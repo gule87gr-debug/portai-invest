@@ -32,6 +32,7 @@ const mockLists: WatchlistData[] = [
 
 const Watchlists = () => {
   const [activeIdx, setActiveIdx] = useState(0);
+  const navigate = useNavigate();
   const active = mockLists[activeIdx];
 
   return (
