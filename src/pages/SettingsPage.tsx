@@ -86,7 +86,3 @@ const SettingsPage = () => {
 };
 
 export default SettingsPage;
-
-function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(" ");
-}
