@@ -8,6 +8,7 @@ import AIChat from "./pages/AIChat";
 import Quiz from "./pages/Quiz";
 import Forum from "./pages/Forum";
 import Watchlists from "./pages/Watchlists";
+import StockDetail from "./pages/StockDetail";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/quiz" element={<Quiz />} />
           <Route path="/forum" element={<Forum />} />
           <Route path="/watchlists" element={<Watchlists />} />
+          <Route path="/stock/:ticker" element={<StockDetail />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
