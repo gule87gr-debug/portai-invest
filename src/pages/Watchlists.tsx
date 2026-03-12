@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { Sparkles, Plus, Trash2, MoreVertical, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -31,6 +32,7 @@ const mockLists: WatchlistData[] = [
 
 const Watchlists = () => {
   const [activeIdx, setActiveIdx] = useState(0);
+  const navigate = useNavigate();
   const active = mockLists[activeIdx];
 
   return (
@@ -93,7 +95,7 @@ const Watchlists = () => {
 
           <div className="space-y-3">
             {active.stocks.map((s) => (
-              <div key={s.ticker} className="flex items-center justify-between rounded-xl border border-border bg-accent/20 px-4 py-3">
+              <div key={s.ticker} onClick={() => navigate(`/stock/${s.ticker}`)} className="flex items-center justify-between rounded-xl border border-border bg-accent/20 px-4 py-3 cursor-pointer transition-colors hover:bg-accent/40">
                 <div className="flex items-center gap-3">
                   <div>
                     <span className="font-semibold">{s.ticker}</span>
