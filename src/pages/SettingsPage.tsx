@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { User, Eye, EyeOff, Upload } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const SettingsPage = () => {
   const [name, setName] = useState("Guest User");
