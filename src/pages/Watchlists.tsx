@@ -95,7 +95,7 @@ const Watchlists = () => {
 
           <div className="space-y-3">
             {active.stocks.map((s) => (
-              <div key={s.ticker} className="flex items-center justify-between rounded-xl border border-border bg-accent/20 px-4 py-3">
+              <div key={s.ticker} onClick={() => navigate(`/stock/${s.ticker}`)} className="flex items-center justify-between rounded-xl border border-border bg-accent/20 px-4 py-3 cursor-pointer transition-colors hover:bg-accent/40">
                 <div className="flex items-center gap-3">
                   <div>
                     <span className="font-semibold">{s.ticker}</span>
