@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { Sparkles, Plus, Trash2, MoreVertical, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
