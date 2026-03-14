@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { useApp } from "@/contexts/AppContext";
-import { Search, Plus, Filter, ThumbsUp, MessageCircle, Sparkles, MoreVertical, ChevronDown, ChevronUp, X, Send } from "lucide-react";
+import { Search, Plus, ThumbsUp, MessageCircle, Sparkles, X, Send, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const categories = ["All", "Sectors", "Events", "Portfolios", "Watchlists", "General"];
@@ -12,22 +12,22 @@ const factCheckResponses: Record<string, string> = {
 
 function generateFactCheck(body: string): string {
   if (body.toLowerCase().includes("nvda") || body.toLowerCase().includes("nvidia")) {
-    return "📊 Fact Check: NVDA current P/E ratio is approximately 65x (trailing) per latest 10-Q filing. Forward P/E ~42x based on analyst consensus. Revenue grew 122% YoY in last reported quarter. AI thesis is supported by data center revenue growth of 150%+ YoY.";
+    return "📊 Fact Check: NVDA current P/E ratio is approximately 65x (trailing) per latest 10-Q filing. Forward P/E ~42x based on analyst consensus. Revenue grew 122% YoY in last reported quarter.";
   }
   if (body.toLowerCase().includes("fed") || body.toLowerCase().includes("rate")) {
-    return "📊 Fact Check: The Federal Reserve held rates at 5.25-5.50% at the last FOMC meeting. Market pricing suggests 2-3 rate cuts expected in 2026. TLT has returned ~8% during previous rate-cut cycles. Utilities (XLU) historically outperform by 3-5% in falling rate environments.";
+    return "📊 Fact Check: The Federal Reserve held rates at 5.25-5.50% at the last FOMC meeting. Market pricing suggests 2-3 rate cuts expected in 2026.";
   }
   if (body.toLowerCase().includes("portfolio") || body.toLowerCase().includes("%")) {
-    return "📊 Fact Check: Portfolio concentration in a single sector above 40% significantly increases idiosyncratic risk. Historical data shows diversified portfolios (max 25% per sector) outperform concentrated ones on a risk-adjusted basis over 10+ year periods.";
+    return "📊 Fact Check: Portfolio concentration in a single sector above 40% significantly increases idiosyncratic risk. Diversified portfolios (max 25% per sector) outperform on a risk-adjusted basis over 10+ year periods.";
   }
   if (body.toLowerCase().includes("greenland") || body.toLowerCase().includes("trump")) {
-    return "📊 Fact Check: Greenland holds significant rare earth mineral deposits estimated at $1.1T. Denmark has sovereignty over Greenland. No military action has been taken — this remains diplomatic rhetoric as of the latest reports.";
+    return "📊 Fact Check: Greenland holds significant rare earth mineral deposits estimated at $1.1T. Denmark has sovereignty over Greenland.";
   }
   return factCheckResponses.default;
 }
 
 const Forum = () => {
-  const { threads, addThread, likeThread, addComment, setFactCheck, profile } = useApp();
+  const { threads, addThread, likeThread, addComment, setFactCheck, deleteThread, deleteComment, profile } = useApp();
   const [active, setActive] = useState("All");
   const [showNewThread, setShowNewThread] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -48,20 +48,11 @@ const Forum = () => {
     const displayName = profile.anonymous ? "Anonymous Trader" : profile.name;
     const displayAvatar = profile.anonymous ? "?" : profile.name[0]?.toUpperCase() || "U";
     addThread({
-      id: `t-${Date.now()}`,
-      author: displayName,
-      avatar: displayAvatar,
-      time: "just now",
+      id: `t-${Date.now()}`, author: displayName, avatar: displayAvatar, time: "just now",
       tags: [{ label: newTag, color: newTag === "general" ? "bg-muted text-muted-foreground" : "bg-primary/20 text-primary" }],
-      title: newTitle,
-      body: newBody,
-      likes: 0,
-      comments: [],
-      likedByUser: false,
+      title: newTitle, body: newBody, likes: 0, comments: [], likedByUser: false,
     });
-    setNewTitle("");
-    setNewBody("");
-    setShowNewThread(false);
+    setNewTitle(""); setNewBody(""); setShowNewThread(false);
   };
 
   const handleComment = (threadId: string) => {
@@ -69,19 +60,8 @@ const Forum = () => {
     if (!text) return;
     const displayName = profile.anonymous ? "Anonymous Trader" : profile.name;
     const displayAvatar = profile.anonymous ? "?" : profile.name[0]?.toUpperCase() || "U";
-    addComment(threadId, {
-      id: `c-${Date.now()}`,
-      author: displayName,
-      avatar: displayAvatar,
-      body: text,
-      time: "just now",
-      likes: 0,
-    });
+    addComment(threadId, { id: `c-${Date.now()}`, author: displayName, avatar: displayAvatar, body: text, time: "just now", likes: 0 });
     setCommentInputs((prev) => ({ ...prev, [threadId]: "" }));
-  };
-
-  const handleFactCheck = (threadId: string, body: string) => {
-    setFactCheck(threadId, generateFactCheck(body));
   };
 
   return (
@@ -110,9 +90,7 @@ const Forum = () => {
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground">Tag:</span>
                 {["general", "portfolios", "markets", "sectors"].map((tag) => (
-                  <button key={tag} onClick={() => setNewTag(tag)} className={cn("rounded-md px-2.5 py-1 text-xs font-medium transition-colors", newTag === tag ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground")}>
-                    {tag}
-                  </button>
+                  <button key={tag} onClick={() => setNewTag(tag)} className={cn("rounded-md px-2.5 py-1 text-xs font-medium transition-colors", newTag === tag ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground")}>{tag}</button>
                 ))}
               </div>
               <div className="flex justify-end gap-2 pt-2">
@@ -135,9 +113,7 @@ const Forum = () => {
       {/* Categories */}
       <div className="mb-6 flex gap-1 rounded-lg bg-card p-1 w-fit">
         {categories.map((cat) => (
-          <button key={cat} onClick={() => setActive(cat)} className={cn("rounded-md px-3 py-1.5 text-xs font-medium transition-colors", active === cat ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}>
-            {cat}
-          </button>
+          <button key={cat} onClick={() => setActive(cat)} className={cn("rounded-md px-3 py-1.5 text-xs font-medium transition-colors", active === cat ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}>{cat}</button>
         ))}
       </div>
 
@@ -147,29 +123,28 @@ const Forum = () => {
           const isExpanded = expandedThread === t.id;
           return (
             <div key={t.id} className="rounded-xl border border-border bg-card p-5 animate-fade-in" style={{ animationDelay: `${i * 60}ms` }}>
-              <div className="mb-3 flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">{t.avatar}</div>
-                <span className="text-sm font-semibold">{t.author}</span>
-                <span className="text-xs text-muted-foreground">{t.time}</span>
+              <div className="mb-3 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">{t.avatar}</div>
+                  <span className="text-sm font-semibold">{t.author}</span>
+                  <span className="text-xs text-muted-foreground">{t.time}</span>
+                </div>
+                <button onClick={() => deleteThread(t.id)} className="text-muted-foreground hover:text-loss transition-colors" title="Delete thread">
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </div>
 
               <div className="mb-2 flex gap-1.5">
-                {t.tags.map((tag) => (
-                  <span key={tag.label} className={cn("rounded-md px-2 py-0.5 text-xs font-medium", tag.color)}>{tag.label}</span>
-                ))}
+                {t.tags.map((tag) => <span key={tag.label} className={cn("rounded-md px-2 py-0.5 text-xs font-medium", tag.color)}>{tag.label}</span>)}
               </div>
 
               <h3 className="text-base font-semibold">{t.title}</h3>
               <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{t.body}</p>
 
-              {/* Fact Check Result */}
               {t.factCheck && (
-                <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm leading-relaxed text-foreground animate-fade-in">
-                  {t.factCheck}
-                </div>
+                <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm leading-relaxed text-foreground animate-fade-in">{t.factCheck}</div>
               )}
 
-              {/* Footer */}
               <div className="mt-4 flex items-center justify-between">
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <button onClick={() => likeThread(t.id)} className={cn("flex items-center gap-1 transition-colors", t.likedByUser ? "text-primary" : "hover:text-primary")}>
@@ -179,30 +154,29 @@ const Forum = () => {
                     <MessageCircle className="h-3.5 w-3.5" /> {t.comments.length}
                   </button>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => handleFactCheck(t.id, t.body)} className="flex items-center gap-1 text-xs text-primary hover:underline">
-                    <Sparkles className="h-3.5 w-3.5" /> Fact Check
-                  </button>
-                </div>
+                <button onClick={() => setFactCheck(t.id, generateFactCheck(t.body))} className="flex items-center gap-1 text-xs text-primary hover:underline">
+                  <Sparkles className="h-3.5 w-3.5" /> Fact Check
+                </button>
               </div>
 
-              {/* Comments Section */}
               {isExpanded && (
                 <div className="mt-4 border-t border-border pt-4 space-y-3 animate-fade-in">
                   {t.comments.length === 0 && <p className="text-xs text-muted-foreground">No comments yet. Be the first!</p>}
                   {t.comments.map((c) => (
-                    <div key={c.id} className="flex gap-2.5">
+                    <div key={c.id} className="flex gap-2.5 group">
                       <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-secondary text-[10px] font-semibold text-secondary-foreground">{c.avatar}</div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-semibold">{c.author}</span>
                           <span className="text-[10px] text-muted-foreground">{c.time}</span>
+                          <button onClick={() => deleteComment(t.id, c.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-loss transition-all ml-auto" title="Delete comment">
+                            <Trash2 className="h-3 w-3" />
+                          </button>
                         </div>
                         <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{c.body}</p>
                       </div>
                     </div>
                   ))}
-                  {/* Comment Input */}
                   <div className="flex gap-2 pt-1">
                     <input
                       value={commentInputs[t.id] || ""}

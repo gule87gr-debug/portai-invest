@@ -1,8 +1,9 @@
 import { useState, useRef } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { useApp } from "@/contexts/AppContext";
-import { User, Eye, EyeOff, Upload, Camera } from "lucide-react";
+import { User, Eye, EyeOff, Upload, Camera, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 const SettingsPage = () => {
   const { profile, setProfile } = useApp();
@@ -24,6 +25,10 @@ const SettingsPage = () => {
     setTimeout(() => setSaved(false), 2000);
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
   return (
     <AppLayout>
       <h1 className="mb-6 text-3xl font-bold">Settings</h1>
@@ -32,7 +37,6 @@ const SettingsPage = () => {
         {/* Profile */}
         <div className="rounded-xl border border-border bg-card p-6">
           <h2 className="mb-4 text-lg font-semibold">Profile</h2>
-
           <div className="mb-6 flex items-center gap-5">
             <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
               {profile.avatar ? (
@@ -54,7 +58,6 @@ const SettingsPage = () => {
               <p className="mt-1 text-xs text-muted-foreground">200×200px recommended. JPG, PNG</p>
             </div>
           </div>
-
           <div className="space-y-4">
             <div>
               <label className="mb-1.5 block text-sm font-medium text-muted-foreground">Display Name</label>
@@ -74,18 +77,21 @@ const SettingsPage = () => {
               {profile.anonymous ? <EyeOff className="h-5 w-5 text-primary" /> : <Eye className="h-5 w-5 text-muted-foreground" />}
               <div>
                 <h3 className="font-semibold">Anonymous Mode</h3>
-                <p className="text-xs text-muted-foreground">Hide your name and avatar in forum posts and shares</p>
+                <p className="text-xs text-muted-foreground">Hide your name and avatar in forum posts</p>
               </div>
             </div>
             <button onClick={() => setProfile((prev) => ({ ...prev, anonymous: !prev.anonymous }))} className={cn("relative h-6 w-11 rounded-full transition-colors", profile.anonymous ? "bg-primary" : "bg-muted")}>
               <span className={cn("absolute top-0.5 h-5 w-5 rounded-full bg-foreground transition-transform", profile.anonymous ? "left-[22px]" : "left-0.5")} />
             </button>
           </div>
-          {profile.anonymous && <p className="mt-3 text-sm text-muted-foreground">You will appear as <span className="font-medium text-foreground">"Anonymous Trader"</span> across the platform.</p>}
+          {profile.anonymous && <p className="mt-3 text-sm text-muted-foreground">You will appear as <span className="font-medium text-foreground">"Anonymous Trader"</span></p>}
         </div>
 
-        {/* Save */}
-        <div className="flex justify-end">
+        {/* Save + Logout */}
+        <div className="flex items-center justify-between">
+          <button onClick={handleLogout} className="flex items-center gap-2 rounded-xl border border-loss/30 px-5 py-2.5 text-sm font-medium text-loss transition-colors hover:bg-loss/10">
+            <LogOut className="h-4 w-4" /> Log Out
+          </button>
           <button onClick={handleSave} className={cn("rounded-xl px-6 py-2.5 text-sm font-medium transition-all", saved ? "bg-gain text-primary-foreground" : "bg-primary text-primary-foreground hover:bg-primary/90")}>
             {saved ? "✓ Saved" : "Save Changes"}
           </button>

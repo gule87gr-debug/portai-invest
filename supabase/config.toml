@@ -1,0 +1,7 @@
+project_id = "vejlgkyydezrnqrzwodp"
+
+[functions.chat]
+verify_jwt = false
+
+[functions.analyze-link]
+verify_jwt = false

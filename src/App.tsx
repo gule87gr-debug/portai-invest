@@ -4,6 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/contexts/AppContext";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import Dashboard from "./pages/Dashboard";
 import AIChat from "./pages/AIChat";
 import Quiz from "./pages/Quiz";
@@ -11,30 +13,61 @@ import Forum from "./pages/Forum";
 import Watchlists from "./pages/Watchlists";
 import StockDetail from "./pages/StockDetail";
 import SettingsPage from "./pages/SettingsPage";
+import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const AppRoutes = () => {
+  const [session, setSession] = useState<any>(undefined); // undefined = loading
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (session === undefined) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <AuthPage onAuth={() => {}} />;
+  }
+
+  return (
+    <AppProvider>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/chat" element={<AIChat />} />
+        <Route path="/quiz" element={<Quiz />} />
+        <Route path="/forum" element={<Forum />} />
+        <Route path="/watchlists" element={<Watchlists />} />
+        <Route path="/stock/:ticker" element={<StockDetail />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </AppProvider>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AppProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/chat" element={<AIChat />} />
-            <Route path="/quiz" element={<Quiz />} />
-            <Route path="/forum" element={<Forum />} />
-            <Route path="/watchlists" element={<Watchlists />} />
-            <Route path="/stock/:ticker" element={<StockDetail />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AppProvider>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </TooltipProvider>
   </QueryClientProvider>
 );
 
