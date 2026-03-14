@@ -32,6 +32,8 @@ type AppState = {
   likeThread: (id: string) => void;
   addComment: (threadId: string, comment: ForumComment) => void;
   setFactCheck: (threadId: string, text: string) => void;
+  deleteThread: (id: string) => void;
+  deleteComment: (threadId: string, commentId: string) => void;
 
   profile: UserProfile;
   setProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
