@@ -126,9 +126,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setThreads((prev) => prev.map((t) => t.id === threadId ? { ...t, comments: [...t.comments, comment] } : t));
   const setFactCheck = (threadId: string, text: string) =>
     setThreads((prev) => prev.map((t) => t.id === threadId ? { ...t, factCheck: text } : t));
+  const deleteThread = (id: string) => setThreads((prev) => prev.filter((t) => t.id !== id));
+  const deleteComment = (threadId: string, commentId: string) =>
+    setThreads((prev) => prev.map((t) => t.id === threadId ? { ...t, comments: t.comments.filter((c) => c.id !== commentId) } : t));
 
   return (
-    <AppContext.Provider value={{ watchlists, setWatchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, deleteWatchlist, threads, setThreads, addThread, likeThread, addComment, setFactCheck, profile, setProfile }}>
+    <AppContext.Provider value={{ watchlists, setWatchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, deleteWatchlist, threads, setThreads, addThread, likeThread, addComment, setFactCheck, deleteThread, deleteComment, profile, setProfile }}>
       {children}
     </AppContext.Provider>
   );
