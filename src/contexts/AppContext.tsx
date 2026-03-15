@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 // Types
 export type Stock = { ticker: string; sector: string; name: string; signal: string };
 export type WatchlistData = { id: string; name: string; stocks: Stock[]; desc: string };
 
-export type ForumComment = { id: string; author: string; avatar: string; body: string; time: string; likes: number };
+export type ForumComment = { id: string; author: string; avatar: string; body: string; time: string; likes: number; userId?: string };
 export type ForumThread = {
   id: string; author: string; avatar: string; time: string;
   tags: { label: string; color: string }[];
@@ -12,6 +13,7 @@ export type ForumThread = {
   comments: ForumComment[];
   likedByUser: boolean;
   factCheck?: string;
+  userId?: string;
 };
 
 export type UserProfile = {
@@ -37,6 +39,7 @@ type AppState = {
 
   profile: UserProfile;
   setProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
+  currentUserId: string | null;
 };
 
 const defaultWatchlists: WatchlistData[] = [
@@ -72,26 +75,26 @@ const defaultThreads: ForumThread[] = [
     body: "Does he actually have intents to invade or is it just a strategy for something else",
     likes: 3, comments: [
       { id: "c-1", author: "MarketWatcher", avatar: "M", body: "Probably just negotiation leverage for rare earth minerals access.", time: "3 weeks ago", likes: 2 },
-    ], likedByUser: false,
+    ], likedByUser: false, userId: "system",
   },
   {
     id: "t-2", author: "TechInvestor2025", avatar: "T", time: "about 1 month ago",
-    tags: [{ label: "portfolios", color: "bg-primary/20 text-primary" }, { label: "tech", color: "bg-muted text-muted-foreground" }],
+    tags: [{ label: "portfolios", color: "bg-primary/20 text-primary" }],
     title: "My AI/Tech Heavy Portfolio - Thoughts?",
-    body: "Just restructured my portfolio: 35% NVDA, 20% MSFT, 15% GOOGL, 15% AMZN, 10% META, 5% cash. I know it's tech heavy but I believe in the AI thesis for the next decade. Looking for constructive feedback on diversification and risk management. Should I add some defensive positions?",
+    body: "Just restructured my portfolio: 35% NVDA, 20% MSFT, 15% GOOGL, 15% AMZN, 10% META, 5% cash. I know it's tech heavy but I believe in the AI thesis for the next decade.",
     likes: 42, comments: [
       { id: "c-2", author: "DiversifyGuy", avatar: "D", body: "Way too concentrated in tech. Add XLP or XLU for defense.", time: "3 weeks ago", likes: 8 },
       { id: "c-3", author: "AIBull", avatar: "A", body: "I'm similarly positioned. AI is the biggest wealth creation opportunity of our generation.", time: "2 weeks ago", likes: 5 },
-    ], likedByUser: false,
+    ], likedByUser: false, userId: "system",
   },
   {
     id: "t-3", author: "MacroTrader", avatar: "M", time: "about 1 month ago",
-    tags: [{ label: "markets", color: "bg-primary/20 text-primary" }, { label: "fed", color: "bg-muted text-muted-foreground" }],
+    tags: [{ label: "markets", color: "bg-primary/20 text-primary" }],
     title: "Fed Rate Decision Impact Analysis",
     body: "The Fed is expected to hold rates steady. How are you all positioning for this? I'm looking at TLT and utilities.",
     likes: 28, comments: [
       { id: "c-4", author: "BondKing", avatar: "B", body: "TLT is a solid play if rates are at peak. I'm also looking at XLU.", time: "3 weeks ago", likes: 4 },
-    ], likedByUser: false,
+    ], likedByUser: false, userId: "system",
   },
 ];
 
@@ -107,11 +110,65 @@ function loadFromLS<T>(key: string, fallback: T): T {
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [watchlists, setWatchlists] = useState<WatchlistData[]>(() => loadFromLS("portai-watchlists", defaultWatchlists));
   const [threads, setThreads] = useState<ForumThread[]>(() => loadFromLS("portai-threads", defaultThreads));
-  const [profile, setProfile] = useState<UserProfile>(() => loadFromLS("portai-profile", { name: "Guest User", email: "guest@portai.com", avatar: null, anonymous: false }));
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [profile, setProfile] = useState<UserProfile>(() => loadFromLS("portai-profile", { name: "Guest User", email: "", avatar: null, anonymous: false }));
+
+  // Get current user and load settings from DB
+  useEffect(() => {
+    const init = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      setCurrentUserId(user.id);
+
+      // Load settings from DB
+      const { data: settings } = await supabase
+        .from("user_settings")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (settings) {
+        setProfile({
+          name: settings.display_name || user.email?.split("@")[0] || "User",
+          email: user.email || "",
+          avatar: settings.avatar_url,
+          anonymous: settings.anonymous_mode,
+        });
+      } else {
+        // Create default settings
+        const defaultName = user.email?.split("@")[0] || "User";
+        await supabase.from("user_settings").insert({
+          user_id: user.id,
+          display_name: defaultName,
+        });
+        setProfile({
+          name: defaultName,
+          email: user.email || "",
+          avatar: null,
+          anonymous: false,
+        });
+      }
+    };
+    init();
+  }, []);
+
+  // Auto-save settings to DB whenever profile changes
+  useEffect(() => {
+    if (!currentUserId) return;
+    const timeout = setTimeout(async () => {
+      await supabase.from("user_settings").update({
+        display_name: profile.name,
+        avatar_url: profile.avatar,
+        anonymous_mode: profile.anonymous,
+        updated_at: new Date().toISOString(),
+      }).eq("user_id", currentUserId);
+      localStorage.setItem("portai-profile", JSON.stringify(profile));
+    }, 500);
+    return () => clearTimeout(timeout);
+  }, [profile, currentUserId]);
 
   useEffect(() => { localStorage.setItem("portai-watchlists", JSON.stringify(watchlists)); }, [watchlists]);
   useEffect(() => { localStorage.setItem("portai-threads", JSON.stringify(threads)); }, [threads]);
-  useEffect(() => { localStorage.setItem("portai-profile", JSON.stringify(profile)); }, [profile]);
 
   const addWatchlist = (w: WatchlistData) => setWatchlists((prev) => [w, ...prev]);
   const deleteWatchlist = (id: string) => setWatchlists((prev) => prev.filter((w) => w.id !== id));
@@ -131,7 +188,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setThreads((prev) => prev.map((t) => t.id === threadId ? { ...t, comments: t.comments.filter((c) => c.id !== commentId) } : t));
 
   return (
-    <AppContext.Provider value={{ watchlists, setWatchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, deleteWatchlist, threads, setThreads, addThread, likeThread, addComment, setFactCheck, deleteThread, deleteComment, profile, setProfile }}>
+    <AppContext.Provider value={{ watchlists, setWatchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, deleteWatchlist, threads, setThreads, addThread, likeThread, addComment, setFactCheck, deleteThread, deleteComment, profile, setProfile, currentUserId }}>
       {children}
     </AppContext.Provider>
   );
