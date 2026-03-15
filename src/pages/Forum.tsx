@@ -4,7 +4,8 @@ import { useApp } from "@/contexts/AppContext";
 import { Search, Plus, ThumbsUp, MessageCircle, Sparkles, X, Send, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const categories = ["All", "Sectors", "Events", "Portfolios", "Watchlists", "General"];
+const categories = ["All", "General", "Portfolios", "Markets", "Sectors"];
+const tagOptions = ["general", "portfolios", "markets", "sectors"];
 
 const factCheckResponses: Record<string, string> = {
   default: "✅ No specific financial claims detected that require verification. This appears to be an opinion-based discussion.",
@@ -12,13 +13,13 @@ const factCheckResponses: Record<string, string> = {
 
 function generateFactCheck(body: string): string {
   if (body.toLowerCase().includes("nvda") || body.toLowerCase().includes("nvidia")) {
-    return "📊 Fact Check: NVDA current P/E ratio is approximately 65x (trailing) per latest 10-Q filing. Forward P/E ~42x based on analyst consensus. Revenue grew 122% YoY in last reported quarter.";
+    return "📊 Fact Check: NVDA current P/E ratio is approximately 65x (trailing) per latest 10-Q filing. Forward P/E ~42x based on analyst consensus.";
   }
   if (body.toLowerCase().includes("fed") || body.toLowerCase().includes("rate")) {
     return "📊 Fact Check: The Federal Reserve held rates at 5.25-5.50% at the last FOMC meeting. Market pricing suggests 2-3 rate cuts expected in 2026.";
   }
   if (body.toLowerCase().includes("portfolio") || body.toLowerCase().includes("%")) {
-    return "📊 Fact Check: Portfolio concentration in a single sector above 40% significantly increases idiosyncratic risk. Diversified portfolios (max 25% per sector) outperform on a risk-adjusted basis over 10+ year periods.";
+    return "📊 Fact Check: Portfolio concentration in a single sector above 40% significantly increases risk. Diversified portfolios outperform on a risk-adjusted basis over 10+ years.";
   }
   if (body.toLowerCase().includes("greenland") || body.toLowerCase().includes("trump")) {
     return "📊 Fact Check: Greenland holds significant rare earth mineral deposits estimated at $1.1T. Denmark has sovereignty over Greenland.";
@@ -27,7 +28,7 @@ function generateFactCheck(body: string): string {
 }
 
 const Forum = () => {
-  const { threads, addThread, likeThread, addComment, setFactCheck, deleteThread, deleteComment, profile } = useApp();
+  const { threads, addThread, likeThread, addComment, setFactCheck, deleteThread, deleteComment, profile, currentUserId } = useApp();
   const [active, setActive] = useState("All");
   const [showNewThread, setShowNewThread] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -51,6 +52,7 @@ const Forum = () => {
       id: `t-${Date.now()}`, author: displayName, avatar: displayAvatar, time: "just now",
       tags: [{ label: newTag, color: newTag === "general" ? "bg-muted text-muted-foreground" : "bg-primary/20 text-primary" }],
       title: newTitle, body: newBody, likes: 0, comments: [], likedByUser: false,
+      userId: currentUserId || undefined,
     });
     setNewTitle(""); setNewBody(""); setShowNewThread(false);
   };
@@ -60,9 +62,12 @@ const Forum = () => {
     if (!text) return;
     const displayName = profile.anonymous ? "Anonymous Trader" : profile.name;
     const displayAvatar = profile.anonymous ? "?" : profile.name[0]?.toUpperCase() || "U";
-    addComment(threadId, { id: `c-${Date.now()}`, author: displayName, avatar: displayAvatar, body: text, time: "just now", likes: 0 });
+    addComment(threadId, { id: `c-${Date.now()}`, author: displayName, avatar: displayAvatar, body: text, time: "just now", likes: 0, userId: currentUserId || undefined });
     setCommentInputs((prev) => ({ ...prev, [threadId]: "" }));
   };
+
+  const canDeleteThread = (t: typeof threads[0]) => t.userId === currentUserId;
+  const canDeleteComment = (c: typeof threads[0]["comments"][0]) => c.userId === currentUserId;
 
   return (
     <AppLayout>
@@ -89,7 +94,7 @@ const Forum = () => {
               <textarea value={newBody} onChange={(e) => setNewBody(e.target.value)} placeholder="Share your thoughts..." rows={4} className="w-full rounded-lg border border-border bg-accent/30 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground">Tag:</span>
-                {["general", "portfolios", "markets", "sectors"].map((tag) => (
+                {tagOptions.map((tag) => (
                   <button key={tag} onClick={() => setNewTag(tag)} className={cn("rounded-md px-2.5 py-1 text-xs font-medium transition-colors", newTag === tag ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground")}>{tag}</button>
                 ))}
               </div>
@@ -129,9 +134,11 @@ const Forum = () => {
                   <span className="text-sm font-semibold">{t.author}</span>
                   <span className="text-xs text-muted-foreground">{t.time}</span>
                 </div>
-                <button onClick={() => deleteThread(t.id)} className="text-muted-foreground hover:text-loss transition-colors" title="Delete thread">
-                  <Trash2 className="h-4 w-4" />
-                </button>
+                {canDeleteThread(t) && (
+                  <button onClick={() => deleteThread(t.id)} className="text-muted-foreground hover:text-loss transition-colors" title="Delete thread">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )}
               </div>
 
               <div className="mb-2 flex gap-1.5">
@@ -169,9 +176,11 @@ const Forum = () => {
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-semibold">{c.author}</span>
                           <span className="text-[10px] text-muted-foreground">{c.time}</span>
-                          <button onClick={() => deleteComment(t.id, c.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-loss transition-all ml-auto" title="Delete comment">
-                            <Trash2 className="h-3 w-3" />
-                          </button>
+                          {canDeleteComment(c) && (
+                            <button onClick={() => deleteComment(t.id, c.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-loss transition-all ml-auto" title="Delete comment">
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          )}
                         </div>
                         <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{c.body}</p>
                       </div>

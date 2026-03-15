@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
-import { Send, Sparkles, RefreshCw, TrendingUp, Loader2 } from "lucide-react";
+import { Send, Sparkles, RefreshCw, TrendingUp, Plus, Trash2, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -10,55 +10,36 @@ const suggestions = [
   "How should I diversify my portfolio?",
   "Explain P/E ratio and how to use it",
   "What is dollar-cost averaging?",
-  "How do interest rates affect the stock market?",
-  "What are the safest investments for beginners?",
 ];
 
 type Message = { role: "user" | "assistant"; content: string };
+type ChatSession = { id: string; title: string; created_at: string };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 
-async function streamChat({
-  messages,
-  onDelta,
-  onDone,
-  onError,
-}: {
-  messages: Message[];
-  onDelta: (text: string) => void;
-  onDone: () => void;
-  onError: (msg: string) => void;
+async function streamChat({ messages, onDelta, onDone, onError }: {
+  messages: Message[]; onDelta: (text: string) => void; onDone: () => void; onError: (msg: string) => void;
 }) {
   const resp = await fetch(CHAT_URL, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-    },
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
     body: JSON.stringify({ messages }),
   });
-
   if (!resp.ok) {
     const err = await resp.json().catch(() => ({ error: "Request failed" }));
-    onError(err.error || `Error ${resp.status}`);
-    return;
+    onError(err.error || `Error ${resp.status}`); return;
   }
-
   if (!resp.body) { onError("No response body"); return; }
-
   const reader = resp.body.getReader();
   const decoder = new TextDecoder();
   let buf = "";
-
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
     buf += decoder.decode(value, { stream: true });
-
     let idx: number;
     while ((idx = buf.indexOf("\n")) !== -1) {
-      let line = buf.slice(0, idx);
-      buf = buf.slice(idx + 1);
+      let line = buf.slice(0, idx); buf = buf.slice(idx + 1);
       if (line.endsWith("\r")) line = line.slice(0, -1);
       if (!line.startsWith("data: ")) continue;
       const json = line.slice(6).trim();
@@ -77,13 +58,59 @@ const AIChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [showSessions, setShowSessions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const welcomeShown = messages.length === 0;
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+
+  // Load sessions on mount
+  useEffect(() => { loadSessions(); }, []);
+
+  const loadSessions = async () => {
+    const { data } = await supabase.from("chat_sessions").select("id, title, created_at").order("updated_at", { ascending: false });
+    if (data) setSessions(data);
+  };
+
+  const loadSession = async (sessionId: string) => {
+    setActiveSessionId(sessionId);
+    const { data } = await supabase.from("chat_messages").select("role, content").eq("session_id", sessionId).order("created_at", { ascending: true });
+    if (data) setMessages(data as Message[]);
+    setShowSessions(false);
+  };
+
+  const saveMessages = async (sessionId: string, msgs: Message[]) => {
+    // Save only the last two messages (user + assistant)
+    const lastTwo = msgs.slice(-2);
+    const inserts = lastTwo.map((m) => ({ session_id: sessionId, role: m.role, content: m.content }));
+    await supabase.from("chat_messages").insert(inserts);
+    await supabase.from("chat_sessions").update({ updated_at: new Date().toISOString() }).eq("id", sessionId);
+  };
+
+  const createSession = async (firstMessage: string): Promise<string> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+    const title = firstMessage.slice(0, 50) + (firstMessage.length > 50 ? "..." : "");
+    const { data, error } = await supabase.from("chat_sessions").insert({ user_id: user.id, title }).select("id").single();
+    if (error || !data) throw new Error("Failed to create session");
+    loadSessions();
+    return data.id;
+  };
+
+  const deleteSession = async (sessionId: string) => {
+    await supabase.from("chat_sessions").delete().eq("id", sessionId);
+    if (activeSessionId === sessionId) { setActiveSessionId(null); setMessages([]); }
+    loadSessions();
+  };
+
+  const startNewChat = () => {
+    setActiveSessionId(null);
+    setMessages([]);
+    setShowSessions(false);
+  };
 
   const send = async (text: string) => {
     if (!text.trim() || isTyping) return;
@@ -92,6 +119,12 @@ const AIChat = () => {
     setMessages(allMessages);
     setInput("");
     setIsTyping(true);
+
+    let sessionId = activeSessionId;
+    if (!sessionId) {
+      try { sessionId = await createSession(text); setActiveSessionId(sessionId); }
+      catch { setIsTyping(false); return; }
+    }
 
     let assistantSoFar = "";
     const upsert = (chunk: string) => {
@@ -105,10 +138,17 @@ const AIChat = () => {
       });
     };
 
+    const finalSessionId = sessionId;
     await streamChat({
       messages: allMessages,
       onDelta: upsert,
-      onDone: () => setIsTyping(false),
+      onDone: () => {
+        setIsTyping(false);
+        // Save to DB after complete
+        const finalMsgs = [...allMessages, { role: "assistant" as const, content: assistantSoFar }];
+        setMessages(finalMsgs);
+        saveMessages(finalSessionId, finalMsgs);
+      },
       onError: (msg) => {
         setMessages((prev) => [...prev, { role: "assistant", content: `❌ ${msg}` }]);
         setIsTyping(false);
@@ -128,14 +168,37 @@ const AIChat = () => {
             <p className="text-xs text-muted-foreground">Powered by AI · Educational use only</p>
           </div>
         </div>
-        <button onClick={() => setMessages([])} className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition-colors hover:bg-accent">
-          <RefreshCw className="h-3.5 w-3.5" /> New Chat
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setShowSessions(!showSessions)} className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition-colors hover:bg-accent">
+            <MessageCircle className="h-3.5 w-3.5" /> History
+          </button>
+          <button onClick={startNewChat} className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition-colors hover:bg-accent">
+            <Plus className="h-3.5 w-3.5" /> New Chat
+          </button>
+        </div>
       </div>
+
+      {/* Session History Panel */}
+      {showSessions && (
+        <div className="mb-4 rounded-xl border border-border bg-card p-4 animate-fade-in">
+          <h3 className="text-sm font-semibold mb-3">Chat History</h3>
+          {sessions.length === 0 && <p className="text-xs text-muted-foreground">No saved chats yet.</p>}
+          <div className="space-y-1 max-h-48 overflow-y-auto scrollbar-thin">
+            {sessions.map((s) => (
+              <div key={s.id} className={cn("flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors cursor-pointer group", activeSessionId === s.id ? "bg-primary/15 text-primary" : "hover:bg-accent/50")}>
+                <span onClick={() => loadSession(s.id)} className="flex-1 truncate">{s.title}</span>
+                <button onClick={(e) => { e.stopPropagation(); deleteSession(s.id); }} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-loss transition-all ml-2">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <DisclaimerBanner />
 
-      <div className="mt-4 flex flex-col" style={{ minHeight: "calc(100vh - 280px)" }}>
+      <div className="mt-4 flex flex-col" style={{ minHeight: "calc(100vh - 320px)" }}>
         <div className="flex-1 space-y-4 overflow-y-auto scrollbar-thin">
           {welcomeShown && (
             <>
@@ -144,7 +207,7 @@ const AIChat = () => {
                   <Sparkles className="h-4 w-4 text-primary-foreground" />
                 </div>
                 <div className="rounded-xl rounded-tl-none bg-card p-4 text-sm leading-relaxed text-foreground">
-                  Hello! I'm your AI financial advisor. I can help you understand investments, market concepts, portfolio strategies, and more. What would you like to know?
+                  Hello! I'm your AI financial advisor. Ask me anything about investing, markets, or portfolio strategies.
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3 pt-2">

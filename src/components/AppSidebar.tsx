@@ -18,10 +18,10 @@ export const AppSidebar = () => {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(!isMobile);
 
-  // Close on mobile when route changes
+  // Close sidebar on any route change
   useEffect(() => {
-    if (isMobile) setOpen(false);
-  }, [location.pathname, isMobile]);
+    setOpen(false);
+  }, [location.pathname]);
 
   return (
     <>
@@ -35,8 +35,8 @@ export const AppSidebar = () => {
         </button>
       )}
 
-      {/* Backdrop for mobile */}
-      {open && isMobile && (
+      {/* Backdrop */}
+      {open && (
         <div className="fixed inset-0 z-40 bg-background/60 backdrop-blur-sm" onClick={() => setOpen(false)} />
       )}
 

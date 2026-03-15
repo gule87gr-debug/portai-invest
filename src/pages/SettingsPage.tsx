@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { useApp } from "@/contexts/AppContext";
 import { User, Eye, EyeOff, Upload, Camera, LogOut } from "lucide-react";
@@ -8,7 +8,14 @@ import { supabase } from "@/integrations/supabase/client";
 const SettingsPage = () => {
   const { profile, setProfile } = useApp();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [saved, setSaved] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+
+  // Get auth email (non-editable)
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.email) setUserEmail(user.email);
+    });
+  }, []);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -18,11 +25,6 @@ const SettingsPage = () => {
       setProfile((prev) => ({ ...prev, avatar: reader.result as string }));
     };
     reader.readAsDataURL(file);
-  };
-
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
   };
 
   const handleLogout = async () => {
@@ -62,10 +64,12 @@ const SettingsPage = () => {
             <div>
               <label className="mb-1.5 block text-sm font-medium text-muted-foreground">Display Name</label>
               <input value={profile.name} onChange={(e) => setProfile((prev) => ({ ...prev, name: e.target.value }))} className="h-10 w-full rounded-lg border border-border bg-accent/30 px-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+              <p className="mt-1 text-xs text-muted-foreground">Changes save automatically</p>
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium text-muted-foreground">Email</label>
-              <input value={profile.email} onChange={(e) => setProfile((prev) => ({ ...prev, email: e.target.value }))} className="h-10 w-full rounded-lg border border-border bg-accent/30 px-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+              <input value={userEmail} readOnly className="h-10 w-full rounded-lg border border-border bg-muted/30 px-4 text-sm text-muted-foreground cursor-not-allowed" />
+              <p className="mt-1 text-xs text-muted-foreground">Email cannot be changed</p>
             </div>
           </div>
         </div>
@@ -87,13 +91,10 @@ const SettingsPage = () => {
           {profile.anonymous && <p className="mt-3 text-sm text-muted-foreground">You will appear as <span className="font-medium text-foreground">"Anonymous Trader"</span></p>}
         </div>
 
-        {/* Save + Logout */}
-        <div className="flex items-center justify-between">
+        {/* Logout */}
+        <div className="flex items-center justify-end">
           <button onClick={handleLogout} className="flex items-center gap-2 rounded-xl border border-loss/30 px-5 py-2.5 text-sm font-medium text-loss transition-colors hover:bg-loss/10">
             <LogOut className="h-4 w-4" /> Log Out
-          </button>
-          <button onClick={handleSave} className={cn("rounded-xl px-6 py-2.5 text-sm font-medium transition-all", saved ? "bg-gain text-primary-foreground" : "bg-primary text-primary-foreground hover:bg-primary/90")}>
-            {saved ? "✓ Saved" : "Save Changes"}
           </button>
         </div>
       </div>

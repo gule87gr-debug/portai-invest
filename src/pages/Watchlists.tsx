@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { useApp, Stock } from "@/contexts/AppContext";
 import { searchAssets, AssetEntry } from "@/lib/stockDatabase";
-import { Sparkles, Plus, Trash2, MoreVertical, TrendingDown, Search, X } from "lucide-react";
+import { Plus, Trash2, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const Watchlists = () => {
@@ -53,7 +53,7 @@ const Watchlists = () => {
       <div className="mb-6 flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold">Watchlists</h1>
-          <p className="mt-1 text-muted-foreground">Track stocks and get AI-powered insights</p>
+          <p className="mt-1 text-muted-foreground">Track your favorite stocks and ETFs</p>
         </div>
         <div className="flex gap-2">
           <button onClick={() => setShowNewList(true)} className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
@@ -158,14 +158,9 @@ const Watchlists = () => {
                     </div>
                   </div>
                   <p className="hidden text-sm text-muted-foreground sm:block">{s.name}</p>
-                  <div className="flex items-center gap-3">
-                    <span className={cn("rounded-md border px-2.5 py-0.5 text-xs font-medium", s.signal === "buy" ? "border-gain/40 text-gain" : s.signal === "sell" ? "border-loss/40 text-loss" : "border-border text-muted-foreground")}>
-                      {s.signal}
-                    </span>
-                    <button onClick={(e) => { e.stopPropagation(); removeStockFromWatchlist(active.id, s.ticker); }} className="text-muted-foreground hover:text-loss transition-colors">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
+                  <button onClick={(e) => { e.stopPropagation(); removeStockFromWatchlist(active.id, s.ticker); }} className="text-muted-foreground hover:text-loss transition-colors">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
               ))}
             </div>
