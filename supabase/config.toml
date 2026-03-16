@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.analyze-link]
 verify_jwt = false
+
+[functions.moderate-post]
+verify_jwt = false
