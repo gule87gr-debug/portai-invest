@@ -1,16 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
-import { Send, Sparkles, RefreshCw, TrendingUp, Plus, Trash2, MessageCircle } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Send, Sparkles, Plus, Trash2, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-
-const suggestions = [
-  "What's the difference between ETFs and mutual funds?",
-  "How should I diversify my portfolio?",
-  "Explain P/E ratio and how to use it",
-  "What is dollar-cost averaging?",
-];
 
 type Message = { role: "user" | "assistant"; content: string };
 type ChatSession = { id: string; title: string; created_at: string };
@@ -25,10 +19,7 @@ async function streamChat({ messages, onDelta, onDone, onError }: {
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
     body: JSON.stringify({ messages }),
   });
-  if (!resp.ok) {
-    const err = await resp.json().catch(() => ({ error: "Request failed" }));
-    onError(err.error || `Error ${resp.status}`); return;
-  }
+  if (!resp.ok) { const err = await resp.json().catch(() => ({ error: "Request failed" })); onError(err.error || `Error ${resp.status}`); return; }
   if (!resp.body) { onError("No response body"); return; }
   const reader = resp.body.getReader();
   const decoder = new TextDecoder();
@@ -55,6 +46,7 @@ async function streamChat({ messages, onDelta, onDone, onError }: {
 }
 
 const AIChat = () => {
+  const { t } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -64,10 +56,9 @@ const AIChat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const welcomeShown = messages.length === 0;
+  const suggestions = [t("suggestETF"), t("suggestDiversify"), t("suggestPE"), t("suggestDCA")];
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
-
-  // Load sessions on mount
   useEffect(() => { loadSessions(); }, []);
 
   const loadSessions = async () => {
@@ -83,7 +74,6 @@ const AIChat = () => {
   };
 
   const saveMessages = async (sessionId: string, msgs: Message[]) => {
-    // Save only the last two messages (user + assistant)
     const lastTwo = msgs.slice(-2);
     const inserts = lastTwo.map((m) => ({ session_id: sessionId, role: m.role, content: m.content }));
     await supabase.from("chat_messages").insert(inserts);
@@ -106,11 +96,7 @@ const AIChat = () => {
     loadSessions();
   };
 
-  const startNewChat = () => {
-    setActiveSessionId(null);
-    setMessages([]);
-    setShowSessions(false);
-  };
+  const startNewChat = () => { setActiveSessionId(null); setMessages([]); setShowSessions(false); };
 
   const send = async (text: string) => {
     if (!text.trim() || isTyping) return;
@@ -131,9 +117,7 @@ const AIChat = () => {
       assistantSoFar += chunk;
       setMessages((prev) => {
         const last = prev[prev.length - 1];
-        if (last?.role === "assistant") {
-          return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
-        }
+        if (last?.role === "assistant") return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
         return [...prev, { role: "assistant", content: assistantSoFar }];
       });
     };
@@ -144,15 +128,11 @@ const AIChat = () => {
       onDelta: upsert,
       onDone: () => {
         setIsTyping(false);
-        // Save to DB after complete
         const finalMsgs = [...allMessages, { role: "assistant" as const, content: assistantSoFar }];
         setMessages(finalMsgs);
         saveMessages(finalSessionId, finalMsgs);
       },
-      onError: (msg) => {
-        setMessages((prev) => [...prev, { role: "assistant", content: `❌ ${msg}` }]);
-        setIsTyping(false);
-      },
+      onError: (msg) => { setMessages((prev) => [...prev, { role: "assistant", content: `❌ ${msg}` }]); setIsTyping(false); },
     });
   };
 
@@ -161,28 +141,27 @@ const AIChat = () => {
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <TrendingUp className="h-5 w-5 text-primary-foreground" />
+            <Sparkles className="h-5 w-5 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">AI Financial Advisor</h1>
-            <p className="text-xs text-muted-foreground">Powered by AI · Educational use only</p>
+            <h1 className="text-xl font-bold">{t("aiFinancialAdvisor")}</h1>
+            <p className="text-xs text-muted-foreground">{t("poweredByAI")}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => setShowSessions(!showSessions)} className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition-colors hover:bg-accent">
-            <MessageCircle className="h-3.5 w-3.5" /> History
+            <MessageCircle className="h-3.5 w-3.5" /> {t("history")}
           </button>
           <button onClick={startNewChat} className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition-colors hover:bg-accent">
-            <Plus className="h-3.5 w-3.5" /> New Chat
+            <Plus className="h-3.5 w-3.5" /> {t("newChat")}
           </button>
         </div>
       </div>
 
-      {/* Session History Panel */}
       {showSessions && (
         <div className="mb-4 rounded-xl border border-border bg-card p-4 animate-fade-in">
-          <h3 className="text-sm font-semibold mb-3">Chat History</h3>
-          {sessions.length === 0 && <p className="text-xs text-muted-foreground">No saved chats yet.</p>}
+          <h3 className="text-sm font-semibold mb-3">{t("chatHistory")}</h3>
+          {sessions.length === 0 && <p className="text-xs text-muted-foreground">{t("noSavedChats")}</p>}
           <div className="space-y-1 max-h-48 overflow-y-auto scrollbar-thin">
             {sessions.map((s) => (
               <div key={s.id} className={cn("flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors cursor-pointer group", activeSessionId === s.id ? "bg-primary/15 text-primary" : "hover:bg-accent/50")}>
@@ -207,12 +186,12 @@ const AIChat = () => {
                   <Sparkles className="h-4 w-4 text-primary-foreground" />
                 </div>
                 <div className="rounded-xl rounded-tl-none bg-card p-4 text-sm leading-relaxed text-foreground">
-                  Hello! I'm your AI financial advisor. Ask me anything about investing, markets, or portfolio strategies.
+                  {t("welcomeMessage")}
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3 pt-2">
                 {suggestions.map((s, i) => (
-                  <button key={s} onClick={() => send(s)} className="rounded-xl border border-border bg-card px-4 py-3 text-left text-sm text-muted-foreground transition-all hover:border-primary/40 hover:text-foreground hover:bg-accent/30 animate-fade-in" style={{ animationDelay: `${i * 80}ms` }}>
+                  <button key={i} onClick={() => send(s)} className="rounded-xl border border-border bg-card px-4 py-3 text-left text-sm text-muted-foreground transition-all hover:border-primary/40 hover:text-foreground hover:bg-accent/30 animate-fade-in" style={{ animationDelay: `${i * 80}ms` }}>
                     {s}
                   </button>
                 ))}
@@ -251,7 +230,7 @@ const AIChat = () => {
         </div>
 
         <div className="mt-4 flex items-center gap-3">
-          <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && send(input)} placeholder="Ask anything about finance, investing, markets..." className="h-12 flex-1 rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+          <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && send(input)} placeholder={t("askAnything")} className="h-12 flex-1 rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
           <button onClick={() => send(input)} disabled={isTyping} className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
             <Send className="h-5 w-5" />
           </button>

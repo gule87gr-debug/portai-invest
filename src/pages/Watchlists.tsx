@@ -24,17 +24,14 @@ const Watchlists = () => {
   const handleCreateList = () => {
     if (!newListName.trim()) return;
     addWatchlist({ id: `wl-${Date.now()}`, name: newListName.trim(), stocks: [], desc: "Custom watchlist" });
-    setNewListName("");
-    setShowNewList(false);
-    setActiveIdx(0);
+    setNewListName(""); setShowNewList(false); setActiveIdx(0);
   };
 
   const handleAddStock = (asset: AssetEntry) => {
     if (!active) return;
     const stock: Stock = { ticker: asset.ticker, name: asset.name, sector: asset.sector, signal: "neutral" };
     addStockToWatchlist(active.id, stock);
-    setStockSearch("");
-    setShowAddStock(false);
+    setStockSearch(""); setShowAddStock(false);
   };
 
   if (watchlists.length === 0) {
@@ -63,7 +60,6 @@ const Watchlists = () => {
         </button>
       </div>
 
-      {/* New List Modal */}
       {showNewList && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in p-4">
           <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
@@ -80,7 +76,6 @@ const Watchlists = () => {
         </div>
       )}
 
-      {/* Add Stock Modal */}
       {showAddStock && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in p-4">
           <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
@@ -93,7 +88,7 @@ const Watchlists = () => {
               <input value={stockSearch} onChange={(e) => setStockSearch(e.target.value)} placeholder={t("searchStocksEtfs")} autoFocus className="h-10 w-full rounded-lg border border-border bg-accent/30 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
             </div>
             <div className="mt-3 max-h-60 overflow-y-auto scrollbar-thin space-y-1">
-              {stockSearch.trim() === "" && <p className="py-4 text-center text-xs text-muted-foreground">Start typing to search...</p>}
+              {stockSearch.trim() === "" && <p className="py-4 text-center text-xs text-muted-foreground">{t("startTypingSearch")}</p>}
               {searchResults.map((a) => {
                 const alreadyAdded = active?.stocks.some((s) => s.ticker === a.ticker);
                 return (
@@ -106,13 +101,13 @@ const Watchlists = () => {
                   </button>
                 );
               })}
-              {stockSearch.trim() && searchResults.length === 0 && <p className="py-4 text-center text-xs text-muted-foreground">No results found</p>}
+              {stockSearch.trim() && searchResults.length === 0 && <p className="py-4 text-center text-xs text-muted-foreground">{t("noResults")}</p>}
             </div>
           </div>
         </div>
       )}
 
-      {/* Mobile: dropdown list picker */}
+      {/* Mobile dropdown */}
       <div className="sm:hidden mb-4">
         <button onClick={() => setShowListPicker(!showListPicker)} className="w-full flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3">
           <div>
@@ -138,7 +133,6 @@ const Watchlists = () => {
       </div>
 
       <div className="flex gap-6">
-        {/* List panel - hidden on mobile */}
         <div className="hidden sm:block w-60 shrink-0 space-y-3">
           {watchlists.map((list, i) => (
             <div key={list.id} className="relative group">
@@ -153,7 +147,6 @@ const Watchlists = () => {
           ))}
         </div>
 
-        {/* Detail panel */}
         {active && (
           <div className="flex-1 rounded-xl border border-border bg-card p-4 sm:p-6 animate-fade-in">
             <div className="mb-4 flex items-start justify-between gap-2">

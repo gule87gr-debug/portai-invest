@@ -18,7 +18,6 @@ const SettingsPage = () => {
     });
   }, []);
 
-  // Sync language changes to DB
   useEffect(() => {
     const syncLang = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -32,22 +31,17 @@ const SettingsPage = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => {
-      setProfile((prev) => ({ ...prev, avatar: reader.result as string }));
-    };
+    reader.onload = () => setProfile((prev) => ({ ...prev, avatar: reader.result as string }));
     reader.readAsDataURL(file);
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
+  const handleLogout = async () => { await supabase.auth.signOut(); };
 
   return (
     <AppLayout>
       <h1 className="mb-6 text-3xl font-bold">{t("settings")}</h1>
 
       <div className="mx-auto max-w-2xl space-y-6">
-        {/* Profile */}
         <div className="rounded-xl border border-border bg-card p-6">
           <h2 className="mb-4 text-lg font-semibold">{t("profile")}</h2>
           <div className="mb-6 flex items-center gap-5">
@@ -68,7 +62,7 @@ const SettingsPage = () => {
               <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 rounded-lg border border-border bg-accent/50 px-4 py-2 text-sm font-medium transition-colors hover:bg-accent">
                 <Upload className="h-4 w-4" /> {t("uploadPhoto")}
               </button>
-              <p className="mt-1 text-xs text-muted-foreground">200×200px recommended. JPG, PNG</p>
+              <p className="mt-1 text-xs text-muted-foreground">{t("avatarRecommendation")}</p>
             </div>
           </div>
           <div className="space-y-4">
@@ -85,7 +79,6 @@ const SettingsPage = () => {
           </div>
         </div>
 
-        {/* Language */}
         <div className="rounded-xl border border-border bg-card p-6">
           <div className="flex items-center gap-3 mb-4">
             <Globe className="h-5 w-5 text-primary" />
@@ -103,7 +96,6 @@ const SettingsPage = () => {
           </div>
         </div>
 
-        {/* Anonymous Mode */}
         <div className="rounded-xl border border-border bg-card p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -120,7 +112,6 @@ const SettingsPage = () => {
           {profile.anonymous && <p className="mt-3 text-sm text-muted-foreground">{t("appearAs")} <span className="font-medium text-foreground">"{t("anonymousTrader")}"</span></p>}
         </div>
 
-        {/* Logout */}
         <div className="flex items-center justify-end">
           <button onClick={handleLogout} className="flex items-center gap-2 rounded-xl border border-loss/30 px-5 py-2.5 text-sm font-medium text-loss transition-colors hover:bg-loss/10">
             <LogOut className="h-4 w-4" /> {t("logOut")}
