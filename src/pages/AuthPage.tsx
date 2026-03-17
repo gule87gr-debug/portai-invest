@@ -3,6 +3,8 @@ import { TrendingUp, Mail, Lock, Loader2, Eye, EyeOff, User, Check, X as XIcon }
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
   const [mode, setMode] = useState<"login" | "signup">("signup");
   const [email, setEmail] = useState("");
@@ -12,15 +14,26 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [emailInUse, setEmailInUse] = useState(false);
+  const [emailError, setEmailError] = useState("");
   const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
   const [usernameTimer, setUsernameTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
+
+  const validateEmail = (value: string) => {
+    setEmail(value);
+    setEmailInUse(false);
+    if (!value.trim()) { setEmailError(""); return; }
+    if (!emailRegex.test(value.trim())) {
+      setEmailError("Please enter a valid email address");
+    } else {
+      setEmailError("");
+    }
+  };
 
   const checkUsername = (value: string) => {
     setUsername(value);
     setUsernameStatus("idle");
     if (usernameTimer) clearTimeout(usernameTimer);
     if (!value.trim() || value.trim().length < 3) return;
-
     const timer = setTimeout(async () => {
       setUsernameStatus("checking");
       const { data, error } = await supabase.rpc("check_username_available", { desired_username: value.trim() });
@@ -33,6 +46,7 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
   const handle = async () => {
     setEmailInUse(false);
     if (!email.trim() || !password.trim()) return setError("Please fill in all fields");
+    if (!emailRegex.test(email.trim())) return setError("Please enter a valid email address");
     if (password.length < 6) return setError("Password must be at least 6 characters");
     if (mode === "signup" && !username.trim()) return setError("Username is required");
     if (mode === "signup" && username.trim().length < 3) return setError("Username must be at least 3 characters");
@@ -52,7 +66,6 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
         setLoading(false);
         return;
       }
-      // Create user settings with username
       if (data.user) {
         await supabase.from("user_settings").insert({
           user_id: data.user.id,
@@ -72,10 +85,12 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
     }
   };
 
+  const hasEmailError = emailError.length > 0;
+  const isSubmitDisabled = loading || hasEmailError || (mode === "signup" && usernameStatus === "taken");
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-sm space-y-6 animate-fade-in">
-        {/* Logo */}
         <div className="flex flex-col items-center gap-3">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
             <TrendingUp className="h-7 w-7 text-primary-foreground" />
@@ -84,30 +99,33 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
           <p className="text-sm text-muted-foreground">AI-powered investment analysis</p>
         </div>
 
-        {/* Toggle */}
         <div className="flex rounded-lg bg-card p-1">
           {(["signup", "login"] as const).map((m) => (
-            <button key={m} onClick={() => { setMode(m); setError(""); setEmailInUse(false); }} className={cn("flex-1 rounded-md py-2 text-sm font-medium transition-colors", mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}>
+            <button key={m} onClick={() => { setMode(m); setError(""); setEmailInUse(false); setEmailError(""); }} className={cn("flex-1 rounded-md py-2 text-sm font-medium transition-colors", mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}>
               {m === "signup" ? "Create Account" : "Log In"}
             </button>
           ))}
         </div>
 
-        {/* Form */}
         <div className="space-y-3">
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input type="email" value={email} onChange={(e) => { setEmail(e.target.value); setEmailInUse(false); }} placeholder="Email address" className="h-11 w-full rounded-lg border border-border bg-card pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+          <div>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input type="email" value={email} onChange={(e) => validateEmail(e.target.value)} placeholder="Email address" className={cn("h-11 w-full rounded-lg border bg-card pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", hasEmailError ? "border-loss" : "border-border")} />
+            </div>
+            {hasEmailError && <p className="mt-1 text-xs text-loss">{emailError}</p>}
           </div>
 
           {mode === "signup" && (
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input type="text" value={username} onChange={(e) => checkUsername(e.target.value)} placeholder="Choose a username" className={cn("h-11 w-full rounded-lg border bg-card pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", usernameStatus === "taken" ? "border-loss" : usernameStatus === "available" ? "border-gain" : "border-border")} />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                {usernameStatus === "checking" && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-                {usernameStatus === "available" && <Check className="h-4 w-4 text-gain" />}
-                {usernameStatus === "taken" && <XIcon className="h-4 w-4 text-loss" />}
+            <div>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input type="text" value={username} onChange={(e) => checkUsername(e.target.value)} placeholder="Choose a username" className={cn("h-11 w-full rounded-lg border bg-card pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", usernameStatus === "taken" ? "border-loss" : usernameStatus === "available" ? "border-gain" : "border-border")} />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  {usernameStatus === "checking" && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                  {usernameStatus === "available" && <Check className="h-4 w-4 text-gain" />}
+                  {usernameStatus === "taken" && <XIcon className="h-4 w-4 text-loss" />}
+                </div>
               </div>
               {usernameStatus === "taken" && <p className="mt-1 text-xs text-loss">This username is already taken</p>}
               {usernameStatus === "available" && <p className="mt-1 text-xs text-gain">Username is available!</p>}
@@ -134,13 +152,13 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
           </div>
         )}
 
-        <button onClick={handle} disabled={loading || (mode === "signup" && usernameStatus === "taken")} className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
+        <button onClick={handle} disabled={isSubmitDisabled} className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : mode === "signup" ? "Create Account" : "Log In"}
         </button>
 
         <p className="text-center text-xs text-muted-foreground">
           {mode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
-          <button onClick={() => { setMode(mode === "signup" ? "login" : "signup"); setError(""); setEmailInUse(false); }} className="text-primary hover:underline">
+          <button onClick={() => { setMode(mode === "signup" ? "login" : "signup"); setError(""); setEmailInUse(false); setEmailError(""); }} className="text-primary hover:underline">
             {mode === "signup" ? "Log in" : "Sign up"}
           </button>
         </p>
