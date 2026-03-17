@@ -3,48 +3,42 @@ import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { useApp } from "@/contexts/AppContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { generatePortfolio, portfolioToStocks } from "@/lib/quizRecommendations";
 import { ChevronLeft, ChevronRight, Sparkles, Clock, Target, TrendingUp, BarChart3, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type Step = {
-  icon: React.ElementType;
-  title: string;
-  subtitle: string;
-  options: { label: string; desc: string }[];
-  multi?: boolean;
-};
-
-const steps: Step[] = [
-  {
-    icon: BarChart3, title: "Risk Tolerance", subtitle: "How comfortable are you with market volatility?",
-    options: [{ label: "Conservative", desc: "Prefer stability and capital preservation" }, { label: "Moderate", desc: "Balanced growth with managed risk" }, { label: "Aggressive", desc: "Maximum growth, higher volatility" }],
-  },
-  {
-    icon: Clock, title: "Investment Timeframe", subtitle: "When do you plan to use these funds?",
-    options: [{ label: "1-3 Years", desc: "Short-term goals" }, { label: "3-7 Years", desc: "Medium-term planning" }, { label: "7+ Years", desc: "Long-term wealth building" }],
-  },
-  {
-    icon: Target, title: "Profit Goals", subtitle: "What annual return are you targeting?",
-    options: [{ label: "5% / year", desc: "Steady income" }, { label: "10% / year", desc: "Growth-oriented" }, { label: "20%+ / year", desc: "Aggressive growth" }],
-  },
-  {
-    icon: TrendingUp, title: "Investment Experience", subtitle: "How would you describe your investing background?",
-    options: [{ label: "Beginner", desc: "New to investing" }, { label: "Intermediate", desc: "Some experience" }, { label: "Advanced", desc: "Experienced investor" }],
-  },
-  {
-    icon: Sparkles, title: "Sector Interests", subtitle: "Select sectors you're interested in (optional)",
-    options: [{ label: "Technology", desc: "" }, { label: "Healthcare", desc: "" }, { label: "Finance", desc: "" }, { label: "Energy", desc: "" }, { label: "Consumer", desc: "" }, { label: "Industrial", desc: "" }],
-    multi: true,
-  },
-];
-
 const Quiz = () => {
+  const { t } = useLanguage();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string[]>>({});
   const [showResults, setShowResults] = useState(false);
   const { watchlists, addWatchlist } = useApp();
   const navigate = useNavigate();
+
+  const steps = [
+    {
+      icon: BarChart3, title: t("riskTolerance"), subtitle: t("riskToleranceSub"),
+      options: [{ label: t("conservative"), desc: t("conservativeDesc") }, { label: t("moderate"), desc: t("moderateDesc") }, { label: t("aggressive"), desc: t("aggressiveDesc") }],
+    },
+    {
+      icon: Clock, title: t("investmentTimeframe"), subtitle: t("investmentTimeframeSub"),
+      options: [{ label: t("shortTerm"), desc: t("shortTermDesc") }, { label: t("mediumTerm"), desc: t("mediumTermDesc") }, { label: t("longTerm"), desc: t("longTermDesc") }],
+    },
+    {
+      icon: Target, title: t("profitGoals"), subtitle: t("profitGoalsSub"),
+      options: [{ label: t("steadyIncome"), desc: t("steadyIncomeDesc") }, { label: t("growthOriented"), desc: t("growthOrientedDesc") }, { label: t("aggressiveGrowth"), desc: t("aggressiveGrowthDesc") }],
+    },
+    {
+      icon: TrendingUp, title: t("investmentExperience"), subtitle: t("investmentExperienceSub"),
+      options: [{ label: t("beginner"), desc: t("beginnerDesc") }, { label: t("intermediate"), desc: t("intermediateDesc") }, { label: t("advanced"), desc: t("advancedDesc") }],
+    },
+    {
+      icon: Sparkles, title: t("sectorInterests"), subtitle: t("sectorInterestsSub"),
+      options: [{ label: t("technology"), desc: "" }, { label: t("healthcare"), desc: "" }, { label: t("finance"), desc: "" }, { label: t("energy"), desc: "" }, { label: t("consumer"), desc: "" }, { label: t("industrial"), desc: "" }],
+      multi: true,
+    },
+  ];
 
   const current = steps[step];
   const progress = ((step + 1) / steps.length) * 100;
@@ -62,15 +56,11 @@ const Quiz = () => {
   const selected = answers[step] || [];
 
   const handleBuildPortfolio = () => {
-    // Generate unique name
     const baseName = "Custom Portfolio";
     const existingNames = watchlists.map((w) => w.name);
     let name = baseName;
     let counter = 1;
-    while (existingNames.includes(name)) {
-      counter++;
-      name = `${baseName} ${counter}`;
-    }
+    while (existingNames.includes(name)) { counter++; name = `${baseName} ${counter}`; }
     const stocks = portfolioToStocks(portfolio.allocations);
     addWatchlist({ id: `wl-${Date.now()}`, name, stocks, desc: portfolio.rationale });
     navigate("/watchlists");
@@ -87,12 +77,10 @@ const Quiz = () => {
                 <CheckCircle2 className="h-7 w-7 text-primary" />
               </div>
             </div>
-            <h2 className="text-center text-2xl font-bold">Your Personalized Portfolio</h2>
-            <p className="mx-auto mt-3 max-w-lg text-center text-sm leading-relaxed text-muted-foreground">
-              {portfolio.rationale}
-            </p>
+            <h2 className="text-center text-2xl font-bold">{t("yourPersonalizedPortfolio")}</h2>
+            <p className="mx-auto mt-3 max-w-lg text-center text-sm leading-relaxed text-muted-foreground">{portfolio.rationale}</p>
 
-            <h3 className="mb-4 mt-8 text-lg font-semibold">Recommended Allocations</h3>
+            <h3 className="mb-4 mt-8 text-lg font-semibold">{t("recommendedAllocations")}</h3>
             <div className="space-y-4">
               {portfolio.allocations.map((a, i) => (
                 <div key={a.ticker} className="flex gap-4 rounded-xl border border-border bg-accent/30 p-4 animate-fade-in" style={{ animationDelay: `${i * 100}ms` }}>
@@ -107,9 +95,9 @@ const Quiz = () => {
 
             <div className="mt-8 grid grid-cols-3 gap-4">
               {[
-                { label: "Bear Case", value: portfolio.bearCase, sub: "5-year return", border: "border-loss/40", text: "text-loss" },
-                { label: "Base Case", value: portfolio.baseCase, sub: "5-year return", border: "border-border", text: "text-foreground" },
-                { label: "Bull Case", value: portfolio.bullCase, sub: "5-year return", border: "border-primary/40", text: "text-primary" },
+                { label: t("bearCase"), value: portfolio.bearCase, sub: t("fiveYearReturn"), border: "border-loss/40", text: "text-loss" },
+                { label: t("baseCase"), value: portfolio.baseCase, sub: t("fiveYearReturn"), border: "border-border", text: "text-foreground" },
+                { label: t("bullCase"), value: portfolio.bullCase, sub: t("fiveYearReturn"), border: "border-primary/40", text: "text-primary" },
               ].map((s) => (
                 <div key={s.label} className={cn("rounded-xl border p-4 text-center", s.border)}>
                   <p className="text-xs text-muted-foreground">{s.label}</p>
@@ -121,21 +109,21 @@ const Quiz = () => {
 
             <div className="mt-6 flex justify-center gap-6 text-center">
               <div>
-                <p className="text-xs text-muted-foreground">Expected Return</p>
+                <p className="text-xs text-muted-foreground">{t("expectedReturn")}</p>
                 <p className="text-lg font-bold text-primary">{portfolio.expectedReturn}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Risk Level</p>
+                <p className="text-xs text-muted-foreground">{t("riskLevel")}</p>
                 <p className="text-lg font-bold">{portfolio.riskLevel}</p>
               </div>
             </div>
 
             <div className="mt-8 flex gap-4">
               <button onClick={() => { setShowResults(false); setStep(0); setAnswers({}); }} className="flex-1 rounded-xl border border-border bg-card py-3 text-sm font-medium transition-colors hover:bg-accent">
-                Retake Quiz
+                {t("retakeQuiz")}
               </button>
               <button onClick={handleBuildPortfolio} className="flex-1 rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
-                Build This Portfolio
+                {t("buildThisPortfolio")}
               </button>
             </div>
           </div>
@@ -147,7 +135,7 @@ const Quiz = () => {
   return (
     <AppLayout>
       <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
-        <span>Step {step + 1} of {steps.length}</span>
+        <span>{t("step")} {step + 1} {t("of")} {steps.length}</span>
         <span className="text-primary font-semibold">{Math.round(progress)}%</span>
       </div>
       <div className="mb-8 h-1.5 rounded-full bg-secondary">
@@ -177,15 +165,15 @@ const Quiz = () => {
 
           <div className="mt-8 flex justify-between">
             <button onClick={() => setStep((s) => Math.max(0, s - 1))} disabled={step === 0} className="flex items-center gap-2 rounded-xl border border-border px-5 py-2.5 text-sm font-medium transition-colors hover:bg-accent disabled:opacity-30">
-              <ChevronLeft className="h-4 w-4" /> Back
+              <ChevronLeft className="h-4 w-4" /> {t("back")}
             </button>
             {step < steps.length - 1 ? (
               <button onClick={() => setStep((s) => s + 1)} disabled={selected.length === 0} className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-30">
-                Continue <ChevronRight className="h-4 w-4" />
+                {t("continue")} <ChevronRight className="h-4 w-4" />
               </button>
             ) : (
               <button onClick={() => setShowResults(true)} className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
-                <Sparkles className="h-4 w-4" /> Generate Portfolio
+                <Sparkles className="h-4 w-4" /> {t("generatePortfolio")}
               </button>
             )}
           </div>
