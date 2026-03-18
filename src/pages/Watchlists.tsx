@@ -206,6 +206,10 @@ const Watchlists = () => {
           </div>
         )}
       </div>
+
+      <div className="mt-8">
+        <StockNewsFeed />
+      </div>
     </AppLayout>
   );
 };
