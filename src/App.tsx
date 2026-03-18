@@ -71,7 +71,9 @@ const AppRoutes = () => {
 
   return (
     <AppProvider>
-      <AppWithLanguage />
+      <NotificationProvider>
+        <AppWithLanguage />
+      </NotificationProvider>
     </AppProvider>
   );
 };
