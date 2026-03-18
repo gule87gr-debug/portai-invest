@@ -115,6 +115,7 @@ const Forum = () => {
         fromUser: displayName,
         threadId: thread.id,
         threadTitle: thread.title.slice(0, 50),
+        targetUserId: thread.userId!,
       });
     }
     likeThread(threadId);
@@ -139,6 +140,7 @@ const Forum = () => {
         fromUser: displayName,
         threadId: thread.id,
         threadTitle: thread.title.slice(0, 50),
+        targetUserId: thread.userId!,
       });
     }
 

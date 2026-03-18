@@ -70,6 +70,39 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          created_at: string
+          from_user: string
+          id: string
+          read: boolean
+          thread_id: string
+          thread_title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          from_user: string
+          id?: string
+          read?: boolean
+          thread_id: string
+          thread_title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          from_user?: string
+          id?: string
+          read?: boolean
+          thread_id?: string
+          thread_title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_settings: {
         Row: {
           anonymous_mode: boolean
