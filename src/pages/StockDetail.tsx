@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
-import { TradingViewChart, TradingViewTechnicalAnalysis, TradingViewTimeline } from "@/components/TradingViewWidgets";
+import { TradingViewChart, TradingViewTechnicalAnalysis } from "@/components/TradingViewWidgets";
+import { StockNews } from "@/components/StockNews";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getStockDescription } from "@/lib/stockDescriptions";
