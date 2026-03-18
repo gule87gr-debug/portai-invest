@@ -224,8 +224,38 @@ const Forum = () => {
               <h3 className="text-base font-semibold">{th.title}</h3>
               <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{th.body}</p>
 
-              {th.factCheck && (
-                <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm leading-relaxed text-foreground animate-fade-in">{th.factCheck}</div>
+              {/* AI Fact Check Results */}
+              {factCheckResults[th.id] && (
+                <div className="mt-3 rounded-lg border border-border bg-card p-3 sm:p-4 space-y-3 animate-fade-in">
+                  {(() => {
+                    const result = factCheckResults[th.id];
+                    const config = verdictConfig[result.verdict] || verdictConfig.unverifiable;
+                    const VerdictIcon = config.icon;
+                    return (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <VerdictIcon className={cn("h-4 w-4", config.color)} />
+                          <span className={cn("text-sm font-semibold", config.color)}>{config.label}</span>
+                          <span className="ml-auto text-[10px] text-muted-foreground">Confidence: {result.confidence}/10</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{result.summary}</p>
+                        {result.claims.length > 0 && (
+                          <div className="space-y-2">
+                            {result.claims.map((claim, idx) => {
+                              const cConfig = claimStatusConfig[claim.status] || claimStatusConfig.unverifiable;
+                              return (
+                                <div key={idx} className={cn("rounded-md border p-2.5 text-xs", cConfig.color)}>
+                                  <p className="font-medium">"{claim.claim}"</p>
+                                  <p className="mt-1 opacity-80">{claim.explanation}</p>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+                </div>
               )}
 
               <div className="mt-4 flex items-center justify-between">
@@ -237,8 +267,13 @@ const Forum = () => {
                     <MessageCircle className="h-3.5 w-3.5" /> {th.comments.length}
                   </button>
                 </div>
-                <button onClick={() => setFactCheck(th.id, generateFactCheck(th.body))} className="flex items-center gap-1 text-xs text-primary hover:underline">
-                  <Sparkles className="h-3.5 w-3.5" /> {t("factCheck")}
+                <button
+                  onClick={() => handleFactCheck(th.id, th.title, th.body)}
+                  disabled={factCheckLoading === th.id}
+                  className="flex items-center gap-1 text-xs text-primary hover:underline disabled:opacity-50"
+                >
+                  {factCheckLoading === th.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                  {t("factCheck")}
                 </button>
               </div>
 
