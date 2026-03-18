@@ -50,19 +50,19 @@ const Dashboard = () => {
         <p className="mt-1 text-muted-foreground">{t("aiCuratedAnalysis")}</p>
       </div>
 
-      <div className="mb-8 rounded-xl border border-border bg-card p-6">
+      <div className="mb-8 rounded-xl border border-border bg-card p-4 sm:p-6">
         <div className="flex items-center gap-2 mb-2">
           <LinkIcon className="h-5 w-5 text-primary" />
           <h2 className="text-lg font-semibold">{t("analyzeLink")}</h2>
         </div>
         <p className="mb-4 text-sm leading-relaxed text-muted-foreground">{t("pasteUrl")}</p>
 
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Globe className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input value={url} onChange={(e) => setUrl(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAnalyze()} placeholder={t("pasteArticleUrl")} className="h-11 w-full rounded-lg border border-border bg-accent/30 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
           </div>
-          <button onClick={handleAnalyze} disabled={isAnalyzing || !url.trim()} className="flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
+          <button onClick={handleAnalyze} disabled={isAnalyzing || !url.trim()} className="flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 shrink-0">
             {isAnalyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
             {isAnalyzing ? t("analyzing") : t("analyze")}
           </button>
@@ -87,7 +87,7 @@ const Dashboard = () => {
                 <p className="text-xs font-semibold text-muted-foreground mb-1">📝 {t("summary")}</p>
                 <p className="text-sm leading-relaxed">{result.summary}</p>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="rounded-lg border border-loss/20 bg-loss/5 p-3">
                   <p className="text-xs font-semibold text-loss mb-2">⚠️ {t("potentialBiases")}</p>
                   <ul className="space-y-1">
@@ -106,7 +106,7 @@ const Dashboard = () => {
         )}
 
         {!result && !isAnalyzing && !error && (
-          <div className="mt-5 grid grid-cols-3 gap-4">
+          <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
               { icon: ShieldCheck, titleKey: "trustScore", descKey: "trustScoreDesc" },
               { icon: FileText, titleKey: "smartSummary", descKey: "smartSummaryDesc" },
