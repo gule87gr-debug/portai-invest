@@ -208,7 +208,11 @@ const Forum = () => {
             <div key={th.id} className="rounded-xl border border-border bg-card p-4 sm:p-5 animate-fade-in" style={{ animationDelay: `${i * 40}ms` }}>
               <div className="mb-3 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">{th.avatar}</div>
+                  {th.avatarUrl ? (
+                    <img src={th.avatarUrl} alt={th.author} className="h-8 w-8 rounded-full object-cover border border-border" />
+                  ) : (
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">{th.avatar}</div>
+                  )}
                   <span className="text-sm font-semibold">{th.author}</span>
                   <span className="text-xs text-muted-foreground">{th.time}</span>
                 </div>
