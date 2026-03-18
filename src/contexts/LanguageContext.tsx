@@ -90,6 +90,8 @@ const translations: Record<Language, Record<string, string>> = {
     disclaimerText: "AI analysis is for informational purposes only. Always consult qualified financial professionals before making investment decisions.",
     // Misc
     deleteThread: "Delete thread", deleteComment: "Delete comment",
+    notifications: "Notifications", markAllRead: "Mark all read", noNotifications: "No new notifications",
+    imageAttached: "Image attached", uploadImage: "Upload image",
   },
   es: {
     dashboard: "Panel", aiChat: "Chat IA", quiz: "Cuestionario", forum: "Foro", watchlists: "Listas", settings: "Ajustes",
