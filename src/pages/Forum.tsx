@@ -288,7 +288,11 @@ const Forum = () => {
                   {th.comments.length === 0 && <p className="text-xs text-muted-foreground">{t("noCommentsYet")}</p>}
                   {th.comments.map((c) => (
                     <div key={c.id} className="flex gap-2.5 group">
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-secondary text-[10px] font-semibold text-secondary-foreground">{c.avatar}</div>
+                      {c.avatarUrl ? (
+                        <img src={c.avatarUrl} alt={c.author} className="h-6 w-6 shrink-0 rounded-full object-cover border border-border" />
+                      ) : (
+                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-secondary text-[10px] font-semibold text-secondary-foreground">{c.avatar}</div>
+                      )}
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-semibold">{c.author}</span>
