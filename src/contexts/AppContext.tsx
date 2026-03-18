@@ -4,9 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 export type Stock = { ticker: string; sector: string; name: string; signal: string };
 export type WatchlistData = { id: string; name: string; stocks: Stock[]; desc: string };
 
-export type ForumComment = { id: string; author: string; avatar: string; body: string; time: string; likes: number; userId?: string };
+export type ForumComment = { id: string; author: string; avatar: string; avatarUrl?: string | null; body: string; time: string; likes: number; userId?: string };
 export type ForumThread = {
-  id: string; author: string; avatar: string; time: string;
+  id: string; author: string; avatar: string; avatarUrl?: string | null; time: string;
   tags: { label: string; color: string }[];
   title: string; body: string; likes: number;
   comments: ForumComment[];

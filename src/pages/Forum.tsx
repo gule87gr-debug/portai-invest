@@ -97,8 +97,9 @@ const Forum = () => {
     if (!allowed) { toast({ title: t("moderationError"), variant: "destructive" }); setIsModeratingPost(false); return; }
     const displayName = profile.anonymous ? t("anonymousTrader") : profile.name;
     const displayAvatar = profile.anonymous ? "?" : profile.name[0]?.toUpperCase() || "U";
+    const avatarUrl = profile.anonymous ? null : profile.avatar;
     addThread({
-      id: `t-${Date.now()}`, author: displayName, avatar: displayAvatar, time: "just now",
+      id: `t-${Date.now()}`, author: displayName, avatar: displayAvatar, avatarUrl, time: "just now",
       tags: [{ label: newTag, color: newTag === "general" ? "bg-muted text-muted-foreground" : "bg-primary/20 text-primary" }],
       title: newTitle, body: newBody, likes: 0, comments: [], likedByUser: false, userId: currentUserId || undefined,
     });
@@ -127,7 +128,8 @@ const Forum = () => {
     if (!allowed) { toast({ title: t("moderationError"), variant: "destructive" }); setIsModeratingComment(null); return; }
     const displayName = profile.anonymous ? t("anonymousTrader") : profile.name;
     const displayAvatar = profile.anonymous ? "?" : profile.name[0]?.toUpperCase() || "U";
-    addComment(threadId, { id: `c-${Date.now()}`, author: displayName, avatar: displayAvatar, body: text, time: "just now", likes: 0, userId: currentUserId || undefined });
+    const avatarUrl = profile.anonymous ? null : profile.avatar;
+    addComment(threadId, { id: `c-${Date.now()}`, author: displayName, avatar: displayAvatar, avatarUrl, body: text, time: "just now", likes: 0, userId: currentUserId || undefined });
 
     // Notify thread author
     const thread = threads.find((t) => t.id === threadId);
@@ -206,7 +208,11 @@ const Forum = () => {
             <div key={th.id} className="rounded-xl border border-border bg-card p-4 sm:p-5 animate-fade-in" style={{ animationDelay: `${i * 40}ms` }}>
               <div className="mb-3 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">{th.avatar}</div>
+                  {th.avatarUrl ? (
+                    <img src={th.avatarUrl} alt={th.author} className="h-8 w-8 rounded-full object-cover border border-border" />
+                  ) : (
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">{th.avatar}</div>
+                  )}
                   <span className="text-sm font-semibold">{th.author}</span>
                   <span className="text-xs text-muted-foreground">{th.time}</span>
                 </div>
@@ -282,7 +288,11 @@ const Forum = () => {
                   {th.comments.length === 0 && <p className="text-xs text-muted-foreground">{t("noCommentsYet")}</p>}
                   {th.comments.map((c) => (
                     <div key={c.id} className="flex gap-2.5 group">
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-secondary text-[10px] font-semibold text-secondary-foreground">{c.avatar}</div>
+                      {c.avatarUrl ? (
+                        <img src={c.avatarUrl} alt={c.author} className="h-6 w-6 shrink-0 rounded-full object-cover border border-border" />
+                      ) : (
+                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-secondary text-[10px] font-semibold text-secondary-foreground">{c.avatar}</div>
+                      )}
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-semibold">{c.author}</span>
