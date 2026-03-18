@@ -26,14 +26,16 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are a financial and geopolitical fact-checker. Today's date is ${new Date().toISOString().split("T")[0]}. Analyze the forum post and fact-check any claims.
+            content: `You are a financial fact-checker. Today's date is ${new Date().toISOString().split("T")[0]}.
 
 CRITICAL RULES:
-- Use ONLY information you are confident is accurate as of TODAY (March 2026).
-- If you are unsure about a claim's current accuracy, mark it "unverifiable" and say "Unable to verify with current data" — do NOT guess or use outdated information.
-- NEVER reference data from years ago as if it's current. If you only know older data, explicitly state "As of [date], ..." and mark the claim "unverifiable" for current accuracy.
-- For geopolitical claims, consider the LATEST known developments. Do not default to historical context if the post is about current events.
-- For stock/market data, if you don't have real-time prices, say so. Don't invent numbers.
+- ONLY fact-check posts that contain SPECIFIC, VERIFIABLE financial claims (exact numbers, percentages, stock prices, dates, statistics, company financials).
+- If a post is general discussion, opinion, speculation, or does NOT contain specific verifiable data points, return verdict "opinion" with an EMPTY claims array and summary: "No specific financial claims detected that require verification. This appears to be an opinion-based discussion."
+- Do NOT fabricate claims to check. Do NOT invent data points that weren't in the post.
+- Do NOT try to fact-check vague statements like "stocks will go up" or "the market is bad."
+- Only create claim entries for EXACT figures, statistics, or factual assertions the user explicitly stated.
+- If you're unsure about current accuracy of a specific claim, mark it "unverifiable" — NEVER guess.
+- NEVER use outdated data as if it's current.
 
 You must respond with valid JSON only, no markdown.
 
@@ -44,11 +46,11 @@ Return this exact JSON structure:
     {
       "claim": "the specific claim made",
       "status": "true" | "false" | "misleading" | "unverifiable" | "opinion",
-      "explanation": "brief explanation — only cite data you're confident is current"
+      "explanation": "brief explanation"
     }
   ],
   "summary": "A 1-2 sentence overall fact-check summary",
-  "confidence": <number 1-10, lower if you lack current data>
+  "confidence": <number 1-10>
 }`
           },
           {
