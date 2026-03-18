@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { useApp } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNotifications } from "@/contexts/NotificationContext";
-import { Search, Plus, ThumbsUp, MessageCircle, Sparkles, X, Send, Trash2, Loader2 } from "lucide-react";
+import { Search, Plus, ThumbsUp, MessageCircle, Sparkles, X, Send, Trash2, Loader2, CheckCircle, AlertTriangle, XCircle, HelpCircle, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -11,19 +11,34 @@ import { useToast } from "@/hooks/use-toast";
 const categories = ["All", "General", "Portfolios", "Markets", "Sectors"];
 const tagOptions = ["general", "portfolios", "markets", "sectors"];
 
-const factCheckResponses: Record<string, string> = {
-  default: "✅ No specific financial claims detected that require verification. This appears to be an opinion-based discussion.",
+type FactCheckClaim = {
+  claim: string;
+  status: "true" | "false" | "misleading" | "unverifiable" | "opinion";
+  explanation: string;
 };
 
-function generateFactCheck(body: string): string {
-  if (body.toLowerCase().includes("nvda") || body.toLowerCase().includes("nvidia"))
-    return "📊 Fact Check: NVDA current P/E ratio is approximately 65x (trailing) per latest 10-Q filing. Forward P/E ~42x based on analyst consensus.";
-  if (body.toLowerCase().includes("fed") || body.toLowerCase().includes("rate"))
-    return "📊 Fact Check: The Federal Reserve held rates at 5.25-5.50% at the last FOMC meeting. Market pricing suggests 2-3 rate cuts expected in 2026.";
-  if (body.toLowerCase().includes("portfolio") || body.toLowerCase().includes("%"))
-    return "📊 Fact Check: Portfolio concentration in a single sector above 40% significantly increases risk. Diversified portfolios outperform on a risk-adjusted basis over 10+ years.";
-  return factCheckResponses.default;
-}
+type FactCheckResult = {
+  verdict: "verified" | "partially_true" | "misleading" | "unverifiable" | "opinion";
+  claims: FactCheckClaim[];
+  summary: string;
+  confidence: number;
+};
+
+const verdictConfig: Record<string, { icon: typeof CheckCircle; label: string; color: string }> = {
+  verified: { icon: CheckCircle, label: "Verified", color: "text-gain" },
+  partially_true: { icon: AlertTriangle, label: "Partially True", color: "text-warning" },
+  misleading: { icon: XCircle, label: "Misleading", color: "text-loss" },
+  unverifiable: { icon: HelpCircle, label: "Unverifiable", color: "text-muted-foreground" },
+  opinion: { icon: MessageSquare, label: "Opinion", color: "text-primary" },
+};
+
+const claimStatusConfig: Record<string, { color: string }> = {
+  true: { color: "bg-gain/20 text-gain border-gain/30" },
+  false: { color: "bg-loss/20 text-loss border-loss/30" },
+  misleading: { color: "bg-warning/20 text-warning border-warning/30" },
+  unverifiable: { color: "bg-muted text-muted-foreground border-border" },
+  opinion: { color: "bg-primary/20 text-primary border-primary/30" },
+};
 
 const Forum = () => {
   const { threads, addThread, likeThread, addComment, setFactCheck, deleteThread, deleteComment, profile, currentUserId } = useApp();
@@ -40,6 +55,26 @@ const Forum = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isModeratingPost, setIsModeratingPost] = useState(false);
   const [isModeratingComment, setIsModeratingComment] = useState<string | null>(null);
+  const [factCheckLoading, setFactCheckLoading] = useState<string | null>(null);
+  const [factCheckResults, setFactCheckResults] = useState<Record<string, FactCheckResult>>({});
+
+  const handleFactCheck = async (threadId: string, title: string, body: string) => {
+    setFactCheckLoading(threadId);
+    try {
+      const { data, error } = await supabase.functions.invoke("fact-check", { body: { title, body } });
+      if (error) throw error;
+      if (data?.error) {
+        toast({ title: data.error, variant: "destructive" });
+      } else if (data?.factCheck) {
+        setFactCheckResults((prev) => ({ ...prev, [threadId]: data.factCheck }));
+        setFactCheck(threadId, data.factCheck.summary);
+      }
+    } catch (e) {
+      toast({ title: "Fact-check failed", variant: "destructive" });
+    } finally {
+      setFactCheckLoading(null);
+    }
+  };
 
   const filtered = threads.filter((th) => {
     if (active !== "All" && !th.tags.some((tag) => tag.label.toLowerCase() === active.toLowerCase())) return false;
@@ -189,8 +224,38 @@ const Forum = () => {
               <h3 className="text-base font-semibold">{th.title}</h3>
               <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{th.body}</p>
 
-              {th.factCheck && (
-                <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm leading-relaxed text-foreground animate-fade-in">{th.factCheck}</div>
+              {/* AI Fact Check Results */}
+              {factCheckResults[th.id] && (
+                <div className="mt-3 rounded-lg border border-border bg-card p-3 sm:p-4 space-y-3 animate-fade-in">
+                  {(() => {
+                    const result = factCheckResults[th.id];
+                    const config = verdictConfig[result.verdict] || verdictConfig.unverifiable;
+                    const VerdictIcon = config.icon;
+                    return (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <VerdictIcon className={cn("h-4 w-4", config.color)} />
+                          <span className={cn("text-sm font-semibold", config.color)}>{config.label}</span>
+                          <span className="ml-auto text-[10px] text-muted-foreground">Confidence: {result.confidence}/10</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{result.summary}</p>
+                        {result.claims.length > 0 && (
+                          <div className="space-y-2">
+                            {result.claims.map((claim, idx) => {
+                              const cConfig = claimStatusConfig[claim.status] || claimStatusConfig.unverifiable;
+                              return (
+                                <div key={idx} className={cn("rounded-md border p-2.5 text-xs", cConfig.color)}>
+                                  <p className="font-medium">"{claim.claim}"</p>
+                                  <p className="mt-1 opacity-80">{claim.explanation}</p>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+                </div>
               )}
 
               <div className="mt-4 flex items-center justify-between">
@@ -202,8 +267,13 @@ const Forum = () => {
                     <MessageCircle className="h-3.5 w-3.5" /> {th.comments.length}
                   </button>
                 </div>
-                <button onClick={() => setFactCheck(th.id, generateFactCheck(th.body))} className="flex items-center gap-1 text-xs text-primary hover:underline">
-                  <Sparkles className="h-3.5 w-3.5" /> {t("factCheck")}
+                <button
+                  onClick={() => handleFactCheck(th.id, th.title, th.body)}
+                  disabled={factCheckLoading === th.id}
+                  className="flex items-center gap-1 text-xs text-primary hover:underline disabled:opacity-50"
+                >
+                  {factCheckLoading === th.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                  {t("factCheck")}
                 </button>
               </div>
 

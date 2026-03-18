@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.moderate-post]
 verify_jwt = false
+
+[functions.fact-check]
+verify_jwt = false
