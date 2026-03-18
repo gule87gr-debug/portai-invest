@@ -13,7 +13,7 @@ const translations: Record<Language, Record<string, string>> = {
     trustScore: "Trust Score", smartSummary: "Smart Summary", biasDetection: "Bias Detection",
     stockHeatmap: "S&P 500 Stock Heatmap",
     marketNewsFeed: "Market News Feed", autoRefresh: "Auto-refreshes",
-    newsDisclaimer: "News provided by TradingView. For informational purposes only — not financial advice.",
+    newsDisclaimer: "News sourced from Google News. For informational purposes only — not financial advice.",
     crypto: "Crypto", etfs: "ETFs",
     trustScoreDesc: "AI rates source credibility, author expertise, and citation quality on a 1-10 scale",
     smartSummaryDesc: "Get a concise summary highlighting key claims, data points, and conclusions",
