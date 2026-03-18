@@ -262,7 +262,7 @@ const translations: Record<Language, Record<string, string>> = {
     trustScore: "Pontuação de Confiança", smartSummary: "Resumo Inteligente", biasDetection: "Detecção de Viés",
     stockHeatmap: "Mapa de Calor S&P 500",
     marketNewsFeed: "Feed de Notícias do Mercado", autoRefresh: "Atualiza automaticamente",
-    newsDisclaimer: "Notícias fornecidas pela TradingView. Apenas para fins informativos — não é aconselhamento financeiro.",
+    newsDisclaimer: "Notícias do Google News. Apenas para fins informativos — não é aconselhamento financeiro.",
     crypto: "Cripto", etfs: "ETFs",
     trustScoreDesc: "A IA avalia a credibilidade da fonte, experiência do autor e qualidade das citações em uma escala de 1-10",
     smartSummaryDesc: "Obtenha um resumo conciso destacando afirmações chave, dados e conclusões",
