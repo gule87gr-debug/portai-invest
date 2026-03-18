@@ -42,7 +42,8 @@ const AppWithLanguage = () => {
 
 const AppRoutes = () => {
   const [session, setSession] = useState<any>(undefined);
-  const [showAuth, setShowAuth] = useState(false);
+  const hasVisited = localStorage.getItem("portai-has-visited");
+  const [showAuth, setShowAuth] = useState(!!hasVisited);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -53,6 +54,11 @@ const AppRoutes = () => {
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  const handleGetStarted = () => {
+    localStorage.setItem("portai-has-visited", "true");
+    setShowAuth(true);
+  };
 
   if (session === undefined) {
     return (
@@ -66,7 +72,7 @@ const AppRoutes = () => {
     if (showAuth) {
       return <AuthPage onAuth={() => {}} />;
     }
-    return <LandingPage onGetStarted={() => setShowAuth(true)} />;
+    return <LandingPage onGetStarted={handleGetStarted} />;
   }
 
   return (
