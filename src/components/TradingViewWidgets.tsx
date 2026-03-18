@@ -257,3 +257,4 @@ export const TradingViewHeatmap = ({ height = 500 }: { height?: number }) => {
   }, [height]);
 
   return <div ref={containerRef} style={{ height: `${height}px` }} className="rounded-xl overflow-hidden" />;
+};
