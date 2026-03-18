@@ -26,6 +26,7 @@ type AppState = {
   addStockToWatchlist: (listId: string, stock: Stock) => void;
   removeStockFromWatchlist: (listId: string, ticker: string) => void;
   deleteWatchlist: (listId: string) => void;
+  watchlistsLoaded: boolean;
   threads: ForumThread[];
   setThreads: React.Dispatch<React.SetStateAction<ForumThread[]>>;
   addThread: (t: ForumThread) => void;
