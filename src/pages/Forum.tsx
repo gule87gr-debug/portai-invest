@@ -54,6 +54,7 @@ const Forum = () => {
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [isModeratingPost, setIsModeratingPost] = useState(false);
+  const [isModeratingComment, setIsModeratingComment] = useState<string | null>(null);
   const [factCheckLoading, setFactCheckLoading] = useState<string | null>(null);
   const [factCheckResults, setFactCheckResults] = useState<Record<string, FactCheckResult>>({});
 
