@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
-import { TradingViewChart, TradingViewTechnicalAnalysis, TradingViewTimeline } from "@/components/TradingViewWidgets";
+import { TradingViewChart, TradingViewTechnicalAnalysis } from "@/components/TradingViewWidgets";
+import { StockNews } from "@/components/StockNews";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getStockDescription } from "@/lib/stockDescriptions";
@@ -58,7 +59,7 @@ const StockDetail = () => {
               <Newspaper className="h-4 w-4 text-primary" />
               <h2 className="text-lg font-semibold">{t("recentNews")}</h2>
             </div>
-            <TradingViewTimeline symbol={symbol} height={400} />
+            <StockNews ticker={symbol} height={400} />
           </div>
 
           <DisclaimerBanner />
