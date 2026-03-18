@@ -4,6 +4,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { useApp, Stock } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { searchAssets, AssetEntry } from "@/lib/stockDatabase";
+import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
 import { Plus, Trash2, Search, X, ChevronDown, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -172,18 +173,21 @@ const Watchlists = () => {
               </div>
             )}
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               {active.stocks.map((s) => (
-                <div key={s.ticker} onClick={() => navigate(`/stock/${s.ticker}`)} className="flex items-center justify-between rounded-xl border border-border bg-accent/20 px-3 sm:px-4 py-3 cursor-pointer transition-colors hover:bg-accent/40">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="font-semibold text-sm">{s.ticker}</span>
-                    <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground hidden sm:inline">{s.sector}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <p className="hidden sm:block text-sm text-muted-foreground truncate max-w-[200px]">{s.name}</p>
+                <div key={s.ticker} onClick={() => navigate(`/stock/${s.ticker}`)} className="rounded-xl border border-border bg-accent/20 cursor-pointer transition-colors hover:bg-accent/40 overflow-hidden">
+                  <div className="flex items-center justify-between px-3 sm:px-4 pt-3 pb-1">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="font-semibold text-sm">{s.ticker}</span>
+                      <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground hidden sm:inline">{s.sector}</span>
+                      <span className="text-xs text-muted-foreground hidden sm:inline truncate max-w-[180px]">{s.name}</span>
+                    </div>
                     <button onClick={(e) => { e.stopPropagation(); removeStockFromWatchlist(active.id, s.ticker); }} className="text-muted-foreground hover:text-loss transition-colors shrink-0">
                       <Trash2 className="h-4 w-4" />
                     </button>
+                  </div>
+                  <div className="pointer-events-none h-[160px] overflow-hidden">
+                    <TradingViewMiniChart symbol={s.ticker} width={600} />
                   </div>
                 </div>
               ))}
