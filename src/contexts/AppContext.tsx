@@ -140,11 +140,42 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<UserProfile>(() => loadFromLS("portai-profile", { name: "Guest User", email: "", avatar: null, anonymous: false }));
   const [initialLanguage, setInitialLanguage] = useState("en");
 
+  const loadWatchlists = async (userId: string) => {
+    const { data: wlData } = await supabase
+      .from("watchlists")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (wlData && wlData.length > 0) {
+      const { data: stocksData } = await supabase
+        .from("watchlist_stocks")
+        .select("*")
+        .in("watchlist_id", wlData.map((w: any) => w.id));
+
+      const mapped: WatchlistData[] = wlData.map((w: any) => ({
+        id: w.id,
+        name: w.name,
+        desc: w.description || "",
+        stocks: (stocksData || [])
+          .filter((s: any) => s.watchlist_id === w.id)
+          .map((s: any) => ({ ticker: s.ticker, name: s.name, sector: s.sector, signal: s.signal })),
+      }));
+      setWatchlists(mapped);
+    } else {
+      setWatchlists([]);
+    }
+    setWatchlistsLoaded(true);
+  };
+
   useEffect(() => {
     const init = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       setCurrentUserId(user.id);
+
+      // Load watchlists from DB
+      await loadWatchlists(user.id);
 
       const { data: settings } = await supabase
         .from("user_settings")
