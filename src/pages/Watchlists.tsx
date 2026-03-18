@@ -4,7 +4,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { useApp, Stock } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { searchAssets, AssetEntry } from "@/lib/stockDatabase";
-import { Plus, Trash2, Search, X, ChevronDown } from "lucide-react";
+import { Plus, Trash2, Search, X, ChevronDown, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const Watchlists = () => {
