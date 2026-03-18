@@ -87,7 +87,7 @@ const Dashboard = () => {
                 <p className="text-xs font-semibold text-muted-foreground mb-1">📝 {t("summary")}</p>
                 <p className="text-sm leading-relaxed">{result.summary}</p>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="rounded-lg border border-loss/20 bg-loss/5 p-3">
                   <p className="text-xs font-semibold text-loss mb-2">⚠️ {t("potentialBiases")}</p>
                   <ul className="space-y-1">
