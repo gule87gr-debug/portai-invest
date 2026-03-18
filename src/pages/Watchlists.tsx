@@ -5,7 +5,6 @@ import { useApp, Stock } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { searchAssets, AssetEntry } from "@/lib/stockDatabase";
 import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
-import { StockNewsFeed } from "@/components/StockNewsFeed";
 import { Plus, Trash2, Search, X, ChevronDown, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 
