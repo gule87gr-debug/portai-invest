@@ -34,13 +34,34 @@ const Watchlists = () => {
     setStockSearch(""); setShowAddStock(false);
   };
 
+  // Create watchlist modal - rendered globally so it works from empty state too
+  const createModal = showNewList && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in p-4">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-bold">{t("createNewWatchlist")}</h2>
+          <button onClick={() => setShowNewList(false)} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
+        </div>
+        <input value={newListName} onChange={(e) => setNewListName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleCreateList()} placeholder={t("watchlistName")} autoFocus className="h-10 w-full rounded-lg border border-border bg-accent/30 px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+        <div className="mt-4 flex justify-end gap-2">
+          <button onClick={() => setShowNewList(false)} className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-accent">{t("cancel")}</button>
+          <button onClick={handleCreateList} disabled={!newListName.trim()} className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-30">{t("create")}</button>
+        </div>
+      </div>
+    </div>
+  );
+
   if (watchlists.length === 0) {
     return (
       <AppLayout>
-        <div className="flex flex-col items-center justify-center py-20">
+        {createModal}
+        <div className="flex flex-col items-center justify-center py-16">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/15 mb-4">
+            <Eye className="h-8 w-8 text-primary" />
+          </div>
           <h1 className="text-2xl font-bold mb-2">{t("noWatchlistsYet")}</h1>
-          <p className="text-muted-foreground mb-4">{t("createFirstWatchlist")}</p>
-          <button onClick={() => setShowNewList(true)} className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground">
+          <p className="text-muted-foreground mb-6 text-center max-w-sm">{t("createFirstWatchlist")}</p>
+          <button onClick={() => setShowNewList(true)} className="flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
             <Plus className="h-4 w-4" /> {t("createWatchlist")}
           </button>
         </div>
@@ -50,31 +71,7 @@ const Watchlists = () => {
 
   return (
     <AppLayout>
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">{t("watchlists")}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{t("trackStocks")}</p>
-        </div>
-        <button onClick={() => setShowNewList(true)} className="flex items-center gap-2 rounded-lg bg-primary px-3 sm:px-4 py-2 sm:py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
-          <Plus className="h-4 w-4" /> <span className="hidden sm:inline">{t("newList")}</span>
-        </button>
-      </div>
-
-      {showNewList && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in p-4">
-          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-bold">{t("createNewWatchlist")}</h2>
-              <button onClick={() => setShowNewList(false)} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
-            </div>
-            <input value={newListName} onChange={(e) => setNewListName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleCreateList()} placeholder={t("watchlistName")} className="h-10 w-full rounded-lg border border-border bg-accent/30 px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-            <div className="mt-4 flex justify-end gap-2">
-              <button onClick={() => setShowNewList(false)} className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-accent">{t("cancel")}</button>
-              <button onClick={handleCreateList} disabled={!newListName.trim()} className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-30">{t("create")}</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {createModal}
 
       {showAddStock && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in p-4">
@@ -106,6 +103,16 @@ const Watchlists = () => {
           </div>
         </div>
       )}
+
+      <div className="mb-4 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold">{t("watchlists")}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t("trackStocks")}</p>
+        </div>
+        <button onClick={() => setShowNewList(true)} className="flex items-center gap-2 rounded-lg bg-primary px-3 sm:px-4 py-2 sm:py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+          <Plus className="h-4 w-4" /> <span className="hidden sm:inline">{t("newList")}</span>
+        </button>
+      </div>
 
       {/* Mobile dropdown */}
       <div className="sm:hidden mb-4">
@@ -160,7 +167,7 @@ const Watchlists = () => {
             </div>
 
             {active.stocks.length === 0 && (
-              <div className="py-12 text-center">
+              <div className="py-10 text-center">
                 <p className="text-muted-foreground text-sm">{t("noStocksYet")}</p>
               </div>
             )}

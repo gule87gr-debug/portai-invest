@@ -5,6 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Send, Sparkles, Plus, Trash2, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import ReactMarkdown from "react-markdown";
 
 type Message = { role: "user" | "assistant"; content: string };
 type ChatSession = { id: string; title: string; created_at: string };
@@ -44,6 +45,27 @@ async function streamChat({ messages, onDelta, onDone, onError }: {
   }
   onDone();
 }
+
+const MarkdownContent = ({ content }: { content: string }) => (
+  <ReactMarkdown
+    components={{
+      h1: ({ children }) => <h1 className="text-lg font-bold mb-2 mt-3">{children}</h1>,
+      h2: ({ children }) => <h2 className="text-base font-bold mb-1.5 mt-2.5">{children}</h2>,
+      h3: ({ children }) => <h3 className="text-sm font-bold mb-1 mt-2">{children}</h3>,
+      p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+      ul: ({ children }) => <ul className="mb-2 ml-4 list-disc space-y-0.5">{children}</ul>,
+      ol: ({ children }) => <ol className="mb-2 ml-4 list-decimal space-y-0.5">{children}</ol>,
+      li: ({ children }) => <li className="text-sm leading-relaxed">{children}</li>,
+      strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
+      em: ({ children }) => <em className="italic">{children}</em>,
+      code: ({ children }) => <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono text-primary">{children}</code>,
+      pre: ({ children }) => <pre className="rounded-lg bg-muted p-3 text-xs overflow-x-auto mb-2 font-mono">{children}</pre>,
+      blockquote: ({ children }) => <blockquote className="border-l-2 border-primary/50 pl-3 italic text-muted-foreground mb-2">{children}</blockquote>,
+    }}
+  >
+    {content}
+  </ReactMarkdown>
+);
 
 const AIChat = () => {
   const { t } = useLanguage();
@@ -138,22 +160,22 @@ const AIChat = () => {
 
   return (
     <AppLayout>
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
             <Sparkles className="h-5 w-5 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">{t("aiFinancialAdvisor")}</h1>
+            <h1 className="text-lg sm:text-xl font-bold">{t("aiFinancialAdvisor")}</h1>
             <p className="text-xs text-muted-foreground">{t("poweredByAI")}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setShowSessions(!showSessions)} className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition-colors hover:bg-accent">
-            <MessageCircle className="h-3.5 w-3.5" /> {t("history")}
+          <button onClick={() => setShowSessions(!showSessions)} className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs sm:text-sm font-medium transition-colors hover:bg-accent">
+            <MessageCircle className="h-3.5 w-3.5" /> <span className="hidden sm:inline">{t("history")}</span>
           </button>
-          <button onClick={startNewChat} className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition-colors hover:bg-accent">
-            <Plus className="h-3.5 w-3.5" /> {t("newChat")}
+          <button onClick={startNewChat} className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs sm:text-sm font-medium transition-colors hover:bg-accent">
+            <Plus className="h-3.5 w-3.5" /> <span className="hidden sm:inline">{t("newChat")}</span>
           </button>
         </div>
       </div>
@@ -189,7 +211,7 @@ const AIChat = () => {
                   {t("welcomeMessage")}
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3 pt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 {suggestions.map((s, i) => (
                   <button key={i} onClick={() => send(s)} className="rounded-xl border border-border bg-card px-4 py-3 text-left text-sm text-muted-foreground transition-all hover:border-primary/40 hover:text-foreground hover:bg-accent/30 animate-fade-in" style={{ animationDelay: `${i * 80}ms` }}>
                     {s}
@@ -206,8 +228,8 @@ const AIChat = () => {
                   <Sparkles className="h-4 w-4 text-primary-foreground" />
                 </div>
               )}
-              <div className={cn("max-w-[70%] rounded-xl p-4 text-sm leading-relaxed whitespace-pre-line", m.role === "user" ? "bg-primary text-primary-foreground rounded-tr-none" : "bg-card text-foreground rounded-tl-none")}>
-                {m.content}
+              <div className={cn("max-w-[85%] sm:max-w-[70%] rounded-xl p-4 text-sm leading-relaxed", m.role === "user" ? "bg-primary text-primary-foreground rounded-tr-none whitespace-pre-line" : "bg-card text-foreground rounded-tl-none")}>
+                {m.role === "assistant" ? <MarkdownContent content={m.content} /> : m.content}
               </div>
             </div>
           ))}
