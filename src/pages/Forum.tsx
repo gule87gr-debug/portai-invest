@@ -54,7 +54,26 @@ const Forum = () => {
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [isModeratingPost, setIsModeratingPost] = useState(false);
-  const [isModeratingComment, setIsModeratingComment] = useState<string | null>(null);
+  const [factCheckLoading, setFactCheckLoading] = useState<string | null>(null);
+  const [factCheckResults, setFactCheckResults] = useState<Record<string, FactCheckResult>>({});
+
+  const handleFactCheck = async (threadId: string, title: string, body: string) => {
+    setFactCheckLoading(threadId);
+    try {
+      const { data, error } = await supabase.functions.invoke("fact-check", { body: { title, body } });
+      if (error) throw error;
+      if (data?.error) {
+        toast({ title: data.error, variant: "destructive" });
+      } else if (data?.factCheck) {
+        setFactCheckResults((prev) => ({ ...prev, [threadId]: data.factCheck }));
+        setFactCheck(threadId, data.factCheck.summary);
+      }
+    } catch (e) {
+      toast({ title: "Fact-check failed", variant: "destructive" });
+    } finally {
+      setFactCheckLoading(null);
+    }
+  };
 
   const filtered = threads.filter((th) => {
     if (active !== "All" && !th.tags.some((tag) => tag.label.toLowerCase() === active.toLowerCase())) return false;
