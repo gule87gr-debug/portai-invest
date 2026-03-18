@@ -94,7 +94,7 @@ export const TradingViewTechnicalAnalysis = ({ symbol }: { symbol: string }) => 
   return <div ref={containerRef} className="rounded-xl overflow-hidden" style={{ minHeight: 450 }} />;
 };
 
-export const TradingViewMiniChart = ({ symbol, width = 350 }: { symbol: string; width?: number }) => {
+export const TradingViewMiniChart = ({ symbol, width = 350 }: { symbol: string; width?: number | string }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -129,7 +129,8 @@ export const TradingViewMiniChart = ({ symbol, width = 350 }: { symbol: string; 
     return () => { if (containerRef.current) containerRef.current.innerHTML = ""; };
   }, [symbol]);
 
-  return <div ref={containerRef} style={{ width: `${width}px`, height: 160 }} className="overflow-hidden" />;
+  const styleWidth = typeof width === "number" ? `${width}px` : width;
+  return <div ref={containerRef} style={{ width: styleWidth, height: 160 }} className="overflow-hidden" />;
 };
 
 export const TradingViewTimeline = ({ symbol, height = 400 }: { symbol: string; height?: number }) => {
