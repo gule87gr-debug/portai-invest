@@ -242,6 +242,8 @@ const translations: Record<Language, Record<string, string>> = {
     notFinancialAdvice: "Pas un conseil financier",
     disclaimerText: "L'analyse IA est uniquement à titre informatif. Consultez toujours des professionnels financiers qualifiés avant de prendre des décisions d'investissement.",
     deleteThread: "Supprimer le sujet", deleteComment: "Supprimer le commentaire",
+    notifications: "Notifications", markAllRead: "Tout marquer lu", noNotifications: "Aucune nouvelle notification",
+    imageAttached: "Image jointe", uploadImage: "Télécharger une image",
   },
   pt: {
     dashboard: "Painel", aiChat: "Chat IA", quiz: "Quiz", forum: "Fórum", watchlists: "Listas", settings: "Configurações",
