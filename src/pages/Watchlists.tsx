@@ -187,7 +187,7 @@ const Watchlists = () => {
                     </button>
                   </div>
                   <div className="pointer-events-none h-[160px] overflow-hidden">
-                    <TradingViewMiniChart symbol={s.ticker} width={600} />
+                    <TradingViewMiniChart symbol={s.ticker} width="100%" />
                   </div>
                 </div>
               ))}

@@ -106,7 +106,7 @@ const Dashboard = () => {
         )}
 
         {!result && !isAnalyzing && !error && (
-          <div className="mt-5 grid grid-cols-3 gap-4">
+          <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
               { icon: ShieldCheck, titleKey: "trustScore", descKey: "trustScoreDesc" },
               { icon: FileText, titleKey: "smartSummary", descKey: "smartSummaryDesc" },
