@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { NotificationBell } from "@/components/NotificationBell";
 
 const navKeys = [
   { to: "/", icon: LayoutDashboard, key: "dashboard" },
@@ -33,12 +34,15 @@ export const AppSidebar = () => {
   return (
     <>
       {!open && (
-        <button
-          onClick={() => setOpen(true)}
-          className="fixed left-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors hover:bg-accent"
-        >
-          <Menu className="h-5 w-5" />
-        </button>
+        <div className="fixed left-4 top-4 z-50 flex items-center gap-2">
+          <button
+            onClick={() => setOpen(true)}
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors hover:bg-accent"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+          <NotificationBell />
+        </div>
       )}
 
       {open && (

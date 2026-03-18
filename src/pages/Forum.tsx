@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { useApp } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useNotifications } from "@/contexts/NotificationContext";
 import { Search, Plus, ThumbsUp, MessageCircle, Sparkles, X, Send, Trash2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +29,7 @@ const Forum = () => {
   const { threads, addThread, likeThread, addComment, setFactCheck, deleteThread, deleteComment, profile, currentUserId } = useApp();
   const { t } = useLanguage();
   const { toast } = useToast();
+  const { addNotification } = useNotifications();
   const [active, setActive] = useState("All");
   const [showNewThread, setShowNewThread] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -68,6 +70,20 @@ const Forum = () => {
     setNewTitle(""); setNewBody(""); setShowNewThread(false); setIsModeratingPost(false);
   };
 
+  const handleLike = (threadId: string) => {
+    const thread = threads.find((t) => t.id === threadId);
+    if (thread && !thread.likedByUser && thread.userId !== currentUserId && thread.userId !== "system") {
+      const displayName = profile.anonymous ? t("anonymousTrader") : profile.name;
+      addNotification({
+        type: "like",
+        fromUser: displayName,
+        threadId: thread.id,
+        threadTitle: thread.title.slice(0, 50),
+      });
+    }
+    likeThread(threadId);
+  };
+
   const handleComment = async (threadId: string) => {
     const text = commentInputs[threadId]?.trim();
     if (!text) return;
@@ -77,6 +93,18 @@ const Forum = () => {
     const displayName = profile.anonymous ? t("anonymousTrader") : profile.name;
     const displayAvatar = profile.anonymous ? "?" : profile.name[0]?.toUpperCase() || "U";
     addComment(threadId, { id: `c-${Date.now()}`, author: displayName, avatar: displayAvatar, body: text, time: "just now", likes: 0, userId: currentUserId || undefined });
+
+    // Notify thread author
+    const thread = threads.find((t) => t.id === threadId);
+    if (thread && thread.userId !== currentUserId && thread.userId !== "system") {
+      addNotification({
+        type: "comment",
+        fromUser: displayName,
+        threadId: thread.id,
+        threadTitle: thread.title.slice(0, 50),
+      });
+    }
+
     setCommentInputs((prev) => ({ ...prev, [threadId]: "" })); setIsModeratingComment(null);
   };
 
@@ -167,7 +195,7 @@ const Forum = () => {
 
               <div className="mt-4 flex items-center justify-between">
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <button onClick={() => likeThread(th.id)} className={cn("flex items-center gap-1 transition-colors", th.likedByUser ? "text-primary" : "hover:text-primary")}>
+                  <button onClick={() => handleLike(th.id)} className={cn("flex items-center gap-1 transition-colors", th.likedByUser ? "text-primary" : "hover:text-primary")}>
                     <ThumbsUp className="h-3.5 w-3.5" /> {th.likes}
                   </button>
                   <button onClick={() => setExpandedThread(isExpanded ? null : th.id)} className="flex items-center gap-1 hover:text-primary transition-colors">

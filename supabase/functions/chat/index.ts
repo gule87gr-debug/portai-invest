@@ -13,18 +13,31 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          {
-            role: "system",
-            content: `You are PortAI — a friendly, knowledgeable financial advisor who talks like a smart friend, not a textbook.
+    // Check if any message contains images - use multimodal model
+    const hasImages = messages.some((m: any) =>
+      Array.isArray(m.content) && m.content.some((c: any) => c.type === "image_url")
+    );
+
+    const model = hasImages ? "google/gemini-2.5-flash" : "google/gemini-3-flash-preview";
+
+    const systemPrompt = hasImages
+      ? `You are PortAI — a friendly, knowledgeable financial advisor with image analysis capabilities.
+
+When analyzing images:
+- If it's a chart/graph: identify the asset, trend, key levels, patterns, and give a brief technical outlook
+- If it's a screenshot of a portfolio: analyze allocation, diversification, and suggest improvements
+- If it's a financial document: summarize key figures and implications
+- If it's a news headline/article: provide context and market impact analysis
+- For any other image: describe what you see and relate it to investing if relevant
+
+Formatting:
+- Use short paragraphs (2-3 sentences max)
+- Use **bold** for key takeaways and numbers
+- Use bullet points for lists of 3+ items
+- Keep total response under 250 words unless asked for more detail
+
+Always end with: "⚠️ Just my take — not financial advice. Do your own research!"`
+      : `You are PortAI — a friendly, knowledgeable financial advisor who talks like a smart friend, not a textbook.
 
 Your personality:
 - Warm and conversational — use "you" and "I" naturally
@@ -48,8 +61,18 @@ When discussing portfolios:
 - Give specific % allocations with ticker symbols
 - Explain the "why" behind each pick in plain language
 
-Always end with: "⚠️ Just my take — not financial advice. Do your own research!"`,
-          },
+Always end with: "⚠️ Just my take — not financial advice. Do your own research!"`;
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: "system", content: systemPrompt },
           ...messages,
         ],
         stream: true,

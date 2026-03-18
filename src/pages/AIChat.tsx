@@ -2,18 +2,34 @@ import { useState, useRef, useEffect } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Send, Sparkles, Plus, Trash2, MessageCircle } from "lucide-react";
+import { Send, Sparkles, Plus, Trash2, MessageCircle, Image, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
 
-type Message = { role: "user" | "assistant"; content: string };
+type MessageContent = string | Array<{ type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }>;
+type Message = { role: "user" | "assistant"; content: string; imageUrl?: string };
 type ChatSession = { id: string; title: string; created_at: string };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 
+function buildMessages(msgs: Message[]): Array<{ role: string; content: MessageContent }> {
+  return msgs.map((m) => {
+    if (m.imageUrl && m.role === "user") {
+      return {
+        role: m.role,
+        content: [
+          { type: "text" as const, text: m.content || "Analyze this image" },
+          { type: "image_url" as const, image_url: { url: m.imageUrl } },
+        ],
+      };
+    }
+    return { role: m.role, content: m.content };
+  });
+}
+
 async function streamChat({ messages, onDelta, onDone, onError }: {
-  messages: Message[]; onDelta: (text: string) => void; onDone: () => void; onError: (msg: string) => void;
+  messages: Array<{ role: string; content: MessageContent }>; onDelta: (text: string) => void; onDone: () => void; onError: (msg: string) => void;
 }) {
   const resp = await fetch(CHAT_URL, {
     method: "POST",
@@ -75,6 +91,8 @@ const AIChat = () => {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [showSessions, setShowSessions] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const welcomeShown = messages.length === 0;
@@ -120,17 +138,28 @@ const AIChat = () => {
 
   const startNewChat = () => { setActiveSessionId(null); setMessages([]); setShowSessions(false); };
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = () => setImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const send = async (text: string) => {
-    if (!text.trim() || isTyping) return;
-    const userMsg: Message = { role: "user", content: text };
+    if ((!text.trim() && !imagePreview) || isTyping) return;
+    const userMsg: Message = { role: "user", content: text || "Analyze this image", imageUrl: imagePreview || undefined };
     const allMessages = [...messages, userMsg];
     setMessages(allMessages);
     setInput("");
+    setImagePreview(null);
     setIsTyping(true);
 
     let sessionId = activeSessionId;
     if (!sessionId) {
-      try { sessionId = await createSession(text); setActiveSessionId(sessionId); }
+      try { sessionId = await createSession(text || "Image analysis"); setActiveSessionId(sessionId); }
       catch { setIsTyping(false); return; }
     }
 
@@ -145,8 +174,9 @@ const AIChat = () => {
     };
 
     const finalSessionId = sessionId;
+    const apiMessages = buildMessages(allMessages);
     await streamChat({
-      messages: allMessages,
+      messages: apiMessages,
       onDelta: upsert,
       onDone: () => {
         setIsTyping(false);
@@ -228,8 +258,11 @@ const AIChat = () => {
                   <Sparkles className="h-4 w-4 text-primary-foreground" />
                 </div>
               )}
-              <div className={cn("max-w-[85%] sm:max-w-[70%] rounded-xl p-4 text-sm leading-relaxed", m.role === "user" ? "bg-primary text-primary-foreground rounded-tr-none whitespace-pre-line" : "bg-card text-foreground rounded-tl-none")}>
-                {m.role === "assistant" ? <MarkdownContent content={m.content} /> : m.content}
+              <div className={cn("max-w-[85%] sm:max-w-[70%] rounded-xl p-4 text-sm leading-relaxed", m.role === "user" ? "bg-primary text-primary-foreground rounded-tr-none" : "bg-card text-foreground rounded-tl-none")}>
+                {m.imageUrl && (
+                  <img src={m.imageUrl} alt="Uploaded" className="mb-2 max-h-48 rounded-lg object-cover" />
+                )}
+                {m.role === "assistant" ? <MarkdownContent content={m.content} /> : <span className="whitespace-pre-line">{m.content}</span>}
               </div>
             </div>
           ))}
@@ -251,7 +284,22 @@ const AIChat = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="mt-4 flex items-center gap-3">
+        {/* Image preview */}
+        {imagePreview && (
+          <div className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-card p-2">
+            <img src={imagePreview} alt="Preview" className="h-16 w-16 rounded-lg object-cover" />
+            <p className="flex-1 text-xs text-muted-foreground">{t("imageAttached")}</p>
+            <button onClick={() => setImagePreview(null)} className="text-muted-foreground hover:text-loss">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
+        <div className="mt-4 flex items-center gap-2">
+          <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleImageSelect} />
+          <button onClick={() => fileInputRef.current?.click()} className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-foreground hover:bg-accent" title={t("uploadImage")}>
+            <Image className="h-5 w-5" />
+          </button>
           <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && send(input)} placeholder={t("askAnything")} className="h-12 flex-1 rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
           <button onClick={() => send(input)} disabled={isTyping} className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
             <Send className="h-5 w-5" />
