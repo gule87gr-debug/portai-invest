@@ -4,6 +4,10 @@ import { AppLayout } from "@/components/AppLayout";
 import { useApp, Stock } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { searchAssets, AssetEntry } from "@/lib/stockDatabase";
+import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
+import { Plus, Trash2, Search, X, ChevronDown, Eye } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { searchAssets, AssetEntry } from "@/lib/stockDatabase";
 import { Plus, Trash2, Search, X, ChevronDown, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 
