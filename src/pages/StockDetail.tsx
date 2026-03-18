@@ -59,7 +59,7 @@ const StockDetail = () => {
               <Newspaper className="h-4 w-4 text-primary" />
               <h2 className="text-lg font-semibold">{t("recentNews")}</h2>
             </div>
-            <TradingViewTimeline symbol={symbol} height={400} />
+            <StockNews ticker={symbol} height={400} />
           </div>
 
           <DisclaimerBanner />
