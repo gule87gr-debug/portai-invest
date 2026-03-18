@@ -235,7 +235,19 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       description: w.desc,
     } as any).select().single();
     if (data) {
-      setWatchlists((prev) => [{ id: (data as any).id, name: w.name, desc: w.desc, stocks: [] }, ...prev]);
+      const newId = (data as any).id;
+      if (w.stocks && w.stocks.length > 0) {
+        await supabase.from("watchlist_stocks").insert(
+          w.stocks.map((s) => ({
+            watchlist_id: newId,
+            ticker: s.ticker,
+            name: s.name,
+            sector: s.sector,
+            signal: s.signal,
+          })) as any
+        );
+      }
+      setWatchlists((prev) => [{ id: newId, name: w.name, desc: w.desc, stocks: w.stocks || [] }, ...prev]);
     }
   };
 
