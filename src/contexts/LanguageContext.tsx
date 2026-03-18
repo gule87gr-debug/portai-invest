@@ -352,7 +352,20 @@ type LanguageState = {
 const LanguageContext = createContext<LanguageState | null>(null);
 
 export const LanguageProvider = ({ children, initialLanguage = "en" }: { children: ReactNode; initialLanguage?: Language }) => {
-  const [language, setLanguage] = useState<Language>(initialLanguage);
+  const [language, setLanguageState] = useState<Language>(initialLanguage);
+  const [hasUserChanged, setHasUserChanged] = useState(false);
+
+  // Sync from DB on load, but don't override manual user changes
+  React.useEffect(() => {
+    if (!hasUserChanged) {
+      setLanguageState(initialLanguage as Language);
+    }
+  }, [initialLanguage]);
+
+  const setLanguage = (lang: Language) => {
+    setHasUserChanged(true);
+    setLanguageState(lang);
+  };
 
   const t = (key: string): string => {
     return translations[language]?.[key] || translations.en[key] || key;
