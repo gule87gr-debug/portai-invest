@@ -6,7 +6,7 @@ export type WatchlistData = { id: string; name: string; stocks: Stock[]; desc: s
 
 export type ForumComment = { id: string; author: string; avatar: string; avatarUrl?: string | null; body: string; time: string; likes: number; userId?: string };
 export type ForumThread = {
-  id: string; author: string; avatar: string; time: string;
+  id: string; author: string; avatar: string; avatarUrl?: string | null; time: string;
   tags: { label: string; color: string }[];
   title: string; body: string; likes: number;
   comments: ForumComment[];
