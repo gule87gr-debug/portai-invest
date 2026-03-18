@@ -128,7 +128,8 @@ const Forum = () => {
     if (!allowed) { toast({ title: t("moderationError"), variant: "destructive" }); setIsModeratingComment(null); return; }
     const displayName = profile.anonymous ? t("anonymousTrader") : profile.name;
     const displayAvatar = profile.anonymous ? "?" : profile.name[0]?.toUpperCase() || "U";
-    addComment(threadId, { id: `c-${Date.now()}`, author: displayName, avatar: displayAvatar, body: text, time: "just now", likes: 0, userId: currentUserId || undefined });
+    const avatarUrl = profile.anonymous ? null : profile.avatar;
+    addComment(threadId, { id: `c-${Date.now()}`, author: displayName, avatar: displayAvatar, avatarUrl, body: text, time: "just now", likes: 0, userId: currentUserId || undefined });
 
     // Notify thread author
     const thread = threads.find((t) => t.id === threadId);
