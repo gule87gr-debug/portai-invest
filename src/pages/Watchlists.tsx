@@ -9,7 +9,7 @@ import { Plus, Trash2, Search, X, ChevronDown, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const Watchlists = () => {
-  const { watchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, deleteWatchlist } = useApp();
+  const { watchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, deleteWatchlist, watchlistsLoaded } = useApp();
   const { t } = useLanguage();
   const [activeIdx, setActiveIdx] = useState(0);
   const [showNewList, setShowNewList] = useState(false);
