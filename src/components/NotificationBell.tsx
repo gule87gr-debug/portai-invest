@@ -56,7 +56,7 @@ export const NotificationBell = () => {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="fixed left-3 right-3 top-16 z-50 sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-96 rounded-xl border border-border bg-card shadow-xl animate-fade-in">
+          <div className="fixed left-3 right-3 top-16 z-50 sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-96 sm:max-h-[calc(100vh-5rem)] rounded-xl border border-border bg-card shadow-xl animate-fade-in overflow-hidden">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <h3 className="text-sm font-semibold">{t("notifications")}</h3>
               <div className="flex items-center gap-2">
