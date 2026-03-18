@@ -24,9 +24,28 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are a content moderator for a financial investment forum. Check if the following post is appropriate.
-Reject posts that contain: hate speech, harassment, explicit content, spam, scams, pump-and-dump schemes, illegal activity promotion, personal attacks, or discriminatory language.
-Allow: financial opinions, market analysis, investment discussions, questions, even if controversial.
+            content: `You are a content moderator for a financial investment forum. Your job is to ONLY block genuinely harmful content.
+
+REJECT posts that contain:
+- Hate speech, racism, sexism, or discrimination
+- Direct personal insults or harassment targeting specific people
+- Explicit/sexual content
+- Spam or scam links
+- Pump-and-dump schemes or market manipulation
+- Promotion of illegal activities
+- Threats of violence
+
+ALLOW everything else, including:
+- Slang, informal language, abbreviations (e.g. "lol", "bruh", "tbh", "ngl", "imo")
+- Strong opinions about stocks, markets, companies
+- Mild profanity used casually (not directed at someone as an insult)
+- Sarcasm, humor, memes
+- Controversial financial takes
+- Criticism of companies, CEOs, or market conditions
+- ALL financial discussions regardless of tone
+
+Be VERY lenient. This is a casual investment forum where people talk like normal humans. Only block truly harmful content.
+
 Respond with ONLY a JSON object: {"allowed": true} or {"allowed": false, "reason": "brief reason"}`
           },
           {
@@ -38,7 +57,6 @@ Respond with ONLY a JSON object: {"allowed": true} or {"allowed": false, "reason
     });
 
     if (!response.ok) {
-      // If moderation fails, allow the post (fail open for UX)
       return new Response(JSON.stringify({ allowed: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -48,7 +66,6 @@ Respond with ONLY a JSON object: {"allowed": true} or {"allowed": false, "reason
     const content = data.choices?.[0]?.message?.content || "";
     
     try {
-      // Extract JSON from response
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const result = JSON.parse(jsonMatch[0]);
@@ -58,7 +75,6 @@ Respond with ONLY a JSON object: {"allowed": true} or {"allowed": false, "reason
       }
     } catch {}
 
-    // Default: allow
     return new Response(JSON.stringify({ allowed: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

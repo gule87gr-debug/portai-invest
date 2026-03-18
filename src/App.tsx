@@ -15,6 +15,7 @@ import Watchlists from "./pages/Watchlists";
 import StockDetail from "./pages/StockDetail";
 import SettingsPage from "./pages/SettingsPage";
 import AuthPage from "./pages/AuthPage";
+import LandingPage from "./pages/LandingPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const AppWithLanguage = () => {
 
 const AppRoutes = () => {
   const [session, setSession] = useState<any>(undefined);
+  const [showAuth, setShowAuth] = useState(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -60,7 +62,10 @@ const AppRoutes = () => {
   }
 
   if (!session) {
-    return <AuthPage onAuth={() => {}} />;
+    if (showAuth) {
+      return <AuthPage onAuth={() => {}} />;
+    }
+    return <LandingPage onGetStarted={() => setShowAuth(true)} />;
   }
 
   return (
