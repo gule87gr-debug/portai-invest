@@ -263,7 +263,7 @@ const translations: Record<Language, Record<string, string>> = {
     stockHeatmap: "Mapa de Calor S&P 500",
     marketNewsFeed: "Feed de Notícias do Mercado", autoRefresh: "Atualiza automaticamente",
     newsDisclaimer: "Notícias fornecidas pela TradingView. Apenas para fins informativos — não é aconselhamento financeiro.",
-    technology: "Tecnologia", finance: "Finanças", healthcare: "Saúde", energy: "Energia", consumer: "Consumo", crypto: "Cripto", etfs: "ETFs",
+    crypto: "Cripto", etfs: "ETFs",
     trustScoreDesc: "A IA avalia a credibilidade da fonte, experiência do autor e qualidade das citações em uma escala de 1-10",
     smartSummaryDesc: "Obtenha um resumo conciso destacando afirmações chave, dados e conclusões",
     biasDetectionDesc: "Sinaliza linguagem promocional, divulgações ausentes e potenciais conflitos de interesse",
