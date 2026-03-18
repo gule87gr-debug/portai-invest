@@ -184,7 +184,7 @@ const translations: Record<Language, Record<string, string>> = {
     stockHeatmap: "Carte Thermique S&P 500",
     marketNewsFeed: "Fil d'Actualités du Marché", autoRefresh: "Mise à jour automatique",
     newsDisclaimer: "Actualités fournies par TradingView. À titre informatif uniquement — pas de conseil financier.",
-    technology: "Technologie", finance: "Finance", healthcare: "Santé", energy: "Énergie", consumer: "Consommation", crypto: "Crypto", etfs: "ETFs",
+    crypto: "Crypto", etfs: "ETFs",
     trustScoreDesc: "L'IA évalue la crédibilité de la source, l'expertise de l'auteur et la qualité des citations sur une échelle de 1-10",
     smartSummaryDesc: "Obtenez un résumé concis mettant en évidence les affirmations clés, les données et les conclusions",
     biasDetectionDesc: "Signale le langage promotionnel, les divulgations manquantes et les conflits d'intérêts potentiels",
