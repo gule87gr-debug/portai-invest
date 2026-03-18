@@ -318,6 +318,8 @@ const translations: Record<Language, Record<string, string>> = {
     notFinancialAdvice: "Não é aconselhamento financeiro",
     disclaimerText: "A análise com IA é apenas informativa. Sempre consulte profissionais financeiros qualificados antes de tomar decisões de investimento.",
     deleteThread: "Excluir tópico", deleteComment: "Excluir comentário",
+    notifications: "Notificações", markAllRead: "Marcar tudo lido", noNotifications: "Sem novas notificações",
+    imageAttached: "Imagem anexada", uploadImage: "Enviar imagem",
   },
 };
 
