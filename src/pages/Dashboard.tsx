@@ -51,6 +51,10 @@ const Dashboard = () => {
         <p className="mt-1 text-muted-foreground">{t("aiCuratedAnalysis")}</p>
       </div>
 
+      <div className="mb-8">
+        <StockNewsFeed />
+      </div>
+
       <div className="mb-8 rounded-xl border border-border bg-card p-4 sm:p-6">
         <div className="flex items-center gap-2 mb-2">
           <LinkIcon className="h-5 w-5 text-primary" />
@@ -121,10 +125,6 @@ const Dashboard = () => {
             ))}
           </div>
         )}
-      </div>
-
-      <div className="mb-8">
-        <StockNewsFeed />
       </div>
 
       <div className="rounded-xl border border-border bg-card p-4">
