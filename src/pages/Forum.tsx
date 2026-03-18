@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { useApp } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNotifications } from "@/contexts/NotificationContext";
-import { Search, Plus, ThumbsUp, MessageCircle, Sparkles, X, Send, Trash2, Loader2 } from "lucide-react";
+import { Search, Plus, ThumbsUp, MessageCircle, Sparkles, X, Send, Trash2, Loader2, CheckCircle, AlertTriangle, XCircle, HelpCircle, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -11,19 +11,34 @@ import { useToast } from "@/hooks/use-toast";
 const categories = ["All", "General", "Portfolios", "Markets", "Sectors"];
 const tagOptions = ["general", "portfolios", "markets", "sectors"];
 
-const factCheckResponses: Record<string, string> = {
-  default: "✅ No specific financial claims detected that require verification. This appears to be an opinion-based discussion.",
+type FactCheckClaim = {
+  claim: string;
+  status: "true" | "false" | "misleading" | "unverifiable" | "opinion";
+  explanation: string;
 };
 
-function generateFactCheck(body: string): string {
-  if (body.toLowerCase().includes("nvda") || body.toLowerCase().includes("nvidia"))
-    return "📊 Fact Check: NVDA current P/E ratio is approximately 65x (trailing) per latest 10-Q filing. Forward P/E ~42x based on analyst consensus.";
-  if (body.toLowerCase().includes("fed") || body.toLowerCase().includes("rate"))
-    return "📊 Fact Check: The Federal Reserve held rates at 5.25-5.50% at the last FOMC meeting. Market pricing suggests 2-3 rate cuts expected in 2026.";
-  if (body.toLowerCase().includes("portfolio") || body.toLowerCase().includes("%"))
-    return "📊 Fact Check: Portfolio concentration in a single sector above 40% significantly increases risk. Diversified portfolios outperform on a risk-adjusted basis over 10+ years.";
-  return factCheckResponses.default;
-}
+type FactCheckResult = {
+  verdict: "verified" | "partially_true" | "misleading" | "unverifiable" | "opinion";
+  claims: FactCheckClaim[];
+  summary: string;
+  confidence: number;
+};
+
+const verdictConfig: Record<string, { icon: typeof CheckCircle; label: string; color: string }> = {
+  verified: { icon: CheckCircle, label: "Verified", color: "text-gain" },
+  partially_true: { icon: AlertTriangle, label: "Partially True", color: "text-warning" },
+  misleading: { icon: XCircle, label: "Misleading", color: "text-loss" },
+  unverifiable: { icon: HelpCircle, label: "Unverifiable", color: "text-muted-foreground" },
+  opinion: { icon: MessageSquare, label: "Opinion", color: "text-primary" },
+};
+
+const claimStatusConfig: Record<string, { color: string }> = {
+  true: { color: "bg-gain/20 text-gain border-gain/30" },
+  false: { color: "bg-loss/20 text-loss border-loss/30" },
+  misleading: { color: "bg-warning/20 text-warning border-warning/30" },
+  unverifiable: { color: "bg-muted text-muted-foreground border-border" },
+  opinion: { color: "bg-primary/20 text-primary border-primary/30" },
+};
 
 const Forum = () => {
   const { threads, addThread, likeThread, addComment, setFactCheck, deleteThread, deleteComment, profile, currentUserId } = useApp();
