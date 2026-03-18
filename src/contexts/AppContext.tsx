@@ -26,6 +26,7 @@ type AppState = {
   addStockToWatchlist: (listId: string, stock: Stock) => void;
   removeStockFromWatchlist: (listId: string, ticker: string) => void;
   deleteWatchlist: (listId: string) => void;
+  watchlistsLoaded: boolean;
   threads: ForumThread[];
   setThreads: React.Dispatch<React.SetStateAction<ForumThread[]>>;
   addThread: (t: ForumThread) => void;
@@ -133,17 +134,49 @@ function loadFromLS<T>(key: string, fallback: T): T {
 }
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [watchlists, setWatchlists] = useState<WatchlistData[]>(() => loadFromLS("portai-watchlists", defaultWatchlists));
+  const [watchlists, setWatchlists] = useState<WatchlistData[]>([]);
+  const [watchlistsLoaded, setWatchlistsLoaded] = useState(false);
   const [threads, setThreads] = useState<ForumThread[]>(() => loadFromLS("portai-threads", defaultThreads));
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [profile, setProfile] = useState<UserProfile>(() => loadFromLS("portai-profile", { name: "Guest User", email: "", avatar: null, anonymous: false }));
   const [initialLanguage, setInitialLanguage] = useState("en");
+
+  const loadWatchlists = async (userId: string) => {
+    const { data: wlData } = await supabase
+      .from("watchlists")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (wlData && wlData.length > 0) {
+      const { data: stocksData } = await supabase
+        .from("watchlist_stocks")
+        .select("*")
+        .in("watchlist_id", wlData.map((w: any) => w.id));
+
+      const mapped: WatchlistData[] = wlData.map((w: any) => ({
+        id: w.id,
+        name: w.name,
+        desc: w.description || "",
+        stocks: (stocksData || [])
+          .filter((s: any) => s.watchlist_id === w.id)
+          .map((s: any) => ({ ticker: s.ticker, name: s.name, sector: s.sector, signal: s.signal })),
+      }));
+      setWatchlists(mapped);
+    } else {
+      setWatchlists([]);
+    }
+    setWatchlistsLoaded(true);
+  };
 
   useEffect(() => {
     const init = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       setCurrentUserId(user.id);
+
+      // Load watchlists from DB
+      await loadWatchlists(user.id);
 
       const { data: settings } = await supabase
         .from("user_settings")
@@ -192,15 +225,42 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     return () => clearTimeout(timeout);
   }, [profile, currentUserId]);
 
-  useEffect(() => { localStorage.setItem("portai-watchlists", JSON.stringify(watchlists)); }, [watchlists]);
   useEffect(() => { localStorage.setItem("portai-threads", JSON.stringify(threads)); }, [threads]);
 
-  const addWatchlist = (w: WatchlistData) => setWatchlists((prev) => [w, ...prev]);
-  const deleteWatchlist = (id: string) => setWatchlists((prev) => prev.filter((w) => w.id !== id));
-  const addStockToWatchlist = (listId: string, stock: Stock) =>
-    setWatchlists((prev) => prev.map((w) => w.id === listId && !w.stocks.find((s) => s.ticker === stock.ticker) ? { ...w, stocks: [...w.stocks, stock] } : w));
-  const removeStockFromWatchlist = (listId: string, ticker: string) =>
+  const addWatchlist = async (w: WatchlistData) => {
+    if (!currentUserId) return;
+    const { data } = await supabase.from("watchlists").insert({
+      user_id: currentUserId,
+      name: w.name,
+      description: w.desc,
+    } as any).select().single();
+    if (data) {
+      setWatchlists((prev) => [{ id: (data as any).id, name: w.name, desc: w.desc, stocks: [] }, ...prev]);
+    }
+  };
+
+  const deleteWatchlist = async (id: string) => {
+    await supabase.from("watchlists").delete().eq("id", id);
+    setWatchlists((prev) => prev.filter((w) => w.id !== id));
+  };
+
+  const addStockToWatchlist = async (listId: string, stock: Stock) => {
+    const list = watchlists.find((w) => w.id === listId);
+    if (!list || list.stocks.find((s) => s.ticker === stock.ticker)) return;
+    await supabase.from("watchlist_stocks").insert({
+      watchlist_id: listId,
+      ticker: stock.ticker,
+      name: stock.name,
+      sector: stock.sector,
+      signal: stock.signal,
+    } as any);
+    setWatchlists((prev) => prev.map((w) => w.id === listId ? { ...w, stocks: [...w.stocks, stock] } : w));
+  };
+
+  const removeStockFromWatchlist = async (listId: string, ticker: string) => {
+    await supabase.from("watchlist_stocks").delete().eq("watchlist_id", listId).eq("ticker", ticker);
     setWatchlists((prev) => prev.map((w) => w.id === listId ? { ...w, stocks: w.stocks.filter((s) => s.ticker !== ticker) } : w));
+  };
 
   const addThread = (t: ForumThread) => setThreads((prev) => [t, ...prev]);
   const likeThread = (id: string) => setThreads((prev) => prev.map((t) => t.id === id ? { ...t, likes: t.likedByUser ? t.likes - 1 : t.likes + 1, likedByUser: !t.likedByUser } : t));
@@ -213,7 +273,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setThreads((prev) => prev.map((t) => t.id === threadId ? { ...t, comments: t.comments.filter((c) => c.id !== commentId) } : t));
 
   return (
-    <AppContext.Provider value={{ watchlists, setWatchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, deleteWatchlist, threads, setThreads, addThread, likeThread, addComment, setFactCheck, deleteThread, deleteComment, profile, setProfile, currentUserId, initialLanguage }}>
+    <AppContext.Provider value={{ watchlists, setWatchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, deleteWatchlist, watchlistsLoaded, threads, setThreads, addThread, likeThread, addComment, setFactCheck, deleteThread, deleteComment, profile, setProfile, currentUserId, initialLanguage }}>
       {children}
     </AppContext.Provider>
   );
