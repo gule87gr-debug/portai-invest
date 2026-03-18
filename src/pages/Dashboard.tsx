@@ -123,6 +123,10 @@ const Dashboard = () => {
         )}
       </div>
 
+      <div className="mb-8">
+        <StockNewsFeed />
+      </div>
+
       <div className="rounded-xl border border-border bg-card p-4">
         <h2 className="mb-3 text-lg font-semibold">{t("stockHeatmap")}</h2>
         <TradingViewHeatmap height={550} />
