@@ -22,11 +22,20 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: [
           {
             role: "system",
-            content: `You are a financial fact-checker. Analyze the following forum post and fact-check any claims made. You must respond with valid JSON only, no markdown.
+            content: `You are a financial and geopolitical fact-checker. Today's date is ${new Date().toISOString().split("T")[0]}. Analyze the forum post and fact-check any claims.
+
+CRITICAL RULES:
+- Use ONLY information you are confident is accurate as of TODAY (March 2026).
+- If you are unsure about a claim's current accuracy, mark it "unverifiable" and say "Unable to verify with current data" — do NOT guess or use outdated information.
+- NEVER reference data from years ago as if it's current. If you only know older data, explicitly state "As of [date], ..." and mark the claim "unverifiable" for current accuracy.
+- For geopolitical claims, consider the LATEST known developments. Do not default to historical context if the post is about current events.
+- For stock/market data, if you don't have real-time prices, say so. Don't invent numbers.
+
+You must respond with valid JSON only, no markdown.
 
 Return this exact JSON structure:
 {
@@ -35,24 +44,16 @@ Return this exact JSON structure:
     {
       "claim": "the specific claim made",
       "status": "true" | "false" | "misleading" | "unverifiable" | "opinion",
-      "explanation": "brief explanation with current data if available"
+      "explanation": "brief explanation — only cite data you're confident is current"
     }
   ],
   "summary": "A 1-2 sentence overall fact-check summary",
-  "confidence": <number 1-10>
-}
-
-Guidelines:
-- Identify ALL specific financial claims (stock prices, percentages, market data, company facts)
-- For each claim, assess accuracy based on your knowledge
-- If the post is purely opinion with no verifiable claims, mark as "opinion"
-- Be specific about what data you're comparing against
-- Include current/recent data points when correcting claims
-- Be fair and balanced in assessment`
+  "confidence": <number 1-10, lower if you lack current data>
+}`
           },
           {
             role: "user",
-            content: `Fact-check this forum post:\n\nTitle: ${title}\n\nContent: ${body}`,
+            content: `Fact-check this forum post (posted today, ${new Date().toISOString().split("T")[0]}):\n\nTitle: ${title}\n\nContent: ${body}`,
           },
         ],
       }),
