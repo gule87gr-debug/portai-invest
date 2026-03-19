@@ -174,8 +174,6 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
     setError("");
     setSuccess("");
     setOtpCode("");
-    setNewPassword("");
-    setConfirmPassword("");
     setResendCooldown(0);
     if (cooldownRef.current) { clearInterval(cooldownRef.current); cooldownRef.current = null; }
   };
