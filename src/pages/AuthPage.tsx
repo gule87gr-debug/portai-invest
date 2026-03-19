@@ -164,8 +164,9 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
     if (verifyError) {
       setError(verifyError.message);
     } else {
-      setMode("new-password");
-      setSuccess("");
+      // Session is now set with PASSWORD_RECOVERY event.
+      // App.tsx will intercept and show the ResetPassword page.
+      setSuccess("Code verified! Redirecting...");
     }
   };
 
