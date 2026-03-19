@@ -128,6 +128,24 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
     } else {
       setSuccess("A recovery code has been sent to your email.");
       setMode("otp");
+      startCooldown();
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (resendCooldown > 0 || loading) return;
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim());
+    setLoading(false);
+    if (resetError) {
+      setError(resetError.message);
+    } else {
+      setSuccess("A new recovery code has been sent to your email.");
+      setOtpCode("");
+      startCooldown();
     }
   };
 
