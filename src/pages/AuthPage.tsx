@@ -2,10 +2,9 @@ import { useState } from "react";
 import { TrendingUp, Mail, Lock, Loader2, Eye, EyeOff, User, Check, X as XIcon, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { KeyRound } from "lucide-react";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const normalizeOtpCode = (value: string) => value.replace(/\D/g, "").slice(0, 6);
 
 type AuthMode = "login" | "signup" | "forgot" | "otp" | "new-password";
 
