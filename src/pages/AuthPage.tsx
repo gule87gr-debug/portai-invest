@@ -261,9 +261,19 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify Code"}
             </button>
 
-            <button onClick={goBackToLogin} className="flex w-full items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-              <ArrowLeft className="h-4 w-4" /> Back to Log In
-            </button>
+            <div className="flex items-center justify-between">
+              <button onClick={goBackToLogin} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <ArrowLeft className="h-4 w-4" /> Back to Log In
+              </button>
+              <button
+                onClick={handleResendCode}
+                disabled={resendCooldown > 0 || loading}
+                className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors disabled:text-muted-foreground disabled:cursor-not-allowed"
+              >
+                <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
+                {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend code"}
+              </button>
+            </div>
           </>
         )}
 
