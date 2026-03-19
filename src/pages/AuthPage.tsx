@@ -194,7 +194,7 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
           </div>
           <h1 className="text-2xl font-bold">PortAI</h1>
           <p className="text-sm text-muted-foreground">
-            {mode === "forgot" ? "Reset your password" : mode === "otp" ? "Enter recovery code" : mode === "new-password" ? "Set new password" : "AI-powered investment analysis"}
+            {mode === "forgot" ? "Reset your password" : mode === "otp" ? "Enter recovery code" : "AI-powered investment analysis"}
           </p>
         </div>
 
