@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const normalizeOtpCode = (value: string) => value.replace(/\D/g, "").slice(0, 6);
 
 type AuthMode = "login" | "signup" | "forgot" | "otp" | "new-password";
 
@@ -111,13 +112,14 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
   };
 
   const handleVerifyOtp = async () => {
-    if (otpCode.length < 6) return setError("Please enter the 6-digit code");
+    const normalizedCode = normalizeOtpCode(otpCode);
+    if (!/^\d{6}$/.test(normalizedCode)) return setError("Please enter a valid 6-digit code");
     setLoading(true);
     setError("");
 
     const { error: verifyError } = await supabase.auth.verifyOtp({
       email: email.trim(),
-      token: otpCode,
+      token: normalizedCode,
       type: "recovery",
     });
     setLoading(false);
@@ -202,7 +204,13 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground text-center">Enter the 6-digit code sent to <span className="text-foreground font-medium">{email}</span></p>
               <div className="flex justify-center">
-                <InputOTP maxLength={6} value={otpCode} onChange={setOtpCode}>
+                <InputOTP
+                  maxLength={6}
+                  value={otpCode}
+                  onChange={(value) => setOtpCode(normalizeOtpCode(value))}
+                  inputMode="numeric"
+                  pattern="\d*"
+                >
                   <InputOTPGroup>
                     <InputOTPSlot index={0} />
                     <InputOTPSlot index={1} />
