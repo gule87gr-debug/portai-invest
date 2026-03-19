@@ -170,21 +170,6 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
     }
   };
 
-  const handleSetNewPassword = async () => {
-    if (newPassword.length < 6) return setError("Password must be at least 6 characters");
-    if (newPassword !== confirmPassword) return setError("Passwords do not match");
-    setLoading(true);
-    setError("");
-
-    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
-    setLoading(false);
-    if (updateError) {
-      setError(updateError.message);
-    } else {
-      setSuccess("Password updated successfully! You are now logged in.");
-      setTimeout(() => onAuth(), 1500);
-    }
-  };
 
   const goBackToLogin = () => {
     setMode("login");
