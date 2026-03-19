@@ -1,22 +1,30 @@
 import { useState } from "react";
-import { TrendingUp, Mail, Lock, Loader2, Eye, EyeOff, User, Check, X as XIcon } from "lucide-react";
+import { TrendingUp, Mail, Lock, Loader2, Eye, EyeOff, User, Check, X as XIcon, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+type AuthMode = "login" | "signup" | "forgot" | "otp" | "new-password";
+
 const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
-  const [mode, setMode] = useState<"login" | "signup">("signup");
+  const [mode, setMode] = useState<AuthMode>("signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [username, setUsername] = useState("");
   const [showPw, setShowPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [emailInUse, setEmailInUse] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
   const [usernameTimer, setUsernameTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
+  const [otpCode, setOtpCode] = useState("");
 
   const validateEmail = (value: string) => {
     setEmail(value);
@@ -85,6 +93,67 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email.trim()) return setError("Please enter your email address");
+    if (!emailRegex.test(email.trim())) return setError("Please enter a valid email address");
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim());
+    setLoading(false);
+    if (resetError) {
+      setError(resetError.message);
+    } else {
+      setSuccess("A recovery code has been sent to your email.");
+      setMode("otp");
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otpCode.length < 6) return setError("Please enter the 6-digit code");
+    setLoading(true);
+    setError("");
+
+    const { error: verifyError } = await supabase.auth.verifyOtp({
+      email: email.trim(),
+      token: otpCode,
+      type: "recovery",
+    });
+    setLoading(false);
+    if (verifyError) {
+      setError(verifyError.message);
+    } else {
+      setMode("new-password");
+      setSuccess("");
+    }
+  };
+
+  const handleSetNewPassword = async () => {
+    if (newPassword.length < 6) return setError("Password must be at least 6 characters");
+    if (newPassword !== confirmPassword) return setError("Passwords do not match");
+    setLoading(true);
+    setError("");
+
+    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+    setLoading(false);
+    if (updateError) {
+      setError(updateError.message);
+    } else {
+      setSuccess("Password updated successfully! You are now logged in.");
+      setTimeout(() => onAuth(), 1500);
+    }
+  };
+
+  const goBackToLogin = () => {
+    setMode("login");
+    setError("");
+    setSuccess("");
+    setOtpCode("");
+    setNewPassword("");
+    setConfirmPassword("");
+  };
+
   const hasEmailError = emailError.length > 0;
   const isSubmitDisabled = loading || hasEmailError || (mode === "signup" && usernameStatus === "taken");
 
@@ -96,72 +165,169 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
             <TrendingUp className="h-7 w-7 text-primary-foreground" />
           </div>
           <h1 className="text-2xl font-bold">PortAI</h1>
-          <p className="text-sm text-muted-foreground">AI-powered investment analysis</p>
+          <p className="text-sm text-muted-foreground">
+            {mode === "forgot" ? "Reset your password" : mode === "otp" ? "Enter recovery code" : mode === "new-password" ? "Set new password" : "AI-powered investment analysis"}
+          </p>
         </div>
 
-        <div className="flex rounded-lg bg-card p-1">
-          {(["signup", "login"] as const).map((m) => (
-            <button key={m} onClick={() => { setMode(m); setError(""); setEmailInUse(false); setEmailError(""); }} className={cn("flex-1 rounded-md py-2 text-sm font-medium transition-colors", mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}>
-              {m === "signup" ? "Create Account" : "Log In"}
-            </button>
-          ))}
-        </div>
-
-        <div className="space-y-3">
-          <div>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input type="email" value={email} onChange={(e) => validateEmail(e.target.value)} placeholder="Email address" className={cn("h-11 w-full rounded-lg border bg-card pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", hasEmailError ? "border-loss" : "border-border")} />
-            </div>
-            {hasEmailError && <p className="mt-1 text-xs text-loss">{emailError}</p>}
-          </div>
-
-          {mode === "signup" && (
-            <div>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input type="text" value={username} onChange={(e) => checkUsername(e.target.value)} placeholder="Choose a username" className={cn("h-11 w-full rounded-lg border bg-card pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", usernameStatus === "taken" ? "border-loss" : usernameStatus === "available" ? "border-gain" : "border-border")} />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  {usernameStatus === "checking" && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-                  {usernameStatus === "available" && <Check className="h-4 w-4 text-gain" />}
-                  {usernameStatus === "taken" && <XIcon className="h-4 w-4 text-loss" />}
+        {/* Forgot Password: Email Input */}
+        {mode === "forgot" && (
+          <>
+            <div className="space-y-3">
+              <div>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <input type="email" value={email} onChange={(e) => validateEmail(e.target.value)} placeholder="Email address" className={cn("h-11 w-full rounded-lg border bg-card pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", hasEmailError ? "border-loss" : "border-border")} />
                 </div>
+                {hasEmailError && <p className="mt-1 text-xs text-loss">{emailError}</p>}
               </div>
-              {usernameStatus === "taken" && <p className="mt-1 text-xs text-loss">This username is already taken</p>}
-              {usernameStatus === "available" && <p className="mt-1 text-xs text-gain">Username is available!</p>}
             </div>
-          )}
 
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input type={showPw ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handle()} placeholder="Password" className="h-11 w-full rounded-lg border border-border bg-card pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-            <button onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-              {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            {error && <p className="text-sm text-loss">{error}</p>}
+            {success && <p className="text-sm text-gain">{success}</p>}
+
+            <button onClick={handleForgotPassword} disabled={loading || hasEmailError} className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send Recovery Code"}
             </button>
-          </div>
-        </div>
 
-        {error && (
-          <div className="space-y-2">
-            <p className="text-sm text-loss">{error}</p>
-            {emailInUse && (
-              <button onClick={() => { setMode("login"); setError(""); setEmailInUse(false); }} className="w-full rounded-lg border border-primary/30 bg-primary/10 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/20">
-                Switch to Log In
-              </button>
-            )}
-          </div>
+            <button onClick={goBackToLogin} className="flex w-full items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <ArrowLeft className="h-4 w-4" /> Back to Log In
+            </button>
+          </>
         )}
 
-        <button onClick={handle} disabled={isSubmitDisabled} className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : mode === "signup" ? "Create Account" : "Log In"}
-        </button>
+        {/* OTP Verification */}
+        {mode === "otp" && (
+          <>
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground text-center">Enter the 6-digit code sent to <span className="text-foreground font-medium">{email}</span></p>
+              <div className="flex justify-center">
+                <InputOTP maxLength={6} value={otpCode} onChange={setOtpCode}>
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>
+            </div>
 
-        <p className="text-center text-xs text-muted-foreground">
-          {mode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
-          <button onClick={() => { setMode(mode === "signup" ? "login" : "signup"); setError(""); setEmailInUse(false); setEmailError(""); }} className="text-primary hover:underline">
-            {mode === "signup" ? "Log in" : "Sign up"}
-          </button>
-        </p>
+            {error && <p className="text-sm text-loss">{error}</p>}
+            {success && <p className="text-sm text-gain">{success}</p>}
+
+            <button onClick={handleVerifyOtp} disabled={loading || otpCode.length < 6} className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify Code"}
+            </button>
+
+            <button onClick={goBackToLogin} className="flex w-full items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <ArrowLeft className="h-4 w-4" /> Back to Log In
+            </button>
+          </>
+        )}
+
+        {/* New Password */}
+        {mode === "new-password" && (
+          <>
+            <div className="space-y-3">
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input type={showNewPw ? "text" : "password"} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" className="h-11 w-full rounded-lg border border-border bg-card pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+                <button onClick={() => setShowNewPw(!showNewPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                  {showNewPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input type={showNewPw ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSetNewPassword()} placeholder="Confirm new password" className="h-11 w-full rounded-lg border border-border bg-card pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+              </div>
+            </div>
+
+            {error && <p className="text-sm text-loss">{error}</p>}
+            {success && <p className="text-sm text-gain">{success}</p>}
+
+            <button onClick={handleSetNewPassword} disabled={loading} className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Update Password"}
+            </button>
+          </>
+        )}
+
+        {/* Login / Signup */}
+        {(mode === "login" || mode === "signup") && (
+          <>
+            <div className="flex rounded-lg bg-card p-1">
+              {(["signup", "login"] as const).map((m) => (
+                <button key={m} onClick={() => { setMode(m); setError(""); setEmailInUse(false); setEmailError(""); }} className={cn("flex-1 rounded-md py-2 text-sm font-medium transition-colors", mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}>
+                  {m === "signup" ? "Create Account" : "Log In"}
+                </button>
+              ))}
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <input type="email" value={email} onChange={(e) => validateEmail(e.target.value)} placeholder="Email address" className={cn("h-11 w-full rounded-lg border bg-card pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", hasEmailError ? "border-loss" : "border-border")} />
+                </div>
+                {hasEmailError && <p className="mt-1 text-xs text-loss">{emailError}</p>}
+              </div>
+
+              {mode === "signup" && (
+                <div>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <input type="text" value={username} onChange={(e) => checkUsername(e.target.value)} placeholder="Choose a username" className={cn("h-11 w-full rounded-lg border bg-card pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", usernameStatus === "taken" ? "border-loss" : usernameStatus === "available" ? "border-gain" : "border-border")} />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      {usernameStatus === "checking" && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                      {usernameStatus === "available" && <Check className="h-4 w-4 text-gain" />}
+                      {usernameStatus === "taken" && <XIcon className="h-4 w-4 text-loss" />}
+                    </div>
+                  </div>
+                  {usernameStatus === "taken" && <p className="mt-1 text-xs text-loss">This username is already taken</p>}
+                  {usernameStatus === "available" && <p className="mt-1 text-xs text-gain">Username is available!</p>}
+                </div>
+              )}
+
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input type={showPw ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handle()} placeholder="Password" className="h-11 w-full rounded-lg border border-border bg-card pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+                <button onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                  {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+
+              {mode === "login" && (
+                <button onClick={() => { setMode("forgot"); setError(""); setSuccess(""); }} className="text-xs text-primary hover:underline">
+                  Forgot password?
+                </button>
+              )}
+            </div>
+
+            {error && (
+              <div className="space-y-2">
+                <p className="text-sm text-loss">{error}</p>
+                {emailInUse && (
+                  <button onClick={() => { setMode("login"); setError(""); setEmailInUse(false); }} className="w-full rounded-lg border border-primary/30 bg-primary/10 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/20">
+                    Switch to Log In
+                  </button>
+                )}
+              </div>
+            )}
+
+            <button onClick={handle} disabled={isSubmitDisabled} className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : mode === "signup" ? "Create Account" : "Log In"}
+            </button>
+
+            <p className="text-center text-xs text-muted-foreground">
+              {mode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
+              <button onClick={() => { setMode(mode === "signup" ? "login" : "signup"); setError(""); setEmailInUse(false); setEmailError(""); }} className="text-primary hover:underline">
+                {mode === "signup" ? "Log in" : "Sign up"}
+              </button>
+            </p>
+          </>
+        )}
       </div>
     </div>
   );
