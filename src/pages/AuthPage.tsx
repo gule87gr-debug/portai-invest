@@ -192,6 +192,8 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
     setOtpCode("");
     setNewPassword("");
     setConfirmPassword("");
+    setResendCooldown(0);
+    if (cooldownRef.current) { clearInterval(cooldownRef.current); cooldownRef.current = null; }
   };
 
   const hasEmailError = emailError.length > 0;
