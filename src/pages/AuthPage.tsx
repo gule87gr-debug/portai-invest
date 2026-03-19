@@ -265,31 +265,6 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
           </>
         )}
 
-        {/* New Password */}
-        {mode === "new-password" && (
-          <>
-            <div className="space-y-3">
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input type={showNewPw ? "text" : "password"} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" className="h-11 w-full rounded-lg border border-border bg-card pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-                <button onClick={() => setShowNewPw(!showNewPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                  {showNewPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input type={showNewPw ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSetNewPassword()} placeholder="Confirm new password" className="h-11 w-full rounded-lg border border-border bg-card pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-              </div>
-            </div>
-
-            {error && <p className="text-sm text-loss">{error}</p>}
-            {success && <p className="text-sm text-gain">{success}</p>}
-
-            <button onClick={handleSetNewPassword} disabled={loading} className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Update Password"}
-            </button>
-          </>
-        )}
 
         {/* Login / Signup */}
         {(mode === "login" || mode === "signup") && (
