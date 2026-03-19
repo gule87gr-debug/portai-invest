@@ -35,10 +35,10 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
   reauthentication: ReauthenticationEmail,
 }
 
-const normalizeSixDigitCode = (value: unknown): string | null => {
+const normalizeAuthCode = (value: unknown): string | null => {
   if (typeof value !== 'string') return null
   const normalized = value.trim()
-  return /^\d{6}$/.test(normalized) ? normalized : null
+  return normalized.length > 0 ? normalized : null
 }
 
 // Configuration
