@@ -6,7 +6,7 @@ import { KeyRound } from "lucide-react";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-type AuthMode = "login" | "signup" | "forgot" | "otp" | "new-password";
+type AuthMode = "login" | "signup" | "forgot" | "otp";
 
 const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
   const [mode, setMode] = useState<AuthMode>("signup");
