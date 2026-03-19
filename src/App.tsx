@@ -17,6 +17,7 @@ import StockDetail from "./pages/StockDetail";
 import SettingsPage from "./pages/SettingsPage";
 import AuthPage from "./pages/AuthPage";
 import LandingPage from "./pages/LandingPage";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,11 +43,17 @@ const AppWithLanguage = () => {
 
 const AppRoutes = () => {
   const [session, setSession] = useState<any>(undefined);
+  const [passwordRecovery, setPasswordRecovery] = useState(false);
   const hasVisited = localStorage.getItem("portai-has-visited");
   const [showAuth, setShowAuth] = useState(!!hasVisited);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setPasswordRecovery(true);
+        setSession(session);
+        return;
+      }
       setSession(session);
     });
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -58,6 +65,10 @@ const AppRoutes = () => {
   const handleGetStarted = () => {
     localStorage.setItem("portai-has-visited", "true");
     setShowAuth(true);
+  };
+
+  const handlePasswordResetComplete = () => {
+    setPasswordRecovery(false);
   };
 
   if (session === undefined) {
@@ -73,6 +84,11 @@ const AppRoutes = () => {
       return <AuthPage onAuth={() => {}} />;
     }
     return <LandingPage onGetStarted={handleGetStarted} />;
+  }
+
+  // If user arrived via password recovery, force them to set a new password
+  if (passwordRecovery) {
+    return <ResetPassword onComplete={handlePasswordResetComplete} />;
   }
 
   return (
