@@ -8,7 +8,19 @@ import { supabase } from "@/integrations/supabase/client";
 
 const SettingsPage = () => {
   const { profile, setProfile } = useApp();
-  const { language, setLanguage, t, languageNames } = useLanguage();
+  let language: Language, setLanguage: (l: Language) => void, t: (key: string) => string, langNames: Record<Language, string>;
+  try {
+    const lang = useLanguage();
+    language = lang.language;
+    setLanguage = lang.setLanguage;
+    t = lang.t;
+    langNames = lang.languageNames;
+  } catch {
+    language = "en" as Language;
+    setLanguage = () => {};
+    t = (key: string) => key;
+    langNames = { en: "English", es: "Español", fr: "Français", pt: "Português", de: "Deutsch", it: "Italiano" };
+  }
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [userEmail, setUserEmail] = useState("");
 
