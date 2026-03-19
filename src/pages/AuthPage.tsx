@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { TrendingUp, Mail, Lock, Loader2, Eye, EyeOff, User, Check, X as XIcon, ArrowLeft } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { TrendingUp, Mail, Lock, Loader2, Eye, EyeOff, User, Check, X as XIcon, ArrowLeft, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { KeyRound } from "lucide-react";
@@ -25,6 +25,27 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
   const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
   const [usernameTimer, setUsernameTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [otpCode, setOtpCode] = useState("");
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const startCooldown = useCallback(() => {
+    setResendCooldown(30);
+    if (cooldownRef.current) clearInterval(cooldownRef.current);
+    cooldownRef.current = setInterval(() => {
+      setResendCooldown((prev) => {
+        if (prev <= 1) {
+          clearInterval(cooldownRef.current!);
+          cooldownRef.current = null;
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  useEffect(() => {
+    return () => { if (cooldownRef.current) clearInterval(cooldownRef.current); };
+  }, []);
 
   const validateEmail = (value: string) => {
     setEmail(value);
@@ -107,6 +128,24 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
     } else {
       setSuccess("A recovery code has been sent to your email.");
       setMode("otp");
+      startCooldown();
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (resendCooldown > 0 || loading) return;
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim());
+    setLoading(false);
+    if (resetError) {
+      setError(resetError.message);
+    } else {
+      setSuccess("A new recovery code has been sent to your email.");
+      setOtpCode("");
+      startCooldown();
     }
   };
 
@@ -153,6 +192,8 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
     setOtpCode("");
     setNewPassword("");
     setConfirmPassword("");
+    setResendCooldown(0);
+    if (cooldownRef.current) { clearInterval(cooldownRef.current); cooldownRef.current = null; }
   };
 
   const hasEmailError = emailError.length > 0;
@@ -222,9 +263,19 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify Code"}
             </button>
 
-            <button onClick={goBackToLogin} className="flex w-full items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-              <ArrowLeft className="h-4 w-4" /> Back to Log In
-            </button>
+            <div className="flex items-center justify-between">
+              <button onClick={goBackToLogin} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <ArrowLeft className="h-4 w-4" /> Back to Log In
+              </button>
+              <button
+                onClick={handleResendCode}
+                disabled={resendCooldown > 0 || loading}
+                className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors disabled:text-muted-foreground disabled:cursor-not-allowed"
+              >
+                <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
+                {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend code"}
+              </button>
+            </div>
           </>
         )}
 
