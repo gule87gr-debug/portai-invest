@@ -6,14 +6,12 @@ import { KeyRound } from "lucide-react";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-type AuthMode = "login" | "signup" | "forgot" | "otp" | "new-password";
+type AuthMode = "login" | "signup" | "forgot" | "otp";
 
 const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
   const [mode, setMode] = useState<AuthMode>("signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [username, setUsername] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [showNewPw, setShowNewPw] = useState(false);
@@ -164,34 +162,18 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
     if (verifyError) {
       setError(verifyError.message);
     } else {
-      setMode("new-password");
-      setSuccess("");
+      // Session is now set with PASSWORD_RECOVERY event.
+      // App.tsx will intercept and show the ResetPassword page.
+      setSuccess("Code verified! Redirecting...");
     }
   };
 
-  const handleSetNewPassword = async () => {
-    if (newPassword.length < 6) return setError("Password must be at least 6 characters");
-    if (newPassword !== confirmPassword) return setError("Passwords do not match");
-    setLoading(true);
-    setError("");
-
-    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
-    setLoading(false);
-    if (updateError) {
-      setError(updateError.message);
-    } else {
-      setSuccess("Password updated successfully! You are now logged in.");
-      setTimeout(() => onAuth(), 1500);
-    }
-  };
 
   const goBackToLogin = () => {
     setMode("login");
     setError("");
     setSuccess("");
     setOtpCode("");
-    setNewPassword("");
-    setConfirmPassword("");
     setResendCooldown(0);
     if (cooldownRef.current) { clearInterval(cooldownRef.current); cooldownRef.current = null; }
   };
@@ -208,7 +190,7 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
           </div>
           <h1 className="text-2xl font-bold">PortAI</h1>
           <p className="text-sm text-muted-foreground">
-            {mode === "forgot" ? "Reset your password" : mode === "otp" ? "Enter recovery code" : mode === "new-password" ? "Set new password" : "AI-powered investment analysis"}
+            {mode === "forgot" ? "Reset your password" : mode === "otp" ? "Enter recovery code" : "AI-powered investment analysis"}
           </p>
         </div>
 
@@ -279,31 +261,6 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
           </>
         )}
 
-        {/* New Password */}
-        {mode === "new-password" && (
-          <>
-            <div className="space-y-3">
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input type={showNewPw ? "text" : "password"} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" className="h-11 w-full rounded-lg border border-border bg-card pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-                <button onClick={() => setShowNewPw(!showNewPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                  {showNewPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input type={showNewPw ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSetNewPassword()} placeholder="Confirm new password" className="h-11 w-full rounded-lg border border-border bg-card pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-              </div>
-            </div>
-
-            {error && <p className="text-sm text-loss">{error}</p>}
-            {success && <p className="text-sm text-gain">{success}</p>}
-
-            <button onClick={handleSetNewPassword} disabled={loading} className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Update Password"}
-            </button>
-          </>
-        )}
 
         {/* Login / Signup */}
         {(mode === "login" || mode === "signup") && (
