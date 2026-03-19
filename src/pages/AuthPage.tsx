@@ -2,10 +2,9 @@ import { useState } from "react";
 import { TrendingUp, Mail, Lock, Loader2, Eye, EyeOff, User, Check, X as XIcon, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { KeyRound } from "lucide-react";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const normalizeOtpCode = (value: string) => value.replace(/\D/g, "").slice(0, 6);
 
 type AuthMode = "login" | "signup" | "forgot" | "otp" | "new-password";
 
@@ -112,14 +111,14 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
   };
 
   const handleVerifyOtp = async () => {
-    const normalizedCode = normalizeOtpCode(otpCode);
-    if (!/^\d{6}$/.test(normalizedCode)) return setError("Please enter a valid 6-digit code");
+    const code = otpCode.trim();
+    if (!code) return setError("Please enter the recovery code");
     setLoading(true);
     setError("");
 
     const { error: verifyError } = await supabase.auth.verifyOtp({
       email: email.trim(),
-      token: normalizedCode,
+      token: code,
       type: "recovery",
     });
     setLoading(false);
@@ -202,31 +201,24 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
         {mode === "otp" && (
           <>
             <div className="space-y-3">
-              <p className="text-sm text-muted-foreground text-center">Enter the 6-digit code sent to <span className="text-foreground font-medium">{email}</span></p>
-              <div className="flex justify-center">
-                <InputOTP
-                  maxLength={6}
+              <p className="text-sm text-muted-foreground text-center">Enter the recovery code sent to <span className="text-foreground font-medium">{email}</span></p>
+              <div className="relative">
+                <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="text"
                   value={otpCode}
-                  onChange={(value) => setOtpCode(normalizeOtpCode(value))}
-                  inputMode="numeric"
-                  pattern="\d*"
-                >
-                  <InputOTPGroup>
-                    <InputOTPSlot index={0} />
-                    <InputOTPSlot index={1} />
-                    <InputOTPSlot index={2} />
-                    <InputOTPSlot index={3} />
-                    <InputOTPSlot index={4} />
-                    <InputOTPSlot index={5} />
-                  </InputOTPGroup>
-                </InputOTP>
+                  onChange={(e) => setOtpCode(e.target.value)}
+                  placeholder="Recovery code"
+                  autoComplete="one-time-code"
+                  className="h-11 w-full rounded-lg border border-border bg-card pl-10 pr-4 text-sm text-foreground font-mono tracking-widest placeholder:text-muted-foreground placeholder:font-sans placeholder:tracking-normal focus:outline-none focus:ring-2 focus:ring-ring"
+                />
               </div>
             </div>
 
             {error && <p className="text-sm text-loss">{error}</p>}
             {success && <p className="text-sm text-gain">{success}</p>}
 
-            <button onClick={handleVerifyOtp} disabled={loading || otpCode.length < 6} className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
+            <button onClick={handleVerifyOtp} disabled={loading || !otpCode.trim()} className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify Code"}
             </button>
 
