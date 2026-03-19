@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
-export type Language = "en" | "es" | "fr" | "pt";
+export type Language = "en" | "es" | "fr" | "pt" | "de" | "it";
 
 const translations: Record<Language, Record<string, string>> = {
   en: {
