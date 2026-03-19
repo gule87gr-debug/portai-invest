@@ -221,18 +221,12 @@ async function handleWebhook(req: Request): Promise<Response> {
     })
   }
 
-  const requiresSixDigitCode = emailType === 'recovery' || emailType === 'reauthentication'
-  const normalizedToken =
-    typeof payload.data.token === 'string' ? payload.data.token.trim() : undefined
-  const sixDigitCode = normalizeSixDigitCode(payload.data.token)
+  const requiresAuthCode = emailType === 'recovery' || emailType === 'reauthentication'
+  const authCode = normalizeAuthCode(payload.data.token)
 
-  if (requiresSixDigitCode && !sixDigitCode) {
-    console.error('Missing or invalid 6-digit auth code', {
-      emailType,
-      run_id,
-      tokenLength: normalizedToken?.length ?? 0,
-    })
-    return new Response(JSON.stringify({ error: 'Missing or invalid 6-digit code' }), {
+  if (requiresAuthCode && !authCode) {
+    console.error('Missing auth code', { emailType, run_id })
+    return new Response(JSON.stringify({ error: 'Missing auth code' }), {
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
@@ -244,7 +238,7 @@ async function handleWebhook(req: Request): Promise<Response> {
     siteUrl: `https://${ROOT_DOMAIN}`,
     recipient: payload.data.email,
     confirmationUrl: payload.data.url,
-    token: sixDigitCode ?? normalizedToken,
+    token: authCode,
     email: payload.data.email,
     newEmail: payload.data.new_email,
   }
