@@ -24,14 +24,14 @@ export const RecoveryEmail = ({
 }: RecoveryEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your recovery code for {siteName}</Preview>
+    <Preview>Your 6-digit recovery code for {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>Reset your password</Heading>
         <Text style={text}>
-          Use the code below to reset your password for {siteName}:
+          Use this 6-digit code to reset your password for {siteName}:
         </Text>
-        <Text style={codeStyle}>{token || '------'}</Text>
+        <Text style={codeStyle}>{token}</Text>
         <Text style={text}>
           Enter this code in the app to choose a new password.
         </Text>
