@@ -100,9 +100,9 @@ const SettingsPage = () => {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            {(Object.keys(languageNames) as Language[]).map((lang) => (
+            {(Object.keys(langNames) as Language[]).map((lang) => (
               <button key={lang} onClick={() => setLanguage(lang)} className={cn("rounded-lg border px-4 py-3 text-sm font-medium transition-all text-left", language === lang ? "border-primary bg-primary/10 text-primary" : "border-border bg-accent/20 text-muted-foreground hover:text-foreground hover:bg-accent/40")}>
-                {languageNames[lang]}
+                {langNames[lang]}
               </button>
             ))}
           </div>
