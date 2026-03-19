@@ -111,14 +111,14 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
   };
 
   const handleVerifyOtp = async () => {
-    const normalizedCode = normalizeOtpCode(otpCode);
-    if (!/^\d{6}$/.test(normalizedCode)) return setError("Please enter a valid 6-digit code");
+    const code = otpCode.trim();
+    if (!code) return setError("Please enter the recovery code");
     setLoading(true);
     setError("");
 
     const { error: verifyError } = await supabase.auth.verifyOtp({
       email: email.trim(),
-      token: normalizedCode,
+      token: code,
       type: "recovery",
     });
     setLoading(false);
