@@ -1,14 +1,14 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { useApp } from "@/contexts/AppContext";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
-import { User, Eye, EyeOff, Upload, Camera, LogOut, Globe, Sun, Moon } from "lucide-react";
+import { User, Eye, EyeOff, Upload, Camera, LogOut, Globe, Sun, Moon, Check, X as XIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "@/hooks/use-theme";
 
 const SettingsPage = () => {
-  const { profile, setProfile } = useApp();
+  const { profile, setProfile, currentUserId } = useApp();
   let language: Language, setLanguage: (l: Language) => void, t: (key: string) => string, langNames: Record<Language, string>;
   try {
     const lang = useLanguage();
@@ -25,11 +25,58 @@ const SettingsPage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [userEmail, setUserEmail] = useState("");
   const { isDark, toggle: toggleTheme } = useTheme();
+
+  const [username, setUsername] = useState("");
+  const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken" | "invalid">("idle");
+  const [savedUsername, setSavedUsername] = useState<string | null>(null);
+  const [usernameSaving, setUsernameSaving] = useState(false);
+
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
       if (user?.email) setUserEmail(user.email);
-    });
+      if (user) {
+        const { data } = await supabase.from("user_settings").select("username").eq("user_id", user.id).maybeSingle();
+        if (data?.username) {
+          setUsername(data.username);
+          setSavedUsername(data.username);
+        }
+      }
+    };
+    load();
   }, []);
+
+  const checkUsername = useCallback(async (value: string) => {
+    if (!value.trim() || value.length < 3) {
+      setUsernameStatus(value.trim() ? "invalid" : "idle");
+      return;
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+      setUsernameStatus("invalid");
+      return;
+    }
+    if (value.toLowerCase() === savedUsername?.toLowerCase()) {
+      setUsernameStatus("idle");
+      return;
+    }
+    setUsernameStatus("checking");
+    const { data } = await supabase.rpc("check_username_available", { desired_username: value });
+    setUsernameStatus(data ? "available" : "taken");
+  }, [savedUsername]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => checkUsername(username), 400);
+    return () => clearTimeout(timer);
+  }, [username, checkUsername]);
+
+  const handleSaveUsername = async () => {
+    if (usernameStatus !== "available" || !currentUserId) return;
+    setUsernameSaving(true);
+    await supabase.from("user_settings").update({ username, updated_at: new Date().toISOString() }).eq("user_id", currentUserId);
+    setSavedUsername(username);
+    setUsernameStatus("idle");
+    setUsernameSaving(false);
+  };
 
   useEffect(() => {
     const syncLang = async () => {
@@ -83,6 +130,45 @@ const SettingsPage = () => {
               <label className="mb-1.5 block text-sm font-medium text-muted-foreground">{t("displayName")}</label>
               <input value={profile.name} onChange={(e) => setProfile((prev) => ({ ...prev, name: e.target.value }))} className="h-10 w-full rounded-lg border border-border bg-accent/30 px-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
               <p className="mt-1 text-xs text-muted-foreground">{t("changesSaveAuto")}</p>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-muted-foreground">Username</label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <input
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ""))}
+                    placeholder="Choose a unique username"
+                    maxLength={20}
+                    className={cn(
+                      "h-10 w-full rounded-lg border bg-accent/30 px-4 pr-10 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring",
+                      usernameStatus === "taken" || usernameStatus === "invalid" ? "border-loss" : usernameStatus === "available" ? "border-gain" : "border-border"
+                    )}
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {usernameStatus === "checking" && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                    {usernameStatus === "available" && <Check className="h-4 w-4 text-gain" />}
+                    {usernameStatus === "taken" && <XIcon className="h-4 w-4 text-loss" />}
+                    {usernameStatus === "invalid" && <XIcon className="h-4 w-4 text-warning" />}
+                  </div>
+                </div>
+                {usernameStatus === "available" && (
+                  <button
+                    onClick={handleSaveUsername}
+                    disabled={usernameSaving}
+                    className="flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+                  >
+                    {usernameSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}
+                  </button>
+                )}
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {usernameStatus === "taken" && <span className="text-loss">Username is already taken</span>}
+                {usernameStatus === "invalid" && <span className="text-warning">Min 3 characters, letters, numbers, underscores only</span>}
+                {usernameStatus === "available" && <span className="text-gain">Username is available!</span>}
+                {usernameStatus === "idle" && (savedUsername ? `Current: @${savedUsername}` : "Letters, numbers, underscores. Min 3 characters.")}
+                {usernameStatus === "checking" && "Checking availability..."}
+              </p>
             </div>
             <div>
               <label className="mb-1.5 block text-sm font-medium text-muted-foreground">{t("email")}</label>
