@@ -5,6 +5,7 @@ import { useApp, Stock } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { searchAssets, AssetEntry } from "@/lib/stockDatabase";
 import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
+import { Sparkline } from "@/components/Sparkline";
 import { Plus, Trash2, Search, X, ChevronDown, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 
