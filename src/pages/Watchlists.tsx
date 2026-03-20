@@ -186,7 +186,7 @@ const Watchlists = () => {
 
             <div className="space-y-3">
               {active.stocks.map((s) => (
-                <div key={s.ticker} onClick={() => navigate(`/stock/${s.ticker}`)} className="rounded-xl border border-border bg-accent/20 cursor-pointer transition-colors hover:bg-accent/40 overflow-hidden">
+                <div key={s.ticker} onClick={() => navigate(`/stock/${s.ticker}`)} className="rounded-xl border border-border bg-card/60 backdrop-blur-md cursor-pointer transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 overflow-hidden">
                   <div className="flex items-center justify-between px-3 sm:px-4 pt-3 pb-1">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="font-semibold text-sm">{s.ticker}</span>
