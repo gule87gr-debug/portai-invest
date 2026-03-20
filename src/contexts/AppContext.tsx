@@ -221,34 +221,46 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   // Only sync profile to DB after the initial load is complete
   useEffect(() => {
     if (!currentUserId || !profileLoaded) return;
-    const timeout = setTimeout(async () => {
-      // Check display name uniqueness before saving
-      const { data: existing } = await supabase
-        .from("user_settings")
-        .select("user_id")
-        .ilike("display_name", profile.name.trim())
-        .neq("user_id", currentUserId)
-        .limit(1);
 
-      if (existing && existing.length > 0) {
-        // Name is taken — save other fields but not the name
-        await supabase.from("user_settings").update({
-          avatar_url: profile.avatar,
-          anonymous_mode: profile.anonymous,
-          updated_at: new Date().toISOString(),
-        }).eq("user_id", currentUserId);
-      } else {
-        await supabase.from("user_settings").update({
-          display_name: profile.name,
-          avatar_url: profile.avatar,
-          anonymous_mode: profile.anonymous,
-          updated_at: new Date().toISOString(),
-        }).eq("user_id", currentUserId);
+    const timeout = setTimeout(async () => {
+      const trimmedName = profile.name.trim();
+      const normalizedCurrent = trimmedName.toLowerCase();
+      const normalizedSaved = savedDisplayName.trim().toLowerCase();
+      const nameChanged = normalizedCurrent !== normalizedSaved;
+
+      let canSaveName = true;
+      if (nameChanged) {
+        const { data: isAvailable, error } = await supabase.rpc("check_username_available", {
+          desired_username: trimmedName,
+        });
+        canSaveName = !error && Boolean(isAvailable);
       }
-      localStorage.setItem("portai-profile", JSON.stringify(profile));
+
+      const updatePayload: any = {
+        avatar_url: profile.avatar,
+        anonymous_mode: profile.anonymous,
+        updated_at: new Date().toISOString(),
+      };
+
+      if (!nameChanged || canSaveName) {
+        updatePayload.display_name = trimmedName;
+      }
+
+      await supabase.from("user_settings").update(updatePayload).eq("user_id", currentUserId);
+
+      if (nameChanged && !canSaveName) {
+        if (savedDisplayName && profile.name !== savedDisplayName) {
+          setProfile((prev) => ({ ...prev, name: savedDisplayName }));
+          localStorage.setItem("portai-profile", JSON.stringify({ ...profile, name: savedDisplayName }));
+        }
+      } else {
+        if (trimmedName !== savedDisplayName) setSavedDisplayName(trimmedName);
+        localStorage.setItem("portai-profile", JSON.stringify(profile));
+      }
     }, 500);
+
     return () => clearTimeout(timeout);
-  }, [profile, currentUserId, profileLoaded]);
+  }, [profile, currentUserId, profileLoaded, savedDisplayName]);
 
   useEffect(() => { localStorage.setItem("portai-threads", JSON.stringify(threads)); }, [threads]);
 
