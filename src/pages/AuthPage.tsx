@@ -79,9 +79,9 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
     if (!email.trim() || !password.trim()) return setError("Please fill in all fields");
     if (!emailRegex.test(email.trim())) return setError("Please enter a valid email address");
     if (password.length < 6) return setError("Password must be at least 6 characters");
-    if (mode === "signup" && !username.trim()) return setError("Username is required");
-    if (mode === "signup" && username.trim().length < 3) return setError("Username must be at least 3 characters");
-    if (mode === "signup" && usernameStatus === "taken") return setError("This username is already taken");
+    if (mode === "signup" && !username.trim()) return setError("Display name is required");
+    if (mode === "signup" && username.trim().length < 2) return setError("Display name must be at least 2 characters");
+    if (mode === "signup" && usernameStatus === "taken") return setError("This display name is already taken");
     setLoading(true);
     setError("");
 
