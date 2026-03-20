@@ -94,7 +94,7 @@ const Forum = () => {
     if (!newTitle.trim() || !newBody.trim()) return;
     setIsModeratingPost(true);
     const allowed = await moderateContent(newTitle, newBody);
-    if (!allowed) { toast({ title: t("moderationError"), variant: "destructive" }); setIsModeratingPost(false); return; }
+    if (!allowed) { toast({ title: t("moderationError"), variant: "destructive", duration: 2000 }); setIsModeratingPost(false); return; }
     const displayName = profile.anonymous ? t("anonymousTrader") : profile.name;
     const displayAvatar = profile.anonymous ? "?" : profile.name[0]?.toUpperCase() || "U";
     const avatarUrl = profile.anonymous ? null : profile.avatar;
