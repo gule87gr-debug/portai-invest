@@ -97,7 +97,7 @@ const translations: Record<Language, Record<string, string>> = {
     imageAttached: "Image attached", uploadImage: "Upload image",
   },
   es: {
-    dashboard: "Panel", aiChat: "Chat IA", quiz: "Cuestionario", forum: "Foro", watchlists: "Listas", settings: "Ajustes",
+    home: "Inicio", dashboard: "Panel", aiChat: "Chat IA", quiz: "Cuestionario", forum: "Foro", watchlists: "Listas", settings: "Ajustes",
     marketIntelligence: "Inteligencia de Mercado", aiCuratedAnalysis: "Análisis con IA, puntuaciones de confianza y datos en vivo",
     analyzeLink: "Analizar Enlace", analyze: "Analizar", analyzing: "Analizando...",
     pasteUrl: "Pega cualquier URL de artículo financiero. La IA proporcionará una puntuación de confianza (1-10), resumen y detección de sesgo.",
