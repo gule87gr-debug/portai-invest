@@ -51,7 +51,7 @@ const features = [
     title: "Watchlists",
     tagline: "Track what matters to you",
     details: [
-      "Build custom watchlists with 170+ stocks, ETFs, and crypto",
+      "Build custom watchlists with 550+ stocks, ETFs, and crypto",
       "View interactive TradingView charts with technical indicators",
       "Organize assets by sector, signal strength, or personal tags",
       "Monitor real-time price movements and market data",
