@@ -78,6 +78,23 @@ const Forum = () => {
     }
   };
 
+  const handleCommentFactCheck = async (commentId: string, body: string) => {
+    setCommentFactCheckLoading(commentId);
+    try {
+      const { data, error } = await supabase.functions.invoke("fact-check", { body: { title: "Comment", body } });
+      if (error) throw error;
+      if (data?.error) {
+        toast({ title: data.error, variant: "destructive" });
+      } else if (data?.factCheck) {
+        setCommentFactCheckResults((prev) => ({ ...prev, [commentId]: data.factCheck }));
+      }
+    } catch {
+      toast({ title: "Fact-check failed", variant: "destructive" });
+    } finally {
+      setCommentFactCheckLoading(null);
+    }
+  };
+
   const filtered = threads.filter((th) => {
     if (active !== "All" && !th.tags.some((tag) => tag.label.toLowerCase() === active.toLowerCase())) return false;
     if (searchQuery && !th.title.toLowerCase().includes(searchQuery.toLowerCase()) && !th.body.toLowerCase().includes(searchQuery.toLowerCase())) return false;
