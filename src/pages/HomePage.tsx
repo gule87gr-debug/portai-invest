@@ -39,7 +39,7 @@ const features = [
   {
     icon: Eye,
     title: "Watchlists",
-    desc: "Build custom watchlists from 170+ stocks, ETFs, and crypto. View interactive charts with technical indicators and track price movements.",
+    desc: "Build custom watchlists from 550+ stocks, ETFs, and crypto. View interactive charts with technical indicators and track price movements.",
     to: "/watchlists",
     color: "text-sky-400",
     bg: "bg-sky-400/15",
