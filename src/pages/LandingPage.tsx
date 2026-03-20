@@ -206,7 +206,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           {features.map((f, i) => (
             <RevealSection key={f.title}>
               <div
-                className="rounded-2xl border border-border bg-card p-6 h-full transition-all hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5"
+                className="rounded-2xl border border-border bg-card/60 backdrop-blur-md p-6 h-full transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
                 style={{ transitionDelay: `${i * 60}ms` }}
               >
                 <div className="flex items-start gap-4 mb-4">
