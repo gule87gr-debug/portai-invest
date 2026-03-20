@@ -218,12 +218,29 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!currentUserId || !profileLoaded) return;
     const timeout = setTimeout(async () => {
-      await supabase.from("user_settings").update({
-        display_name: profile.name,
-        avatar_url: profile.avatar,
-        anonymous_mode: profile.anonymous,
-        updated_at: new Date().toISOString(),
-      }).eq("user_id", currentUserId);
+      // Check display name uniqueness before saving
+      const { data: existing } = await supabase
+        .from("user_settings")
+        .select("user_id")
+        .ilike("display_name", profile.name.trim())
+        .neq("user_id", currentUserId)
+        .limit(1);
+
+      if (existing && existing.length > 0) {
+        // Name is taken — save other fields but not the name
+        await supabase.from("user_settings").update({
+          avatar_url: profile.avatar,
+          anonymous_mode: profile.anonymous,
+          updated_at: new Date().toISOString(),
+        }).eq("user_id", currentUserId);
+      } else {
+        await supabase.from("user_settings").update({
+          display_name: profile.name,
+          avatar_url: profile.avatar,
+          anonymous_mode: profile.anonymous,
+          updated_at: new Date().toISOString(),
+        }).eq("user_id", currentUserId);
+      }
       localStorage.setItem("portai-profile", JSON.stringify(profile));
     }, 500);
     return () => clearTimeout(timeout);
