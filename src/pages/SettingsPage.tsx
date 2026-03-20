@@ -59,9 +59,9 @@ const SettingsPage = () => {
   }, [savedName, currentUserId]);
 
   useEffect(() => {
-    const timer = setTimeout(() => checkNameAvailable(profile.name), 400);
+    const timer = setTimeout(() => checkNameAvailable(editingName), 400);
     return () => clearTimeout(timer);
-  }, [profile.name, checkNameAvailable]);
+  }, [editingName, checkNameAvailable]);
 
   useEffect(() => {
     const syncLang = async () => {
