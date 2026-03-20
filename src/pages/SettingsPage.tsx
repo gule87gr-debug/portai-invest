@@ -46,17 +46,20 @@ const SettingsPage = () => {
   const checkNameAvailable = useCallback(async (name: string) => {
     const trimmed = name.trim();
     if (!trimmed || trimmed.length < 2) { setNameStatus("idle"); return; }
-    if (trimmed === savedName) { setNameStatus("idle"); return; }
+    if (trimmed.toLowerCase() === savedName.trim().toLowerCase()) { setNameStatus("idle"); return; }
+
     setNameStatus("checking");
-    // Check if any other user has this display_name (case-insensitive)
-    const { data } = await supabase
-      .from("user_settings")
-      .select("user_id")
-      .ilike("display_name", trimmed)
-      .neq("user_id", currentUserId || "")
-      .limit(1);
-    setNameStatus(data && data.length > 0 ? "taken" : "available");
-  }, [savedName, currentUserId]);
+    const { data, error } = await supabase.rpc("check_username_available", {
+      desired_username: trimmed,
+    });
+
+    if (error) {
+      setNameStatus("idle");
+      return;
+    }
+
+    setNameStatus(data ? "available" : "taken");
+  }, [savedName]);
 
   useEffect(() => {
     const timer = setTimeout(() => checkNameAvailable(editingName), 400);

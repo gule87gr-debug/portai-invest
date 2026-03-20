@@ -201,7 +201,7 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
   };
 
   const hasEmailError = emailError.length > 0;
-  const isSubmitDisabled = loading || hasEmailError || (mode === "signup" && usernameStatus === "taken");
+  const isSubmitDisabled = loading || hasEmailError || (mode === "signup" && (usernameStatus === "taken" || usernameStatus === "checking"));
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">

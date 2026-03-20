@@ -187,8 +187,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         .maybeSingle();
 
       if (settings) {
+        const loadedName = settings.display_name || user.email?.split("@")[0] || "User";
+        setSavedDisplayName(loadedName);
         setProfile({
-          name: settings.display_name || user.email?.split("@")[0] || "User",
+          name: loadedName,
           email: user.email || "",
           avatar: settings.avatar_url,
           anonymous: settings.anonymous_mode,
@@ -202,6 +204,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           user_id: user.id,
           display_name: defaultName,
         });
+        setSavedDisplayName(defaultName);
         setProfile({
           name: defaultName,
           email: user.email || "",
