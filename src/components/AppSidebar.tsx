@@ -88,6 +88,16 @@ export const AppSidebar = () => {
               </NavLink>
             );
           })}
+
+          <div className="mt-auto pt-2 border-t border-sidebar-border">
+            <button
+              onClick={() => supabase.auth.signOut()}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-loss transition-all hover:bg-loss/10"
+            >
+              <LogOut className="h-4.5 w-4.5" />
+              {t("logOut")}
+            </button>
+          </div>
         </nav>
 
         <div className="border-t border-sidebar-border p-4">
