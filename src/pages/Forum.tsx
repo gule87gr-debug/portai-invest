@@ -318,13 +318,47 @@ const Forum = () => {
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-semibold">{c.author}</span>
                           <span className="text-[10px] text-muted-foreground">{c.time}</span>
-                          {canDeleteComment(c) && (
-                            <button onClick={() => deleteComment(th.id, c.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-loss transition-all ml-auto" title={t("deleteComment")}>
-                              <Trash2 className="h-3 w-3" />
+                          <div className="ml-auto flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                            <button
+                              onClick={() => handleCommentFactCheck(c.id, c.body)}
+                              disabled={commentFactCheckLoading === c.id}
+                              className="text-primary hover:text-primary/80 transition-colors"
+                              title={t("factCheck")}
+                            >
+                              {commentFactCheckLoading === c.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
                             </button>
-                          )}
+                            {canDeleteComment(c) && (
+                              <button onClick={() => deleteComment(th.id, c.id)} className="text-muted-foreground hover:text-loss transition-colors" title={t("deleteComment")}>
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                            )}
+                          </div>
                         </div>
                         <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{c.body}</p>
+                        {commentFactCheckResults[c.id] && (() => {
+                          const result = commentFactCheckResults[c.id];
+                          const config = verdictConfig[result.verdict] || verdictConfig.unverifiable;
+                          const VerdictIcon = config.icon;
+                          return (
+                            <div className="mt-2 rounded-md border border-border bg-card p-2 space-y-1.5 animate-fade-in">
+                              <div className="flex items-center gap-1.5">
+                                <VerdictIcon className={cn("h-3 w-3", config.color)} />
+                                <span className={cn("text-[10px] font-semibold", config.color)}>{config.label}</span>
+                                <span className="ml-auto text-[9px] text-muted-foreground">Confidence: {result.confidence}/10</span>
+                              </div>
+                              <p className="text-[10px] text-muted-foreground leading-relaxed">{result.summary}</p>
+                              {result.claims.length > 0 && result.claims.map((claim, idx) => {
+                                const cConfig = claimStatusConfig[claim.status] || claimStatusConfig.unverifiable;
+                                return (
+                                  <div key={idx} className={cn("rounded border p-1.5 text-[10px]", cConfig.color)}>
+                                    <p className="font-medium">"{claim.claim}"</p>
+                                    <p className="mt-0.5 opacity-80">{claim.explanation}</p>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
                   ))}
