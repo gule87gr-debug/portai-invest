@@ -9,6 +9,7 @@ import { NotificationProvider } from "@/contexts/NotificationContext";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Dashboard from "./pages/Dashboard";
+import HomePage from "./pages/HomePage";
 import AIChat from "./pages/AIChat";
 import Quiz from "./pages/Quiz";
 import Forum from "./pages/Forum";
@@ -28,7 +29,8 @@ const AppWithLanguage = () => {
   return (
     <LanguageProvider initialLanguage={initialLanguage as Language}>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/chat" element={<AIChat />} />
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/forum" element={<Forum />} />
