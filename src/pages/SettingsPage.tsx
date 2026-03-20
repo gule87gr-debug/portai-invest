@@ -28,6 +28,7 @@ const SettingsPage = () => {
 
   const [nameStatus, setNameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
   const [savedName, setSavedName] = useState<string>("");
+  const [editingName, setEditingName] = useState<string>("");
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -36,7 +37,10 @@ const SettingsPage = () => {
   }, []);
 
   useEffect(() => {
-    if (profile.name) setSavedName(profile.name);
+    if (profile.name) {
+      setSavedName(profile.name);
+      setEditingName(profile.name);
+    }
   }, []);
 
   const checkNameAvailable = useCallback(async (name: string) => {
@@ -55,9 +59,9 @@ const SettingsPage = () => {
   }, [savedName, currentUserId]);
 
   useEffect(() => {
-    const timer = setTimeout(() => checkNameAvailable(profile.name), 400);
+    const timer = setTimeout(() => checkNameAvailable(editingName), 400);
     return () => clearTimeout(timer);
-  }, [profile.name, checkNameAvailable]);
+  }, [editingName, checkNameAvailable]);
 
   useEffect(() => {
     const syncLang = async () => {
@@ -111,8 +115,18 @@ const SettingsPage = () => {
               <label className="mb-1.5 block text-sm font-medium text-muted-foreground">{t("displayName")}</label>
               <div className="relative">
                 <input
-                  value={profile.name}
-                  onChange={(e) => setProfile((prev) => ({ ...prev, name: e.target.value }))}
+                  value={editingName}
+                  onChange={(e) => setEditingName(e.target.value)}
+                  onBlur={() => {
+                    if (nameStatus === "available" && editingName.trim() !== savedName) {
+                      setProfile((prev) => ({ ...prev, name: editingName.trim() }));
+                      setSavedName(editingName.trim());
+                      setNameStatus("idle");
+                    } else if (nameStatus !== "available") {
+                      setEditingName(savedName);
+                      setNameStatus("idle");
+                    }
+                  }}
                   className={cn(
                     "h-10 w-full rounded-lg border bg-accent/30 px-4 pr-10 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring",
                     nameStatus === "taken" ? "border-loss" : nameStatus === "available" ? "border-gain" : "border-border"
@@ -126,7 +140,7 @@ const SettingsPage = () => {
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
                 {nameStatus === "taken" && <span className="text-loss">This name is already taken by another user</span>}
-                {nameStatus === "available" && <span className="text-gain">Name is available — saves automatically</span>}
+                {nameStatus === "available" && <span className="text-gain">Name is available — click away to save</span>}
                 {nameStatus === "checking" && "Checking availability..."}
                 {nameStatus === "idle" && t("changesSaveAuto")}
               </p>
