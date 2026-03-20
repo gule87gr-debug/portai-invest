@@ -28,6 +28,7 @@ const SettingsPage = () => {
 
   const [nameStatus, setNameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
   const [savedName, setSavedName] = useState<string>("");
+  const [editingName, setEditingName] = useState<string>("");
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
