@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "@/hooks/use-theme";
 
 const SettingsPage = () => {
-  const { profile, setProfile, currentUserId } = useApp();
+  const { profile, setProfile } = useApp();
   let language: Language, setLanguage: (l: Language) => void, t: (key: string) => string, langNames: Record<Language, string>;
   try {
     const lang = useLanguage();
