@@ -60,12 +60,16 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
     setUsername(value);
     setUsernameStatus("idle");
     if (usernameTimer) clearTimeout(usernameTimer);
-    if (!value.trim() || value.trim().length < 3) return;
+    if (!value.trim() || value.trim().length < 2) return;
     const timer = setTimeout(async () => {
       setUsernameStatus("checking");
-      const { data, error } = await supabase.rpc("check_username_available", { desired_username: value.trim() });
+      const { data, error } = await supabase
+        .from("user_settings")
+        .select("user_id")
+        .ilike("display_name", value.trim())
+        .limit(1);
       if (error) { setUsernameStatus("idle"); return; }
-      setUsernameStatus(data ? "available" : "taken");
+      setUsernameStatus(data && data.length > 0 ? "taken" : "available");
     }, 500);
     setUsernameTimer(timer);
   };
@@ -75,13 +79,26 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
     if (!email.trim() || !password.trim()) return setError("Please fill in all fields");
     if (!emailRegex.test(email.trim())) return setError("Please enter a valid email address");
     if (password.length < 6) return setError("Password must be at least 6 characters");
-    if (mode === "signup" && !username.trim()) return setError("Username is required");
-    if (mode === "signup" && username.trim().length < 3) return setError("Username must be at least 3 characters");
-    if (mode === "signup" && usernameStatus === "taken") return setError("This username is already taken");
+    if (mode === "signup" && !username.trim()) return setError("Display name is required");
+    if (mode === "signup" && username.trim().length < 2) return setError("Display name must be at least 2 characters");
+    if (mode === "signup" && usernameStatus === "taken") return setError("This display name is already taken");
     setLoading(true);
     setError("");
 
     if (mode === "signup") {
+      // Re-check availability right before creating to prevent race conditions
+      const { data: existing } = await supabase
+        .from("user_settings")
+        .select("user_id")
+        .ilike("display_name", username.trim())
+        .limit(1);
+      if (existing && existing.length > 0) {
+        setUsernameStatus("taken");
+        setError("This display name was just taken. Please choose another.");
+        setLoading(false);
+        return;
+      }
+
       const { data, error: authError } = await supabase.auth.signUp({ email, password });
       if (authError) {
         if (authError.message.toLowerCase().includes("already registered") || authError.message.toLowerCase().includes("already been registered")) {
@@ -97,7 +114,6 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
         await supabase.from("user_settings").insert({
           user_id: data.user.id,
           display_name: username.trim(),
-          username: username.trim(),
         });
       }
       onAuth();
@@ -286,15 +302,15 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
                 <div>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <input type="text" value={username} onChange={(e) => checkUsername(e.target.value)} placeholder="Choose a username" className={cn("h-11 w-full rounded-lg border bg-card pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", usernameStatus === "taken" ? "border-loss" : usernameStatus === "available" ? "border-gain" : "border-border")} />
+                    <input type="text" value={username} onChange={(e) => checkUsername(e.target.value)} placeholder="Choose a display name" className={cn("h-11 w-full rounded-lg border bg-card pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", usernameStatus === "taken" ? "border-loss" : usernameStatus === "available" ? "border-gain" : "border-border")} />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
                       {usernameStatus === "checking" && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
                       {usernameStatus === "available" && <Check className="h-4 w-4 text-gain" />}
                       {usernameStatus === "taken" && <XIcon className="h-4 w-4 text-loss" />}
                     </div>
                   </div>
-                  {usernameStatus === "taken" && <p className="mt-1 text-xs text-loss">This username is already taken</p>}
-                  {usernameStatus === "available" && <p className="mt-1 text-xs text-gain">Username is available!</p>}
+                  {usernameStatus === "taken" && <p className="mt-1 text-xs text-loss">This display name is already taken</p>}
+                  {usernameStatus === "available" && <p className="mt-1 text-xs text-gain">Display name is available!</p>}
                 </div>
               )}
 
