@@ -41,7 +41,7 @@ const SettingsPage = () => {
       setSavedName(profile.name);
       setEditingName(profile.name);
     }
-  }, []);
+  }, [profile.name]);
 
   const checkNameAvailable = useCallback(async (name: string) => {
     const trimmed = name.trim();

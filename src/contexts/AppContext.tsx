@@ -141,6 +141,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<UserProfile>(() => loadFromLS("portai-profile", { name: "Guest User", email: "", avatar: null, anonymous: false }));
   const [initialLanguage, setInitialLanguage] = useState("en");
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [savedDisplayName, setSavedDisplayName] = useState("");
 
   const loadWatchlists = async (userId: string) => {
     const { data: wlData } = await supabase
