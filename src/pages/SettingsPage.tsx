@@ -24,7 +24,7 @@ const SettingsPage = () => {
   }
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [userEmail, setUserEmail] = useState("");
-
+  const { isDark, toggle: toggleTheme } = useTheme();
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user?.email) setUserEmail(user.email);
