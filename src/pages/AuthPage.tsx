@@ -302,15 +302,15 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
                 <div>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <input type="text" value={username} onChange={(e) => checkUsername(e.target.value)} placeholder="Choose a username" className={cn("h-11 w-full rounded-lg border bg-card pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", usernameStatus === "taken" ? "border-loss" : usernameStatus === "available" ? "border-gain" : "border-border")} />
+                    <input type="text" value={username} onChange={(e) => checkUsername(e.target.value)} placeholder="Choose a display name" className={cn("h-11 w-full rounded-lg border bg-card pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", usernameStatus === "taken" ? "border-loss" : usernameStatus === "available" ? "border-gain" : "border-border")} />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
                       {usernameStatus === "checking" && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
                       {usernameStatus === "available" && <Check className="h-4 w-4 text-gain" />}
                       {usernameStatus === "taken" && <XIcon className="h-4 w-4 text-loss" />}
                     </div>
                   </div>
-                  {usernameStatus === "taken" && <p className="mt-1 text-xs text-loss">This username is already taken</p>}
-                  {usernameStatus === "available" && <p className="mt-1 text-xs text-gain">Username is available!</p>}
+                  {usernameStatus === "taken" && <p className="mt-1 text-xs text-loss">This display name is already taken</p>}
+                  {usernameStatus === "available" && <p className="mt-1 text-xs text-gain">Display name is available!</p>}
                 </div>
               )}
 
