@@ -126,7 +126,7 @@ const Forum = () => {
     if (!text) return;
     setIsModeratingComment(threadId);
     const allowed = await moderateContent("comment", text);
-    if (!allowed) { toast({ title: t("moderationError"), variant: "destructive" }); setIsModeratingComment(null); return; }
+    if (!allowed) { toast({ title: t("moderationError"), variant: "destructive", duration: 2000 }); setIsModeratingComment(null); return; }
     const displayName = profile.anonymous ? t("anonymousTrader") : profile.name;
     const displayAvatar = profile.anonymous ? "?" : profile.name[0]?.toUpperCase() || "U";
     const avatarUrl = profile.anonymous ? null : profile.avatar;
