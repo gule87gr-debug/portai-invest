@@ -86,6 +86,19 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
     setError("");
 
     if (mode === "signup") {
+      // Re-check availability right before creating to prevent race conditions
+      const { data: existing } = await supabase
+        .from("user_settings")
+        .select("user_id")
+        .ilike("display_name", username.trim())
+        .limit(1);
+      if (existing && existing.length > 0) {
+        setUsernameStatus("taken");
+        setError("This display name was just taken. Please choose another.");
+        setLoading(false);
+        return;
+      }
+
       const { data, error: authError } = await supabase.auth.signUp({ email, password });
       if (authError) {
         if (authError.message.toLowerCase().includes("already registered") || authError.message.toLowerCase().includes("already been registered")) {
@@ -101,7 +114,6 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
         await supabase.from("user_settings").insert({
           user_id: data.user.id,
           display_name: username.trim(),
-          username: username.trim(),
         });
       }
       onAuth();
