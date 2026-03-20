@@ -112,6 +112,21 @@ const SettingsPage = () => {
         <div className="rounded-xl border border-border bg-card p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
+              {isDark ? <Moon className="h-5 w-5 text-primary" /> : <Sun className="h-5 w-5 text-warning" />}
+              <div>
+                <h3 className="font-semibold">{isDark ? "Dark Mode" : "Light Mode"}</h3>
+                <p className="text-xs text-muted-foreground">Switch between dark and light appearance</p>
+              </div>
+            </div>
+            <button onClick={toggleTheme} className={cn("relative h-6 w-11 rounded-full transition-colors", isDark ? "bg-primary" : "bg-muted")}>
+              <span className={cn("absolute top-0.5 h-5 w-5 rounded-full bg-foreground transition-transform", isDark ? "left-[22px]" : "left-0.5")} />
+            </button>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
               {profile.anonymous ? <EyeOff className="h-5 w-5 text-primary" /> : <Eye className="h-5 w-5 text-muted-foreground" />}
               <div>
                 <h3 className="font-semibold">{t("anonymousMode")}</h3>
