@@ -15,6 +15,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['Manrope', 'Inter', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       colors: {
@@ -59,6 +60,7 @@ export default {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",
         },
+        highlight: "hsl(var(--highlight))",
         gain: "hsl(var(--gain))",
         loss: "hsl(var(--loss))",
         trust: {
@@ -100,8 +102,8 @@ export default {
           to: { transform: "translateX(0)" },
         },
         "pulse-glow": {
-          "0%, 100%": { boxShadow: "0 0 10px hsl(210 100% 56% / 0.15)" },
-          "50%": { boxShadow: "0 0 25px hsl(210 100% 56% / 0.3)" },
+          "0%, 100%": { boxShadow: "0 0 10px hsl(210 66% 50% / 0.15)" },
+          "50%": { boxShadow: "0 0 25px hsl(210 66% 50% / 0.3)" },
         },
       },
       animation: {

@@ -100,7 +100,7 @@ const HomePage = () => {
                 key={f.to}
                 ref={ref}
                 onClick={() => navigate(f.to)}
-                className="group cursor-pointer rounded-2xl border border-border bg-card p-5 transition-all hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5 active:scale-[0.98]"
+                className="group cursor-pointer rounded-2xl border border-border bg-card/60 backdrop-blur-md p-5 transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 active:scale-[0.98]"
                 style={{
                   opacity: 0,
                   transform: "translateY(14px)",

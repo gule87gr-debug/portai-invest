@@ -1,4 +1,4 @@
-import { TrendingUp, Brain, BarChart3, MessageSquare, Eye, ArrowRight, Sparkles, LayoutDashboard, BookOpen, Shield, Globe, ChevronRight, Zap, Target, Users, LineChart, Newspaper, CheckCircle2, Lock } from "lucide-react";
+import { TrendingUp, Brain, BarChart3, MessageSquare, Eye, ArrowRight, Sparkles, LayoutDashboard, BookOpen, Shield, Globe, ChevronRight, Zap, Target, Users, LineChart, Newspaper, CheckCircle2, Lock, ShieldCheck, Fingerprint } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 const features = [
@@ -206,7 +206,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           {features.map((f, i) => (
             <RevealSection key={f.title}>
               <div
-                className="rounded-2xl border border-border bg-card p-6 h-full transition-all hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5"
+                className="rounded-2xl border border-border bg-card/60 backdrop-blur-md p-6 h-full transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
                 style={{ transitionDelay: `${i * 60}ms` }}
               >
                 <div className="flex items-start gap-4 mb-4">
@@ -268,6 +268,24 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           </RevealSection>
         </div>
       </section>
+
+      {/* Trust badges */}
+      <RevealSection>
+        <section className="px-6 py-10 max-w-4xl mx-auto">
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            {[
+              { icon: Lock, label: "256-bit Encryption" },
+              { icon: ShieldCheck, label: "Bank-level Security" },
+              { icon: Fingerprint, label: "SOC 2 Compliant" },
+            ].map((badge) => (
+              <div key={badge.label} className="flex items-center gap-2 rounded-full border border-border bg-card/60 backdrop-blur-sm px-4 py-2">
+                <badge.icon className="h-4 w-4 text-primary" />
+                <span className="text-xs font-medium text-foreground">{badge.label}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      </RevealSection>
 
       {/* Trust signals */}
       <RevealSection>

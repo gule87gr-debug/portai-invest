@@ -5,6 +5,7 @@ import { useApp, Stock } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { searchAssets, AssetEntry } from "@/lib/stockDatabase";
 import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
+import { Sparkline } from "@/components/Sparkline";
 import { Plus, Trash2, Search, X, ChevronDown, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -185,10 +186,11 @@ const Watchlists = () => {
 
             <div className="space-y-3">
               {active.stocks.map((s) => (
-                <div key={s.ticker} onClick={() => navigate(`/stock/${s.ticker}`)} className="rounded-xl border border-border bg-accent/20 cursor-pointer transition-colors hover:bg-accent/40 overflow-hidden">
+                <div key={s.ticker} onClick={() => navigate(`/stock/${s.ticker}`)} className="rounded-xl border border-border bg-card/60 backdrop-blur-md cursor-pointer transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 overflow-hidden">
                   <div className="flex items-center justify-between px-3 sm:px-4 pt-3 pb-1">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="font-semibold text-sm">{s.ticker}</span>
+                      <Sparkline seed={s.ticker} width={64} height={22} className="shrink-0" />
                       <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground hidden sm:inline">{s.sector}</span>
                       <span className="text-xs text-muted-foreground hidden sm:inline truncate max-w-[180px]">{s.name}</span>
                     </div>
