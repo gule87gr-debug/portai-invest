@@ -5,7 +5,7 @@ export type Language = "en" | "es" | "fr" | "pt" | "de" | "it";
 const translations: Record<Language, Record<string, string>> = {
   en: {
     // Nav
-    dashboard: "Dashboard", aiChat: "AI Chat", quiz: "Quiz", forum: "Forum", watchlists: "Watchlists", settings: "Settings",
+    home: "Home", dashboard: "Dashboard", aiChat: "AI Chat", quiz: "Quiz", forum: "Forum", watchlists: "Watchlists", settings: "Settings",
     // Dashboard
     marketIntelligence: "Market Intelligence", aiCuratedAnalysis: "AI-curated analysis with trust scores and live market data",
     analyzeLink: "Analyze Link", analyze: "Analyze", analyzing: "Analyzing...",
