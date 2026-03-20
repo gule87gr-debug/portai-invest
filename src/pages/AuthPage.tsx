@@ -60,12 +60,16 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
     setUsername(value);
     setUsernameStatus("idle");
     if (usernameTimer) clearTimeout(usernameTimer);
-    if (!value.trim() || value.trim().length < 3) return;
+    if (!value.trim() || value.trim().length < 2) return;
     const timer = setTimeout(async () => {
       setUsernameStatus("checking");
-      const { data, error } = await supabase.rpc("check_username_available", { desired_username: value.trim() });
+      const { data, error } = await supabase
+        .from("user_settings")
+        .select("user_id")
+        .ilike("display_name", value.trim())
+        .limit(1);
       if (error) { setUsernameStatus("idle"); return; }
-      setUsernameStatus(data ? "available" : "taken");
+      setUsernameStatus(data && data.length > 0 ? "taken" : "available");
     }, 500);
     setUsernameTimer(timer);
   };
