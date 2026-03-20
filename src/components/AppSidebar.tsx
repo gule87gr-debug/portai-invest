@@ -7,7 +7,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { NotificationBell } from "@/components/NotificationBell";
 
 const navKeys = [
-  { to: "/", icon: LayoutDashboard, key: "dashboard" },
+  { to: "/", icon: Home, key: "home" },
+  { to: "/dashboard", icon: LayoutDashboard, key: "dashboard" },
   { to: "/chat", icon: MessageCircle, key: "aiChat" },
   { to: "/quiz", icon: Sparkles, key: "quiz" },
   { to: "/forum", icon: MessageSquare, key: "forum" },

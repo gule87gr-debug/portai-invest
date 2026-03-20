@@ -29,7 +29,8 @@ const AppWithLanguage = () => {
   return (
     <LanguageProvider initialLanguage={initialLanguage as Language}>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/chat" element={<AIChat />} />
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/forum" element={<Forum />} />
