@@ -413,7 +413,7 @@ const translations: Record<Language, Record<string, string>> = {
     imageAttached: "Bild angehängt", uploadImage: "Bild hochladen",
   },
   it: {
-    dashboard: "Dashboard", aiChat: "Chat IA", quiz: "Quiz", forum: "Forum", watchlists: "Liste", settings: "Impostazioni",
+    home: "Home", dashboard: "Dashboard", aiChat: "Chat IA", quiz: "Quiz", forum: "Forum", watchlists: "Liste", settings: "Impostazioni",
     marketIntelligence: "Intelligenza di Mercato", aiCuratedAnalysis: "Analisi IA con punteggi di fiducia e dati di mercato in tempo reale",
     analyzeLink: "Analizza Link", analyze: "Analizza", analyzing: "Analisi in corso...",
     pasteUrl: "Incolla l'URL di un articolo finanziario. L'IA fornirà un punteggio di fiducia (1-10), un riepilogo e il rilevamento dei bias.",
