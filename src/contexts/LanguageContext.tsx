@@ -334,7 +334,7 @@ const translations: Record<Language, Record<string, string>> = {
     imageAttached: "Imagem anexada", uploadImage: "Enviar imagem",
   },
   de: {
-    dashboard: "Dashboard", aiChat: "KI-Chat", quiz: "Quiz", forum: "Forum", watchlists: "Beobachtungslisten", settings: "Einstellungen",
+    home: "Startseite", dashboard: "Dashboard", aiChat: "KI-Chat", quiz: "Quiz", forum: "Forum", watchlists: "Beobachtungslisten", settings: "Einstellungen",
     marketIntelligence: "Marktintelligenz", aiCuratedAnalysis: "KI-kuratierte Analyse mit Vertrauenswerten und Live-Marktdaten",
     analyzeLink: "Link analysieren", analyze: "Analysieren", analyzing: "Analyse läuft...",
     pasteUrl: "Fügen Sie eine URL eines Finanzartikels ein. Die KI liefert einen Vertrauenswert (1-10), eine Zusammenfassung und eine Bias-Erkennung.",
