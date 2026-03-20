@@ -1,4 +1,5 @@
-import { LayoutDashboard, MessageCircle, Sparkles, MessageSquare, Eye, Settings, TrendingUp, Menu, X, Home } from "lucide-react";
+import { LayoutDashboard, MessageCircle, Sparkles, MessageSquare, Eye, Settings, TrendingUp, Menu, X, Home, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/hooks/use-theme";
 import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
@@ -20,6 +21,7 @@ export const AppSidebar = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
+  const { isDark, toggle: toggleTheme } = useTheme();
   let t: (key: string) => string;
   try {
     const lang = useLanguage();
@@ -41,6 +43,13 @@ export const AppSidebar = () => {
             className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors hover:bg-accent"
           >
             <Menu className="h-5 w-5" />
+          </button>
+          <button
+            onClick={toggleTheme}
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors hover:bg-accent active:scale-95"
+          >
+            {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </button>
           <NotificationBell />
         </div>

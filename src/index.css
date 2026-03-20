@@ -70,11 +70,74 @@
     --font-body: 'Inter', system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
   }
+
+  .light {
+    --background: 226 100% 97%;
+    --foreground: 228 60% 8%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 228 60% 8%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 228 60% 8%;
+
+    --primary: 210 66% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 214 32% 91%;
+    --secondary-foreground: 215 16% 47%;
+
+    --muted: 214 32% 91%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 214 32% 91%;
+    --accent-foreground: 228 60% 8%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --warning: 40 90% 55%;
+    --warning-foreground: 228 60% 8%;
+
+    --success: 162 100% 39%;
+    --success-foreground: 0 0% 100%;
+
+    --gain: 162 100% 39%;
+    --loss: 0 84% 60%;
+
+    --highlight: 193 100% 42%;
+
+    --border: 213 97% 87%;
+    --input: 213 97% 87%;
+    --ring: 210 66% 50%;
+
+    --sidebar-background: 226 100% 97%;
+    --sidebar-foreground: 215 16% 47%;
+    --sidebar-primary: 210 66% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 214 32% 91%;
+    --sidebar-accent-foreground: 228 60% 8%;
+    --sidebar-border: 213 97% 87%;
+    --sidebar-ring: 210 66% 50%;
+
+    --trust-high: 162 100% 39%;
+    --trust-medium: 40 90% 55%;
+    --trust-low: 0 84% 60%;
+
+    --chart-1: 210 66% 50%;
+    --chart-2: 162 100% 39%;
+    --chart-3: 265 60% 60%;
+    --chart-4: 40 90% 55%;
+    --chart-5: 0 84% 60%;
+  }
 }
 
 @layer base {
   * {
     @apply border-border;
+    transition-property: background-color, border-color, color, box-shadow;
+    transition-duration: 300ms;
+    transition-timing-function: ease;
   }
 
   body {
