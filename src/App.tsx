@@ -46,8 +46,7 @@ const AppWithLanguage = () => {
 const AppRoutes = () => {
   const [session, setSession] = useState<any>(undefined);
   const [passwordRecovery, setPasswordRecovery] = useState(false);
-  const hasVisited = localStorage.getItem("portai-has-visited");
-  const [showAuth, setShowAuth] = useState(!!hasVisited);
+  const [showAuth, setShowAuth] = useState(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
