@@ -95,12 +95,10 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
 
     if (mode === "signup") {
       // Re-check availability right before creating to prevent race conditions
-      const { data: existing } = await supabase
-        .from("user_settings")
-        .select("user_id")
-        .ilike("display_name", username.trim())
-        .limit(1);
-      if (existing && existing.length > 0) {
+      const { data: availableNow, error: availabilityError } = await supabase.rpc("check_username_available", {
+        desired_username: username.trim(),
+      });
+      if (availabilityError || !availableNow) {
         setUsernameStatus("taken");
         setError("This display name was just taken. Please choose another.");
         setLoading(false);
