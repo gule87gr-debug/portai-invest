@@ -176,7 +176,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         <div className="border-y border-border bg-card/50 py-8 px-6">
           <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
             {[
-              { value: "170+", label: "Stocks & assets" },
+              { value: "550+", label: "Stocks & assets" },
               { value: "6", label: "Languages" },
               { value: "AI", label: "Fact-checking" },
               { value: "24/7", label: "AI advisor" },
