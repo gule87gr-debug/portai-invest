@@ -37,7 +37,10 @@ const SettingsPage = () => {
   }, []);
 
   useEffect(() => {
-    if (profile.name) setSavedName(profile.name);
+    if (profile.name) {
+      setSavedName(profile.name);
+      setEditingName(profile.name);
+    }
   }, []);
 
   const checkNameAvailable = useCallback(async (name: string) => {
