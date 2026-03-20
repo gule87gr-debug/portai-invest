@@ -20,7 +20,6 @@ export const AppSidebar = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
-  const { isDark, toggle: toggleTheme } = useTheme();
   let t: (key: string) => string;
   try {
     const lang = useLanguage();
