@@ -2,7 +2,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Brain, BarChart3, MessageSquare, Eye, Sparkles, LayoutDashboard, Globe, ArrowRight, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef } from "react";
-
+import { useLanguage } from "@/contexts/LanguageContext";
 const features = [
   {
     icon: LayoutDashboard,
