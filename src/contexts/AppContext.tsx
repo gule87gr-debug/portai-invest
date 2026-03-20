@@ -140,6 +140,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [profile, setProfile] = useState<UserProfile>(() => loadFromLS("portai-profile", { name: "Guest User", email: "", avatar: null, anonymous: false }));
   const [initialLanguage, setInitialLanguage] = useState("en");
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
   const loadWatchlists = async (userId: string) => {
     const { data: wlData } = await supabase
@@ -207,12 +208,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           anonymous: false,
         });
       }
+      // Mark profile as loaded AFTER DB data is applied
+      setProfileLoaded(true);
     };
     init();
   }, []);
 
+  // Only sync profile to DB after the initial load is complete
   useEffect(() => {
-    if (!currentUserId) return;
+    if (!currentUserId || !profileLoaded) return;
     const timeout = setTimeout(async () => {
       await supabase.from("user_settings").update({
         display_name: profile.name,
@@ -223,7 +227,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem("portai-profile", JSON.stringify(profile));
     }, 500);
     return () => clearTimeout(timeout);
-  }, [profile, currentUserId]);
+  }, [profile, currentUserId, profileLoaded]);
 
   useEffect(() => { localStorage.setItem("portai-threads", JSON.stringify(threads)); }, [threads]);
 
