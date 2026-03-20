@@ -57,6 +57,8 @@ const Forum = () => {
   const [isModeratingComment, setIsModeratingComment] = useState<string | null>(null);
   const [factCheckLoading, setFactCheckLoading] = useState<string | null>(null);
   const [factCheckResults, setFactCheckResults] = useState<Record<string, FactCheckResult>>({});
+  const [commentFactCheckLoading, setCommentFactCheckLoading] = useState<string | null>(null);
+  const [commentFactCheckResults, setCommentFactCheckResults] = useState<Record<string, FactCheckResult>>({});
 
   const handleFactCheck = async (threadId: string, title: string, body: string) => {
     setFactCheckLoading(threadId);
