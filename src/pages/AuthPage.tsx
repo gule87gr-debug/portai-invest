@@ -21,10 +21,10 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
   const [emailInUse, setEmailInUse] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
-  const [usernameTimer, setUsernameTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [otpCode, setOtpCode] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const usernameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const startCooldown = useCallback(() => {
     setResendCooldown(30);
@@ -42,7 +42,10 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
   }, []);
 
   useEffect(() => {
-    return () => { if (cooldownRef.current) clearInterval(cooldownRef.current); };
+    return () => {
+      if (cooldownRef.current) clearInterval(cooldownRef.current);
+      if (usernameTimerRef.current) clearTimeout(usernameTimerRef.current);
+    };
   }, []);
 
   const validateEmail = (value: string) => {
@@ -59,19 +62,24 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
   const checkUsername = (value: string) => {
     setUsername(value);
     setUsernameStatus("idle");
-    if (usernameTimer) clearTimeout(usernameTimer);
-    if (!value.trim() || value.trim().length < 2) return;
-    const timer = setTimeout(async () => {
+    if (usernameTimerRef.current) clearTimeout(usernameTimerRef.current);
+
+    const trimmed = value.trim();
+    if (!trimmed || trimmed.length < 2) return;
+
+    usernameTimerRef.current = setTimeout(async () => {
       setUsernameStatus("checking");
-      const { data, error } = await supabase
-        .from("user_settings")
-        .select("user_id")
-        .ilike("display_name", value.trim())
-        .limit(1);
-      if (error) { setUsernameStatus("idle"); return; }
-      setUsernameStatus(data && data.length > 0 ? "taken" : "available");
+      const { data, error } = await supabase.rpc("check_username_available", {
+        desired_username: trimmed,
+      });
+
+      if (error) {
+        setUsernameStatus("idle");
+        return;
+      }
+
+      setUsernameStatus(data ? "available" : "taken");
     }, 500);
-    setUsernameTimer(timer);
   };
 
   const handle = async () => {
@@ -87,12 +95,10 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
 
     if (mode === "signup") {
       // Re-check availability right before creating to prevent race conditions
-      const { data: existing } = await supabase
-        .from("user_settings")
-        .select("user_id")
-        .ilike("display_name", username.trim())
-        .limit(1);
-      if (existing && existing.length > 0) {
+      const { data: availableNow, error: availabilityError } = await supabase.rpc("check_username_available", {
+        desired_username: username.trim(),
+      });
+      if (availabilityError || !availableNow) {
         setUsernameStatus("taken");
         setError("This display name was just taken. Please choose another.");
         setLoading(false);
@@ -195,7 +201,7 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
   };
 
   const hasEmailError = emailError.length > 0;
-  const isSubmitDisabled = loading || hasEmailError || (mode === "signup" && usernameStatus === "taken");
+  const isSubmitDisabled = loading || hasEmailError || (mode === "signup" && (usernameStatus === "taken" || usernameStatus === "checking"));
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
