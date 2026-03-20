@@ -73,7 +73,6 @@ const HomePage = () => {
   const navigate = useNavigate();
   let t: (k: string) => string;
   try {
-    const { useLanguage } = require("@/contexts/LanguageContext");
     t = useLanguage().t;
   } catch {
     t = (k: string) => k;
