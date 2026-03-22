@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://portai-invest.lovable.app/sitemap.xml
+Sitemap: https://portai-invest.com/sitemap.xml
