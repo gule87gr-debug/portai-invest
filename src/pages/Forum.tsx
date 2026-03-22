@@ -110,7 +110,9 @@ const Forum = () => {
   };
 
   const handlePost = async () => {
-    if (!newTitle.trim() || !newBody.trim()) return;
+    const trimmedTitle = newTitle.trim().slice(0, 500);
+    const trimmedBody = newBody.trim().slice(0, 10000);
+    if (!trimmedTitle || !trimmedBody) return;
     setIsModeratingPost(true);
     const allowed = await moderateContent(newTitle, newBody);
     if (!allowed) { toast({ title: t("moderationError"), variant: "destructive", duration: 2000 }); setIsModeratingPost(false); return; }
