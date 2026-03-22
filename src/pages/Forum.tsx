@@ -110,7 +110,9 @@ const Forum = () => {
   };
 
   const handlePost = async () => {
-    if (!newTitle.trim() || !newBody.trim()) return;
+    const trimmedTitle = newTitle.trim().slice(0, 500);
+    const trimmedBody = newBody.trim().slice(0, 10000);
+    if (!trimmedTitle || !trimmedBody) return;
     setIsModeratingPost(true);
     const allowed = await moderateContent(newTitle, newBody);
     if (!allowed) { toast({ title: t("moderationError"), variant: "destructive", duration: 2000 }); setIsModeratingPost(false); return; }
@@ -189,8 +191,8 @@ const Forum = () => {
               <button onClick={() => setShowNewThread(false)} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
             </div>
             <div className="space-y-3">
-              <input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder={t("threadTitle")} className="h-10 w-full rounded-lg border border-border bg-accent/30 px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-              <textarea value={newBody} onChange={(e) => setNewBody(e.target.value)} placeholder={t("shareThoughts")} rows={4} className="w-full rounded-lg border border-border bg-accent/30 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
+              <input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} maxLength={500} placeholder={t("threadTitle")} className="h-10 w-full rounded-lg border border-border bg-accent/30 px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+              <textarea value={newBody} onChange={(e) => setNewBody(e.target.value)} maxLength={10000} placeholder={t("shareThoughts")} rows={4} className="w-full rounded-lg border border-border bg-accent/30 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs text-muted-foreground">{t("tag")}:</span>
                 {tagOptions.map((tag) => (

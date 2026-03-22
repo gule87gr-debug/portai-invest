@@ -85,10 +85,15 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
   const handle = async () => {
     setEmailInUse(false);
     if (!email.trim() || !password.trim()) return setError("Please fill in all fields");
+    if (email.trim().length > 255) return setError("Email is too long");
     if (!emailRegex.test(email.trim())) return setError("Please enter a valid email address");
-    if (password.length < 6) return setError("Password must be at least 6 characters");
+    if (password.length < 8) return setError("Password must be at least 8 characters");
+    if (password.length > 128) return setError("Password is too long");
+    if (mode === "signup" && !/[A-Z]/.test(password)) return setError("Password must contain at least one uppercase letter");
+    if (mode === "signup" && !/[0-9]/.test(password)) return setError("Password must contain at least one number");
     if (mode === "signup" && !username.trim()) return setError("Display name is required");
     if (mode === "signup" && username.trim().length < 2) return setError("Display name must be at least 2 characters");
+    if (mode === "signup" && username.trim().length > 30) return setError("Display name must be 30 characters or less");
     if (mode === "signup" && usernameStatus === "taken") return setError("This display name is already taken");
     setLoading(true);
     setError("");

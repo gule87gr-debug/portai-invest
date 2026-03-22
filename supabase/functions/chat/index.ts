@@ -1,20 +1,91 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { checkRateLimit, getClientIP, rateLimitResponse } from "../_shared/rate-limiter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const MAX_MESSAGES = 50;
+const MAX_MESSAGE_CONTENT_LENGTH = 8000;
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  // Rate limit: 15 requests per minute per IP
+  const ip = getClientIP(req);
+  const rl = checkRateLimit(`chat:${ip}`, { maxRequests: 15, windowMs: 60_000 });
+  if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs, corsHeaders);
+
   try {
-    const { messages } = await req.json();
+    const rawBody = await req.json();
+
+    // Validate messages array
+    if (!rawBody || typeof rawBody !== "object") {
+      return new Response(JSON.stringify({ error: "Invalid request body" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { messages } = rawBody;
+
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return new Response(JSON.stringify({ error: "\"messages\" must be a non-empty array" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (messages.length > MAX_MESSAGES) {
+      return new Response(JSON.stringify({ error: `Too many messages (max ${MAX_MESSAGES})` }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Validate and sanitize each message
+    const validRoles = new Set(["user", "assistant"]);
+    const sanitizedMessages = [];
+
+    for (const msg of messages) {
+      if (!msg || typeof msg !== "object") continue;
+      if (!validRoles.has(msg.role)) continue;
+
+      if (typeof msg.content === "string") {
+        if (msg.content.length > MAX_MESSAGE_CONTENT_LENGTH) {
+          sanitizedMessages.push({ role: msg.role, content: msg.content.slice(0, MAX_MESSAGE_CONTENT_LENGTH) });
+        } else {
+          sanitizedMessages.push({ role: msg.role, content: msg.content });
+        }
+      } else if (Array.isArray(msg.content)) {
+        // Multimodal content - validate each part
+        const validParts = [];
+        for (const part of msg.content) {
+          if (part.type === "text" && typeof part.text === "string") {
+            validParts.push({ type: "text", text: part.text.slice(0, MAX_MESSAGE_CONTENT_LENGTH) });
+          } else if (part.type === "image_url" && part.image_url?.url && typeof part.image_url.url === "string") {
+            // Only allow data: URIs and https: URLs, limit URL length
+            const url = part.image_url.url;
+            if ((url.startsWith("data:image/") || url.startsWith("https://")) && url.length < 10_000_000) {
+              validParts.push({ type: "image_url", image_url: { url } });
+            }
+          }
+        }
+        if (validParts.length > 0) {
+          sanitizedMessages.push({ role: msg.role, content: validParts });
+        }
+      }
+    }
+
+    if (sanitizedMessages.length === 0) {
+      return new Response(JSON.stringify({ error: "No valid messages provided" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     // Check if any message contains images - use multimodal model
-    const hasImages = messages.some((m: any) =>
+    const hasImages = sanitizedMessages.some((m: any) =>
       Array.isArray(m.content) && m.content.some((c: any) => c.type === "image_url")
     );
 
@@ -73,7 +144,7 @@ Always end with: "⚠️ Just my take — not financial advice. Do your own rese
         model,
         messages: [
           { role: "system", content: systemPrompt },
-          ...messages,
+          ...sanitizedMessages,
         ],
         stream: true,
       }),
