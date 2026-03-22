@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns:s="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <s:url>
+    <s:loc>https://portai-invest.lovable.app/</s:loc>
+    <s:lastmod>2026-03-22</s:lastmod>
+    <s:priority>1.0</s:priority>
+  </s:url>
+  <s:url>
+    <s:loc>https://portai-invest.lovable.app/auth</s:loc>
+    <s:lastmod>2026-03-22</s:lastmod>
+    <s:priority>0.8</s:priority>
+  </s:url>
+</urlset>
