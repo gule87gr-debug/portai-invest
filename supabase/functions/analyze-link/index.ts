@@ -1,16 +1,31 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { checkRateLimit, getClientIP, rateLimitResponse } from "../_shared/rate-limiter.ts";
+import { validateInput, validationErrorResponse, type SchemaDefinition } from "../_shared/input-validator.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const inputSchema: SchemaDefinition = {
+  url: { type: "string", required: true, minLength: 5, maxLength: 2048, pattern: /^https?:\/\/.+/ },
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  // Rate limit: 10 requests per minute per IP
+  const ip = getClientIP(req);
+  const rl = checkRateLimit(`analyze:${ip}`, { maxRequests: 10, windowMs: 60_000 });
+  if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs, corsHeaders);
+
   try {
-    const { url } = await req.json();
-    if (!url) throw new Error("URL is required");
+    const rawBody = await req.json();
+
+    const { valid, errors, sanitized } = validateInput(rawBody, inputSchema);
+    if (!valid) return validationErrorResponse(errors, corsHeaders);
+
+    const { url } = sanitized as { url: string };
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -72,10 +87,8 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "";
     
-    // Parse the JSON from AI response
     let analysis;
     try {
-      // Try to extract JSON from the response
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       analysis = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
     } catch {
