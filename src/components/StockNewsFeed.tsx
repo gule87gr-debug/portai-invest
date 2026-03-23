@@ -142,9 +142,20 @@ export const StockNewsFeed = () => {
       {/* News list */}
       <div className="rounded-lg border border-border overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-16 text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin mr-2" />
-            <span className="text-sm">Loading news...</span>
+          <div className="divide-y divide-border">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-start gap-3 p-3">
+                <div className="h-10 w-10 shrink-0 rounded-lg bg-muted animate-pulse" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-full rounded bg-muted animate-pulse" />
+                  <div className="h-4 w-3/4 rounded bg-muted animate-pulse" />
+                  <div className="flex gap-2">
+                    <div className="h-4 w-16 rounded bg-muted animate-pulse" />
+                    <div className="h-4 w-10 rounded bg-muted animate-pulse" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : error ? (
           <div className="flex items-center justify-center py-16 text-muted-foreground">
