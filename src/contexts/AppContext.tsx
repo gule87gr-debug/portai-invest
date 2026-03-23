@@ -39,6 +39,8 @@ type AppState = {
   setProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
   currentUserId: string | null;
   initialLanguage: string;
+  showTutorial: boolean;
+  setShowTutorial: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const defaultWatchlists: WatchlistData[] = [
@@ -142,6 +144,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [initialLanguage, setInitialLanguage] = useState("en");
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [savedDisplayName, setSavedDisplayName] = useState("");
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const loadWatchlists = async (userId: string) => {
     const { data: wlData } = await supabase
@@ -197,6 +200,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         });
         if ((settings as any).language) {
           setInitialLanguage((settings as any).language);
+        }
+        // Check if tutorial should show
+        if (!(settings as any).tutorial_completed) {
+          setShowTutorial(true);
         }
       } else {
         const defaultName = user.email?.split("@")[0] || "User";
@@ -322,7 +329,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setThreads((prev) => prev.map((t) => t.id === threadId ? { ...t, comments: t.comments.filter((c) => c.id !== commentId) } : t));
 
   return (
-    <AppContext.Provider value={{ watchlists, setWatchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, deleteWatchlist, watchlistsLoaded, threads, setThreads, addThread, likeThread, addComment, setFactCheck, deleteThread, deleteComment, profile, setProfile, currentUserId, initialLanguage }}>
+    <AppContext.Provider value={{ watchlists, setWatchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, deleteWatchlist, watchlistsLoaded, threads, setThreads, addThread, likeThread, addComment, setFactCheck, deleteThread, deleteComment, profile, setProfile, currentUserId, initialLanguage, showTutorial, setShowTutorial }}>
       {children}
     </AppContext.Provider>
   );

@@ -222,6 +222,7 @@ export type Database = {
           display_name: string
           id: string
           language: string
+          tutorial_completed: boolean
           updated_at: string
           user_id: string
           username: string | null
@@ -233,6 +234,7 @@ export type Database = {
           display_name?: string
           id?: string
           language?: string
+          tutorial_completed?: boolean
           updated_at?: string
           user_id: string
           username?: string | null
@@ -244,6 +246,7 @@ export type Database = {
           display_name?: string
           id?: string
           language?: string
+          tutorial_completed?: boolean
           updated_at?: string
           user_id?: string
           username?: string | null

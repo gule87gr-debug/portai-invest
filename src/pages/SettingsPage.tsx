@@ -2,13 +2,15 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { useApp } from "@/contexts/AppContext";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
-import { User, Eye, EyeOff, Upload, Camera, LogOut, Globe, Sun, Moon, Check, X as XIcon, Loader2 } from "lucide-react";
+import { User, Eye, EyeOff, Upload, Camera, LogOut, Globe, Sun, Moon, Check, X as XIcon, Loader2, GraduationCap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "@/hooks/use-theme";
+import { useNavigate } from "react-router-dom";
 
 const SettingsPage = () => {
-  const { profile, setProfile } = useApp();
+  const { profile, setProfile, setShowTutorial } = useApp();
+  const navigate = useNavigate();
   let language: Language, setLanguage: (l: Language) => void, t: (key: string) => string, langNames: Record<Language, string>;
   try {
     const lang = useLanguage();
@@ -202,6 +204,32 @@ const SettingsPage = () => {
             </button>
           </div>
           {profile.anonymous && <p className="mt-3 text-sm text-muted-foreground">{t("appearAs")} <span className="font-medium text-foreground">"{t("anonymousTrader")}"</span></p>}
+        </div>
+
+        {/* Take the Tour */}
+        <div className="rounded-xl border border-border bg-card p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <GraduationCap className="h-5 w-5 text-primary" />
+              <div>
+                <h3 className="font-semibold">Take the Tour</h3>
+                <p className="text-xs text-muted-foreground">Replay the onboarding walkthrough</p>
+              </div>
+            </div>
+            <button
+              onClick={async () => {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                  await supabase.from("user_settings").update({ tutorial_completed: false } as any).eq("user_id", user.id);
+                }
+                setShowTutorial(true);
+                navigate("/dashboard");
+              }}
+              className="rounded-lg border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
+            >
+              Start Tour
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center justify-end">

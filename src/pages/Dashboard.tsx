@@ -52,7 +52,7 @@ const Dashboard = () => {
         <p className="mt-1 text-muted-foreground">{t("aiCuratedAnalysis")}</p>
       </div>
 
-      <div className="mb-8">
+      <div className="mb-8" data-tour="news-feed">
         <StockNewsFeed />
       </div>
 
@@ -60,7 +60,7 @@ const Dashboard = () => {
         <TrendingStocks />
       </div>
 
-      <div className="mb-8 rounded-xl border border-border bg-card p-4 sm:p-6">
+      <div className="mb-8 rounded-xl border border-border bg-card p-4 sm:p-6" data-tour="analyze-link">
         <div className="flex items-center gap-2 mb-2">
           <LinkIcon className="h-5 w-5 text-primary" />
           <h2 className="text-lg font-semibold">{t("analyzeLink")}</h2>
