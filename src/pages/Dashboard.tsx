@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { TradingViewHeatmap } from "@/components/TradingViewWidgets";
 import { StockNewsFeed } from "@/components/StockNewsFeed";
+import { TrendingStocks } from "@/components/TrendingStocks";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link as LinkIcon, Search, Globe, ShieldCheck, FileText, AlertCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
