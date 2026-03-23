@@ -126,10 +126,6 @@ const HomePage = () => {
           })}
         </div>
 
-        {/* Trending stocks */}
-        <div className="mt-6">
-          <TrendingStocks />
-        </div>
 
         {/* Tip */}
         <div
