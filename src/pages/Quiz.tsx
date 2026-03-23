@@ -2,10 +2,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
+import { UpgradeModal } from "@/components/UpgradeModal";
 import { useApp } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import { generatePortfolio, portfolioToStocks } from "@/lib/quizRecommendations";
-import { ChevronLeft, ChevronRight, Sparkles, Clock, Target, TrendingUp, BarChart3, CheckCircle2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles, Clock, Target, TrendingUp, BarChart3, CheckCircle2, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const Quiz = () => {
@@ -14,6 +16,7 @@ const Quiz = () => {
   const [answers, setAnswers] = useState<Record<number, string[]>>({});
   const [showResults, setShowResults] = useState(false);
   const { watchlists, addWatchlist } = useApp();
+  const { isPro } = useSubscription();
   const navigate = useNavigate();
 
   const steps = [
@@ -70,8 +73,27 @@ const Quiz = () => {
     return (
       <AppLayout>
         <DisclaimerBanner />
-        <div className="mx-auto mt-6 max-w-3xl animate-fade-in">
-          <div className="rounded-2xl border border-border bg-card p-8">
+        <div className="mx-auto mt-6 max-w-3xl animate-fade-in relative">
+          {/* Blurred overlay for free users */}
+          {!isPro && (
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-2xl bg-background/60 backdrop-blur-md">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/20 mb-4">
+                <Lock className="h-8 w-8 text-primary" />
+              </div>
+              <h2 className="text-xl font-bold mb-2">Unlock Your Investor Profile</h2>
+              <p className="text-sm text-muted-foreground mb-5 text-center max-w-sm">
+                Upgrade to Pro to see your personalized results, recommended allocations, and projected returns.
+              </p>
+              <button onClick={() => navigate("/pricing")} className="rounded-xl bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+                Upgrade to Pro — $9.99/mo
+              </button>
+              <button onClick={() => { setShowResults(false); setStep(0); setAnswers({}); }} className="mt-3 text-sm text-muted-foreground hover:text-foreground">
+                Retake Quiz
+              </button>
+            </div>
+          )}
+
+          <div className={cn("rounded-2xl border border-border bg-card p-8", !isPro && "select-none")}>
             <div className="mb-6 flex justify-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/20 animate-[pulse_2s_ease-in-out_1]">
                 <CheckCircle2 className="h-7 w-7 text-primary" />
@@ -118,14 +140,16 @@ const Quiz = () => {
               </div>
             </div>
 
-            <div className="mt-8 flex gap-4">
-              <button onClick={() => { setShowResults(false); setStep(0); setAnswers({}); }} className="flex-1 rounded-xl border border-border bg-card py-3 text-sm font-medium transition-colors hover:bg-accent">
-                {t("retakeQuiz")}
-              </button>
-              <button onClick={handleBuildPortfolio} className="flex-1 rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
-                {t("buildThisPortfolio")}
-              </button>
-            </div>
+            {isPro && (
+              <div className="mt-8 flex gap-4">
+                <button onClick={() => { setShowResults(false); setStep(0); setAnswers({}); }} className="flex-1 rounded-xl border border-border bg-card py-3 text-sm font-medium transition-colors hover:bg-accent">
+                  {t("retakeQuiz")}
+                </button>
+                <button onClick={handleBuildPortfolio} className="flex-1 rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+                  {t("buildThisPortfolio")}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </AppLayout>

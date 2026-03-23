@@ -24,6 +24,7 @@ import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Unsubscribe from "./pages/Unsubscribe";
+import Pricing from "./pages/Pricing";
 import { CookieConsent } from "./components/CookieConsent";
 
 const queryClient = new QueryClient();
@@ -49,6 +50,7 @@ const AppWithLanguage = () => {
         <Route path="/watchlists" element={<Watchlists />} />
         <Route path="/stock/:ticker" element={<StockDetail />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/pricing" element={<Pricing />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </LanguageProvider>
