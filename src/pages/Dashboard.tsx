@@ -52,7 +52,7 @@ const Dashboard = () => {
         <p className="mt-1 text-muted-foreground">{t("aiCuratedAnalysis")}</p>
       </div>
 
-      <div className="mb-8">
+      <div className="mb-8" data-tour="news-feed">
         <StockNewsFeed />
       </div>
 
