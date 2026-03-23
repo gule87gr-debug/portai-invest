@@ -126,10 +126,15 @@ const HomePage = () => {
           })}
         </div>
 
+        {/* Trending stocks */}
+        <div className="mt-6">
+          <TrendingStocks />
+        </div>
+
         {/* Tip */}
         <div
           onClick={() => navigate("/settings")}
-          className="mt-8 rounded-xl border border-border bg-card/60 px-5 py-4 flex items-start gap-3 cursor-pointer transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 active:scale-[0.98]"
+          className="mt-6 rounded-xl border border-border bg-card/60 px-5 py-4 flex items-start gap-3 cursor-pointer transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 active:scale-[0.98]"
         >
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/15 mt-0.5">
             <Globe className="h-4 w-4 text-primary" />
