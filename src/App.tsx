@@ -28,10 +28,17 @@ import { CookieConsent } from "./components/CookieConsent";
 const queryClient = new QueryClient();
 
 const AppWithLanguage = () => {
-  const { initialLanguage } = useApp();
+  const { initialLanguage, showTutorial, setShowTutorial } = useApp();
+  const navigate = useNavigate();
 
   return (
     <LanguageProvider initialLanguage={initialLanguage as Language}>
+      {showTutorial && (
+        <OnboardingTutorial onComplete={() => {
+          setShowTutorial(false);
+          navigate("/dashboard");
+        }} />
+      )}
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/dashboard" element={<Dashboard />} />
