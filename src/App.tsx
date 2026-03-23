@@ -22,6 +22,7 @@ import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import Unsubscribe from "./pages/Unsubscribe";
 import { CookieConsent } from "./components/CookieConsent";
 
 const queryClient = new QueryClient();
