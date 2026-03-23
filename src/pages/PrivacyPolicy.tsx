@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 const PrivacyPolicy = () => {
+  usePageTitle("Privacy Policy | PortAI");
   return (
     <div className="min-h-screen bg-background">
       <nav className="flex items-center justify-between px-6 py-5 max-w-4xl mx-auto">

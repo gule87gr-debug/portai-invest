@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 const Watchlists = () => {
   const { watchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, deleteWatchlist, watchlistsLoaded } = useApp();
   const { t } = useLanguage();
+  usePageTitle("Stock Watchlists | PortAI");
   const [activeIdx, setActiveIdx] = useState(0);
   const [showNewList, setShowNewList] = useState(false);
   const [newListName, setNewListName] = useState("");

@@ -11,6 +11,7 @@ import { ArrowLeft, Building2, Newspaper, BarChart3 } from "lucide-react";
 const StockDetail = () => {
   const { ticker } = useParams<{ ticker: string }>();
   const symbol = ticker?.toUpperCase() || "SPY";
+  usePageTitle(`${symbol} Stock Detail | PortAI`);
   const info = getStockDescription(symbol);
   let t: (key: string) => string;
   try {

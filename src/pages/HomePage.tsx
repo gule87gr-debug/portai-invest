@@ -72,6 +72,7 @@ function useReveal() {
 }
 
 const HomePage = () => {
+  usePageTitle("Home | PortAI");
   const navigate = useNavigate();
   let t: (k: string) => string;
   try {

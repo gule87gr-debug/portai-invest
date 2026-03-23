@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 
 const Quiz = () => {
   const { t } = useLanguage();
+  usePageTitle("Investor Profile Quiz | PortAI");
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string[]>>({});
   const [showResults, setShowResults] = useState(false);

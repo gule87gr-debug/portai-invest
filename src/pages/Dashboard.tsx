@@ -19,6 +19,7 @@ type AnalysisResult = {
 };
 
 const Dashboard = () => {
+  usePageTitle("Market Intelligence | PortAI");
   const { t } = useLanguage();
   const [url, setUrl] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);

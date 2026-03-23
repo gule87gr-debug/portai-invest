@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 const SettingsPage = () => {
   const { profile, setProfile, setShowTutorial } = useApp();
   const navigate = useNavigate();
+  usePageTitle("Settings | PortAI");
 
   let language: Language, setLanguage: (l: Language) => void, t: (key: string) => string, langNames: Record<Language, string>;
   try {
