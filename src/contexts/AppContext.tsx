@@ -39,6 +39,8 @@ type AppState = {
   setProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
   currentUserId: string | null;
   initialLanguage: string;
+  showTutorial: boolean;
+  setShowTutorial: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const defaultWatchlists: WatchlistData[] = [
