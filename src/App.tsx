@@ -24,6 +24,7 @@ import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Unsubscribe from "./pages/Unsubscribe";
+import Pricing from "./pages/Pricing";
 import { CookieConsent } from "./components/CookieConsent";
 
 const queryClient = new QueryClient();
