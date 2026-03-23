@@ -21,6 +21,7 @@ export const AppSidebar = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
+  const [tourLocked, setTourLocked] = useState(false);
   let t: (key: string) => string;
   try {
     const lang = useLanguage();
@@ -29,9 +30,26 @@ export const AppSidebar = () => {
     t = (key: string) => key;
   }
 
+  // Close on route change (but not during tour)
   useEffect(() => {
-    setOpen(false);
-  }, [location.pathname]);
+    if (!tourLocked) setOpen(false);
+  }, [location.pathname, tourLocked]);
+
+  // Listen for tour open/close events
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.open) {
+        setOpen(true);
+        setTourLocked(true);
+      } else {
+        setTourLocked(false);
+        // Don't auto-close here — let user interaction handle it
+      }
+    };
+    window.addEventListener("tour-sidebar", handler);
+    return () => window.removeEventListener("tour-sidebar", handler);
+  }, []);
 
   return (
     <>
@@ -47,7 +65,7 @@ export const AppSidebar = () => {
         </div>
       )}
 
-      {open && (
+      {open && !tourLocked && (
         <div className="fixed inset-0 z-40 bg-background/60 backdrop-blur-sm" onClick={() => setOpen(false)} />
       )}
 
@@ -64,9 +82,11 @@ export const AppSidebar = () => {
             </div>
             <span className="text-lg font-bold text-foreground">PortAI</span>
           </div>
-          <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground">
-            <X className="h-5 w-5" />
-          </button>
+          {!tourLocked && (
+            <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground">
+              <X className="h-5 w-5" />
+            </button>
+          )}
         </div>
 
         <nav className="mt-2 flex flex-1 flex-col gap-1 px-3">
@@ -77,6 +97,7 @@ export const AppSidebar = () => {
                 key={to}
                 to={to}
                 data-tour={tour || undefined}
+                onClick={(e) => { if (tourLocked) e.preventDefault(); }}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
                   active
@@ -92,7 +113,7 @@ export const AppSidebar = () => {
 
           <div className="mt-auto pt-2 border-t border-sidebar-border">
             <button
-              onClick={() => supabase.auth.signOut()}
+              onClick={() => { if (!tourLocked) supabase.auth.signOut(); }}
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-loss transition-all hover:bg-loss/10"
             >
               <LogOut className="h-4.5 w-4.5" />
