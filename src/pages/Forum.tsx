@@ -225,6 +225,27 @@ const Forum = () => {
       </div>
 
       <div className="space-y-4">
+        {filtered.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-16 animate-fade-in">
+            <div className="relative mb-6">
+              <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/10 border-2 border-dashed border-primary/30">
+                <MessageSquare className="h-9 w-9 text-primary/60" />
+              </div>
+              <div className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary shadow-lg">
+                <Plus className="h-4 w-4 text-primary-foreground" />
+              </div>
+            </div>
+            <h2 className="text-lg font-bold mb-1">{searchQuery ? "No threads found" : "No discussions yet"}</h2>
+            <p className="text-sm text-muted-foreground text-center max-w-sm mb-5">
+              {searchQuery ? "Try a different search term or browse all categories." : "Be the first to start a conversation! Share your investment ideas with the community."}
+            </p>
+            {!searchQuery && (
+              <button onClick={() => setShowNewThread(true)} className="flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+                <Plus className="h-4 w-4" /> {t("newThread")}
+              </button>
+            )}
+          </div>
+        )}
         {filtered.map((th, i) => {
           const isExpanded = expandedThread === th.id;
           return (

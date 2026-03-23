@@ -80,12 +80,19 @@ const Watchlists = () => {
     return (
       <AppLayout>
         {createModal}
-        <div className="flex flex-col items-center justify-center py-16">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/15 mb-4">
-            <Eye className="h-8 w-8 text-primary" />
+        <div className="flex flex-col items-center justify-center py-16 animate-fade-in">
+          <div className="relative mb-6">
+            <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/10 border-2 border-dashed border-primary/30">
+              <Eye className="h-9 w-9 text-primary/60" />
+            </div>
+            <div className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary shadow-lg">
+              <Plus className="h-4 w-4 text-primary-foreground" />
+            </div>
           </div>
           <h1 className="text-2xl font-bold mb-2">{t("noWatchlistsYet")}</h1>
-          <p className="text-muted-foreground mb-6 text-center max-w-sm">{t("createFirstWatchlist")}</p>
+          <p className="text-muted-foreground mb-6 text-center max-w-sm text-sm leading-relaxed">
+            Create your first watchlist to start tracking stocks, ETFs, and crypto with live charts and price data.
+          </p>
           <button onClick={() => setShowNewList(true)} className="flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
             <Plus className="h-4 w-4" /> {t("createWatchlist")}
           </button>
