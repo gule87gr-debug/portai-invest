@@ -50,6 +50,7 @@ const AppWithLanguage = () => {
         <Route path="/watchlists" element={<Watchlists />} />
         <Route path="/stock/:ticker" element={<StockDetail />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/pricing" element={<Pricing />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </LanguageProvider>
