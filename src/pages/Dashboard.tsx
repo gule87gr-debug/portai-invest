@@ -83,9 +83,22 @@ const Dashboard = () => {
                   <h3 className="font-semibold text-base">{result.title}</h3>
                   <p className="text-xs text-muted-foreground mt-0.5">{t("source")}: {result.source}</p>
                 </div>
-                <div className="text-center">
-                  <p className={cn("text-3xl font-bold font-mono", trustColor(result.trustScore))}>{result.trustScore}<span className="text-sm text-muted-foreground">/10</span></p>
-                  <p className="text-[10px] text-muted-foreground">{t("trustScore")}</p>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => {
+                      const text = `📊 AI Analysis: "${result.title}" — Trust Score: ${result.trustScore}/10\n\n${result.summary.slice(0, 200)}...\n\nAnalyzed on @PortAI_Invest 👉 https://portai-invest.com`;
+                      window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer,width=550,height=420");
+                    }}
+                    className="flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
+                    title="Share to X"
+                  >
+                    <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    Share
+                  </button>
+                  <div className="text-center">
+                    <p className={cn("text-3xl font-bold font-mono", trustColor(result.trustScore))}>{result.trustScore}<span className="text-sm text-muted-foreground">/10</span></p>
+                    <p className="text-[10px] text-muted-foreground">{t("trustScore")}</p>
+                  </div>
                 </div>
               </div>
               <div className="rounded-lg bg-accent/30 p-3 mb-3">

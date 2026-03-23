@@ -295,6 +295,16 @@ const Forum = () => {
                   <button onClick={() => setExpandedThread(isExpanded ? null : th.id)} className="flex items-center gap-1 hover:text-primary transition-colors">
                     <MessageCircle className="h-3.5 w-3.5" /> {th.comments.length}
                   </button>
+                  <button
+                    onClick={() => {
+                      const text = `💬 "${th.title}"\n\n${th.body.slice(0, 180)}...\n\nDiscussed on @PortAI_Invest 👉 https://portai-invest.com`;
+                      window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer,width=550,height=420");
+                    }}
+                    className="flex items-center gap-1 hover:text-foreground transition-colors"
+                    title="Share to X"
+                  >
+                    <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                  </button>
                 </div>
                 <button
                   onClick={() => handleFactCheck(th.id, th.title, th.body)}
