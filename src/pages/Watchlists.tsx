@@ -56,8 +56,21 @@ const Watchlists = () => {
   if (!watchlistsLoaded) {
     return (
       <AppLayout>
-        <div className="flex items-center justify-center py-16">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        <div className="mb-4">
+          <div className="h-8 w-48 rounded bg-muted animate-pulse mb-2" />
+          <div className="h-4 w-32 rounded bg-muted animate-pulse" />
+        </div>
+        <div className="flex gap-6">
+          <div className="hidden sm:block w-60 shrink-0 space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-20 rounded-xl border border-border bg-card animate-pulse" />
+            ))}
+          </div>
+          <div className="flex-1 rounded-xl border border-border bg-card p-6 space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-48 rounded-xl border border-border animate-pulse bg-muted/30" />
+            ))}
+          </div>
         </div>
       </AppLayout>
     );
