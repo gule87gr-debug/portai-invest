@@ -172,26 +172,6 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </div>
       </section>
 
-      {/* Trending stocks teaser */}
-      <RevealSection>
-        <div className="px-6 pb-16 max-w-5xl mx-auto">
-          <div className="rounded-2xl border border-border bg-card/40 p-6 shadow-2xl shadow-primary/5 text-center">
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              <h3 className="text-lg font-semibold text-foreground">Trending on PortAI</h3>
-            </div>
-            <p className="text-sm text-muted-foreground max-w-lg mx-auto mb-4">
-              See which stocks, ETFs and crypto are being watched most by the PortAI community this week — updated daily.
-            </p>
-            <button
-              onClick={onGetStarted}
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
-            >
-              Sign up to see trending stocks <ChevronRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        </div>
-      </RevealSection>
 
       {/* Stats bar */}
       <RevealSection>
