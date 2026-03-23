@@ -9,7 +9,8 @@ import { useTheme } from "@/hooks/use-theme";
 import { useNavigate } from "react-router-dom";
 
 const SettingsPage = () => {
-  const { profile, setProfile } = useApp();
+  const { profile, setProfile, setShowTutorial } = useApp();
+  const navigate = useNavigate();
   let language: Language, setLanguage: (l: Language) => void, t: (key: string) => string, langNames: Record<Language, string>;
   try {
     const lang = useLanguage();
