@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { useApp } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { generatePortfolio, portfolioToStocks } from "@/lib/quizRecommendations";
@@ -10,6 +11,7 @@ import { cn } from "@/lib/utils";
 
 const Quiz = () => {
   const { t } = useLanguage();
+  usePageTitle("Investor Profile Quiz | PortAI");
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string[]>>({});
   const [showResults, setShowResults] = useState(false);

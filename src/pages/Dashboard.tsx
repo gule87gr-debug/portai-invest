@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { TradingViewHeatmap } from "@/components/TradingViewWidgets";
 import { StockNewsFeed } from "@/components/StockNewsFeed";
 import { TrendingStocks } from "@/components/TrendingStocks";
@@ -19,6 +19,7 @@ type AnalysisResult = {
 };
 
 const Dashboard = () => {
+  usePageTitle("Market Intelligence | PortAI");
   const { t } = useLanguage();
   const [url, setUrl] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);

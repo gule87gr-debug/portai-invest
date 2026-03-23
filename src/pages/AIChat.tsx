@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { Send, Sparkles, Plus, Trash2, MessageCircle, Image, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -85,6 +86,7 @@ const MarkdownContent = ({ content }: { content: string }) => (
 
 const AIChat = () => {
   const { t } = useLanguage();
+  usePageTitle("AI Financial Advisor | PortAI");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);

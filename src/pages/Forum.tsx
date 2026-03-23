@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { useApp } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNotifications } from "@/contexts/NotificationContext";
@@ -43,6 +44,7 @@ const claimStatusConfig: Record<string, { color: string }> = {
 const Forum = () => {
   const { threads, addThread, likeThread, addComment, setFactCheck, deleteThread, deleteComment, profile, currentUserId } = useApp();
   const { t } = useLanguage();
+  usePageTitle("Smart Investor Forum | PortAI");
   const { toast } = useToast();
   const { addNotification } = useNotifications();
   const [active, setActive] = useState("All");
