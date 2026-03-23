@@ -70,12 +70,13 @@ export const AppSidebar = () => {
         </div>
 
         <nav className="mt-2 flex flex-1 flex-col gap-1 px-3">
-          {navKeys.map(({ to, icon: Icon, key }) => {
+          {navKeys.map(({ to, icon: Icon, key, tour }) => {
             const active = location.pathname === to;
             return (
               <NavLink
                 key={to}
                 to={to}
+                data-tour={tour || undefined}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
                   active
