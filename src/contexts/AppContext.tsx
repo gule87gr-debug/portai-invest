@@ -144,6 +144,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [initialLanguage, setInitialLanguage] = useState("en");
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [savedDisplayName, setSavedDisplayName] = useState("");
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const loadWatchlists = async (userId: string) => {
     const { data: wlData } = await supabase
