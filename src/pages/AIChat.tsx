@@ -2,8 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useSubscription } from "@/hooks/useSubscription";
-import { Send, Sparkles, Plus, Trash2, MessageCircle, Image, X, Crown } from "lucide-react";
+import { Send, Sparkles, Plus, Trash2, MessageCircle, Image, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
@@ -86,7 +85,6 @@ const MarkdownContent = ({ content }: { content: string }) => (
 
 const AIChat = () => {
   const { t } = useLanguage();
-  const { isPro } = useSubscription();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -198,14 +196,7 @@ const AIChat = () => {
             <Sparkles className="h-5 w-5 text-primary-foreground" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg sm:text-xl font-bold">{t("aiFinancialAdvisor")}</h1>
-              {isPro && (
-                <span className="flex items-center gap-1 rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                  <Crown className="h-3 w-3" /> Priority
-                </span>
-              )}
-            </div>
+            <h1 className="text-lg sm:text-xl font-bold">{t("aiFinancialAdvisor")}</h1>
             <p className="text-xs text-muted-foreground">{t("poweredByAI")}</p>
           </div>
         </div>
@@ -293,7 +284,6 @@ const AIChat = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Image preview */}
         {imagePreview && (
           <div className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-card p-2">
             <img src={imagePreview} alt="Preview" className="h-16 w-16 rounded-lg object-cover" />
