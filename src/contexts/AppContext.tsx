@@ -201,6 +201,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         if ((settings as any).language) {
           setInitialLanguage((settings as any).language);
         }
+        // Check if tutorial should show
+        if (!(settings as any).tutorial_completed) {
+          setShowTutorial(true);
+        }
       } else {
         const defaultName = user.email?.split("@")[0] || "User";
         await supabase.from("user_settings").insert({
