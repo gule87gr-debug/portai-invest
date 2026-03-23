@@ -86,6 +86,7 @@ const MarkdownContent = ({ content }: { content: string }) => (
 
 const AIChat = () => {
   const { t } = useLanguage();
+  const { isPro } = useSubscription();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
