@@ -191,14 +191,15 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         <div className="border-y border-border bg-card/50 py-8 px-6">
           <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
             {[
-              { value: "550+", label: "Stocks & assets" },
-              { value: "6", label: "Languages" },
-              { value: "AI", label: "Fact-checking" },
-              { value: "24/7", label: "AI advisor" },
+              { value: "550+", label: "Stocks & assets", icon: BarChart3 },
+              { value: "6", label: "Languages", icon: Globe },
+              { value: "AI", label: "Fact-checking", icon: ShieldCheck },
+              { value: "24/7", label: "AI advisor", icon: Brain },
             ].map((s) => (
-              <div key={s.label}>
+              <div key={s.label} className="flex flex-col items-center gap-1.5">
+                <s.icon className="h-5 w-5 text-primary mb-0.5" />
                 <p className="text-2xl font-bold text-foreground font-mono tracking-tight">{s.value}</p>
-                <p className="text-xs text-muted-foreground mt-1">{s.label}</p>
+                <p className="text-xs text-muted-foreground">{s.label}</p>
               </div>
             ))}
           </div>
