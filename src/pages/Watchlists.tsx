@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { useApp, Stock } from "@/contexts/AppContext";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { searchAssets, AssetEntry } from "@/lib/stockDatabase";
 import { TradingViewMiniChart } from "@/components/TradingViewWidgets";

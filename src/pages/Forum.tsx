@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { useApp } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNotifications } from "@/contexts/NotificationContext";

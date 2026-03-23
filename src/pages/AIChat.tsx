@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { Send, Sparkles, Plus, Trash2, MessageCircle, Image, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";

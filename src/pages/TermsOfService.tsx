@@ -1,5 +1,6 @@
 import { ArrowLeft, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 const TermsOfService = () => {
   return (

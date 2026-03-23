@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { useApp } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { generatePortfolio, portfolioToStocks } from "@/lib/quizRecommendations";

@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { TradingViewChart, TradingViewTechnicalAnalysis } from "@/components/TradingViewWidgets";
 import { StockNews } from "@/components/StockNews";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
