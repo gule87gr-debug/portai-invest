@@ -56,8 +56,21 @@ const Watchlists = () => {
   if (!watchlistsLoaded) {
     return (
       <AppLayout>
-        <div className="flex items-center justify-center py-16">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        <div className="mb-4">
+          <div className="h-8 w-48 rounded bg-muted animate-pulse mb-2" />
+          <div className="h-4 w-32 rounded bg-muted animate-pulse" />
+        </div>
+        <div className="flex gap-6">
+          <div className="hidden sm:block w-60 shrink-0 space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-20 rounded-xl border border-border bg-card animate-pulse" />
+            ))}
+          </div>
+          <div className="flex-1 rounded-xl border border-border bg-card p-6 space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-48 rounded-xl border border-border animate-pulse bg-muted/30" />
+            ))}
+          </div>
         </div>
       </AppLayout>
     );
@@ -67,12 +80,19 @@ const Watchlists = () => {
     return (
       <AppLayout>
         {createModal}
-        <div className="flex flex-col items-center justify-center py-16">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/15 mb-4">
-            <Eye className="h-8 w-8 text-primary" />
+        <div className="flex flex-col items-center justify-center py-16 animate-fade-in">
+          <div className="relative mb-6">
+            <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/10 border-2 border-dashed border-primary/30">
+              <Eye className="h-9 w-9 text-primary/60" />
+            </div>
+            <div className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary shadow-lg">
+              <Plus className="h-4 w-4 text-primary-foreground" />
+            </div>
           </div>
           <h1 className="text-2xl font-bold mb-2">{t("noWatchlistsYet")}</h1>
-          <p className="text-muted-foreground mb-6 text-center max-w-sm">{t("createFirstWatchlist")}</p>
+          <p className="text-muted-foreground mb-6 text-center max-w-sm text-sm leading-relaxed">
+            Create your first watchlist to start tracking stocks, ETFs, and crypto with live charts and price data.
+          </p>
           <button onClick={() => setShowNewList(true)} className="flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
             <Plus className="h-4 w-4" /> {t("createWatchlist")}
           </button>
@@ -190,7 +210,7 @@ const Watchlists = () => {
                   <div className="flex items-center justify-between px-3 sm:px-4 pt-3 pb-1">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="font-semibold text-sm">{s.ticker}</span>
-                      <Sparkline seed={s.ticker} width={64} height={22} className="shrink-0" />
+                      <Sparkline seed={s.ticker} width={90} height={28} className="shrink-0" />
                       <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground hidden sm:inline">{s.sector}</span>
                       <span className="text-xs text-muted-foreground hidden sm:inline truncate max-w-[180px]">{s.name}</span>
                     </div>

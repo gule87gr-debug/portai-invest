@@ -1,5 +1,6 @@
 import { TrendingUp, Brain, BarChart3, MessageSquare, Eye, ArrowRight, Sparkles, LayoutDashboard, BookOpen, Shield, Globe, ChevronRight, Zap, Target, Users, LineChart, Newspaper, CheckCircle2, Lock, ShieldCheck, Fingerprint } from "lucide-react";
 import { useEffect, useRef } from "react";
+import dashboardMockup from "@/assets/dashboard-mockup.png";
 
 const features = [
   {
@@ -143,7 +144,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       </nav>
 
       {/* Hero */}
-      <section className="px-6 pt-16 pb-24 max-w-4xl mx-auto text-center">
+      <section className="px-6 pt-16 pb-12 max-w-4xl mx-auto text-center">
         <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary mb-6">
           <Sparkles className="h-3.5 w-3.5" /> AI-Powered Investment Platform
         </div>
@@ -171,19 +172,34 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </div>
       </section>
 
+      {/* Dashboard mockup */}
+      <RevealSection>
+        <div className="px-6 pb-16 max-w-5xl mx-auto">
+          <div className="rounded-2xl border border-border bg-card/40 p-2 shadow-2xl shadow-primary/5">
+            <img
+              src={dashboardMockup}
+              alt="PortAI dashboard showing stock charts, AI analysis, and watchlists"
+              className="w-full rounded-xl"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </RevealSection>
+
       {/* Stats bar */}
       <RevealSection>
         <div className="border-y border-border bg-card/50 py-8 px-6">
           <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
             {[
-              { value: "550+", label: "Stocks & assets" },
-              { value: "6", label: "Languages" },
-              { value: "AI", label: "Fact-checking" },
-              { value: "24/7", label: "AI advisor" },
+              { value: "550+", label: "Stocks & assets", icon: BarChart3 },
+              { value: "6", label: "Languages", icon: Globe },
+              { value: "AI", label: "Fact-checking", icon: ShieldCheck },
+              { value: "24/7", label: "AI advisor", icon: Brain },
             ].map((s) => (
-              <div key={s.label}>
+              <div key={s.label} className="flex flex-col items-center gap-1.5">
+                <s.icon className="h-5 w-5 text-primary mb-0.5" />
                 <p className="text-2xl font-bold text-foreground font-mono tracking-tight">{s.value}</p>
-                <p className="text-xs text-muted-foreground mt-1">{s.label}</p>
+                <p className="text-xs text-muted-foreground">{s.label}</p>
               </div>
             ))}
           </div>

@@ -142,9 +142,20 @@ export const StockNewsFeed = () => {
       {/* News list */}
       <div className="rounded-lg border border-border overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-16 text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin mr-2" />
-            <span className="text-sm">Loading news...</span>
+          <div className="divide-y divide-border">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-start gap-3 p-3">
+                <div className="h-10 w-10 shrink-0 rounded-lg bg-muted animate-pulse" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-full rounded bg-muted animate-pulse" />
+                  <div className="h-4 w-3/4 rounded bg-muted animate-pulse" />
+                  <div className="flex gap-2">
+                    <div className="h-4 w-16 rounded bg-muted animate-pulse" />
+                    <div className="h-4 w-10 rounded bg-muted animate-pulse" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : error ? (
           <div className="flex items-center justify-center py-16 text-muted-foreground">
@@ -156,30 +167,37 @@ export const StockNewsFeed = () => {
           </div>
         ) : (
           <div className="divide-y divide-border max-h-[500px] overflow-y-auto scrollbar-thin">
-            {news.map((item, i) => (
-              <a
-                key={i}
-                href={item.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-start gap-3 p-3 hover:bg-accent/30 transition-colors group"
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium leading-snug group-hover:text-primary transition-colors line-clamp-2">
-                    {item.title}
-                  </p>
-                  <div className="flex items-center gap-2 mt-1.5">
-                    <span className="text-[11px] font-medium text-primary/80 bg-primary/10 px-1.5 py-0.5 rounded">
-                      {item.source}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground">
-                      {formatTimeAgo(item.pubDate)}
-                    </span>
+            {news.map((item, i) => {
+              const sourceInitial = item.source?.[0]?.toUpperCase() || "N";
+              const sourceColor = ["bg-primary/20 text-primary", "bg-chart-3/20 text-chart-3", "bg-warning/20 text-warning", "bg-gain/20 text-gain"][i % 4];
+              return (
+                <a
+                  key={i}
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-start gap-3 p-3 hover:bg-accent/30 transition-colors group"
+                >
+                  <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-xs font-bold", sourceColor)}>
+                    {sourceInitial}
                   </div>
-                </div>
-                <ExternalLink className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </a>
-            ))}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium leading-snug group-hover:text-primary transition-colors line-clamp-2">
+                      {item.title}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <span className="text-[11px] font-medium text-primary/80 bg-primary/10 px-1.5 py-0.5 rounded">
+                        {item.source}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">
+                        {formatTimeAgo(item.pubDate)}
+                      </span>
+                    </div>
+                  </div>
+                  <ExternalLink className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </a>
+              );
+            })}
           </div>
         )}
       </div>
