@@ -1,5 +1,6 @@
 import { TrendingUp, Brain, BarChart3, MessageSquare, Eye, ArrowRight, Sparkles, LayoutDashboard, BookOpen, Shield, Globe, ChevronRight, Zap, Target, Users, LineChart, Newspaper, CheckCircle2, Lock, ShieldCheck, Fingerprint } from "lucide-react";
 import { useEffect, useRef } from "react";
+import dashboardMockup from "@/assets/dashboard-mockup.png";
 
 const features = [
   {
