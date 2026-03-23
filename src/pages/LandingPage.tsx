@@ -5,10 +5,10 @@ import { useEffect, useRef } from "react";
 const features = [
   {
     icon: LayoutDashboard,
-    title: "Smart Dashboard",
-    tagline: "Your financial command center",
+    title: "Market Intelligence",
+    tagline: "AI-curated financial news with trust scores and bias detection",
     details: [
-      "View curated market news with AI-generated trust scores",
+      "AI-curated financial news with trust scores and bias detection. Know exactly which sources to trust before making investment decisions.",
       "Paste any financial article URL for instant AI analysis",
       "See bias detection, credibility ratings, and smart summaries",
       "Stay informed with real-time news from major financial sources",
@@ -17,9 +17,9 @@ const features = [
   {
     icon: Brain,
     title: "AI Financial Advisor",
-    tagline: "Ask anything about investing",
+    tagline: "Your personal AI financial advisor available 24/7",
     details: [
-      "Chat with an AI trained on financial markets and strategies",
+      "Your personal AI financial advisor available 24/7. Ask about stocks, ETFs, crypto, portfolio strategy and market trends.",
       "Get personalized portfolio recommendations and analysis",
       "Ask about specific stocks, sectors, or investment concepts",
       "Conversation history saved across sessions for continuity",
@@ -28,20 +28,20 @@ const features = [
   {
     icon: Sparkles,
     title: "Investment Quiz",
-    tagline: "Discover your investor profile",
+    tagline: "Discover your personalized investor profile",
     details: [
+      "Get your personalized investor profile and AI stock recommendations tailored to your goals and risk tolerance.",
       "Complete a guided 5-step questionnaire about your goals",
-      "Get matched with an investment style (conservative to aggressive)",
       "Receive tailored stock and ETF recommendations",
       "Learn which sectors and asset classes fit your risk tolerance",
     ],
   },
   {
     icon: MessageSquare,
-    title: "Community Forum",
-    tagline: "Discuss with real investors",
+    title: "Smart Forum",
+    tagline: "The smartest investing community on the web",
     details: [
-      "Create threads to discuss market trends and trade ideas",
+      "Discuss stocks and market trends with AI-powered fact checking on every post. The smartest investing community on the web.",
       "AI-powered fact-checking flags unverified claims automatically",
       "Reply, upvote, and engage in meaningful financial discussions",
       "Moderated by AI to keep conversations grounded and respectful",
@@ -50,9 +50,9 @@ const features = [
   {
     icon: Eye,
     title: "Watchlists",
-    tagline: "Track what matters to you",
+    tagline: "Track 550+ stocks, ETFs and crypto assets",
     details: [
-      "Build custom watchlists with 550+ stocks, ETFs, and crypto",
+      "Track 550+ stocks, ETFs and crypto assets in real time with live prices, charts and AI analysis.",
       "View interactive TradingView charts with technical indicators",
       "Organize assets by sector, signal strength, or personal tags",
       "Monitor real-time price movements and market data",
@@ -109,6 +109,10 @@ const RevealSection = ({ children, className = "" }: { children: React.ReactNode
 };
 
 const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
+  useEffect(() => {
+    document.title = "PortAI — AI-Powered Investment Platform | Smart Investing with Artificial Intelligence";
+  }, []);
+
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       <style>{`
@@ -154,7 +158,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           <span className="text-primary">artificial intelligence</span>
         </h1>
         <p className="mt-5 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed" style={{ textWrap: "pretty" as any }}>
-          PortAI combines AI analysis, real-time market data, and community insights to help you make informed investment decisions — whether you're just starting out or managing a portfolio.
+          The AI-powered investment platform that detects bias in financial news, tracks your portfolio in real time and gives you personalized AI financial advice — free.
         </p>
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
           <button
@@ -178,10 +182,10 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         <div className="border-y border-border bg-card/50 py-8 px-6">
           <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
             {[
-              { value: "550+", label: "Stocks & assets", icon: BarChart3 },
-              { value: "6", label: "Languages", icon: Globe },
-              { value: "AI", label: "Fact-checking", icon: ShieldCheck },
-              { value: "24/7", label: "AI advisor", icon: Brain },
+              { value: "550+", label: "Stocks, ETFs & Crypto", icon: BarChart3 },
+              { value: "6", label: "Languages Supported", icon: Globe },
+              { value: "AI", label: "Bias & Fact Checking", icon: ShieldCheck },
+              { value: "24/7", label: "AI Financial Advisor", icon: Brain },
             ].map((s) => (
               <div key={s.label} className="flex flex-col items-center gap-1.5">
                 <s.icon className="h-5 w-5 text-primary mb-0.5" />
