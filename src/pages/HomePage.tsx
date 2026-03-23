@@ -3,6 +3,7 @@ import { Brain, BarChart3, MessageSquare, Eye, Sparkles, LayoutDashboard, Globe,
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { TrendingStocks } from "@/components/TrendingStocks";
 const features = [
   {
     icon: LayoutDashboard,
