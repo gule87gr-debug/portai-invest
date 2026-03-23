@@ -56,6 +56,10 @@ const Dashboard = () => {
         <StockNewsFeed />
       </div>
 
+      <div className="mb-8">
+        <TrendingStocks />
+      </div>
+
       <div className="mb-8 rounded-xl border border-border bg-card p-4 sm:p-6">
         <div className="flex items-center gap-2 mb-2">
           <LinkIcon className="h-5 w-5 text-primary" />
