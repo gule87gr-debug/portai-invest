@@ -8,13 +8,13 @@ import { NotificationBell } from "@/components/NotificationBell";
 import { supabase } from "@/integrations/supabase/client";
 
 const navKeys = [
-  { to: "/", icon: Home, key: "home" },
-  { to: "/dashboard", icon: LayoutDashboard, key: "dashboard" },
-  { to: "/chat", icon: MessageCircle, key: "aiChat" },
-  { to: "/quiz", icon: Sparkles, key: "quiz" },
-  { to: "/forum", icon: MessageSquare, key: "forum" },
-  { to: "/watchlists", icon: Eye, key: "watchlists" },
-  { to: "/settings", icon: Settings, key: "settings" },
+  { to: "/", icon: Home, key: "home", tour: "" },
+  { to: "/dashboard", icon: LayoutDashboard, key: "dashboard", tour: "" },
+  { to: "/chat", icon: MessageCircle, key: "aiChat", tour: "nav-chat" },
+  { to: "/quiz", icon: Sparkles, key: "quiz", tour: "nav-quiz" },
+  { to: "/forum", icon: MessageSquare, key: "forum", tour: "nav-forum" },
+  { to: "/watchlists", icon: Eye, key: "watchlists", tour: "nav-watchlists" },
+  { to: "/settings", icon: Settings, key: "settings", tour: "" },
 ];
 
 export const AppSidebar = () => {
