@@ -309,8 +309,14 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       </RevealSection>
 
       {/* Footer */}
-      <footer className="border-t border-border px-6 py-6 text-center">
-        <p className="text-xs text-muted-foreground">© 2026 PortAI. For educational purposes only. Not financial advice.</p>
+      <footer className="border-t border-border px-6 py-8">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-muted-foreground">© 2026 PortAI. For educational purposes only. Not financial advice.</p>
+          <div className="flex items-center gap-4">
+            <a href="/privacy-policy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a>
+            <a href="/terms-of-service" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Terms of Service</a>
+          </div>
+        </div>
       </footer>
     </div>
   );
