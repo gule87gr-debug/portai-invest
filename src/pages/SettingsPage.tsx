@@ -206,6 +206,32 @@ const SettingsPage = () => {
           {profile.anonymous && <p className="mt-3 text-sm text-muted-foreground">{t("appearAs")} <span className="font-medium text-foreground">"{t("anonymousTrader")}"</span></p>}
         </div>
 
+        {/* Take the Tour */}
+        <div className="rounded-xl border border-border bg-card p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <GraduationCap className="h-5 w-5 text-primary" />
+              <div>
+                <h3 className="font-semibold">Take the Tour</h3>
+                <p className="text-xs text-muted-foreground">Replay the onboarding walkthrough</p>
+              </div>
+            </div>
+            <button
+              onClick={async () => {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                  await supabase.from("user_settings").update({ tutorial_completed: false } as any).eq("user_id", user.id);
+                }
+                setShowTutorial(true);
+                navigate("/dashboard");
+              }}
+              className="rounded-lg border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
+            >
+              Start Tour
+            </button>
+          </div>
+        </div>
+
         <div className="flex items-center justify-end">
           <button onClick={handleLogout} className="flex items-center gap-2 rounded-xl border border-loss/30 px-5 py-2.5 text-sm font-medium text-loss transition-colors hover:bg-loss/10">
             <LogOut className="h-4 w-4" /> {t("logOut")}
