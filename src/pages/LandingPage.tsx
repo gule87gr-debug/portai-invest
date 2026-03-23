@@ -144,7 +144,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       </nav>
 
       {/* Hero */}
-      <section className="px-6 pt-16 pb-24 max-w-4xl mx-auto text-center">
+      <section className="px-6 pt-16 pb-12 max-w-4xl mx-auto text-center">
         <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary mb-6">
           <Sparkles className="h-3.5 w-3.5" /> AI-Powered Investment Platform
         </div>
@@ -171,6 +171,20 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           </a>
         </div>
       </section>
+
+      {/* Dashboard mockup */}
+      <RevealSection>
+        <div className="px-6 pb-16 max-w-5xl mx-auto">
+          <div className="rounded-2xl border border-border bg-card/40 p-2 shadow-2xl shadow-primary/5">
+            <img
+              src={dashboardMockup}
+              alt="PortAI dashboard showing stock charts, AI analysis, and watchlists"
+              className="w-full rounded-xl"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </RevealSection>
 
       {/* Stats bar */}
       <RevealSection>
