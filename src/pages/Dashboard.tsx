@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { AppLayout } from "@/components/AppLayout";
 import { TradingViewHeatmap } from "@/components/TradingViewWidgets";
 import { StockNewsFeed } from "@/components/StockNewsFeed";
 import { TrendingStocks } from "@/components/TrendingStocks";
