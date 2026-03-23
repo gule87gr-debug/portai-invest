@@ -55,7 +55,16 @@ serve(async (req) => {
 
     if (hasActiveSub) {
       const subscription = subscriptions.data[0];
-      subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+      try {
+        const endVal = subscription.current_period_end;
+        if (typeof endVal === 'number') {
+          subscriptionEnd = new Date(endVal * 1000).toISOString();
+        } else if (typeof endVal === 'string') {
+          subscriptionEnd = new Date(endVal).toISOString();
+        }
+      } catch {
+        subscriptionEnd = null;
+      }
       cancelAtPeriodEnd = subscription.cancel_at_period_end;
       subscriptionId = subscription.id;
     }
