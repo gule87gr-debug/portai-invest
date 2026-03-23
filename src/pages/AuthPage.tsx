@@ -127,6 +127,15 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
           user_id: data.user.id,
           display_name: username.trim(),
         });
+        // Send welcome email
+        supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "welcome",
+            recipientEmail: email.trim(),
+            idempotencyKey: `welcome-${data.user.id}`,
+            templateData: { displayName: username.trim() },
+          },
+        }).catch(() => {}); // Fire-and-forget
       }
       onAuth();
     } else {
