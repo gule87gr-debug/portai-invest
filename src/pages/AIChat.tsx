@@ -198,7 +198,14 @@ const AIChat = () => {
             <Sparkles className="h-5 w-5 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-lg sm:text-xl font-bold">{t("aiFinancialAdvisor")}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg sm:text-xl font-bold">{t("aiFinancialAdvisor")}</h1>
+              {isPro && (
+                <span className="flex items-center gap-1 rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                  <Crown className="h-3 w-3" /> Priority
+                </span>
+              )}
+            </div>
             <p className="text-xs text-muted-foreground">{t("poweredByAI")}</p>
           </div>
         </div>
