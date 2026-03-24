@@ -56,7 +56,7 @@ export const TrendingStocks = () => {
         const sorted = Object.entries(counts)
           .map(([ticker, { name, count }]) => ({ ticker, name, count }))
           .sort((a, b) => b.count - a.count)
-          .slice(0, 8);
+          .slice(0, 6);
 
         setTrending(sorted);
       }
