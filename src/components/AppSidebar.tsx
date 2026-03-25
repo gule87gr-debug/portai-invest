@@ -77,9 +77,7 @@ export const AppSidebar = () => {
       >
         <div className="flex items-center justify-between px-5 py-5">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-              <TrendingUp className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <img src="/logo.png" alt="PortAI" className="h-9 w-9 rounded-lg" />
             <span className="text-lg font-bold text-foreground">PortAI</span>
           </div>
           {!tourLocked && (
