@@ -42,7 +42,7 @@ const steps: TutorialStep[] = [
     type: "tooltip",
     selector: "[data-tour='nav-watchlists']",
     title: "Track Your Stocks",
-    text: "Build custom watchlists to track 550+ stocks, ETFs and crypto with live prices and charts.",
+    text: "Build custom watchlists to track 1500+ stocks, ETFs and crypto with live prices and charts.",
     requiresSidebar: true,
   },
   {
