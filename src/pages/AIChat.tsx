@@ -85,6 +85,11 @@ const MarkdownContent = ({ content }: { content: string }) => (
   </ReactMarkdown>
 );
 
+const FREE_MSG_LIMIT = 10;
+const FREE_MSG_WINDOW_HOURS = 12;
+const FREE_IMG_LIMIT = 3;
+const FREE_IMG_WINDOW_HOURS = 24;
+
 const AIChat = () => {
   const { t } = useLanguage();
   usePageTitle("AI Financial Advisor | PortAI");
@@ -95,6 +100,8 @@ const AIChat = () => {
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [showSessions, setShowSessions] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [msgUsage, setMsgUsage] = useState(0);
+  const [imgUsage, setImgUsage] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -102,8 +109,32 @@ const AIChat = () => {
   const welcomeShown = messages.length === 0;
   const suggestions = [t("suggestETF"), t("suggestDiversify"), t("suggestPE"), t("suggestDCA")];
 
+  const msgLimitReached = !isPro && msgUsage >= FREE_MSG_LIMIT;
+  const imgLimitReached = !isPro && imgUsage >= FREE_IMG_LIMIT;
+
+  const loadUsage = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const msgCutoff = new Date(Date.now() - FREE_MSG_WINDOW_HOURS * 3600000).toISOString();
+    const imgCutoff = new Date(Date.now() - FREE_IMG_WINDOW_HOURS * 3600000).toISOString();
+    const [{ count: mc }, { count: ic }] = await Promise.all([
+      supabase.from("chat_usage").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("usage_type", "message").gte("created_at", msgCutoff),
+      supabase.from("chat_usage").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("usage_type", "image_analysis").gte("created_at", imgCutoff),
+    ]);
+    setMsgUsage(mc ?? 0);
+    setImgUsage(ic ?? 0);
+  };
+
+  const trackUsage = async (type: "message" | "image_analysis") => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("chat_usage").insert({ user_id: user.id, usage_type: type } as any);
+    if (type === "message") setMsgUsage((p) => p + 1);
+    else setImgUsage((p) => p + 1);
+  };
+
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
-  useEffect(() => { loadSessions(); }, []);
+  useEffect(() => { loadSessions(); loadUsage(); }, []);
 
   const loadSessions = async () => {
     const { data } = await supabase.from("chat_sessions").select("id, title, created_at").order("updated_at", { ascending: false });
@@ -154,12 +185,24 @@ const AIChat = () => {
 
   const send = async (text: string) => {
     if ((!text.trim() && !imagePreview) || isTyping) return;
+    const hasImage = !!imagePreview;
+
+    if (!isPro) {
+      if (msgLimitReached) return;
+      if (hasImage && imgLimitReached) return;
+    }
+
     const userMsg: Message = { role: "user", content: text || "Analyze this image", imageUrl: imagePreview || undefined };
     const allMessages = [...messages, userMsg];
     setMessages(allMessages);
     setInput("");
     setImagePreview(null);
     setIsTyping(true);
+
+    if (!isPro) {
+      await trackUsage("message");
+      if (hasImage) await trackUsage("image_analysis");
+    }
 
     let sessionId = activeSessionId;
     if (!sessionId) {
@@ -238,6 +281,31 @@ const AIChat = () => {
 
       <DisclaimerBanner />
 
+      {!isPro && (
+        <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
+          <span className={cn(msgLimitReached && "text-destructive font-semibold")}>
+            Messages: {msgUsage}/{FREE_MSG_LIMIT} (resets every {FREE_MSG_WINDOW_HOURS}h)
+          </span>
+          <span className={cn(imgLimitReached && "text-destructive font-semibold")}>
+            Image analyses: {imgUsage}/{FREE_IMG_LIMIT} (resets every {FREE_IMG_WINDOW_HOURS}h)
+          </span>
+        </div>
+      )}
+
+      {msgLimitReached && (
+        <div className="mt-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3 flex items-center gap-2 text-sm">
+          <Crown className="h-4 w-4 text-primary shrink-0" />
+          <span>You've reached your free message limit ({FREE_MSG_LIMIT} every {FREE_MSG_WINDOW_HOURS}h). <a href="/pricing" className="text-primary font-semibold hover:underline">Upgrade to Pro</a> for unlimited messages.</span>
+        </div>
+      )}
+
+      {imgLimitReached && !msgLimitReached && (
+        <div className="mt-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3 flex items-center gap-2 text-sm">
+          <Crown className="h-4 w-4 text-primary shrink-0" />
+          <span>You've used all {FREE_IMG_LIMIT} free image analyses today. <a href="/pricing" className="text-primary font-semibold hover:underline">Upgrade to Pro</a> for unlimited analyses.</span>
+        </div>
+      )}
+
       <div className="mt-4 flex flex-col" style={{ minHeight: "calc(100vh - 320px)" }}>
         <div className="flex-1 space-y-4 overflow-y-auto scrollbar-thin">
           {welcomeShown && (
@@ -305,11 +373,11 @@ const AIChat = () => {
 
         <div className="mt-4 flex items-center gap-2">
           <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleImageSelect} />
-          <button onClick={() => fileInputRef.current?.click()} className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-foreground hover:bg-accent" title={t("uploadImage")}>
+          <button onClick={() => fileInputRef.current?.click()} disabled={imgLimitReached} className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-foreground hover:bg-accent", imgLimitReached && "opacity-50 cursor-not-allowed")} title={imgLimitReached ? "Image analysis limit reached" : t("uploadImage")}>
             <Image className="h-5 w-5" />
           </button>
-          <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && send(input)} placeholder={t("askAnything")} className="h-12 flex-1 rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-          <button onClick={() => send(input)} disabled={isTyping} className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
+          <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && !msgLimitReached && send(input)} placeholder={msgLimitReached ? "Message limit reached — upgrade to Pro" : t("askAnything")} disabled={msgLimitReached} className={cn("h-12 flex-1 rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", msgLimitReached && "opacity-50 cursor-not-allowed")} />
+          <button onClick={() => send(input)} disabled={isTyping || msgLimitReached} className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
             <Send className="h-5 w-5" />
           </button>
         </div>
