@@ -95,7 +95,7 @@ const SettingsPage = () => {
     try {
       const { error } = await supabase.functions.invoke("cancel-subscription", { body: { subscription_id: subscriptionId } });
       if (error) throw error;
-      toast.success("Subscription cancelled. You'll retain access until the end of your billing period.");
+      toast.success("Subscription cancelled. You've been downgraded to the Free plan.");
       await refresh();
     } catch (e: any) {
       toast.error(e.message || "Failed to cancel subscription");
