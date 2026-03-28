@@ -243,7 +243,7 @@ const SettingsPage = () => {
                 <h2 className="text-lg font-bold">Cancel Subscription?</h2>
               </div>
               <p className="text-sm text-muted-foreground mb-6">
-                You'll keep Pro access until the end of your current billing period{formattedEnd ? ` (${formattedEnd})` : ""}. After that, you'll be downgraded to the Free plan.
+                Your subscription will be cancelled immediately and you'll be downgraded to the Free plan right away. This action cannot be undone.
               </p>
               <div className="flex gap-3">
                 <button onClick={() => setShowCancelModal(false)} className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium hover:bg-accent">
