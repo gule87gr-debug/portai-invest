@@ -3,16 +3,19 @@ import { AppLayout } from "@/components/AppLayout";
 import { useApp } from "@/contexts/AppContext";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { User, Eye, EyeOff, Upload, Camera, LogOut, Globe, Sun, Moon, Check, X as XIcon, Loader2, GraduationCap } from "lucide-react";
+import { useSubscription } from "@/hooks/useSubscription";
+import { User, Eye, EyeOff, Upload, Camera, LogOut, Globe, Sun, Moon, Check, X as XIcon, Loader2, GraduationCap, Crown, CreditCard, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "@/hooks/use-theme";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const SettingsPage = () => {
   const { profile, setProfile, setShowTutorial } = useApp();
   const navigate = useNavigate();
   usePageTitle("Settings | PortAI");
+  const { isPro, subscriptionEnd, cancelAtPeriodEnd, subscriptionId, loading: subLoading, refresh } = useSubscription();
 
   let language: Language, setLanguage: (l: Language) => void, t: (key: string) => string, langNames: Record<Language, string>;
   try {
@@ -34,6 +37,10 @@ const SettingsPage = () => {
   const [nameStatus, setNameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
   const [savedName, setSavedName] = useState<string>("");
   const [editingName, setEditingName] = useState<string>("");
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+
+  const formattedEnd = subscriptionEnd ? new Date(subscriptionEnd).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : null;
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -81,6 +88,32 @@ const SettingsPage = () => {
   };
 
   const handleLogout = async () => { await supabase.auth.signOut(); };
+
+  const handleCancelSubscription = async () => {
+    if (!subscriptionId) return;
+    setCancelLoading(true);
+    try {
+      const { error } = await supabase.functions.invoke("cancel-subscription", { body: { subscription_id: subscriptionId } });
+      if (error) throw error;
+      toast.success("Subscription cancelled. You'll retain access until the end of your billing period.");
+      await refresh();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to cancel subscription");
+    } finally {
+      setCancelLoading(false);
+      setShowCancelModal(false);
+    }
+  };
+
+  const handleManageBilling = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke("customer-portal");
+      if (error) throw error;
+      if (data?.url) window.open(data.url, "_blank");
+    } catch (e: any) {
+      toast.error(e.message || "Failed to open billing portal");
+    }
+  };
 
   return (
     <AppLayout>
@@ -152,6 +185,78 @@ const SettingsPage = () => {
             </div>
           </div>
         </div>
+
+        {/* Subscription Management */}
+        <div className="rounded-xl border border-border bg-card p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Crown className="h-5 w-5 text-primary" />
+            <div>
+              <h3 className="font-semibold">Subscription</h3>
+              <p className="text-xs text-muted-foreground">Manage your plan and billing</p>
+            </div>
+          </div>
+
+          {subLoading ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" /> Loading subscription...
+            </div>
+          ) : isPro ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary">Pro Plan</span>
+                {cancelAtPeriodEnd && <span className="rounded-full bg-warning/20 px-3 py-1 text-xs font-semibold text-warning">Cancelling</span>}
+              </div>
+              {formattedEnd && (
+                <p className="text-sm text-muted-foreground">
+                  {cancelAtPeriodEnd ? `Access until ${formattedEnd}` : `Next billing: ${formattedEnd}`}
+                </p>
+              )}
+              <div className="flex gap-3">
+                <button onClick={handleManageBilling} className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-accent">
+                  <CreditCard className="h-4 w-4" /> Manage Billing
+                </button>
+                {!cancelAtPeriodEnd && (
+                  <button onClick={() => setShowCancelModal(true)} className="flex items-center gap-2 rounded-lg border border-loss/30 px-4 py-2 text-sm font-medium text-loss hover:bg-loss/10">
+                    Cancel Subscription
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">You're on the <span className="font-medium text-foreground">Free</span> plan.</p>
+              <button onClick={() => navigate("/pricing")} className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+                <Crown className="h-4 w-4" /> Upgrade to Pro — $9.99/mo
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Cancel Modal */}
+        {showCancelModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in p-4">
+            <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-warning/20">
+                  <AlertTriangle className="h-5 w-5 text-warning" />
+                </div>
+                <h2 className="text-lg font-bold">Cancel Subscription?</h2>
+              </div>
+              <p className="text-sm text-muted-foreground mb-6">
+                You'll keep Pro access until the end of your current billing period{formattedEnd ? ` (${formattedEnd})` : ""}. After that, you'll be downgraded to the Free plan.
+              </p>
+              <div className="flex gap-3">
+                <button onClick={() => setShowCancelModal(false)} className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium hover:bg-accent">
+                  Keep Pro
+                </button>
+                <button onClick={handleCancelSubscription} disabled={cancelLoading} className="flex-1 rounded-xl bg-loss py-2.5 text-sm font-medium text-white hover:bg-loss/90 disabled:opacity-50 flex items-center justify-center gap-2">
+                  {cancelLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                  Cancel Subscription
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="rounded-xl border border-border bg-card p-6">
           <div className="flex items-center gap-3 mb-4">

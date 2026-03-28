@@ -5,8 +5,10 @@ import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useApp } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSubscription } from "@/hooks/useSubscription";
+import { UpgradeModal } from "@/components/UpgradeModal";
 import { generatePortfolio, portfolioToStocks } from "@/lib/quizRecommendations";
-import { ChevronLeft, ChevronRight, Sparkles, Clock, Target, TrendingUp, BarChart3, CheckCircle2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles, Clock, Target, TrendingUp, BarChart3, CheckCircle2, Crown, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const Quiz = () => {
@@ -15,7 +17,9 @@ const Quiz = () => {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string[]>>({});
   const [showResults, setShowResults] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const { watchlists, addWatchlist } = useApp();
+  const { isPro } = useSubscription();
   const navigate = useNavigate();
 
   const steps = [
@@ -71,6 +75,7 @@ const Quiz = () => {
   if (showResults) {
     return (
       <AppLayout>
+        <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} title="Unlock Your Results" description="Upgrade to Pro to see your personalized portfolio, allocations, and projections." />
         <DisclaimerBanner />
         <div className="mx-auto mt-6 max-w-3xl animate-fade-in">
           <div className="rounded-2xl border border-border bg-card p-8">
@@ -80,43 +85,60 @@ const Quiz = () => {
               </div>
             </div>
             <h2 className="text-center text-2xl font-bold">{t("yourPersonalizedPortfolio")}</h2>
-            <p className="mx-auto mt-3 max-w-lg text-center text-sm leading-relaxed text-muted-foreground">{portfolio.rationale}</p>
+            <p className="mx-auto mt-3 max-w-lg text-center text-sm leading-relaxed text-muted-foreground">
+              {isPro ? portfolio.rationale : "Your personalized portfolio is ready! Upgrade to Pro to unlock your full results."}
+            </p>
 
-            <h3 className="mb-4 mt-8 text-lg font-semibold">{t("recommendedAllocations")}</h3>
-            <div className="space-y-4">
-              {portfolio.allocations.map((a, i) => (
-                <div key={a.ticker} className="flex gap-4 rounded-xl border border-border bg-accent/30 p-4 animate-fade-in" style={{ animationDelay: `${i * 100}ms` }}>
-                  <span className="flex h-10 min-w-[3rem] items-center justify-center rounded-lg bg-primary/20 text-sm font-bold text-primary font-mono">{a.pct}%</span>
+            <div className="relative">
+              {!isPro && (
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-xl bg-background/80 backdrop-blur-sm">
+                  <Lock className="h-8 w-8 text-primary mb-3" />
+                  <h3 className="text-lg font-bold mb-1">Results Locked</h3>
+                  <p className="text-sm text-muted-foreground mb-4 text-center max-w-xs">Upgrade to Pro to see your personalized portfolio allocations and projections.</p>
+                  <button onClick={() => setShowUpgrade(true)} className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+                    <Crown className="h-4 w-4" /> Unlock Results
+                  </button>
+                </div>
+              )}
+
+              <div className={cn(!isPro && "blur-md select-none pointer-events-none")}>
+                <h3 className="mb-4 mt-8 text-lg font-semibold">{t("recommendedAllocations")}</h3>
+                <div className="space-y-4">
+                  {portfolio.allocations.map((a, i) => (
+                    <div key={a.ticker} className="flex gap-4 rounded-xl border border-border bg-accent/30 p-4 animate-fade-in" style={{ animationDelay: `${i * 100}ms` }}>
+                      <span className="flex h-10 min-w-[3rem] items-center justify-center rounded-lg bg-primary/20 text-sm font-bold text-primary font-mono">{a.pct}%</span>
+                      <div>
+                        <p className="font-semibold">{a.ticker} <span className="font-normal text-muted-foreground">· {a.name}</span></p>
+                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{a.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-8 grid grid-cols-3 gap-4">
+                  {[
+                    { label: t("bearCase"), value: portfolio.bearCase, sub: t("fiveYearReturn"), border: "border-loss/40", text: "text-loss" },
+                    { label: t("baseCase"), value: portfolio.baseCase, sub: t("fiveYearReturn"), border: "border-border", text: "text-foreground" },
+                    { label: t("bullCase"), value: portfolio.bullCase, sub: t("fiveYearReturn"), border: "border-primary/40", text: "text-primary" },
+                  ].map((s) => (
+                    <div key={s.label} className={cn("rounded-xl border p-4 text-center", s.border)}>
+                      <p className="text-xs text-muted-foreground">{s.label}</p>
+                      <p className={cn("text-2xl font-bold font-mono", s.text)}>{s.value}</p>
+                      <p className="text-xs text-muted-foreground">{s.sub}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-6 flex justify-center gap-6 text-center">
                   <div>
-                    <p className="font-semibold">{a.ticker} <span className="font-normal text-muted-foreground">· {a.name}</span></p>
-                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{a.desc}</p>
+                    <p className="text-xs text-muted-foreground">{t("expectedReturn")}</p>
+                    <p className="text-lg font-bold text-primary">{portfolio.expectedReturn}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t("riskLevel")}</p>
+                    <p className="text-lg font-bold">{portfolio.riskLevel}</p>
                   </div>
                 </div>
-              ))}
-            </div>
-
-            <div className="mt-8 grid grid-cols-3 gap-4">
-              {[
-                { label: t("bearCase"), value: portfolio.bearCase, sub: t("fiveYearReturn"), border: "border-loss/40", text: "text-loss" },
-                { label: t("baseCase"), value: portfolio.baseCase, sub: t("fiveYearReturn"), border: "border-border", text: "text-foreground" },
-                { label: t("bullCase"), value: portfolio.bullCase, sub: t("fiveYearReturn"), border: "border-primary/40", text: "text-primary" },
-              ].map((s) => (
-                <div key={s.label} className={cn("rounded-xl border p-4 text-center", s.border)}>
-                  <p className="text-xs text-muted-foreground">{s.label}</p>
-                  <p className={cn("text-2xl font-bold font-mono", s.text)}>{s.value}</p>
-                  <p className="text-xs text-muted-foreground">{s.sub}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-6 flex justify-center gap-6 text-center">
-              <div>
-                <p className="text-xs text-muted-foreground">{t("expectedReturn")}</p>
-                <p className="text-lg font-bold text-primary">{portfolio.expectedReturn}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">{t("riskLevel")}</p>
-                <p className="text-lg font-bold">{portfolio.riskLevel}</p>
               </div>
             </div>
 
@@ -124,9 +146,11 @@ const Quiz = () => {
               <button onClick={() => { setShowResults(false); setStep(0); setAnswers({}); }} className="flex-1 rounded-xl border border-border bg-card py-3 text-sm font-medium transition-colors hover:bg-accent">
                 {t("retakeQuiz")}
               </button>
-              <button onClick={handleBuildPortfolio} className="flex-1 rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
-                {t("buildThisPortfolio")}
-              </button>
+              {isPro && (
+                <button onClick={handleBuildPortfolio} className="flex-1 rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+                  {t("buildThisPortfolio")}
+                </button>
+              )}
             </div>
           </div>
         </div>
