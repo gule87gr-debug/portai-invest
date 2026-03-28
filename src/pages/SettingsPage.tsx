@@ -95,7 +95,7 @@ const SettingsPage = () => {
     try {
       const { error } = await supabase.functions.invoke("cancel-subscription", { body: { subscription_id: subscriptionId } });
       if (error) throw error;
-      toast.success("Subscription cancelled. You've been downgraded to the Free plan.");
+      toast.success("Subscription cancelled. You'll retain access until the end of your billing period.");
       await refresh();
     } catch (e: any) {
       toast.error(e.message || "Failed to cancel subscription");
@@ -243,7 +243,7 @@ const SettingsPage = () => {
                 <h2 className="text-lg font-bold">Cancel Subscription?</h2>
               </div>
               <p className="text-sm text-muted-foreground mb-6">
-                Your subscription will be cancelled immediately and you'll be downgraded to the Free plan right away. This action cannot be undone.
+                You'll keep Pro access until the end of your current billing period{formattedEnd ? ` (${formattedEnd})` : ""}. After that, you'll be downgraded to the Free plan.
               </p>
               <div className="flex gap-3">
                 <button onClick={() => setShowCancelModal(false)} className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium hover:bg-accent">
