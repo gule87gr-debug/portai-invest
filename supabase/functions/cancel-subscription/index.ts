@@ -36,10 +36,8 @@ serve(async (req) => {
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     
-    // Cancel at end of period
-    await stripe.subscriptions.update(subscription_id, {
-      cancel_at_period_end: true,
-    });
+    // Cancel immediately
+    await stripe.subscriptions.cancel(subscription_id);
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
