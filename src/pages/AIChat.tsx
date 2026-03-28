@@ -281,6 +281,31 @@ const AIChat = () => {
 
       <DisclaimerBanner />
 
+      {!isPro && (
+        <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
+          <span className={cn(msgLimitReached && "text-destructive font-semibold")}>
+            Messages: {msgUsage}/{FREE_MSG_LIMIT} (resets every {FREE_MSG_WINDOW_HOURS}h)
+          </span>
+          <span className={cn(imgLimitReached && "text-destructive font-semibold")}>
+            Image analyses: {imgUsage}/{FREE_IMG_LIMIT} (resets every {FREE_IMG_WINDOW_HOURS}h)
+          </span>
+        </div>
+      )}
+
+      {msgLimitReached && (
+        <div className="mt-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3 flex items-center gap-2 text-sm">
+          <Crown className="h-4 w-4 text-primary shrink-0" />
+          <span>You've reached your free message limit ({FREE_MSG_LIMIT} every {FREE_MSG_WINDOW_HOURS}h). <a href="/pricing" className="text-primary font-semibold hover:underline">Upgrade to Pro</a> for unlimited messages.</span>
+        </div>
+      )}
+
+      {imgLimitReached && !msgLimitReached && (
+        <div className="mt-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3 flex items-center gap-2 text-sm">
+          <Crown className="h-4 w-4 text-primary shrink-0" />
+          <span>You've used all {FREE_IMG_LIMIT} free image analyses today. <a href="/pricing" className="text-primary font-semibold hover:underline">Upgrade to Pro</a> for unlimited analyses.</span>
+        </div>
+      )}
+
       <div className="mt-4 flex flex-col" style={{ minHeight: "calc(100vh - 320px)" }}>
         <div className="flex-1 space-y-4 overflow-y-auto scrollbar-thin">
           {welcomeShown && (
@@ -348,11 +373,11 @@ const AIChat = () => {
 
         <div className="mt-4 flex items-center gap-2">
           <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleImageSelect} />
-          <button onClick={() => fileInputRef.current?.click()} className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-foreground hover:bg-accent" title={t("uploadImage")}>
+          <button onClick={() => fileInputRef.current?.click()} disabled={imgLimitReached} className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-foreground hover:bg-accent", imgLimitReached && "opacity-50 cursor-not-allowed")} title={imgLimitReached ? "Image analysis limit reached" : t("uploadImage")}>
             <Image className="h-5 w-5" />
           </button>
-          <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && send(input)} placeholder={t("askAnything")} className="h-12 flex-1 rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-          <button onClick={() => send(input)} disabled={isTyping} className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
+          <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && !msgLimitReached && send(input)} placeholder={msgLimitReached ? "Message limit reached — upgrade to Pro" : t("askAnything")} disabled={msgLimitReached} className={cn("h-12 flex-1 rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", msgLimitReached && "opacity-50 cursor-not-allowed")} />
+          <button onClick={() => send(input)} disabled={isTyping || msgLimitReached} className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
             <Send className="h-5 w-5" />
           </button>
         </div>
