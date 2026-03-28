@@ -37,7 +37,7 @@ serve(async (req) => {
       customer_email: customerId ? undefined : user.email,
       line_items: [{ price: "price_1TFyVKPJefLcxc6Cn1iwdSTk", quantity: 1 }],
       mode: "subscription",
-      success_url: `${origin}/dashboard?upgrade=success`,
+      success_url: `${origin}/upgrade-success`,
       cancel_url: `${origin}/pricing`,
     });
 
