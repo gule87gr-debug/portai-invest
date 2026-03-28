@@ -1,8 +1,8 @@
 Monetization system: Free vs Pro ($9.99/mo) tiers with Stripe integration
 
 ## Stripe IDs
-- Product: prod_UCbv3XBPzcIcTF
-- Price: price_1TEChWAIaAlyM68hjTFBLtAl
+- Product: prod_UEROAe01UbaEpK
+- Price: price_1TFyVKPJefLcxc6Cn1iwdSTk
 
 ## Free Tier Limits
 - 3 article analyses/day (tracked in analysis_usage table)
