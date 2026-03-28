@@ -205,6 +205,11 @@ const AIChat = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {isPro && (
+            <span className="flex items-center gap-1 rounded-full bg-primary/20 px-2.5 py-1 text-xs font-semibold text-primary">
+              <Crown className="h-3 w-3" /> Priority
+            </span>
+          )}
           <button onClick={() => setShowSessions(!showSessions)} className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs sm:text-sm font-medium transition-colors hover:bg-accent">
             <MessageCircle className="h-3.5 w-3.5" /> <span className="hidden sm:inline">{t("history")}</span>
           </button>
