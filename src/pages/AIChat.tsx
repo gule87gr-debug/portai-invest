@@ -3,7 +3,8 @@ import { AppLayout } from "@/components/AppLayout";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { Send, Sparkles, Plus, Trash2, MessageCircle, Image, X } from "lucide-react";
+import { Send, Sparkles, Plus, Trash2, MessageCircle, Image, X, Crown } from "lucide-react";
+import { useSubscription } from "@/hooks/useSubscription";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
@@ -97,6 +98,7 @@ const AIChat = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const { isPro } = useSubscription();
   const welcomeShown = messages.length === 0;
   const suggestions = [t("suggestETF"), t("suggestDiversify"), t("suggestPE"), t("suggestDCA")];
 
@@ -203,6 +205,11 @@ const AIChat = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {isPro && (
+            <span className="flex items-center gap-1 rounded-full bg-primary/20 px-2.5 py-1 text-xs font-semibold text-primary">
+              <Crown className="h-3 w-3" /> Priority
+            </span>
+          )}
           <button onClick={() => setShowSessions(!showSessions)} className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs sm:text-sm font-medium transition-colors hover:bg-accent">
             <MessageCircle className="h-3.5 w-3.5" /> <span className="hidden sm:inline">{t("history")}</span>
           </button>

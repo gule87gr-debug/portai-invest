@@ -21,6 +21,7 @@ import AuthPage from "./pages/AuthPage";
 import LandingPage from "./pages/LandingPage";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
+import Pricing from "./pages/Pricing";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Unsubscribe from "./pages/Unsubscribe";
@@ -49,6 +50,7 @@ const AppWithLanguage = () => {
         <Route path="/watchlists" element={<Watchlists />} />
         <Route path="/stock/:ticker" element={<StockDetail />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/pricing" element={<Pricing />} />
         <Route path="*" element={<NotFound />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

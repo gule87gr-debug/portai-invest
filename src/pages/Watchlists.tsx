@@ -4,6 +4,8 @@ import { AppLayout } from "@/components/AppLayout";
 import { useApp, Stock } from "@/contexts/AppContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSubscription } from "@/hooks/useSubscription";
+import { UpgradeModal } from "@/components/UpgradeModal";
 import { searchAssets, AssetEntry } from "@/lib/stockDatabase";
 import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
 import { Sparkline } from "@/components/Sparkline";
@@ -11,9 +13,13 @@ import { Plus, Trash2, Search, X, ChevronDown, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
+const FREE_MAX_WATCHLISTS = 1;
+const FREE_MAX_STOCKS = 5;
+
 const Watchlists = () => {
   const { watchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, deleteWatchlist, watchlistsLoaded } = useApp();
   const { t } = useLanguage();
+  const { isPro } = useSubscription();
   usePageTitle("Stock Watchlists | PortAI");
   const [activeIdx, setActiveIdx] = useState(0);
   const [showNewList, setShowNewList] = useState(false);
@@ -21,10 +27,33 @@ const Watchlists = () => {
   const [showAddStock, setShowAddStock] = useState(false);
   const [stockSearch, setStockSearch] = useState("");
   const [showListPicker, setShowListPicker] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const [upgradeMsg, setUpgradeMsg] = useState("");
   const navigate = useNavigate();
 
   const active = watchlists[activeIdx] || watchlists[0];
   const searchResults = searchAssets(stockSearch);
+
+  const canCreateWatchlist = isPro || watchlists.length < FREE_MAX_WATCHLISTS;
+  const canAddStock = isPro || (active?.stocks.length ?? 0) < FREE_MAX_STOCKS;
+
+  const handleNewListClick = () => {
+    if (!canCreateWatchlist) {
+      setUpgradeMsg("Free users can create 1 watchlist. Upgrade to Pro for unlimited watchlists.");
+      setShowUpgrade(true);
+      return;
+    }
+    setShowNewList(true);
+  };
+
+  const handleAddStockClick = () => {
+    if (!canAddStock) {
+      setUpgradeMsg("Free users can add up to 5 stocks per watchlist. Upgrade to Pro for unlimited stocks.");
+      setShowUpgrade(true);
+      return;
+    }
+    setShowAddStock(true);
+  };
 
   const handleCreateList = () => {
     if (!newListName.trim()) return;
@@ -34,6 +63,11 @@ const Watchlists = () => {
 
   const handleAddStock = (asset: AssetEntry) => {
     if (!active) return;
+    if (!canAddStock) {
+      setUpgradeMsg("Free users can add up to 5 stocks per watchlist. Upgrade to Pro for unlimited stocks.");
+      setShowUpgrade(true);
+      return;
+    }
     const stock: Stock = { ticker: asset.ticker, name: asset.name, sector: asset.sector, signal: "neutral" };
     addStockToWatchlist(active.id, stock);
     setStockSearch(""); setShowAddStock(false);
@@ -82,6 +116,7 @@ const Watchlists = () => {
     return (
       <AppLayout>
         {createModal}
+        <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} description={upgradeMsg} />
         <div className="flex flex-col items-center justify-center py-16 animate-fade-in">
           <div className="relative mb-6">
             <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/10 border-2 border-dashed border-primary/30">
@@ -95,7 +130,7 @@ const Watchlists = () => {
           <p className="text-muted-foreground mb-6 text-center max-w-sm text-sm leading-relaxed">
             Create your first watchlist to start tracking stocks, ETFs, and crypto with live charts and price data.
           </p>
-          <button onClick={() => setShowNewList(true)} className="flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+          <button onClick={handleNewListClick} className="flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
             <Plus className="h-4 w-4" /> {t("createWatchlist")}
           </button>
         </div>
@@ -106,6 +141,7 @@ const Watchlists = () => {
   return (
     <AppLayout>
       {createModal}
+      <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} description={upgradeMsg} />
 
       {showAddStock && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in p-4">
@@ -114,6 +150,9 @@ const Watchlists = () => {
               <h2 className="text-lg font-bold">{t("addStock")}</h2>
               <button onClick={() => { setShowAddStock(false); setStockSearch(""); }} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
             </div>
+            {!isPro && (
+              <p className="text-xs text-muted-foreground mb-2">{active?.stocks.length ?? 0}/{FREE_MAX_STOCKS} stocks used</p>
+            )}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input value={stockSearch} onChange={(e) => setStockSearch(e.target.value)} placeholder={t("searchStocksEtfs")} autoFocus className="h-10 w-full rounded-lg border border-border bg-accent/30 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
@@ -143,7 +182,7 @@ const Watchlists = () => {
           <h1 className="text-2xl sm:text-3xl font-bold">{t("watchlists")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{t("trackStocks")}</p>
         </div>
-        <button onClick={() => setShowNewList(true)} className="flex items-center gap-2 rounded-lg bg-primary px-3 sm:px-4 py-2 sm:py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+        <button onClick={handleNewListClick} className="flex items-center gap-2 rounded-lg bg-primary px-3 sm:px-4 py-2 sm:py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
           <Plus className="h-4 w-4" /> <span className="hidden sm:inline">{t("newList")}</span>
         </button>
       </div>
@@ -195,7 +234,7 @@ const Watchlists = () => {
                 <h2 className="text-lg sm:text-xl font-bold truncate">{active.name}</h2>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground line-clamp-2">{active.desc}</p>
               </div>
-              <button onClick={() => setShowAddStock(true)} className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 shrink-0">
+              <button onClick={handleAddStockClick} className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 shrink-0">
                 <Plus className="h-3.5 w-3.5" /> <span className="hidden sm:inline">{t("addStock")}</span>
               </button>
             </div>

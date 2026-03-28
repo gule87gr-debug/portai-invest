@@ -1,13 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { TradingViewHeatmap } from "@/components/TradingViewWidgets";
 import { StockNewsFeed } from "@/components/StockNewsFeed";
 import { TrendingStocks } from "@/components/TrendingStocks";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Link as LinkIcon, Search, Globe, ShieldCheck, FileText, AlertCircle, Loader2 } from "lucide-react";
+import { useSubscription, trackAnalysis } from "@/hooks/useSubscription";
+import { UpgradeModal } from "@/components/UpgradeModal";
+import { Link as LinkIcon, Search, Globe, ShieldCheck, FileText, AlertCircle, Loader2, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 type AnalysisResult = {
   title: string;
@@ -18,6 +22,8 @@ type AnalysisResult = {
   strengths: string[];
 };
 
+const FREE_DAILY_ANALYSES = 3;
+
 const Dashboard = () => {
   usePageTitle("Market Intelligence | PortAI");
   const { t } = useLanguage();
@@ -25,9 +31,23 @@ const Dashboard = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState("");
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const { isPro, dailyAnalysesUsed, canAnalyze, refresh } = useSubscription();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("upgrade") === "success") {
+      toast.success("Welcome to Pro! 🎉 All features are now unlocked.");
+      refresh();
+    }
+  }, [searchParams, refresh]);
 
   const handleAnalyze = async () => {
     if (!url.trim()) return;
+    if (!canAnalyze) {
+      setShowUpgrade(true);
+      return;
+    }
     setIsAnalyzing(true);
     setResult(null);
     setError("");
@@ -37,6 +57,8 @@ const Dashboard = () => {
       if (data?.error) throw new Error(data.error);
       if (data?.analysis) {
         setResult(data.analysis);
+        await trackAnalysis();
+        await refresh();
       } else throw new Error("No analysis returned");
     } catch (e: any) {
       setError(e.message || "Analysis failed");
@@ -47,9 +69,12 @@ const Dashboard = () => {
 
   const trustColor = (score: number) => score >= 7 ? "text-gain" : score >= 5 ? "text-warning" : "text-loss";
   const trustBorder = (score: number) => score >= 7 ? "border-gain/40" : score >= 5 ? "border-warning/40" : "border-loss/40";
+  const remaining = FREE_DAILY_ANALYSES - dailyAnalysesUsed;
 
   return (
     <AppLayout>
+      <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} title="Analysis Limit Reached" description="You've used all 3 free analyses today. Upgrade to Pro for unlimited analyses." />
+
       <div className="mb-6">
         <h1 className="text-3xl font-bold">{t("marketIntelligence")}</h1>
         <p className="mt-1 text-muted-foreground">{t("aiCuratedAnalysis")}</p>
@@ -64,9 +89,21 @@ const Dashboard = () => {
       </div>
 
       <div className="mb-8 rounded-xl border border-border bg-card p-4 sm:p-6" data-tour="analyze-link">
-        <div className="flex items-center gap-2 mb-2">
-          <LinkIcon className="h-5 w-5 text-primary" />
-          <h2 className="text-lg font-semibold">{t("analyzeLink")}</h2>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <LinkIcon className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold">{t("analyzeLink")}</h2>
+          </div>
+          {!isPro && (
+            <span className="text-xs text-muted-foreground">
+              {remaining > 0 ? `${remaining}/${FREE_DAILY_ANALYSES} analyses remaining` : "No analyses remaining"}
+            </span>
+          )}
+          {isPro && (
+            <span className="flex items-center gap-1 text-xs text-primary font-medium">
+              <Crown className="h-3.5 w-3.5" /> Unlimited
+            </span>
+          )}
         </div>
         <p className="mb-4 text-sm leading-relaxed text-muted-foreground">{t("pasteUrl")}</p>
 
