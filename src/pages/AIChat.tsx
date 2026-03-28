@@ -85,6 +85,11 @@ const MarkdownContent = ({ content }: { content: string }) => (
   </ReactMarkdown>
 );
 
+const FREE_MSG_LIMIT = 10;
+const FREE_MSG_WINDOW_HOURS = 12;
+const FREE_IMG_LIMIT = 3;
+const FREE_IMG_WINDOW_HOURS = 24;
+
 const AIChat = () => {
   const { t } = useLanguage();
   usePageTitle("AI Financial Advisor | PortAI");
@@ -95,6 +100,8 @@ const AIChat = () => {
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [showSessions, setShowSessions] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [msgUsage, setMsgUsage] = useState(0);
+  const [imgUsage, setImgUsage] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -102,8 +109,32 @@ const AIChat = () => {
   const welcomeShown = messages.length === 0;
   const suggestions = [t("suggestETF"), t("suggestDiversify"), t("suggestPE"), t("suggestDCA")];
 
+  const msgLimitReached = !isPro && msgUsage >= FREE_MSG_LIMIT;
+  const imgLimitReached = !isPro && imgUsage >= FREE_IMG_LIMIT;
+
+  const loadUsage = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const msgCutoff = new Date(Date.now() - FREE_MSG_WINDOW_HOURS * 3600000).toISOString();
+    const imgCutoff = new Date(Date.now() - FREE_IMG_WINDOW_HOURS * 3600000).toISOString();
+    const [{ count: mc }, { count: ic }] = await Promise.all([
+      supabase.from("chat_usage").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("usage_type", "message").gte("created_at", msgCutoff),
+      supabase.from("chat_usage").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("usage_type", "image_analysis").gte("created_at", imgCutoff),
+    ]);
+    setMsgUsage(mc ?? 0);
+    setImgUsage(ic ?? 0);
+  };
+
+  const trackUsage = async (type: "message" | "image_analysis") => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("chat_usage").insert({ user_id: user.id, usage_type: type } as any);
+    if (type === "message") setMsgUsage((p) => p + 1);
+    else setImgUsage((p) => p + 1);
+  };
+
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
-  useEffect(() => { loadSessions(); }, []);
+  useEffect(() => { loadSessions(); loadUsage(); }, []);
 
   const loadSessions = async () => {
     const { data } = await supabase.from("chat_sessions").select("id, title, created_at").order("updated_at", { ascending: false });
@@ -154,12 +185,24 @@ const AIChat = () => {
 
   const send = async (text: string) => {
     if ((!text.trim() && !imagePreview) || isTyping) return;
+    const hasImage = !!imagePreview;
+
+    if (!isPro) {
+      if (msgLimitReached) return;
+      if (hasImage && imgLimitReached) return;
+    }
+
     const userMsg: Message = { role: "user", content: text || "Analyze this image", imageUrl: imagePreview || undefined };
     const allMessages = [...messages, userMsg];
     setMessages(allMessages);
     setInput("");
     setImagePreview(null);
     setIsTyping(true);
+
+    if (!isPro) {
+      await trackUsage("message");
+      if (hasImage) await trackUsage("image_analysis");
+    }
 
     let sessionId = activeSessionId;
     if (!sessionId) {
