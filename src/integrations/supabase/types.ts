@@ -374,6 +374,13 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_trending_stocks: {
+        Args: { _since: string }
+        Returns: {
+          name: string
+          ticker: string
+        }[]
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -390,6 +397,16 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      send_notification: {
+        Args: {
+          _from_user: string
+          _target_user_id: string
+          _thread_id: string
+          _thread_title: string
+          _type: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

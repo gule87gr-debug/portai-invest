@@ -99,13 +99,13 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const addNotification = useCallback(async (n: NotificationInput) => {
-    // Insert into DB for the target user
-    await supabase.from("notifications").insert({
-      user_id: n.targetUserId,
-      type: n.type,
-      from_user: n.fromUser,
-      thread_id: n.threadId,
-      thread_title: n.threadTitle,
+    // Use secure RPC to insert notification (validates sender server-side)
+    await supabase.rpc("send_notification" as any, {
+      _target_user_id: n.targetUserId,
+      _type: n.type,
+      _from_user: n.fromUser,
+      _thread_id: n.threadId,
+      _thread_title: n.threadTitle,
     });
   }, []);
 

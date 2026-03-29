@@ -40,9 +40,9 @@ export const TrendingStocks = () => {
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
       const { data, error } = await supabase
-        .from("watchlist_stocks")
-        .select("ticker, name")
-        .gte("created_at", oneWeekAgo.toISOString());
+        .rpc("get_trending_stocks" as any, {
+          _since: oneWeekAgo.toISOString(),
+        });
 
       if (!error && data) {
         // Count occurrences of each ticker
