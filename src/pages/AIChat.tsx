@@ -106,6 +106,8 @@ const AIChat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { isPro } = useSubscription();
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const [upgradeReason, setUpgradeReason] = useState("");
   const welcomeShown = messages.length === 0;
   const suggestions = [t("suggestETF"), t("suggestDiversify"), t("suggestPE"), t("suggestDCA")];
 
