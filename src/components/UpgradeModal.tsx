@@ -32,7 +32,10 @@ export const UpgradeModal = ({ open, onClose, title = "Upgrade to Pro", descript
           </button>
         </div>
 
-        <h2 className="text-xl font-bold mb-1">{title}</h2>
+        <div className="flex items-center gap-2 mb-1">
+          <h2 className="text-xl font-bold">{title}</h2>
+          <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-semibold text-primary">40% OFF</span>
+        </div>
         <p className="text-sm text-muted-foreground mb-5">{description}</p>
 
         <div className="space-y-3 mb-6">
