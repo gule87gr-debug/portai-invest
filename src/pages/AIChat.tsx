@@ -221,6 +221,8 @@ const AIChat = () => {
         const finalMsgs = [...allMessages, { role: "assistant" as const, content: assistantSoFar }];
         setMessages(finalMsgs);
         saveMessages(finalSessionId, finalMsgs);
+        // Reload usage counts since they're tracked server-side now
+        loadUsage();
       },
       onError: (msg) => { setMessages((prev) => [...prev, { role: "assistant", content: `❌ ${msg}` }]); setIsTyping(false); },
     });
