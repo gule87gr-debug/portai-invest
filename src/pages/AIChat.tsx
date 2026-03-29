@@ -5,6 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Send, Sparkles, Plus, Trash2, MessageCircle, Image, X, Crown } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
+import { UpgradeModal } from "@/components/UpgradeModal";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
@@ -184,8 +185,16 @@ const AIChat = () => {
     const hasImage = !!imagePreview;
 
     if (!isPro) {
-      if (msgLimitReached) return;
-      if (hasImage && imgLimitReached) return;
+      if (msgLimitReached) {
+        setUpgradeReason(`You've used all ${FREE_MSG_LIMIT} free messages (resets every ${FREE_MSG_WINDOW_HOURS}h). Upgrade to Pro for unlimited messages.`);
+        setShowUpgrade(true);
+        return;
+      }
+      if (hasImage && imgLimitReached) {
+        setUpgradeReason(`You've used all ${FREE_IMG_LIMIT} free image analyses (resets every ${FREE_IMG_WINDOW_HOURS}h). Upgrade to Pro for unlimited image analyses.`);
+        setShowUpgrade(true);
+        return;
+      }
     }
 
     const userMsg: Message = { role: "user", content: text || "Analyze this image", imageUrl: imagePreview || undefined };
