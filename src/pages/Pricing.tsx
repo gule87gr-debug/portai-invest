@@ -85,7 +85,8 @@ const Pricing = () => {
               <h2 className="text-2xl font-bold">Pro</h2>
             </div>
             <p className="text-muted-foreground text-sm mb-6">Full access to all premium features</p>
-            <div className="text-4xl font-bold font-mono mb-6">$9.99<span className="text-lg text-muted-foreground font-normal">/mo</span></div>
+            <div className="mb-1"><span className="inline-block rounded-full bg-green-500/20 px-2.5 py-0.5 text-xs font-semibold text-green-500">40% OFF</span></div>
+            <div className="text-4xl font-bold font-mono mb-6">$9.99<span className="text-lg text-muted-foreground font-normal line-through ml-2">$16.99</span><span className="text-lg text-muted-foreground font-normal">/mo</span></div>
             <ul className="space-y-3 mb-8">
               {proTierFeatures.map((f, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm">

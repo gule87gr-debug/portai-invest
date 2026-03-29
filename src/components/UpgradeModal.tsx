@@ -55,7 +55,7 @@ export const UpgradeModal = ({ open, onClose, title = "Upgrade to Pro", descript
             onClick={() => { onClose(); navigate("/pricing"); }}
             className="flex-1 rounded-xl bg-primary py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Upgrade — $9.99/mo
+            Upgrade — <span className="line-through opacity-60 mr-1">$16.99</span>$9.99/mo
           </button>
         </div>
       </div>
