@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { checkRateLimit, getClientIP, rateLimitResponse } from "../_shared/rate-limiter.ts";
 
 const corsHeaders = {
@@ -8,6 +9,11 @@ const corsHeaders = {
 
 const MAX_MESSAGES = 50;
 const MAX_MESSAGE_CONTENT_LENGTH = 8000;
+
+const FREE_MSG_LIMIT = 10;
+const FREE_MSG_WINDOW_HOURS = 12;
+const FREE_IMG_LIMIT = 3;
+const FREE_IMG_WINDOW_HOURS = 24;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -44,6 +50,7 @@ serve(async (req) => {
     // Validate and sanitize each message
     const validRoles = new Set(["user", "assistant"]);
     const sanitizedMessages = [];
+    let hasImages = false;
 
     for (const msg of messages) {
       if (!msg || typeof msg !== "object") continue;
@@ -56,16 +63,15 @@ serve(async (req) => {
           sanitizedMessages.push({ role: msg.role, content: msg.content });
         }
       } else if (Array.isArray(msg.content)) {
-        // Multimodal content - validate each part
         const validParts = [];
         for (const part of msg.content) {
           if (part.type === "text" && typeof part.text === "string") {
             validParts.push({ type: "text", text: part.text.slice(0, MAX_MESSAGE_CONTENT_LENGTH) });
           } else if (part.type === "image_url" && part.image_url?.url && typeof part.image_url.url === "string") {
-            // Only allow data: URIs and https: URLs, limit URL length
             const url = part.image_url.url;
             if ((url.startsWith("data:image/") || url.startsWith("https://")) && url.length < 10_000_000) {
               validParts.push({ type: "image_url", image_url: { url } });
+              hasImages = true;
             }
           }
         }
@@ -81,13 +87,76 @@ serve(async (req) => {
       });
     }
 
+    // --- Server-side auth & usage enforcement ---
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
+
+    const authHeader = req.headers.get("Authorization");
+    let userId: string | null = null;
+    let isPro = false;
+
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data: userData } = await supabaseAdmin.auth.getUser(token);
+      if (userData?.user) {
+        userId = userData.user.id;
+
+        // Check if user is Pro (has active Stripe subscription)
+        const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+        if (stripeKey && userData.user.email) {
+          try {
+            const Stripe = (await import("https://esm.sh/stripe@18.5.0")).default;
+            const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+            const customers = await stripe.customers.list({ email: userData.user.email, limit: 1 });
+            if (customers.data.length > 0) {
+              const subs = await stripe.subscriptions.list({ customer: customers.data[0].id, status: "active", limit: 1 });
+              isPro = subs.data.length > 0;
+            }
+          } catch {
+            // If Stripe check fails, default to free tier
+          }
+        }
+
+        // Enforce limits for free users
+        if (!isPro) {
+          const msgCutoff = new Date(Date.now() - FREE_MSG_WINDOW_HOURS * 3600000).toISOString();
+          const { count: msgCount } = await supabaseAdmin
+            .from("chat_usage")
+            .select("*", { count: "exact", head: true })
+            .eq("user_id", userId)
+            .eq("usage_type", "message")
+            .gte("created_at", msgCutoff);
+
+          if ((msgCount ?? 0) >= FREE_MSG_LIMIT) {
+            return new Response(JSON.stringify({ error: "Message limit reached. Upgrade to Pro for unlimited messages." }), {
+              status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+
+          if (hasImages) {
+            const imgCutoff = new Date(Date.now() - FREE_IMG_WINDOW_HOURS * 3600000).toISOString();
+            const { count: imgCount } = await supabaseAdmin
+              .from("chat_usage")
+              .select("*", { count: "exact", head: true })
+              .eq("user_id", userId)
+              .eq("usage_type", "image_analysis")
+              .gte("created_at", imgCutoff);
+
+            if ((imgCount ?? 0) >= FREE_IMG_LIMIT) {
+              return new Response(JSON.stringify({ error: "Image analysis limit reached. Upgrade to Pro for unlimited image analysis." }), {
+                status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+              });
+            }
+          }
+        }
+      }
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
-
-    // Check if any message contains images - use multimodal model
-    const hasImages = sanitizedMessages.some((m: any) =>
-      Array.isArray(m.content) && m.content.some((c: any) => c.type === "image_url")
-    );
 
     const model = hasImages ? "google/gemini-2.5-flash" : "google/gemini-3-flash-preview";
 
@@ -166,6 +235,14 @@ Always end with: "⚠️ Just my take — not financial advice. Do your own rese
       return new Response(JSON.stringify({ error: "AI service error" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Record usage server-side AFTER successful AI response start
+    if (userId && !isPro) {
+      await supabaseAdmin.from("chat_usage").insert({ user_id: userId, usage_type: "message" });
+      if (hasImages) {
+        await supabaseAdmin.from("chat_usage").insert({ user_id: userId, usage_type: "image_analysis" });
+      }
     }
 
     return new Response(response.body, {

@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { checkRateLimit, getClientIP, rateLimitResponse } from "../_shared/rate-limiter.ts";
 import { validateInput, validationErrorResponse, type SchemaDefinition } from "../_shared/input-validator.ts";
 
@@ -10,6 +11,8 @@ const corsHeaders = {
 const inputSchema: SchemaDefinition = {
   url: { type: "string", required: true, minLength: 5, maxLength: 2048, pattern: /^https?:\/\/.+/ },
 };
+
+const FREE_DAILY_ANALYSES = 3;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -26,6 +29,57 @@ serve(async (req) => {
     if (!valid) return validationErrorResponse(errors, corsHeaders);
 
     const { url } = sanitized as { url: string };
+
+    // --- Server-side auth & usage enforcement ---
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
+
+    const authHeader = req.headers.get("Authorization");
+    let userId: string | null = null;
+    let isPro = false;
+
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data: userData } = await supabaseAdmin.auth.getUser(token);
+      if (userData?.user) {
+        userId = userData.user.id;
+
+        // Check if user is Pro
+        const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+        if (stripeKey && userData.user.email) {
+          try {
+            const Stripe = (await import("https://esm.sh/stripe@18.5.0")).default;
+            const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+            const customers = await stripe.customers.list({ email: userData.user.email, limit: 1 });
+            if (customers.data.length > 0) {
+              const subs = await stripe.subscriptions.list({ customer: customers.data[0].id, status: "active", limit: 1 });
+              isPro = subs.data.length > 0;
+            }
+          } catch {
+            // Default to free tier
+          }
+        }
+
+        // Enforce daily analysis limit for free users
+        if (!isPro) {
+          const today = new Date().toISOString().split("T")[0];
+          const { count } = await supabaseAdmin
+            .from("analysis_usage")
+            .select("*", { count: "exact", head: true })
+            .eq("user_id", userId)
+            .eq("used_date", today);
+
+          if ((count ?? 0) >= FREE_DAILY_ANALYSES) {
+            return new Response(JSON.stringify({ error: "Daily analysis limit reached. Upgrade to Pro for unlimited analyses." }), {
+              status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+        }
+      }
+    }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -104,6 +158,11 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
         biases: ["Unable to fully parse structured analysis"],
         strengths: ["URL was analyzed by AI"],
       };
+    }
+
+    // Record usage server-side AFTER successful analysis
+    if (userId && !isPro) {
+      await supabaseAdmin.from("analysis_usage").insert({ user_id: userId });
     }
 
     return new Response(JSON.stringify({ success: true, analysis }), {

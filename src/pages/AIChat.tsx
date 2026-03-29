@@ -125,13 +125,7 @@ const AIChat = () => {
     setImgUsage(ic ?? 0);
   };
 
-  const trackUsage = async (type: "message" | "image_analysis") => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    await supabase.from("chat_usage").insert({ user_id: user.id, usage_type: type } as any);
-    if (type === "message") setMsgUsage((p) => p + 1);
-    else setImgUsage((p) => p + 1);
-  };
+  // Usage is now tracked server-side in the chat edge function
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
   useEffect(() => { loadSessions(); loadUsage(); }, []);
@@ -199,10 +193,7 @@ const AIChat = () => {
     setImagePreview(null);
     setIsTyping(true);
 
-    if (!isPro) {
-      await trackUsage("message");
-      if (hasImage) await trackUsage("image_analysis");
-    }
+    // Usage is tracked server-side in the chat edge function
 
     let sessionId = activeSessionId;
     if (!sessionId) {
@@ -230,6 +221,8 @@ const AIChat = () => {
         const finalMsgs = [...allMessages, { role: "assistant" as const, content: assistantSoFar }];
         setMessages(finalMsgs);
         saveMessages(finalSessionId, finalMsgs);
+        // Reload usage counts since they're tracked server-side now
+        loadUsage();
       },
       onError: (msg) => { setMessages((prev) => [...prev, { role: "assistant", content: `❌ ${msg}` }]); setIsTyping(false); },
     });

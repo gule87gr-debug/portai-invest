@@ -71,8 +71,7 @@ export const useSubscription = (): SubscriptionState => {
   };
 };
 
+// Usage tracking is now handled server-side in the analyze-link edge function
 export const trackAnalysis = async () => {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-  await supabase.from("analysis_usage").insert({ user_id: user.id } as any);
+  // No-op: usage is recorded server-side
 };
