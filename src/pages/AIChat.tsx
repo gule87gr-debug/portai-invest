@@ -5,6 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Send, Sparkles, Plus, Trash2, MessageCircle, Image, X, Crown } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
+import { UpgradeModal } from "@/components/UpgradeModal";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import ReactMarkdown from "react-markdown";
@@ -106,6 +107,8 @@ const AIChat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { isPro } = useSubscription();
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const [upgradeReason, setUpgradeReason] = useState("");
   const welcomeShown = messages.length === 0;
   const suggestions = [t("suggestETF"), t("suggestDiversify"), t("suggestPE"), t("suggestDCA")];
 
@@ -182,8 +185,16 @@ const AIChat = () => {
     const hasImage = !!imagePreview;
 
     if (!isPro) {
-      if (msgLimitReached) return;
-      if (hasImage && imgLimitReached) return;
+      if (msgLimitReached) {
+        setUpgradeReason(`You've used all ${FREE_MSG_LIMIT} free messages (resets every ${FREE_MSG_WINDOW_HOURS}h). Upgrade to Pro for unlimited messages.`);
+        setShowUpgrade(true);
+        return;
+      }
+      if (hasImage && imgLimitReached) {
+        setUpgradeReason(`You've used all ${FREE_IMG_LIMIT} free image analyses (resets every ${FREE_IMG_WINDOW_HOURS}h). Upgrade to Pro for unlimited image analyses.`);
+        setShowUpgrade(true);
+        return;
+      }
     }
 
     const userMsg: Message = { role: "user", content: text || "Analyze this image", imageUrl: imagePreview || undefined };
@@ -230,6 +241,7 @@ const AIChat = () => {
 
   return (
     <AppLayout>
+      <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} title="Limit Reached" description={upgradeReason} />
       <div className="mb-4 flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
@@ -366,7 +378,10 @@ const AIChat = () => {
 
         <div className="mt-4 flex items-center gap-2">
           <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleImageSelect} />
-          <button onClick={() => fileInputRef.current?.click()} disabled={imgLimitReached} className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-foreground hover:bg-accent", imgLimitReached && "opacity-50 cursor-not-allowed")} title={imgLimitReached ? "Image analysis limit reached" : t("uploadImage")}>
+          <button onClick={() => {
+            if (imgLimitReached) { setUpgradeReason(`You've used all ${FREE_IMG_LIMIT} free image analyses (resets every ${FREE_IMG_WINDOW_HOURS}h). Upgrade to Pro for unlimited image analyses.`); setShowUpgrade(true); return; }
+            fileInputRef.current?.click();
+          }} className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-foreground hover:bg-accent", imgLimitReached && "opacity-50")} title={imgLimitReached ? "Image analysis limit reached" : t("uploadImage")}>
             <Image className="h-5 w-5" />
           </button>
           <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && !msgLimitReached && send(input)} placeholder={msgLimitReached ? "Message limit reached — upgrade to Pro" : t("askAnything")} disabled={msgLimitReached} className={cn("h-12 flex-1 rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", msgLimitReached && "opacity-50 cursor-not-allowed")} />
