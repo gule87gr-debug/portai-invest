@@ -378,7 +378,10 @@ const AIChat = () => {
 
         <div className="mt-4 flex items-center gap-2">
           <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleImageSelect} />
-          <button onClick={() => fileInputRef.current?.click()} disabled={imgLimitReached} className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-foreground hover:bg-accent", imgLimitReached && "opacity-50 cursor-not-allowed")} title={imgLimitReached ? "Image analysis limit reached" : t("uploadImage")}>
+          <button onClick={() => {
+            if (imgLimitReached) { setUpgradeReason(`You've used all ${FREE_IMG_LIMIT} free image analyses (resets every ${FREE_IMG_WINDOW_HOURS}h). Upgrade to Pro for unlimited image analyses.`); setShowUpgrade(true); return; }
+            fileInputRef.current?.click();
+          }} className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-foreground hover:bg-accent", imgLimitReached && "opacity-50")} title={imgLimitReached ? "Image analysis limit reached" : t("uploadImage")}>
             <Image className="h-5 w-5" />
           </button>
           <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && !msgLimitReached && send(input)} placeholder={msgLimitReached ? "Message limit reached — upgrade to Pro" : t("askAnything")} disabled={msgLimitReached} className={cn("h-12 flex-1 rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", msgLimitReached && "opacity-50 cursor-not-allowed")} />
