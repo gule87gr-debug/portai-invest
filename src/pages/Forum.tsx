@@ -360,14 +360,17 @@ const Forum = () => {
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-semibold">{c.author}</span>
                           <span className="text-[10px] text-muted-foreground">{c.time}</span>
-                          <div className="ml-auto flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                          <div className="ml-auto flex items-center gap-1">
                             <button
-                              onClick={() => handleCommentFactCheck(c.id, c.body)}
+                              onClick={() => {
+                                if (!isPro) { setShowUpgrade(true); return; }
+                                handleCommentFactCheck(c.id, c.body);
+                              }}
                               disabled={commentFactCheckLoading === c.id}
                               className="text-primary hover:text-primary/80 transition-colors"
-                              title={t("factCheck")}
+                              title={isPro ? t("factCheck") : "Upgrade to Pro for fact-checking"}
                             >
-                              {commentFactCheckLoading === c.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                              {commentFactCheckLoading === c.id ? <Loader2 className="h-3 w-3 animate-spin" /> : isPro ? <Sparkles className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
                             </button>
                             {canDeleteComment(c) && (
                               <button onClick={() => deleteComment(th.id, c.id)} className="text-muted-foreground hover:text-loss transition-colors" title={t("deleteComment")}>
