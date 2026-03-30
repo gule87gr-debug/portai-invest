@@ -4,10 +4,12 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { useApp } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNotifications } from "@/contexts/NotificationContext";
-import { Search, Plus, ThumbsUp, MessageCircle, Sparkles, X, Send, Trash2, Loader2, CheckCircle, AlertTriangle, XCircle, HelpCircle, MessageSquare } from "lucide-react";
+import { Search, Plus, ThumbsUp, MessageCircle, Sparkles, X, Send, Trash2, Loader2, CheckCircle, AlertTriangle, XCircle, HelpCircle, MessageSquare, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useSubscription } from "@/hooks/useSubscription";
+import { UpgradeModal } from "@/components/UpgradeModal";
 
 const categories = ["All", "General", "Portfolios", "Markets", "Sectors"];
 const tagOptions = ["general", "portfolios", "markets", "sectors"];
