@@ -1,8 +1,9 @@
 import { AppLayout } from "@/components/AppLayout";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
-import { Crown, Check, Loader2 } from "lucide-react";
+import { Crown, Check, Loader2, X } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const freeTierFeatures = [
