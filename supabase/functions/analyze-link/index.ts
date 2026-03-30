@@ -47,19 +47,25 @@ serve(async (req) => {
       if (userData?.user) {
         userId = userData.user.id;
 
-        // Check if user is Pro
-        const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-        if (stripeKey && userData.user.email) {
-          try {
-            const Stripe = (await import("https://esm.sh/stripe@18.5.0")).default;
-            const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-            const customers = await stripe.customers.list({ email: userData.user.email, limit: 1 });
-            if (customers.data.length > 0) {
-              const subs = await stripe.subscriptions.list({ customer: customers.data[0].id, status: "active", limit: 1 });
-              isPro = subs.data.length > 0;
+        // Admin override
+        const ADMIN_EMAILS = ["gule.87.gr@gmail.com"];
+        if (userData.user.email && ADMIN_EMAILS.includes(userData.user.email.toLowerCase())) {
+          isPro = true;
+        } else {
+          // Check if user is Pro
+          const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+          if (stripeKey && userData.user.email) {
+            try {
+              const Stripe = (await import("https://esm.sh/stripe@18.5.0")).default;
+              const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+              const customers = await stripe.customers.list({ email: userData.user.email, limit: 1 });
+              if (customers.data.length > 0) {
+                const subs = await stripe.subscriptions.list({ customer: customers.data[0].id, status: "active", limit: 1 });
+                isPro = subs.data.length > 0;
+              }
+            } catch {
+              // Default to free tier
             }
-          } catch {
-            // Default to free tier
           }
         }
 
