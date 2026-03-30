@@ -287,7 +287,13 @@ const Forum = () => {
 
               {/* AI Fact Check Results */}
               {factCheckResults[th.id] && (
-                <div className="mt-3 rounded-lg border border-border bg-card p-3 sm:p-4 space-y-3 animate-fade-in">
+                <div className="mt-3 rounded-lg border border-border bg-card p-3 sm:p-4 space-y-3 animate-fade-in relative">
+                  <button
+                    onClick={() => setFactCheckResults((prev) => { const next = { ...prev }; delete next[th.id]; return next; })}
+                    className="absolute top-2 right-2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
                   {(() => {
                     const result = factCheckResults[th.id];
                     const config = verdictConfig[result.verdict] || verdictConfig.unverifiable;
