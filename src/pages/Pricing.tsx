@@ -1,8 +1,9 @@
 import { AppLayout } from "@/components/AppLayout";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
-import { Crown, Check, Loader2 } from "lucide-react";
+import { Crown, Check, Loader2, X } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const freeTierFeatures = [
@@ -26,6 +27,7 @@ const proTierFeatures = [
 
 const Pricing = () => {
   const { isPro, loading, cancelAtPeriodEnd } = useSubscription();
+  const navigate = useNavigate();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const handleUpgrade = async () => {
@@ -48,7 +50,14 @@ const Pricing = () => {
 
   return (
     <AppLayout>
-      <div className="mx-auto max-w-4xl py-8">
+      <div className="mx-auto max-w-4xl py-8 relative">
+        <button
+          onClick={() => navigate(-1)}
+          className="absolute top-8 right-0 rounded-full p-2 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          title="Close"
+        >
+          <X className="h-5 w-5" />
+        </button>
         <div className="text-center mb-10">
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">Choose Your Plan</h1>
           <p className="text-muted-foreground max-w-lg mx-auto">Invest smarter with the tools and insights that match your ambition.</p>
