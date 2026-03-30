@@ -401,7 +401,13 @@ const Forum = () => {
                           const config = verdictConfig[result.verdict] || verdictConfig.unverifiable;
                           const VerdictIcon = config.icon;
                           return (
-                            <div className="mt-2 rounded-md border border-border bg-card p-2 space-y-1.5 animate-fade-in">
+                            <div className="mt-2 rounded-md border border-border bg-card p-2 space-y-1.5 animate-fade-in relative">
+                              <button
+                                onClick={() => setCommentFactCheckResults((prev) => { const next = { ...prev }; delete next[c.id]; return next; })}
+                                className="absolute top-1 right-1 text-muted-foreground hover:text-foreground transition-colors"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
                               <div className="flex items-center gap-1.5">
                                 <VerdictIcon className={cn("h-3 w-3", config.color)} />
                                 <span className={cn("text-[10px] font-semibold", config.color)}>{config.label}</span>
