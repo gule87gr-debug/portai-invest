@@ -370,6 +370,11 @@ const Forum = () => {
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-semibold">{c.author}</span>
+                          {isPro && c.userId === currentUserId && (
+                            <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/15 px-1 py-0.5 text-[9px] font-semibold text-primary">
+                              <Crown className="h-2 w-2" /> PRO
+                            </span>
+                          )}
                           <span className="text-[10px] text-muted-foreground">{c.time}</span>
                           <div className="ml-auto flex items-center gap-1">
                             <button
