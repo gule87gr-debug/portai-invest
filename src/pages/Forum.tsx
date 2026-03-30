@@ -49,6 +49,8 @@ const Forum = () => {
   usePageTitle("Smart Investor Forum | PortAI");
   const { toast } = useToast();
   const { addNotification } = useNotifications();
+  const { isPro } = useSubscription();
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const [active, setActive] = useState("All");
   const [showNewThread, setShowNewThread] = useState(false);
   const [newTitle, setNewTitle] = useState("");
