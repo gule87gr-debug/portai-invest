@@ -27,6 +27,7 @@ const proTierFeatures = [
 
 const Pricing = () => {
   const { isPro, loading, cancelAtPeriodEnd } = useSubscription();
+  const navigate = useNavigate();
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const handleUpgrade = async () => {
