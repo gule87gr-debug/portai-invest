@@ -31,6 +31,20 @@ serve(async (req) => {
     const user = userData.user;
     if (!user?.email) throw new Error("User not authenticated");
 
+    // Admin override: grant permanent Pro access
+    const ADMIN_EMAILS = ["gule.87.gr@gmail.com"];
+    if (ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+      return new Response(JSON.stringify({
+        subscribed: true,
+        subscription_end: null,
+        cancel_at_period_end: false,
+        subscription_id: "admin_override",
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
 
