@@ -4,10 +4,12 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { useApp } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNotifications } from "@/contexts/NotificationContext";
-import { Search, Plus, ThumbsUp, MessageCircle, Sparkles, X, Send, Trash2, Loader2, CheckCircle, AlertTriangle, XCircle, HelpCircle, MessageSquare } from "lucide-react";
+import { Search, Plus, ThumbsUp, MessageCircle, Sparkles, X, Send, Trash2, Loader2, CheckCircle, AlertTriangle, XCircle, HelpCircle, MessageSquare, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useSubscription } from "@/hooks/useSubscription";
+import { UpgradeModal } from "@/components/UpgradeModal";
 
 const categories = ["All", "General", "Portfolios", "Markets", "Sectors"];
 const tagOptions = ["general", "portfolios", "markets", "sectors"];
@@ -47,6 +49,8 @@ const Forum = () => {
   usePageTitle("Smart Investor Forum | PortAI");
   const { toast } = useToast();
   const { addNotification } = useNotifications();
+  const { isPro } = useSubscription();
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const [active, setActive] = useState("All");
   const [showNewThread, setShowNewThread] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -330,12 +334,15 @@ const Forum = () => {
                   </button>
                 </div>
                 <button
-                  onClick={() => handleFactCheck(th.id, th.title, th.body)}
+                  onClick={() => {
+                    if (!isPro) { setShowUpgrade(true); return; }
+                    handleFactCheck(th.id, th.title, th.body);
+                  }}
                   disabled={factCheckLoading === th.id}
                   className="flex items-center gap-1 text-xs text-primary hover:underline disabled:opacity-50"
                 >
-                  {factCheckLoading === th.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                  {t("factCheck")}
+                  {factCheckLoading === th.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : isPro ? <Sparkles className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                  {t("factCheck")}{!isPro && " (Pro)"}
                 </button>
               </div>
 
@@ -353,14 +360,17 @@ const Forum = () => {
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-semibold">{c.author}</span>
                           <span className="text-[10px] text-muted-foreground">{c.time}</span>
-                          <div className="ml-auto flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                          <div className="ml-auto flex items-center gap-1">
                             <button
-                              onClick={() => handleCommentFactCheck(c.id, c.body)}
+                              onClick={() => {
+                                if (!isPro) { setShowUpgrade(true); return; }
+                                handleCommentFactCheck(c.id, c.body);
+                              }}
                               disabled={commentFactCheckLoading === c.id}
                               className="text-primary hover:text-primary/80 transition-colors"
-                              title={t("factCheck")}
+                              title={isPro ? t("factCheck") : "Upgrade to Pro for fact-checking"}
                             >
-                              {commentFactCheckLoading === c.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                              {commentFactCheckLoading === c.id ? <Loader2 className="h-3 w-3 animate-spin" /> : isPro ? <Sparkles className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
                             </button>
                             {canDeleteComment(c) && (
                               <button onClick={() => deleteComment(th.id, c.id)} className="text-muted-foreground hover:text-loss transition-colors" title={t("deleteComment")}>
@@ -409,6 +419,7 @@ const Forum = () => {
           );
         })}
       </div>
+      <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} description="AI-powered fact-checking is a Pro feature. Upgrade to verify claims and get detailed analysis on any forum post or comment." />
     </AppLayout>
   );
 };
