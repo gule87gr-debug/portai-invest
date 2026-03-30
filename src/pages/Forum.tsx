@@ -4,7 +4,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { useApp } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNotifications } from "@/contexts/NotificationContext";
-import { Search, Plus, ThumbsUp, MessageCircle, Sparkles, X, Send, Trash2, Loader2, CheckCircle, AlertTriangle, XCircle, HelpCircle, MessageSquare, Lock } from "lucide-react";
+import { Search, Plus, ThumbsUp, MessageCircle, Sparkles, X, Send, Trash2, Loader2, CheckCircle, AlertTriangle, XCircle, HelpCircle, MessageSquare, Lock, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -264,6 +264,11 @@ const Forum = () => {
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">{th.avatar}</div>
                   )}
                   <span className="text-sm font-semibold">{th.author}</span>
+                  {isPro && th.userId === currentUserId && (
+                    <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+                      <Crown className="h-2.5 w-2.5" /> PRO
+                    </span>
+                  )}
                   <span className="text-xs text-muted-foreground">{th.time}</span>
                 </div>
                 {canDeleteThread(th) && (
@@ -282,7 +287,13 @@ const Forum = () => {
 
               {/* AI Fact Check Results */}
               {factCheckResults[th.id] && (
-                <div className="mt-3 rounded-lg border border-border bg-card p-3 sm:p-4 space-y-3 animate-fade-in">
+                <div className="mt-3 rounded-lg border border-border bg-card p-3 sm:p-4 space-y-3 animate-fade-in relative">
+                  <button
+                    onClick={() => setFactCheckResults((prev) => { const next = { ...prev }; delete next[th.id]; return next; })}
+                    className="absolute top-2 right-2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
                   {(() => {
                     const result = factCheckResults[th.id];
                     const config = verdictConfig[result.verdict] || verdictConfig.unverifiable;
@@ -359,6 +370,11 @@ const Forum = () => {
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-semibold">{c.author}</span>
+                          {isPro && c.userId === currentUserId && (
+                            <span className="inline-flex items-center gap-0.5 rounded-full bg-primary/15 px-1 py-0.5 text-[9px] font-semibold text-primary">
+                              <Crown className="h-2 w-2" /> PRO
+                            </span>
+                          )}
                           <span className="text-[10px] text-muted-foreground">{c.time}</span>
                           <div className="ml-auto flex items-center gap-1">
                             <button
@@ -385,7 +401,13 @@ const Forum = () => {
                           const config = verdictConfig[result.verdict] || verdictConfig.unverifiable;
                           const VerdictIcon = config.icon;
                           return (
-                            <div className="mt-2 rounded-md border border-border bg-card p-2 space-y-1.5 animate-fade-in">
+                            <div className="mt-2 rounded-md border border-border bg-card p-2 space-y-1.5 animate-fade-in relative">
+                              <button
+                                onClick={() => setCommentFactCheckResults((prev) => { const next = { ...prev }; delete next[c.id]; return next; })}
+                                className="absolute top-1 right-1 text-muted-foreground hover:text-foreground transition-colors"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
                               <div className="flex items-center gap-1.5">
                                 <VerdictIcon className={cn("h-3 w-3", config.color)} />
                                 <span className={cn("text-[10px] font-semibold", config.color)}>{config.label}</span>

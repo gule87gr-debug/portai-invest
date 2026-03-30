@@ -121,7 +121,14 @@ const SettingsPage = () => {
 
       <div className="mx-auto max-w-2xl space-y-6">
         <div className="rounded-xl border border-border bg-card p-6">
-          <h2 className="mb-4 text-lg font-semibold">{t("profile")}</h2>
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="text-lg font-semibold">{t("profile")}</h2>
+            {isPro && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary">
+                <Crown className="h-3 w-3" /> PRO
+              </span>
+            )}
+          </div>
           <div className="mb-6 flex items-center gap-5">
             <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
               {profile.avatar ? (
