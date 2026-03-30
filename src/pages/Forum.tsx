@@ -419,7 +419,7 @@ const Forum = () => {
           );
         })}
       </div>
-      <UpgradeModal open={showUpgrade} onOpenChange={setShowUpgrade} reason="AI-powered fact-checking is a Pro feature. Upgrade to verify claims and get detailed analysis on any forum post or comment." />
+      <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} description="AI-powered fact-checking is a Pro feature. Upgrade to verify claims and get detailed analysis on any forum post or comment." />
     </AppLayout>
   );
 };
