@@ -334,12 +334,15 @@ const Forum = () => {
                   </button>
                 </div>
                 <button
-                  onClick={() => handleFactCheck(th.id, th.title, th.body)}
+                  onClick={() => {
+                    if (!isPro) { setShowUpgrade(true); return; }
+                    handleFactCheck(th.id, th.title, th.body);
+                  }}
                   disabled={factCheckLoading === th.id}
                   className="flex items-center gap-1 text-xs text-primary hover:underline disabled:opacity-50"
                 >
-                  {factCheckLoading === th.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                  {t("factCheck")}
+                  {factCheckLoading === th.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : isPro ? <Sparkles className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                  {t("factCheck")}{!isPro && " (Pro)"}
                 </button>
               </div>
 
