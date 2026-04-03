@@ -84,6 +84,11 @@ Deno.serve(async (req) => {
     return jsonResponse({ valid: false, reason: 'already_unsubscribed' })
   }
 
+  // Check token expiration
+  if (tokenRecord.expires_at && new Date(tokenRecord.expires_at) < new Date()) {
+    return jsonResponse({ error: 'This unsubscribe link has expired' }, 410)
+  }
+
   // GET: Validate token (the app's unsubscribe page calls this on load)
   if (req.method === 'GET') {
     return jsonResponse({ valid: true })
