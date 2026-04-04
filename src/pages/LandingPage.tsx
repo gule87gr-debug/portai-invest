@@ -274,14 +274,15 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </div>
       </section>
 
-      {/* Trust badges */}
+      {/* Trust & Compliance badges */}
       <RevealSection>
         <section className="px-6 py-10 max-w-4xl mx-auto">
-          <div className="flex flex-wrap items-center justify-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-3">
             {[
-              { icon: Lock, label: "256-bit Encryption" },
-              { icon: ShieldCheck, label: "Bank-level Security" },
-              { icon: Fingerprint, label: "SOC 2 Compliant" },
+              { icon: ShieldCheck, label: "GDPR Compliant" },
+              { icon: Lock, label: "SSL Encrypted" },
+              { icon: Fingerprint, label: "Data Protected" },
+              { icon: Shield, label: "Not Financial Advice" },
             ].map((badge) => (
               <div key={badge.label} className="flex items-center gap-2 rounded-full border border-border bg-card/60 backdrop-blur-sm px-4 py-2">
                 <badge.icon className="h-4 w-4 text-primary" />
