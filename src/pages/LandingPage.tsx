@@ -316,12 +316,15 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
 
       {/* Footer */}
       <footer className="border-t border-border px-6 py-8">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-muted-foreground">© 2026 PortAI. For educational purposes only. Not financial advice.</p>
-          <div className="flex items-center gap-4">
+        <div className="max-w-4xl mx-auto flex flex-col items-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
             <a href="/privacy-policy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a>
             <a href="/terms-of-service" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Terms of Service</a>
+            <a href="/data-compliance" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Data & Compliance</a>
+            <a href="/ip-policy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">IP Policy</a>
           </div>
+          <p className="text-xs text-muted-foreground text-center max-w-lg">PortAI is not a financial advisor. All content is for informational purposes only. Always consult a qualified financial professional before making investment decisions.</p>
+          <p className="text-xs text-muted-foreground">© 2026 PortAI. All rights reserved.</p>
         </div>
       </footer>
     </div>
