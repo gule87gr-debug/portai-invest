@@ -26,6 +26,8 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Unsubscribe from "./pages/Unsubscribe";
 import UpgradeSuccess from "./pages/UpgradeSuccess";
+import DataCompliance from "./pages/DataCompliance";
+import IPPolicy from "./pages/IPPolicy";
 import { CookieConsent } from "./components/CookieConsent";
 
 const queryClient = new QueryClient();
