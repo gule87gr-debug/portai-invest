@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 export const AppLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex min-h-screen bg-background overflow-x-hidden max-w-[100vw]">
+    <div className="flex min-h-screen bg-background overflow-x-hidden max-w-[100vw] noise-overlay">
       <AppSidebar />
       <div className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto w-full flex flex-col">
         <main className="flex-1">

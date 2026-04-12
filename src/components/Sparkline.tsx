@@ -39,7 +39,7 @@ export const Sparkline = ({ width = 80, height = 28, className = "", seed = "def
     return { points: pts, isUp: data[data.length - 1] >= data[0] };
   }, [seed, width, height]);
 
-  const color = isUp ? "hsl(162 100% 39%)" : "hsl(0 100% 65%)";
+  const color = isUp ? "#00D4B1" : "#FF4D4D";
 
   return (
     <svg width={width} height={height} className={className} viewBox={`0 0 ${width} ${height}`}>
