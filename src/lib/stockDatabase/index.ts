@@ -10,11 +10,19 @@ import { extraEtfs } from "./extraEtfs";
 import { extraIndices } from "./extraIndices";
 import { extraCrypto } from "./extraCrypto";
 
-export const assetDatabase = [
+const rawAssets = [
   ...stocks, ...etfs, ...crypto, ...indexFunds,
   ...additionalStocks, ...additionalCrypto,
   ...extraStocks, ...extraEtfs, ...extraIndices, ...extraCrypto,
 ];
+
+// Deduplicate by ticker — first occurrence wins
+const seen = new Set<string>();
+export const assetDatabase = rawAssets.filter((a) => {
+  if (seen.has(a.ticker)) return false;
+  seen.add(a.ticker);
+  return true;
+});
 
 export function searchAssets(query: string) {
   if (!query.trim()) return [];
