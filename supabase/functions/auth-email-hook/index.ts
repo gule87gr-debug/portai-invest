@@ -35,25 +35,19 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
   reauthentication: ReauthenticationEmail,
 }
 
-const normalizeAuthCode = (value: unknown): string | null => {
-  if (typeof value !== 'string') return null
-  const normalized = value.trim()
-  return normalized.length > 0 ? normalized : null
-}
-
 // Configuration
-const SITE_NAME = 'portai-invest'
-const SENDER_DOMAIN = 'notify.portai-invest.com'
-const ROOT_DOMAIN = 'portai-invest.com'
-const FROM_DOMAIN = 'portai-invest.com' // Domain shown in From address (may be root or sender subdomain)
+const SITE_NAME = "portai-invest"
+const SENDER_DOMAIN = "notify.portai-invest.com"
+const ROOT_DOMAIN = "portai-invest.com"
+const FROM_DOMAIN = "portai-invest.com" // Domain shown in From address (may be root or sender subdomain)
 
 // Sample data for preview mode ONLY (not used in actual email sending).
 // URLs are baked in at scaffold time from the project's real data.
 // The sample email uses a fixed placeholder (RFC 6761 .test TLD) so the Go backend
 // can always find-and-replace it with the actual recipient when sending test emails,
 // even if the project's domain has changed since the template was scaffolded.
-const SAMPLE_PROJECT_URL = 'https://portai-invest.lovable.app'
-const SAMPLE_EMAIL = 'user@example.test'
+const SAMPLE_PROJECT_URL = "https://portai-invest.lovable.app"
+const SAMPLE_EMAIL = "user@example.test"
 const SAMPLE_DATA: Record<string, object> = {
   signup: {
     siteName: SITE_NAME,
@@ -67,7 +61,6 @@ const SAMPLE_DATA: Record<string, object> = {
   },
   recovery: {
     siteName: SITE_NAME,
-    token: '123456',
     confirmationUrl: SAMPLE_PROJECT_URL,
   },
   invite: {
@@ -111,7 +104,7 @@ async function handlePreview(req: Request): Promise<Response> {
   try {
     const body = await req.json()
     type = body.type
-  } catch (_error) {
+  } catch (error) {
     return new Response(JSON.stringify({ error: 'Invalid JSON in request body' }), {
       status: 400,
       headers: { ...previewCorsHeaders, 'Content-Type': 'application/json' },
@@ -142,10 +135,10 @@ async function handleWebhook(req: Request): Promise<Response> {
 
   if (!apiKey) {
     console.error('LOVABLE_API_KEY not configured')
-    return new Response(JSON.stringify({ error: 'Server configuration error' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    return new Response(
+      JSON.stringify({ error: 'Server configuration error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
   }
 
   // Verify signature + timestamp, then parse payload.
@@ -174,26 +167,29 @@ async function handleWebhook(req: Request): Promise<Response> {
         case 'invalid_payload':
         case 'invalid_json':
           console.error('Invalid webhook payload', { error: error.message })
-          return new Response(JSON.stringify({ error: 'Invalid webhook payload' }), {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          })
+          return new Response(
+            JSON.stringify({ error: 'Invalid webhook payload' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
       }
     }
 
     console.error('Webhook verification failed', { error })
-    return new Response(JSON.stringify({ error: 'Invalid webhook payload' }), {
-      status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    return new Response(
+      JSON.stringify({ error: 'Invalid webhook payload' }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
   }
 
   if (!run_id) {
     console.error('Webhook payload missing run_id')
-    return new Response(JSON.stringify({ error: 'Invalid webhook payload' }), {
-      status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    return new Response(
+      JSON.stringify({ error: 'Invalid webhook payload' }),
+      {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    )
   }
 
   if (payload.version !== '1') {
@@ -215,21 +211,10 @@ async function handleWebhook(req: Request): Promise<Response> {
   const EmailTemplate = EMAIL_TEMPLATES[emailType]
   if (!EmailTemplate) {
     console.error('Unknown email type', { emailType, run_id })
-    return new Response(JSON.stringify({ error: `Unknown email type: ${emailType}` }), {
-      status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
-  }
-
-  const requiresAuthCode = emailType === 'recovery' || emailType === 'reauthentication'
-  const authCode = normalizeAuthCode(payload.data.token)
-
-  if (requiresAuthCode && !authCode) {
-    console.error('Missing auth code', { emailType, run_id })
-    return new Response(JSON.stringify({ error: 'Missing auth code' }), {
-      status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    return new Response(
+      JSON.stringify({ error: `Unknown email type: ${emailType}` }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
   }
 
   // Build template props from payload.data (HookData structure)
@@ -238,7 +223,7 @@ async function handleWebhook(req: Request): Promise<Response> {
     siteUrl: `https://${ROOT_DOMAIN}`,
     recipient: payload.data.email,
     confirmationUrl: payload.data.url,
-    token: authCode,
+    token: payload.data.token,
     email: payload.data.email,
     newEmail: payload.data.new_email,
   }
@@ -299,10 +284,10 @@ async function handleWebhook(req: Request): Promise<Response> {
 
   console.log('Auth email enqueued', { emailType, email: payload.data.email, run_id })
 
-  return new Response(JSON.stringify({ success: true, queued: true }), {
-    status: 200,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  })
+  return new Response(
+    JSON.stringify({ success: true, queued: true }),
+    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  )
 }
 
 Deno.serve(async (req) => {
