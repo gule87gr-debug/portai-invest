@@ -7,6 +7,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { searchAssets, AssetEntry } from "@/lib/stockDatabase";
+import { getTradingViewSymbol } from "@/lib/tradingViewSymbol";
 import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
 import { Sparkline } from "@/components/Sparkline";
 import { Plus, Trash2, Search, X, ChevronDown, Eye, Filter } from "lucide-react";
