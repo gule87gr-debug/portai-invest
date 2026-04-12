@@ -6,7 +6,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
-import { searchAssets, AssetEntry } from "@/lib/stockDatabase";
+import { searchAssets, AssetEntry, assetDatabase } from "@/lib/stockDatabase";
 import { getTradingViewSymbol } from "@/lib/tradingViewSymbol";
 import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
 import { Sparkline } from "@/components/Sparkline";
@@ -280,7 +280,7 @@ const Watchlists = () => {
                     </button>
                   </div>
                   {(() => {
-                    const entry = searchAssets(s.ticker).find((a) => a.ticker === s.ticker);
+                    const entry = assetDatabase.find((a) => a.ticker === s.ticker);
                     const tvSym = getTradingViewSymbol(s.ticker, entry?.type);
                     return tvSym ? (
                       <div className="pointer-events-none h-[160px] overflow-hidden">
