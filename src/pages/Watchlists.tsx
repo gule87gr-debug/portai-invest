@@ -280,7 +280,8 @@ const Watchlists = () => {
                     </button>
                   </div>
                   {(() => {
-                    const tvSym = getTradingViewSymbol(s.ticker, undefined);
+                    const entry = searchAssets(s.ticker).find((a) => a.ticker === s.ticker);
+                    const tvSym = getTradingViewSymbol(s.ticker, entry?.type);
                     return tvSym ? (
                       <div className="pointer-events-none h-[160px] overflow-hidden">
                         <TradingViewMiniChart symbol={tvSym} width="100%" />
