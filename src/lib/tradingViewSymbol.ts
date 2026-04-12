@@ -81,18 +81,15 @@ export function getTradingViewSymbol(ticker: string, type?: string): string | nu
   const upper = ticker.toUpperCase();
 
   // Synthetic / non-tradeable indices → no TradingView data
-  if (
-    upper.startsWith("MSCI-") ||
-    upper.startsWith("FTSE-") ||
-    upper.startsWith("SP-") ||
-    upper.startsWith("THEM-") ||
-    upper.includes("-")
-  ) {
+  if (upper.includes("-")) {
     return null;
   }
 
+  // Auto-detect crypto if type not provided
+  const isCrypto = type === "crypto" || (!type && (upper.endsWith("USD") && upper.length > 4 && !["AUDUSD", "EURUSD", "GBPUSD", "NZDUSD"].includes(upper)) || upper.endsWith("USDT"));
+
   // Crypto resolution
-  if (type === "crypto") {
+  if (isCrypto) {
     // Check COINBASE first (most common)
     if (COINBASE_USD.has(upper)) return `COINBASE:${upper}`;
     // Check BITSTAMP
