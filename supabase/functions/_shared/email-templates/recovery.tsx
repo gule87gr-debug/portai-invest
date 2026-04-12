@@ -16,11 +16,13 @@ import {
 interface RecoveryEmailProps {
   siteName: string
   confirmationUrl: string
+  token?: string
 }
 
 export const RecoveryEmail = ({
   siteName,
   confirmationUrl,
+  token,
 }: RecoveryEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
@@ -29,11 +31,16 @@ export const RecoveryEmail = ({
       <Container style={container}>
         <Heading style={h1}>Reset your password</Heading>
         <Text style={text}>
-          We received a request to reset your password for {siteName}. Click
-          the button below to choose a new password.
+          We received a request to reset your password for {siteName}. Enter
+          the recovery code below in the app to continue.
+        </Text>
+        {token ? <Text style={codeStyle}>{token}</Text> : null}
+        <Text style={helperText}>
+          If you prefer, you can also use the button below to continue from
+          your browser.
         </Text>
         <Button style={button} href={confirmationUrl}>
-          Reset Password
+          Open Password Reset
         </Button>
         <Text style={footer}>
           If you didn't request a password reset, you can safely ignore this
@@ -60,8 +67,27 @@ const text = {
   lineHeight: '1.5',
   margin: '0 0 25px',
 }
+const codeStyle = {
+  fontFamily: 'JetBrains Mono, Courier, monospace',
+  fontSize: '28px',
+  fontWeight: 'bold' as const,
+  letterSpacing: '0.12em',
+  textAlign: 'center' as const,
+  color: '#2ecc8f',
+  backgroundColor: '#f4fbf7',
+  border: '1px solid #b9e8d0',
+  borderRadius: '12px',
+  padding: '18px 20px',
+  margin: '0 0 20px',
+}
+const helperText = {
+  fontSize: '13px',
+  color: '#6b7a99',
+  lineHeight: '1.5',
+  margin: '0 0 25px',
+}
 const button = {
-  backgroundColor: '#000000',
+  backgroundColor: '#2ecc8f',
   color: '#ffffff',
   fontSize: '14px',
   borderRadius: '8px',
