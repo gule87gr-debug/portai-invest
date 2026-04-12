@@ -2,8 +2,11 @@ export type { AssetEntry } from "./types";
 import { stocks } from "./stocks";
 import { etfs } from "./etfs";
 import { crypto } from "./crypto";
+import { indexFunds } from "./indexFunds";
+import { additionalStocks } from "./additionalStocks";
+import { additionalCrypto } from "./additionalCrypto";
 
-export const assetDatabase = [...stocks, ...etfs, ...crypto];
+export const assetDatabase = [...stocks, ...etfs, ...crypto, ...indexFunds, ...additionalStocks, ...additionalCrypto];
 
 export function searchAssets(query: string) {
   if (!query.trim()) return [];

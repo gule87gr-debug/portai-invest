@@ -23,4 +23,4 @@ PortAI - AI-powered investor helper app with dark/light theme support
 
 ## Architecture
 - Frontend with Lovable Cloud backend
-- 561 assets: 328 stocks, 153 ETFs, 80 crypto
+- 2401 assets: 1730 stocks, 153 ETFs, 292 index funds, 226 crypto
