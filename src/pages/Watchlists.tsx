@@ -151,12 +151,26 @@ const Watchlists = () => {
           <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-bold">{t("addStock")}</h2>
-              <button onClick={() => { setShowAddStock(false); setStockSearch(""); }} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
+              <button onClick={() => { setShowAddStock(false); setStockSearch(""); setAssetFilter("all"); }} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
             </div>
             {!isPro && (
               <p className="text-xs text-muted-foreground mb-2">{active?.stocks.length ?? 0}/{FREE_MAX_STOCKS} stocks used</p>
             )}
-            <div className="relative">
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {(["all", "stock", "etf", "index", "crypto"] as const).map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setAssetFilter(f)}
+                  className={cn(
+                    "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors border",
+                    assetFilter === f
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-accent/30 text-muted-foreground border-border hover:bg-accent/60"
+                  )}
+                >
+                  {f === "all" ? "All" : f === "stock" ? "Stocks" : f === "etf" ? "ETFs" : f === "index" ? "Index Funds" : "Crypto"}
+                </button>
+              ))}
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input value={stockSearch} onChange={(e) => setStockSearch(e.target.value)} placeholder={t("searchStocksEtfs")} autoFocus className="h-10 w-full rounded-lg border border-border bg-accent/30 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
             </div>
