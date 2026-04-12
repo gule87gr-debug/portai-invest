@@ -186,7 +186,7 @@ const Watchlists = () => {
                       <span className="text-sm font-semibold">{a.ticker}</span>
                       <span className="ml-2 text-xs text-muted-foreground">{a.name}</span>
                     </div>
-                    <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-medium", a.type === "crypto" ? "bg-chart-3/20 text-chart-3" : a.type === "etf" ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground")}>{a.type.toUpperCase()}</span>
+                    <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-medium", a.type === "crypto" ? "bg-chart-3/20 text-chart-3" : a.type === "etf" ? "bg-primary/20 text-primary" : a.type === "index" ? "bg-chart-4/20 text-chart-4" : "bg-muted text-muted-foreground")}>{a.type === "index" ? "INDEX" : a.type.toUpperCase()}</span>
                   </button>
                 );
               })}
