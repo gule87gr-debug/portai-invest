@@ -6,7 +6,8 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
-import { searchAssets, AssetEntry } from "@/lib/stockDatabase";
+import { searchAssets, AssetEntry, assetDatabase } from "@/lib/stockDatabase";
+import { getTradingViewSymbol } from "@/lib/tradingViewSymbol";
 import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
 import { Sparkline } from "@/components/Sparkline";
 import { Plus, Trash2, Search, X, ChevronDown, Eye, Filter } from "lucide-react";
@@ -278,9 +279,19 @@ const Watchlists = () => {
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
-                  <div className="pointer-events-none h-[160px] overflow-hidden">
-                    <TradingViewMiniChart symbol={s.ticker} width="100%" />
-                  </div>
+                  {(() => {
+                    const entry = assetDatabase.find((a) => a.ticker === s.ticker);
+                    const tvSym = getTradingViewSymbol(s.ticker, entry?.type);
+                    return tvSym ? (
+                      <div className="pointer-events-none h-[160px] overflow-hidden">
+                        <TradingViewMiniChart symbol={tvSym} width="100%" />
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center h-[160px] text-xs text-muted-foreground">
+                        No live chart available
+                      </div>
+                    );
+                  })()}
                 </div>
               ))}
             </div>
