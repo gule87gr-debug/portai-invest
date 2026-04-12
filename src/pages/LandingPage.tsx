@@ -114,7 +114,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="min-h-screen bg-background overflow-x-hidden noise-overlay">
       <style>{`
         .scroll-reveal {
           opacity: 0;
@@ -132,36 +132,36 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       `}</style>
 
       {/* Nav */}
-      <nav className="flex items-center justify-between px-6 py-5 max-w-6xl mx-auto">
+      <nav className="flex items-center justify-between px-6 py-5 max-w-6xl mx-auto glass rounded-b-xl">
         <div className="flex items-center gap-2.5">
           <img src="/logo.png" alt="PortAI" className="h-9 w-9 rounded-lg" />
           <span className="text-lg font-bold text-foreground">PortAI</span>
         </div>
         <button
           onClick={onGetStarted}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 active:scale-[0.97]"
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97]"
         >
           Get Started
         </button>
       </nav>
 
       {/* Hero */}
-      <section className="px-6 pt-16 pb-12 max-w-4xl mx-auto text-center">
-        <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary mb-6">
+      <section className="px-6 pt-16 pb-12 max-w-4xl mx-auto text-center relative gold-glow">
+        <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary mb-6 tracking-label uppercase">
           <Sparkles className="h-3.5 w-3.5" /> AI-Powered Investment Platform
         </div>
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight" style={{ lineHeight: "1.08" }}>
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight relative z-10" style={{ lineHeight: "1.08" }}>
           Invest smarter with
           <br />
           <span className="text-primary">artificial intelligence</span>
         </h1>
-        <p className="mt-5 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed" style={{ textWrap: "pretty" as any }}>
+        <p className="mt-5 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed relative z-10" style={{ textWrap: "pretty" as any }}>
           The AI-powered investment platform that detects bias in financial news, tracks your portfolio in real time and gives you personalized AI financial advice — free.
         </p>
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 relative z-10">
           <button
             onClick={onGetStarted}
-            className="flex items-center gap-2 rounded-xl bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 active:scale-[0.97]"
+            className="flex items-center gap-2 rounded-xl bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97]"
           >
             Create Free Account <ArrowRight className="h-4 w-4" />
           </button>
@@ -198,7 +198,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       {/* Features — detailed */}
       <section id="features" className="px-6 pt-20 pb-16 max-w-5xl mx-auto">
         <RevealSection>
-          <p className="text-center text-xs font-semibold uppercase tracking-widest text-primary mb-3">Platform Features</p>
+          <p className="text-center text-xs font-semibold uppercase tracking-label text-primary mb-3">Platform Features</p>
           <h2 className="text-center text-2xl sm:text-3xl font-bold text-foreground mb-4" style={{ textWrap: "balance" as any }}>
             Everything you need to invest with confidence
           </h2>
@@ -211,7 +211,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           {features.map((f, i) => (
             <RevealSection key={f.title}>
               <div
-                className="rounded-2xl border border-border bg-card/60 backdrop-blur-md p-6 h-full transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
+                className="glass-card rounded-2xl p-6 h-full transition-all card-hover"
                 style={{ transitionDelay: `${i * 60}ms` }}
               >
                 <div className="flex items-start gap-4 mb-4">
@@ -241,7 +241,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       <section className="px-6 py-20 bg-card/40 border-y border-border">
         <div className="max-w-3xl mx-auto">
           <RevealSection>
-            <p className="text-center text-xs font-semibold uppercase tracking-widest text-primary mb-3">Getting Started</p>
+            <p className="text-center text-xs font-semibold uppercase tracking-label text-primary mb-3">Getting Started</p>
             <h2 className="text-center text-2xl sm:text-3xl font-bold text-foreground mb-12" style={{ textWrap: "balance" as any }}>
               Up and running in minutes
             </h2>
@@ -266,7 +266,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           <RevealSection className="mt-10 text-center">
             <button
               onClick={onGetStarted}
-              className="inline-flex items-center gap-2 rounded-xl bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 active:scale-[0.97]"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97]"
             >
               Start Now — It's Free <ArrowRight className="h-4 w-4" />
             </button>
@@ -284,7 +284,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
               { icon: Fingerprint, label: "Data Protected" },
               { icon: Shield, label: "Not Financial Advice" },
             ].map((badge) => (
-              <div key={badge.label} className="flex items-center gap-2 rounded-full border border-border bg-card/60 backdrop-blur-sm px-4 py-2">
+              <div key={badge.label} className="flex items-center gap-2 rounded-full border border-border bg-card/60 backdrop-blur-sm px-4 py-2" style={{ borderColor: "rgba(240, 180, 41, 0.08)" }}>
                 <badge.icon className="h-4 w-4 text-primary" />
                 <span className="text-xs font-medium text-foreground">{badge.label}</span>
               </div>
@@ -303,8 +303,8 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
               { icon: Lock, title: "Not financial advice", desc: "PortAI is for education and research. Always consult a licensed advisor." },
             ].map((t) => (
               <div key={t.title} className="flex flex-col items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary">
-                  <t.icon className="h-5 w-5 text-muted-foreground" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                  <t.icon className="h-5 w-5 text-primary/70" />
                 </div>
                 <h3 className="text-sm font-semibold text-foreground">{t.title}</h3>
                 <p className="text-xs text-muted-foreground leading-relaxed max-w-[220px]">{t.desc}</p>

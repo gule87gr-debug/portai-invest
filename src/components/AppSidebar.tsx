@@ -30,12 +30,10 @@ export const AppSidebar = () => {
     t = (key: string) => key;
   }
 
-  // Close on route change (but not during tour)
   useEffect(() => {
     if (!tourLocked) setOpen(false);
   }, [location.pathname, tourLocked]);
 
-  // Listen for tour open/close events
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
@@ -44,7 +42,6 @@ export const AppSidebar = () => {
         setTourLocked(true);
       } else {
         setTourLocked(false);
-        // Don't auto-close here — let user interaction handle it
       }
     };
     window.addEventListener("tour-sidebar", handler);
@@ -57,7 +54,7 @@ export const AppSidebar = () => {
         <div className="fixed left-4 top-4 z-50 flex items-center gap-2">
           <button
             onClick={() => setOpen(true)}
-            className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors hover:bg-accent"
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors hover:bg-accent hover:border-primary/30"
           >
             <Menu className="h-5 w-5" />
           </button>
@@ -71,7 +68,7 @@ export const AppSidebar = () => {
 
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 flex h-screen w-56 flex-col border-r border-sidebar-border bg-sidebar transition-transform duration-200",
+          "fixed left-0 top-0 z-40 flex h-screen w-56 flex-col border-r border-sidebar-border glass transition-transform duration-200",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -122,7 +119,7 @@ export const AppSidebar = () => {
 
         <div className="border-t border-sidebar-border p-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary">
               <TrendingUp className="h-4 w-4" />
             </div>
             <div className="min-w-0">

@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Manrope', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+        display: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       colors: {
@@ -102,8 +102,12 @@ export default {
           to: { transform: "translateX(0)" },
         },
         "pulse-glow": {
-          "0%, 100%": { boxShadow: "0 0 10px hsl(210 66% 50% / 0.15)" },
-          "50%": { boxShadow: "0 0 25px hsl(210 66% 50% / 0.3)" },
+          "0%, 100%": { boxShadow: "0 0 10px hsl(43 87% 55% / 0.15)" },
+          "50%": { boxShadow: "0 0 25px hsl(43 87% 55% / 0.3)" },
+        },
+        "hover-lift": {
+          from: { transform: "translateY(0)" },
+          to: { transform: "translateY(-4px)" },
         },
       },
       animation: {
