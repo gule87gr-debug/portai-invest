@@ -35,16 +35,16 @@ const features = [
     title: "Forum",
     desc: "Discuss market trends and trade ideas with other investors. AI fact-checking automatically flags unverified claims in conversations.",
     to: "/forum",
-    color: "text-purple-400",
-    bg: "bg-purple-400/15",
+    color: "text-[hsl(var(--chart-3))]",
+    bg: "bg-[hsl(var(--chart-3))]/15",
   },
   {
     icon: Eye,
     title: "Watchlists",
     desc: "Build custom watchlists from 10,000+ stocks, ETFs, index funds, and crypto. View interactive charts with technical indicators and track price movements.",
     to: "/watchlists",
-    color: "text-sky-400",
-    bg: "bg-sky-400/15",
+    color: "text-[hsl(var(--chart-2))]",
+    bg: "bg-[hsl(var(--chart-2))]/15",
   },
   {
     icon: Settings,
@@ -87,7 +87,7 @@ const HomePage = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2" style={{ lineHeight: "1.15" }}>
-            Welcome to PortAI
+            Welcome to <span className="text-primary">PortAI</span>
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed max-w-xl">
             Your AI-powered investment companion. Here's everything you can do — tap any card to jump straight in.
@@ -95,7 +95,7 @@ const HomePage = () => {
         </div>
 
         {/* Feature grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 stagger-fade">
           {features.map((f, i) => {
             const ref = useReveal();
             return (
@@ -103,12 +103,12 @@ const HomePage = () => {
                 key={f.to}
                 ref={ref}
                 onClick={() => navigate(f.to)}
-                className="group cursor-pointer rounded-2xl border border-border bg-card/60 backdrop-blur-md p-5 transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 active:scale-[0.98]"
+                className="group cursor-pointer glass-card rounded-2xl p-5 transition-all card-hover active:scale-[0.98]"
                 style={{
                   opacity: 0,
                   transform: "translateY(14px)",
                   filter: "blur(3px)",
-                  transition: `opacity 550ms cubic-bezier(0.16,1,0.3,1) ${i * 70}ms, transform 550ms cubic-bezier(0.16,1,0.3,1) ${i * 70}ms, filter 550ms cubic-bezier(0.16,1,0.3,1) ${i * 70}ms, border-color 200ms, box-shadow 200ms`,
+                  transition: `opacity 550ms cubic-bezier(0.16,1,0.3,1) ${i * 70}ms, transform 550ms cubic-bezier(0.16,1,0.3,1) ${i * 70}ms, filter 550ms cubic-bezier(0.16,1,0.3,1) ${i * 70}ms, border-color 200ms, box-shadow 300ms`,
                 }}
               >
                 <div className="flex items-start gap-3.5">
@@ -132,7 +132,7 @@ const HomePage = () => {
         {/* Tip */}
         <div
           onClick={() => navigate("/settings")}
-          className="mt-6 rounded-xl border border-border bg-card/60 px-5 py-4 flex items-start gap-3 cursor-pointer transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 active:scale-[0.98]"
+          className="mt-6 glass-card rounded-xl px-5 py-4 flex items-start gap-3 cursor-pointer transition-all card-hover active:scale-[0.98]"
         >
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/15 mt-0.5">
             <Globe className="h-4 w-4 text-primary" />
