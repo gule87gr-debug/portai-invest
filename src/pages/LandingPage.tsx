@@ -284,7 +284,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
               { icon: Fingerprint, label: "Data Protected" },
               { icon: Shield, label: "Not Financial Advice" },
             ].map((badge) => (
-              <div key={badge.label} className="flex items-center gap-2 rounded-full border border-border bg-card/60 backdrop-blur-sm px-4 py-2" style={{ borderColor: "rgba(240, 180, 41, 0.08)" }}>
+              <div key={badge.label} className="flex items-center gap-2 rounded-full border border-border bg-card/60 backdrop-blur-sm px-4 py-2" style={{ borderColor: "rgba(46, 204, 143, 0.08)" }}>
                 <badge.icon className="h-4 w-4 text-primary" />
                 <span className="text-xs font-medium text-foreground">{badge.label}</span>
               </div>

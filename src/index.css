@@ -13,8 +13,8 @@
     --popover: 220 40% 9%;
     --popover-foreground: 220 40% 93%;
 
-    --primary: 43 87% 55%;
-    --primary-foreground: 220 60% 3%;
+    --primary: 153 64% 49%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 220 35% 17%;
     --secondary-foreground: 220 20% 60%;
@@ -37,28 +37,28 @@
     --gain: 168 100% 42%;
     --loss: 0 100% 65%;
 
-    --highlight: 43 87% 55%;
+    --highlight: 153 64% 49%;
 
     --border: 220 40% 20%;
     --input: 220 40% 20%;
-    --ring: 43 87% 55%;
+    --ring: 153 64% 49%;
 
     --radius: 0.75rem;
 
     --sidebar-background: 220 50% 4%;
     --sidebar-foreground: 220 20% 50%;
-    --sidebar-primary: 43 87% 55%;
-    --sidebar-primary-foreground: 220 60% 3%;
+    --sidebar-primary: 153 64% 49%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 35% 14%;
     --sidebar-accent-foreground: 220 40% 93%;
     --sidebar-border: 220 40% 20%;
-    --sidebar-ring: 43 87% 55%;
+    --sidebar-ring: 153 64% 49%;
 
     --trust-high: 168 100% 42%;
     --trust-medium: 40 90% 55%;
     --trust-low: 0 100% 65%;
 
-    --chart-1: 43 87% 55%;
+    --chart-1: 153 64% 49%;
     --chart-2: 168 100% 42%;
     --chart-3: 265 60% 60%;
     --chart-4: 40 90% 55%;
@@ -79,7 +79,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 40% 10%;
 
-    --primary: 43 87% 48%;
+    --primary: 153 64% 42%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 40 15% 91%;
@@ -103,26 +103,26 @@
     --gain: 168 100% 35%;
     --loss: 0 84% 60%;
 
-    --highlight: 43 87% 48%;
+    --highlight: 153 64% 42%;
 
     --border: 40 20% 85%;
     --input: 40 20% 85%;
-    --ring: 43 87% 48%;
+    --ring: 153 64% 42%;
 
     --sidebar-background: 40 20% 97%;
     --sidebar-foreground: 220 15% 45%;
-    --sidebar-primary: 43 87% 48%;
+    --sidebar-primary: 153 64% 42%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 40 15% 91%;
     --sidebar-accent-foreground: 220 40% 10%;
     --sidebar-border: 40 20% 85%;
-    --sidebar-ring: 43 87% 48%;
+    --sidebar-ring: 153 64% 42%;
 
     --trust-high: 168 100% 35%;
     --trust-medium: 40 90% 50%;
     --trust-low: 0 84% 60%;
 
-    --chart-1: 43 87% 48%;
+    --chart-1: 153 64% 42%;
     --chart-2: 168 100% 35%;
     --chart-3: 265 60% 55%;
     --chart-4: 40 90% 50%;
@@ -170,7 +170,7 @@
   .glass-card {
     background: rgba(13, 20, 33, 0.7);
     backdrop-filter: blur(12px) saturate(1.2);
-    border: 1px solid rgba(240, 180, 41, 0.08);
+    border: 1px solid rgba(46, 204, 143, 0.08);
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
   }
 
@@ -180,15 +180,15 @@
   }
 
   .trust-glow {
-    box-shadow: 0 0 20px hsl(43 87% 55% / 0.12);
+    box-shadow: 0 0 20px hsl(153 64% 49% / 0.12);
   }
 
   .btn-glow {
-    box-shadow: 0 0 0 0 hsl(43 87% 55% / 0);
+    box-shadow: 0 0 0 0 hsl(153 64% 49% / 0);
     transition: box-shadow 200ms ease-out, background-color 200ms;
   }
   .btn-glow:hover {
-    box-shadow: 0 0 20px hsl(43 87% 55% / 0.3), 0 0 40px hsl(43 87% 55% / 0.12);
+    box-shadow: 0 0 20px hsl(153 64% 49% / 0.3), 0 0 40px hsl(153 64% 49% / 0.12);
   }
 
   .gold-glow {
@@ -202,7 +202,7 @@
     transform: translateX(-50%);
     width: 80%;
     height: 60%;
-    background: radial-gradient(ellipse at center, hsl(43 87% 55% / 0.05) 0%, transparent 70%);
+    background: radial-gradient(ellipse at center, hsl(153 64% 49% / 0.05) 0%, transparent 70%);
     pointer-events: none;
     z-index: 0;
   }
@@ -227,7 +227,7 @@
   }
   .card-hover:hover {
     transform: translateY(-4px);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(240, 180, 41, 0.15);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(46, 204, 143, 0.15);
   }
 
   .flash-gain {
@@ -247,7 +247,7 @@
 
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: hsl(43 87% 55% / 0.3) transparent;
+    scrollbar-color: hsl(153 64% 49% / 0.3) transparent;
   }
 
   .scrollbar-thin::-webkit-scrollbar {
@@ -259,12 +259,12 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: hsl(43 87% 55% / 0.3);
+    background: hsl(153 64% 49% / 0.3);
     border-radius: 3px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: hsl(43 87% 55% / 0.5);
+    background: hsl(153 64% 49% / 0.5);
   }
 
   .stagger-fade > * {
