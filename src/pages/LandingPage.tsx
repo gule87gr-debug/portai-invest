@@ -50,9 +50,9 @@ const features = [
   {
     icon: Eye,
     title: "Watchlists",
-    tagline: "Track 2400+ stocks, ETFs, index funds and crypto assets",
+    tagline: "Track 10,000+ stocks, ETFs, index funds and crypto assets",
     details: [
-      "Track 2400+ stocks, ETFs, index funds and crypto assets in real time with live prices, charts and AI analysis.",
+      "Track 10,000+ stocks, ETFs, index funds and crypto assets in real time with live prices, charts and AI analysis.",
       "View interactive TradingView charts with technical indicators",
       "Organize assets by sector, signal strength, or personal tags",
       "Monitor real-time price movements and market data",
@@ -180,7 +180,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         <div className="border-y border-border bg-card/50 py-8 px-6">
           <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
             {[
-              { value: "2400+", label: "Stocks, ETFs, Index Funds & Crypto", icon: BarChart3 },
+              { value: "10,000+", label: "Stocks, ETFs, Index Funds & Crypto", icon: BarChart3 },
               { value: "6", label: "Languages Supported", icon: Globe },
               { value: "AI", label: "Bias & Fact Checking", icon: ShieldCheck },
               { value: "24/7", label: "AI Financial Advisor", icon: Brain },
