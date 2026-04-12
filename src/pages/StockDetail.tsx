@@ -39,20 +39,9 @@ const StockDetail = () => {
       </div>
 
       {tvSymbol ? (
-        <>
-          <div className="mb-6 rounded-xl border border-border bg-card p-1">
-            <TradingViewChart symbol={tvSymbol} height={450} />
-          </div>
-
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <div className="rounded-xl border border-border bg-card p-5">
-              <div className="mb-3 flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-primary" />
-                <h2 className="text-lg font-semibold">{t("technicalAnalysis")}</h2>
-              </div>
-              <TradingViewTechnicalAnalysis symbol={tvSymbol} />
-            </div>
-        </>
+        <div className="mb-6 rounded-xl border border-border bg-card p-1">
+          <TradingViewChart symbol={tvSymbol} height={450} />
+        </div>
       ) : (
         <div className="mb-6 rounded-xl border border-border bg-card p-8 text-center">
           <AlertTriangle className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
@@ -62,13 +51,16 @@ const StockDetail = () => {
         </div>
       )}
 
-      {tvSymbol ? null : (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-      )}
-
-      {!tvSymbol && (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-      )}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {tvSymbol && (
+          <div className="rounded-xl border border-border bg-card p-5">
+            <div className="mb-3 flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 text-primary" />
+              <h2 className="text-lg font-semibold">{t("technicalAnalysis")}</h2>
+            </div>
+            <TradingViewTechnicalAnalysis symbol={tvSymbol} />
+          </div>
+        )}
 
         <div className="space-y-6">
           <div className="rounded-xl border border-border bg-card p-5">
