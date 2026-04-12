@@ -6,13 +6,17 @@ import { StockNews } from "@/components/StockNews";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getStockDescription } from "@/lib/stockDescriptions";
-import { ArrowLeft, Building2, Newspaper, BarChart3 } from "lucide-react";
+import { getTradingViewSymbol } from "@/lib/tradingViewSymbol";
+import { assetDatabase } from "@/lib/stockDatabase";
+import { ArrowLeft, Building2, Newspaper, BarChart3, AlertTriangle } from "lucide-react";
 
 const StockDetail = () => {
   const { ticker } = useParams<{ ticker: string }>();
   const symbol = ticker?.toUpperCase() || "SPY";
   usePageTitle(`${symbol} Stock Detail | PortAI`);
   const info = getStockDescription(symbol);
+  const assetEntry = assetDatabase.find((a) => a.ticker.toUpperCase() === symbol);
+  const tvSymbol = getTradingViewSymbol(symbol, assetEntry?.type);
   let t: (key: string) => string;
   try {
     const lang = useLanguage();
@@ -34,18 +38,37 @@ const StockDetail = () => {
         <p className="mt-1 text-muted-foreground">{info.name}</p>
       </div>
 
-      <div className="mb-6 rounded-xl border border-border bg-card p-1">
-        <TradingViewChart symbol={symbol} height={450} />
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border border-border bg-card p-5">
-          <div className="mb-3 flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-primary" />
-            <h2 className="text-lg font-semibold">{t("technicalAnalysis")}</h2>
+      {tvSymbol ? (
+        <>
+          <div className="mb-6 rounded-xl border border-border bg-card p-1">
+            <TradingViewChart symbol={tvSymbol} height={450} />
           </div>
-          <TradingViewTechnicalAnalysis symbol={symbol} />
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="rounded-xl border border-border bg-card p-5">
+              <div className="mb-3 flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-primary" />
+                <h2 className="text-lg font-semibold">{t("technicalAnalysis")}</h2>
+              </div>
+              <TradingViewTechnicalAnalysis symbol={tvSymbol} />
+            </div>
+        </>
+      ) : (
+        <div className="mb-6 rounded-xl border border-border bg-card p-8 text-center">
+          <AlertTriangle className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">
+            Live chart data is not available for this asset. It may be a synthetic index or unlisted instrument.
+          </p>
         </div>
+      )}
+
+      {tvSymbol ? null : (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      )}
+
+      {!tvSymbol && (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      )}
 
         <div className="space-y-6">
           <div className="rounded-xl border border-border bg-card p-5">
