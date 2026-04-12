@@ -9,7 +9,7 @@ import { UpgradeModal } from "@/components/UpgradeModal";
 import { searchAssets, AssetEntry } from "@/lib/stockDatabase";
 import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
 import { Sparkline } from "@/components/Sparkline";
-import { Plus, Trash2, Search, X, ChevronDown, Eye } from "lucide-react";
+import { Plus, Trash2, Search, X, ChevronDown, Eye, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -26,13 +26,16 @@ const Watchlists = () => {
   const [newListName, setNewListName] = useState("");
   const [showAddStock, setShowAddStock] = useState(false);
   const [stockSearch, setStockSearch] = useState("");
+  const [assetFilter, setAssetFilter] = useState<"all" | "stock" | "etf" | "crypto" | "index">("all");
   const [showListPicker, setShowListPicker] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeMsg, setUpgradeMsg] = useState("");
   const navigate = useNavigate();
 
   const active = watchlists[activeIdx] || watchlists[0];
-  const searchResults = searchAssets(stockSearch);
+  const searchResults = searchAssets(stockSearch).filter(
+    (a) => assetFilter === "all" || a.type === assetFilter
+  );
 
   const canCreateWatchlist = isPro || watchlists.length < FREE_MAX_WATCHLISTS;
   const canAddStock = isPro || (active?.stocks.length ?? 0) < FREE_MAX_STOCKS;
@@ -148,11 +151,27 @@ const Watchlists = () => {
           <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-bold">{t("addStock")}</h2>
-              <button onClick={() => { setShowAddStock(false); setStockSearch(""); }} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
+              <button onClick={() => { setShowAddStock(false); setStockSearch(""); setAssetFilter("all"); }} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
             </div>
             {!isPro && (
               <p className="text-xs text-muted-foreground mb-2">{active?.stocks.length ?? 0}/{FREE_MAX_STOCKS} stocks used</p>
             )}
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {(["all", "stock", "etf", "index", "crypto"] as const).map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setAssetFilter(f)}
+                  className={cn(
+                    "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors border",
+                    assetFilter === f
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-accent/30 text-muted-foreground border-border hover:bg-accent/60"
+                  )}
+                >
+                  {f === "all" ? "All" : f === "stock" ? "Stocks" : f === "etf" ? "ETFs" : f === "index" ? "Index Funds" : "Crypto"}
+                </button>
+              ))}
+            </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input value={stockSearch} onChange={(e) => setStockSearch(e.target.value)} placeholder={t("searchStocksEtfs")} autoFocus className="h-10 w-full rounded-lg border border-border bg-accent/30 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
@@ -167,7 +186,7 @@ const Watchlists = () => {
                       <span className="text-sm font-semibold">{a.ticker}</span>
                       <span className="ml-2 text-xs text-muted-foreground">{a.name}</span>
                     </div>
-                    <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-medium", a.type === "crypto" ? "bg-chart-3/20 text-chart-3" : a.type === "etf" ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground")}>{a.type.toUpperCase()}</span>
+                    <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-medium", a.type === "crypto" ? "bg-chart-3/20 text-chart-3" : a.type === "etf" ? "bg-primary/20 text-primary" : a.type === "index" ? "bg-chart-4/20 text-chart-4" : "bg-muted text-muted-foreground")}>{a.type === "index" ? "INDEX" : a.type.toUpperCase()}</span>
                   </button>
                 );
               })}
