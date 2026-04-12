@@ -26,13 +26,16 @@ const Watchlists = () => {
   const [newListName, setNewListName] = useState("");
   const [showAddStock, setShowAddStock] = useState(false);
   const [stockSearch, setStockSearch] = useState("");
+  const [assetFilter, setAssetFilter] = useState<"all" | "stock" | "etf" | "crypto" | "index">("all");
   const [showListPicker, setShowListPicker] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeMsg, setUpgradeMsg] = useState("");
   const navigate = useNavigate();
 
   const active = watchlists[activeIdx] || watchlists[0];
-  const searchResults = searchAssets(stockSearch);
+  const searchResults = searchAssets(stockSearch).filter(
+    (a) => assetFilter === "all" || a.type === assetFilter
+  );
 
   const canCreateWatchlist = isPro || watchlists.length < FREE_MAX_WATCHLISTS;
   const canAddStock = isPro || (active?.stocks.length ?? 0) < FREE_MAX_STOCKS;
