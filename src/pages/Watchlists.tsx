@@ -266,34 +266,38 @@ const Watchlists = () => {
             )}
 
             <div className="space-y-3">
-              {active.stocks.map((s) => (
-                <div key={s.ticker} onClick={() => navigate(`/stock/${s.ticker}`)} className="rounded-xl border border-border bg-card/60 backdrop-blur-md cursor-pointer transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 overflow-hidden">
-                  <div className="flex items-center justify-between px-3 sm:px-4 pt-3 pb-1">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="font-semibold text-sm">{s.ticker}</span>
-                      <Sparkline seed={s.ticker} width={90} height={28} className="shrink-0" />
-                      <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground hidden sm:inline">{s.sector}</span>
-                      <span className="text-xs text-muted-foreground hidden sm:inline truncate max-w-[180px]">{s.name}</span>
+              {active.stocks.map((s) => {
+                // Generate a deterministic daily % from ticker
+                const hashCode = s.ticker.split("").reduce((a, c) => Math.imul(31, a) + c.charCodeAt(0) | 0, 0);
+                const dailyPct = ((((hashCode ^ (hashCode >>> 16)) >>> 0) % 1000) / 100 - 5).toFixed(2);
+                const isUp = Number(dailyPct) >= 0;
+                return (
+                  <div key={s.ticker} onClick={() => navigate(`/stock/${s.ticker}`)} className="rounded-xl border border-border bg-card/60 backdrop-blur-md cursor-pointer transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 overflow-hidden">
+                    <div className="flex items-center justify-between px-3 sm:px-4 py-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="min-w-0">
+                          <span className="font-semibold text-sm block">{s.ticker}</span>
+                          <span className="text-xs text-muted-foreground truncate block max-w-[140px] sm:max-w-[200px]">{s.name}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <div className="flex flex-col items-end gap-0.5">
+                          <div className="flex items-center gap-2">
+                            <Sparkline seed={s.ticker} width={64} height={24} className="shrink-0" />
+                            <span className={cn("text-sm font-semibold tabular-nums", isUp ? "text-gain" : "text-loss")}>
+                              {isUp ? "+" : ""}{dailyPct}%
+                            </span>
+                          </div>
+                          <span className="text-[10px] text-muted-foreground">Daily</span>
+                        </div>
+                        <button onClick={(e) => { e.stopPropagation(); removeStockFromWatchlist(active.id, s.ticker); }} className="text-muted-foreground hover:text-loss transition-colors shrink-0">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
-                    <button onClick={(e) => { e.stopPropagation(); removeStockFromWatchlist(active.id, s.ticker); }} className="text-muted-foreground hover:text-loss transition-colors shrink-0">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
                   </div>
-                  {(() => {
-                    const entry = assetDatabase.find((a) => a.ticker === s.ticker);
-                    const tvSym = getTradingViewSymbol(s.ticker, entry?.type);
-                    return tvSym ? (
-                      <div className="pointer-events-none h-[160px] overflow-hidden">
-                        <TradingViewMiniChart symbol={tvSym} width="100%" />
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center h-[160px] text-xs text-muted-foreground">
-                        No live chart available
-                      </div>
-                    );
-                  })()}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
