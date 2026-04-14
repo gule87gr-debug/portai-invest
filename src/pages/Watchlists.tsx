@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { useApp, Stock } from "@/contexts/AppContext";
@@ -10,6 +10,7 @@ import { searchAssets, AssetEntry, assetDatabase } from "@/lib/stockDatabase";
 import { getTradingViewSymbol } from "@/lib/tradingViewSymbol";
 import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
 import { Sparkline, generateSparklineData } from "@/components/Sparkline";
+import { useQuotes } from "@/hooks/useQuotes";
 import { Plus, Trash2, Search, X, ChevronDown, Eye, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
