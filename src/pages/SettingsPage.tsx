@@ -38,6 +38,7 @@ const SettingsPage = () => {
   const [savedName, setSavedName] = useState<string>("");
   const [editingName, setEditingName] = useState<string>("");
   const [cancelLoading, setCancelLoading] = useState(false);
+  const [reactivateLoading, setReactivateLoading] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
 
   const formattedEnd = subscriptionEnd ? new Date(subscriptionEnd).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : null;
