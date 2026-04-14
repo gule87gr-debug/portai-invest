@@ -9,7 +9,7 @@ import { UpgradeModal } from "@/components/UpgradeModal";
 import { searchAssets, AssetEntry, assetDatabase } from "@/lib/stockDatabase";
 import { getTradingViewSymbol } from "@/lib/tradingViewSymbol";
 import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
-import { Sparkline } from "@/components/Sparkline";
+import { Sparkline, generateSparklineData } from "@/components/Sparkline";
 import { Plus, Trash2, Search, X, ChevronDown, Eye, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
