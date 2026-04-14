@@ -9,21 +9,22 @@ export type Quote = {
   high: number;
   low: number;
   prevClose: number;
+  timestamp?: number;
+  live?: boolean;
 };
 
 type QuoteMap = Record<string, Quote | null>;
 
 const globalCache: QuoteMap = {};
 
-export const useQuotes = (tickers: string[]) => {
+export const useQuotes = (tickers: string[], types?: Record<string, string>) => {
   const [quotes, setQuotes] = useState<QuoteMap>({});
   const [loading, setLoading] = useState(false);
   const lastFetch = useRef<string>("");
 
-  const fetchQuotes = useCallback(async (tickerList: string[]) => {
+  const fetchQuotes = useCallback(async (tickerList: string[], typeMap?: Record<string, string>) => {
     if (tickerList.length === 0) return;
 
-    // Skip if we already fetched the same set
     const key = tickerList.sort().join(",");
     if (key === lastFetch.current) return;
     lastFetch.current = key;
@@ -40,11 +41,10 @@ export const useQuotes = (tickers: string[]) => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("fetch-quotes", {
-        body: { tickers: tickerList },
+        body: { tickers: tickerList, types: typeMap || {} },
       });
       if (error) throw error;
       const result = data?.quotes || {};
-      // Merge into global cache
       Object.entries(result).forEach(([k, v]) => {
         globalCache[k] = v as Quote | null;
       });
@@ -57,8 +57,8 @@ export const useQuotes = (tickers: string[]) => {
   }, []);
 
   useEffect(() => {
-    fetchQuotes(tickers);
+    fetchQuotes(tickers, types);
   }, [tickers.join(","), fetchQuotes]);
 
-  return { quotes, loading, refetch: () => { lastFetch.current = ""; fetchQuotes(tickers); } };
+  return { quotes, loading, refetch: () => { lastFetch.current = ""; fetchQuotes(tickers, types); } };
 };
