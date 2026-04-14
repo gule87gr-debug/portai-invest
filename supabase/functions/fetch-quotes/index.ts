@@ -8,6 +8,17 @@ const corsHeaders = {
 const cache = new Map<string, { data: any; ts: number }>();
 const CACHE_TTL = 5 * 60 * 1000;
 
+// Map ticker to Yahoo Finance symbol
+function toYahooSymbol(ticker: string, type?: string): string {
+  const upper = ticker.toUpperCase();
+  if (type === "crypto") {
+    const base = upper.replace(/USD[T]?$/, "");
+    return `${base}-USD`;
+  }
+  // International tickers already have exchange suffix (e.g., SHEL.L, SAP.DE)
+  return upper;
+}
+
 // Crypto: try multiple exchange formats on Finnhub
 const CRYPTO_ATTEMPTS = (base: string) => [
   `BINANCE:${base}USDT`,
@@ -21,37 +32,8 @@ function buildFinnhubSymbols(ticker: string, type?: string): string[] {
     const base = upper.replace(/USD[T]?$/, "");
     return CRYPTO_ATTEMPTS(base);
   }
-  if (upper.includes("-")) return [];
+  if (upper.includes(".") || upper.includes("-")) return [];
   return [upper];
-}
-
-// Map our internal ticker to a Yahoo Finance symbol
-function toYahooSymbol(ticker: string, type?: string): string {
-  const upper = ticker.toUpperCase();
-  if (type === "crypto") {
-    const base = upper.replace(/USD[T]?$/, "");
-    return `${base}-USD`;
-  }
-  return upper;
-}
-
-async function fetchFinnhub(symbol: string, apiKey: string) {
-  const res = await fetch(
-    `https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(symbol)}&token=${apiKey}`
-  );
-  if (!res.ok) return null;
-  const data = await res.json();
-  if (!data || data.c === 0 || data.c === undefined) return null;
-  return {
-    price: data.c,
-    change: data.d ?? 0,
-    changePercent: data.dp ?? 0,
-    open: data.o,
-    high: data.h,
-    low: data.l,
-    prevClose: data.pc,
-    timestamp: data.t ? data.t * 1000 : Date.now(),
-  };
 }
 
 async function fetchYahoo(symbol: string) {
@@ -83,6 +65,25 @@ async function fetchYahoo(symbol: string) {
   }
 }
 
+async function fetchFinnhub(symbol: string, apiKey: string) {
+  const res = await fetch(
+    `https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(symbol)}&token=${apiKey}`
+  );
+  if (!res.ok) return null;
+  const data = await res.json();
+  if (!data || data.c === 0 || data.c === undefined) return null;
+  return {
+    price: data.c,
+    change: data.d ?? 0,
+    changePercent: data.dp ?? 0,
+    open: data.o,
+    high: data.h,
+    low: data.l,
+    prevClose: data.pc,
+    timestamp: data.t ? data.t * 1000 : Date.now(),
+  };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -90,8 +91,6 @@ serve(async (req) => {
 
   try {
     const apiKey = Deno.env.get("FINNHUB_API_KEY");
-    if (!apiKey) throw new Error("FINNHUB_API_KEY is not set");
-
     const body = await req.json();
     const tickers: string[] = body.tickers || [];
     const types: Record<string, string> = body.types || {};
@@ -115,21 +114,7 @@ serve(async (req) => {
         return;
       }
 
-      // 1) Try Finnhub first
-      const symbols = buildFinnhubSymbols(upper, assetType);
-      for (const sym of symbols) {
-        try {
-          const quote = await fetchFinnhub(sym, apiKey);
-          if (quote) {
-            const isLive = now - quote.timestamp < 5 * 60 * 1000;
-            results[upper] = { ...quote, live: isLive, source: "finnhub" };
-            cache.set(upper, { data: results[upper], ts: now });
-            return;
-          }
-        } catch { /* try next */ }
-      }
-
-      // 2) Fallback to Yahoo Finance
+      // 1) Try Yahoo Finance first (works for all exchanges including international)
       const yahooSym = toYahooSymbol(upper, assetType);
       try {
         const quote = await fetchYahoo(yahooSym);
@@ -139,7 +124,23 @@ serve(async (req) => {
           cache.set(upper, { data: results[upper], ts: now });
           return;
         }
-      } catch { /* continue */ }
+      } catch { /* continue to fallback */ }
+
+      // 2) Fallback to Finnhub (US stocks and crypto)
+      if (apiKey) {
+        const symbols = buildFinnhubSymbols(upper, assetType);
+        for (const sym of symbols) {
+          try {
+            const quote = await fetchFinnhub(sym, apiKey);
+            if (quote) {
+              const isLive = now - quote.timestamp < 5 * 60 * 1000;
+              results[upper] = { ...quote, live: isLive, source: "finnhub" };
+              cache.set(upper, { data: results[upper], ts: now });
+              return;
+            }
+          } catch { /* try next */ }
+        }
+      }
 
       results[upper] = null;
     });

@@ -8,11 +8,14 @@ import { additionalCrypto } from "./additionalCrypto";
 import { extraStocks } from "./extraStocks";
 import { extraEtfs } from "./extraEtfs";
 import { extraCrypto } from "./extraCrypto";
+import { internationalStocks } from "./internationalStocks";
+import { moreUSStocks } from "./moreUSStocks";
 
 const rawAssets = [
   ...stocks, ...etfs, ...crypto, ...indexFunds,
   ...additionalStocks, ...additionalCrypto,
   ...extraStocks, ...extraEtfs, ...extraCrypto,
+  ...internationalStocks, ...moreUSStocks,
 ];
 
 // Deduplicate by ticker — first occurrence wins
