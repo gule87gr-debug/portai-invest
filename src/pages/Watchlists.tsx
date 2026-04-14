@@ -280,9 +280,10 @@ const Watchlists = () => {
               {active.stocks.map((s) => {
                 const quote = quotes[s.ticker.toUpperCase()];
                 const hasQuote = !!quote;
-                const dailyPct = hasQuote ? quote.changePercent.toFixed(2) : generateSparklineData(`${s.ticker}-${new Date().toISOString().split("T")[0]}`).pctChange.toFixed(2);
-                const isUp = Number(dailyPct) >= 0;
+                const dailyPct = hasQuote ? quote.changePercent.toFixed(2) : "—";
+                const isUp = hasQuote ? quote.changePercent >= 0 : true;
                 const price = hasQuote ? quote.price : null;
+                const label = hasQuote ? (quote.live ? "Live" : "Last close") : (quotesLoading ? "Loading…" : "No data");
                 return (
                   <div key={s.ticker} onClick={() => navigate(`/stock/${s.ticker}`)} className="rounded-xl border border-border bg-card/60 backdrop-blur-md cursor-pointer transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 overflow-hidden">
                     <div className="flex items-center justify-between px-3 sm:px-4 py-3">
@@ -294,15 +295,17 @@ const Watchlists = () => {
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
                         <div className="flex flex-col items-end gap-0.5">
-                          {price !== null && (
+                          {price !== null ? (
                             <span className="text-sm font-semibold tabular-nums text-foreground">${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                          )}
-                          <div className="flex items-center">
+                          ) : quotesLoading ? (
+                            <span className="text-sm text-muted-foreground animate-pulse">···</span>
+                          ) : null}
+                          {hasQuote && (
                             <span className={cn("text-xs font-semibold tabular-nums", isUp ? "text-gain" : "text-loss")}>
                               {isUp ? "+" : ""}{dailyPct}%
                             </span>
-                          </div>
-                          <span className="text-[10px] text-muted-foreground">{hasQuote ? "Live" : "Daily"}</span>
+                          )}
+                          <span className="text-[10px] text-muted-foreground">{label}</span>
                         </div>
                         <button onClick={(e) => { e.stopPropagation(); removeStockFromWatchlist(active.id, s.ticker); }} className="text-muted-foreground hover:text-loss transition-colors shrink-0">
                           <Trash2 className="h-4 w-4" />
