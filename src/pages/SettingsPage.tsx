@@ -38,6 +38,7 @@ const SettingsPage = () => {
   const [savedName, setSavedName] = useState<string>("");
   const [editingName, setEditingName] = useState<string>("");
   const [cancelLoading, setCancelLoading] = useState(false);
+  const [reactivateLoading, setReactivateLoading] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
 
   const formattedEnd = subscriptionEnd ? new Date(subscriptionEnd).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : null;
@@ -102,6 +103,21 @@ const SettingsPage = () => {
     } finally {
       setCancelLoading(false);
       setShowCancelModal(false);
+    }
+  };
+
+  const handleReactivateSubscription = async () => {
+    if (!subscriptionId) return;
+    setReactivateLoading(true);
+    try {
+      const { error } = await supabase.functions.invoke("reactivate-subscription", { body: { subscription_id: subscriptionId } });
+      if (error) throw error;
+      toast.success("Subscription reactivated! You won't be charged until your next billing cycle.");
+      await refresh();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to reactivate subscription");
+    } finally {
+      setReactivateLoading(false);
     }
   };
 
@@ -220,12 +236,22 @@ const SettingsPage = () => {
 
               {/* Expiration / renewal banner */}
               {cancelAtPeriodEnd && formattedEnd && (
-                <div className="flex items-start gap-3 rounded-lg border border-warning/40 bg-warning/10 p-4">
-                  <AlertTriangle className="h-5 w-5 text-warning mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">Your subscription expires on {formattedEnd}</p>
-                    <p className="text-xs text-muted-foreground mt-1">You'll retain full Pro access until then. After that you'll be downgraded to the Free plan.</p>
+                <div className="rounded-lg border border-warning/40 bg-warning/10 p-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="h-5 w-5 text-warning mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">Your subscription expires on {formattedEnd}</p>
+                      <p className="text-xs text-muted-foreground mt-1">You'll retain full Pro access until then. After that you'll be downgraded to the Free plan.</p>
+                    </div>
                   </div>
+                  <button
+                    onClick={handleReactivateSubscription}
+                    disabled={reactivateLoading}
+                    className="flex items-center justify-center gap-2 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                  >
+                    {reactivateLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                    <Crown className="h-4 w-4" /> Re-subscribe to Pro
+                  </button>
                 </div>
               )}
 
