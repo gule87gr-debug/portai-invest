@@ -35,6 +35,8 @@ const Watchlists = () => {
   const navigate = useNavigate();
 
   const active = watchlists[activeIdx] || watchlists[0];
+  const activeTickers = useMemo(() => active?.stocks?.map((s) => s.ticker) || [], [active]);
+  const { quotes, loading: quotesLoading } = useQuotes(activeTickers);
   const searchResults = searchAssets(stockSearch).filter(
     (a) => assetFilter === "all" || a.type === assetFilter
   );
