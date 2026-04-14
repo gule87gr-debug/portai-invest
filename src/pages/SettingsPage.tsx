@@ -40,6 +40,7 @@ const SettingsPage = () => {
   const [cancelLoading, setCancelLoading] = useState(false);
   const [reactivateLoading, setReactivateLoading] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showReactivateModal, setShowReactivateModal] = useState(false);
 
   const formattedEnd = subscriptionEnd ? new Date(subscriptionEnd).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : null;
 
@@ -245,11 +246,9 @@ const SettingsPage = () => {
                     </div>
                   </div>
                   <button
-                    onClick={handleReactivateSubscription}
-                    disabled={reactivateLoading}
-                    className="flex items-center justify-center gap-2 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                    onClick={() => setShowReactivateModal(true)}
+                    className="flex items-center justify-center gap-2 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                   >
-                    {reactivateLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                     <Crown className="h-4 w-4" /> Re-subscribe to Pro
                   </button>
                 </div>
@@ -302,6 +301,35 @@ const SettingsPage = () => {
                 <button onClick={handleCancelSubscription} disabled={cancelLoading} className="flex-1 rounded-xl bg-loss py-2.5 text-sm font-medium text-white hover:bg-loss/90 disabled:opacity-50 flex items-center justify-center gap-2">
                   {cancelLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                   Cancel Subscription
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Reactivate Modal */}
+        {showReactivateModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in p-4">
+            <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20">
+                  <Crown className="h-5 w-5 text-primary" />
+                </div>
+                <h2 className="text-lg font-bold">Re-subscribe to Pro?</h2>
+              </div>
+              <p className="text-sm text-muted-foreground mb-2">
+                Your subscription will resume and you will <span className="font-semibold text-foreground">not</span> be charged again until your next billing cycle{formattedEnd ? ` (${formattedEnd})` : ""}.
+              </p>
+              <p className="text-xs text-muted-foreground mb-6">
+                By confirming, you agree to resume the Pro plan at $9.99/month, billed at the start of each new billing period.
+              </p>
+              <div className="flex gap-3">
+                <button onClick={() => setShowReactivateModal(false)} className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium hover:bg-accent">
+                  Cancel
+                </button>
+                <button onClick={async () => { await handleReactivateSubscription(); setShowReactivateModal(false); }} disabled={reactivateLoading} className="flex-1 rounded-xl bg-primary py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2">
+                  {reactivateLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                  Confirm Re-subscribe
                 </button>
               </div>
             </div>

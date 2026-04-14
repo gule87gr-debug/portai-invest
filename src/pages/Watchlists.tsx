@@ -289,8 +289,7 @@ const Watchlists = () => {
                           {price !== null && (
                             <span className="text-sm font-semibold tabular-nums text-foreground">${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                           )}
-                          <div className="flex items-center gap-2">
-                            <Sparkline seed={`${s.ticker}-${new Date().toISOString().split("T")[0]}`} width={52} height={20} className="shrink-0" />
+                          <div className="flex items-center">
                             <span className={cn("text-xs font-semibold tabular-nums", isUp ? "text-gain" : "text-loss")}>
                               {isUp ? "+" : ""}{dailyPct}%
                             </span>
