@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { useApp, Stock } from "@/contexts/AppContext";
@@ -10,6 +10,7 @@ import { searchAssets, AssetEntry, assetDatabase } from "@/lib/stockDatabase";
 import { getTradingViewSymbol } from "@/lib/tradingViewSymbol";
 import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
 import { Sparkline, generateSparklineData } from "@/components/Sparkline";
+import { useQuotes } from "@/hooks/useQuotes";
 import { Plus, Trash2, Search, X, ChevronDown, Eye, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -34,6 +35,8 @@ const Watchlists = () => {
   const navigate = useNavigate();
 
   const active = watchlists[activeIdx] || watchlists[0];
+  const activeTickers = useMemo(() => active?.stocks?.map((s) => s.ticker) || [], [active]);
+  const { quotes, loading: quotesLoading } = useQuotes(activeTickers);
   const searchResults = searchAssets(stockSearch).filter(
     (a) => assetFilter === "all" || a.type === assetFilter
   );
@@ -267,10 +270,11 @@ const Watchlists = () => {
 
             <div className="space-y-3">
               {active.stocks.map((s) => {
-                const today = new Date().toISOString().split("T")[0];
-                const dailySeed = `${s.ticker}-${today}`;
-                const { pctChange, isUp } = generateSparklineData(dailySeed);
-                const dailyPct = pctChange.toFixed(2);
+                const quote = quotes[s.ticker.toUpperCase()];
+                const hasQuote = !!quote;
+                const dailyPct = hasQuote ? quote.changePercent.toFixed(2) : generateSparklineData(`${s.ticker}-${new Date().toISOString().split("T")[0]}`).pctChange.toFixed(2);
+                const isUp = Number(dailyPct) >= 0;
+                const price = hasQuote ? quote.price : null;
                 return (
                   <div key={s.ticker} onClick={() => navigate(`/stock/${s.ticker}`)} className="rounded-xl border border-border bg-card/60 backdrop-blur-md cursor-pointer transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 overflow-hidden">
                     <div className="flex items-center justify-between px-3 sm:px-4 py-3">
@@ -282,13 +286,16 @@ const Watchlists = () => {
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
                         <div className="flex flex-col items-end gap-0.5">
+                          {price !== null && (
+                            <span className="text-sm font-semibold tabular-nums text-foreground">${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                          )}
                           <div className="flex items-center gap-2">
-                            <Sparkline seed={dailySeed} width={64} height={24} className="shrink-0" />
-                            <span className={cn("text-sm font-semibold tabular-nums", isUp ? "text-gain" : "text-loss")}>
+                            <Sparkline seed={`${s.ticker}-${new Date().toISOString().split("T")[0]}`} width={52} height={20} className="shrink-0" />
+                            <span className={cn("text-xs font-semibold tabular-nums", isUp ? "text-gain" : "text-loss")}>
                               {isUp ? "+" : ""}{dailyPct}%
                             </span>
                           </div>
-                          <span className="text-[10px] text-muted-foreground">Daily</span>
+                          <span className="text-[10px] text-muted-foreground">{hasQuote ? "Live" : "Daily"}</span>
                         </div>
                         <button onClick={(e) => { e.stopPropagation(); removeStockFromWatchlist(active.id, s.ticker); }} className="text-muted-foreground hover:text-loss transition-colors shrink-0">
                           <Trash2 className="h-4 w-4" />
