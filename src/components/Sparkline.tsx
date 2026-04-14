@@ -7,7 +7,7 @@ interface SparklineProps {
   seed?: string;
 }
 
-function seededRandom(seed: string) {
+export function seededRandom(seed: string) {
   let h = 0;
   for (let i = 0; i < seed.length; i++) {
     h = Math.imul(31, h) + seed.charCodeAt(i) | 0;
@@ -20,23 +20,30 @@ function seededRandom(seed: string) {
   };
 }
 
+export function generateSparklineData(seed: string) {
+  const rng = seededRandom(seed);
+  const count = 20;
+  const data: number[] = [];
+  let val = 50 + rng() * 50;
+  for (let i = 0; i < count; i++) {
+    val += (rng() - 0.48) * 8;
+    val = Math.max(10, Math.min(90, val));
+    data.push(val);
+  }
+  const isUp = data[data.length - 1] >= data[0];
+  const pctChange = ((data[data.length - 1] - data[0]) / data[0]) * 100;
+  return { data, isUp, pctChange: Number(pctChange.toFixed(2)) };
+}
+
 export const Sparkline = ({ width = 80, height = 28, className = "", seed = "default" }: SparklineProps) => {
   const { points, isUp } = useMemo(() => {
-    const rng = seededRandom(seed);
-    const count = 20;
-    const data: number[] = [];
-    let val = 50 + rng() * 50;
-    for (let i = 0; i < count; i++) {
-      val += (rng() - 0.48) * 8;
-      val = Math.max(10, Math.min(90, val));
-      data.push(val);
-    }
+    const { data, isUp } = generateSparklineData(seed);
     const min = Math.min(...data);
     const max = Math.max(...data);
     const range = max - min || 1;
     const normalized = data.map((v) => ((v - min) / range));
-    const pts = normalized.map((v, i) => `${(i / (count - 1)) * width},${height - v * (height - 4) - 2}`).join(" ");
-    return { points: pts, isUp: data[data.length - 1] >= data[0] };
+    const pts = normalized.map((v, i) => `${(i / (data.length - 1)) * width},${height - v * (height - 4) - 2}`).join(" ");
+    return { points: pts, isUp };
   }, [seed, width, height]);
 
   const color = isUp ? "#00D4B1" : "#FF4D4D";

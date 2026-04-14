@@ -9,7 +9,7 @@ import { UpgradeModal } from "@/components/UpgradeModal";
 import { searchAssets, AssetEntry, assetDatabase } from "@/lib/stockDatabase";
 import { getTradingViewSymbol } from "@/lib/tradingViewSymbol";
 import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
-import { Sparkline } from "@/components/Sparkline";
+import { Sparkline, generateSparklineData } from "@/components/Sparkline";
 import { Plus, Trash2, Search, X, ChevronDown, Eye, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -267,10 +267,8 @@ const Watchlists = () => {
 
             <div className="space-y-3">
               {active.stocks.map((s) => {
-                // Generate a deterministic daily % from ticker
-                const hashCode = s.ticker.split("").reduce((a, c) => Math.imul(31, a) + c.charCodeAt(0) | 0, 0);
-                const dailyPct = ((((hashCode ^ (hashCode >>> 16)) >>> 0) % 1000) / 100 - 5).toFixed(2);
-                const isUp = Number(dailyPct) >= 0;
+                const { pctChange, isUp } = generateSparklineData(s.ticker);
+                const dailyPct = pctChange.toFixed(2);
                 return (
                   <div key={s.ticker} onClick={() => navigate(`/stock/${s.ticker}`)} className="rounded-xl border border-border bg-card/60 backdrop-blur-md cursor-pointer transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 overflow-hidden">
                     <div className="flex items-center justify-between px-3 sm:px-4 py-3">
