@@ -217,11 +217,24 @@ const SettingsPage = () => {
                 <span className="rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary">Pro Plan</span>
                 {cancelAtPeriodEnd && <span className="rounded-full bg-warning/20 px-3 py-1 text-xs font-semibold text-warning">Cancelling</span>}
               </div>
-              {formattedEnd && (
+
+              {/* Expiration / renewal banner */}
+              {cancelAtPeriodEnd && formattedEnd && (
+                <div className="flex items-start gap-3 rounded-lg border border-warning/40 bg-warning/10 p-4">
+                  <AlertTriangle className="h-5 w-5 text-warning mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Your subscription expires on {formattedEnd}</p>
+                    <p className="text-xs text-muted-foreground mt-1">You'll retain full Pro access until then. After that you'll be downgraded to the Free plan.</p>
+                  </div>
+                </div>
+              )}
+
+              {!cancelAtPeriodEnd && formattedEnd && (
                 <p className="text-sm text-muted-foreground">
-                  {cancelAtPeriodEnd ? `Access until ${formattedEnd}` : `Next billing: ${formattedEnd}`}
+                  Next billing: {formattedEnd}
                 </p>
               )}
+
               <div className="flex gap-3">
                 <button onClick={handleManageBilling} className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-accent">
                   <CreditCard className="h-4 w-4" /> Manage Billing
