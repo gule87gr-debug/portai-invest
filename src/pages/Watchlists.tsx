@@ -267,7 +267,9 @@ const Watchlists = () => {
 
             <div className="space-y-3">
               {active.stocks.map((s) => {
-                const { pctChange, isUp } = generateSparklineData(s.ticker);
+                const today = new Date().toISOString().split("T")[0];
+                const dailySeed = `${s.ticker}-${today}`;
+                const { pctChange, isUp } = generateSparklineData(dailySeed);
                 const dailyPct = pctChange.toFixed(2);
                 return (
                   <div key={s.ticker} onClick={() => navigate(`/stock/${s.ticker}`)} className="rounded-xl border border-border bg-card/60 backdrop-blur-md cursor-pointer transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 overflow-hidden">
