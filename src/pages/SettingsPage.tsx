@@ -106,6 +106,21 @@ const SettingsPage = () => {
     }
   };
 
+  const handleReactivateSubscription = async () => {
+    if (!subscriptionId) return;
+    setReactivateLoading(true);
+    try {
+      const { error } = await supabase.functions.invoke("reactivate-subscription", { body: { subscription_id: subscriptionId } });
+      if (error) throw error;
+      toast.success("Subscription reactivated! You won't be charged until your next billing cycle.");
+      await refresh();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to reactivate subscription");
+    } finally {
+      setReactivateLoading(false);
+    }
+  };
+
   const handleManageBilling = async () => {
     try {
       const { data, error } = await supabase.functions.invoke("customer-portal");
