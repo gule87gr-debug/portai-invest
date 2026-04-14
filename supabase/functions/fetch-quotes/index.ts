@@ -8,36 +8,39 @@ const corsHeaders = {
 const cache = new Map<string, { data: any; ts: number }>();
 const CACHE_TTL = 5 * 60 * 1000;
 
-// For crypto tickers, try multiple exchange formats
+// Crypto: try multiple exchange formats on Finnhub
 const CRYPTO_ATTEMPTS = (base: string) => [
   `BINANCE:${base}USDT`,
   `COINBASE:${base}-USD`,
   `KRAKEN:${base}USD`,
 ];
 
-function buildSymbols(ticker: string, type?: string): string[] {
+function buildFinnhubSymbols(ticker: string, type?: string): string[] {
   const upper = ticker.toUpperCase();
-
   if (type === "crypto") {
-    // Strip trailing USD/USDT if present in the ticker
     const base = upper.replace(/USD[T]?$/, "");
     return CRYPTO_ATTEMPTS(base);
   }
-
-  // Index funds / synthetic indices with dashes won't exist on Finnhub
   if (upper.includes("-")) return [];
-
-  // Stocks, ETFs → Finnhub resolves them directly
   return [upper];
 }
 
-async function fetchQuote(symbol: string, apiKey: string) {
+// Map our internal ticker to a Yahoo Finance symbol
+function toYahooSymbol(ticker: string, type?: string): string {
+  const upper = ticker.toUpperCase();
+  if (type === "crypto") {
+    const base = upper.replace(/USD[T]?$/, "");
+    return `${base}-USD`;
+  }
+  return upper;
+}
+
+async function fetchFinnhub(symbol: string, apiKey: string) {
   const res = await fetch(
     `https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(symbol)}&token=${apiKey}`
   );
   if (!res.ok) return null;
   const data = await res.json();
-  // Finnhub returns zeros for unknown symbols
   if (!data || data.c === 0 || data.c === undefined) return null;
   return {
     price: data.c,
@@ -49,6 +52,35 @@ async function fetchQuote(symbol: string, apiKey: string) {
     prevClose: data.pc,
     timestamp: data.t ? data.t * 1000 : Date.now(),
   };
+}
+
+async function fetchYahoo(symbol: string) {
+  try {
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
+    const res = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0" },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const meta = data?.chart?.result?.[0]?.meta;
+    if (!meta || !meta.regularMarketPrice) return null;
+    const price = meta.regularMarketPrice;
+    const prevClose = meta.chartPreviousClose || meta.previousClose || price;
+    const change = price - prevClose;
+    const changePercent = prevClose !== 0 ? (change / prevClose) * 100 : 0;
+    return {
+      price,
+      change: Number(change.toFixed(4)),
+      changePercent: Number(changePercent.toFixed(4)),
+      open: meta.regularMarketOpen ?? price,
+      high: meta.regularMarketDayHigh ?? price,
+      low: meta.regularMarketDayLow ?? price,
+      prevClose,
+      timestamp: (meta.regularMarketTime ?? Math.floor(Date.now() / 1000)) * 1000,
+    };
+  } catch {
+    return null;
+  }
 }
 
 serve(async (req) => {
@@ -74,6 +106,7 @@ serve(async (req) => {
 
     const fetches = batch.map(async (ticker: string) => {
       const upper = ticker.toUpperCase();
+      const assetType = types[upper] || types[ticker];
 
       // Check cache
       const cached = cache.get(upper);
@@ -82,33 +115,36 @@ serve(async (req) => {
         return;
       }
 
-      const symbols = buildSymbols(upper, types[upper] || types[ticker]);
-      if (symbols.length === 0) {
-        results[upper] = null;
-        return;
-      }
-
-      // Try each symbol variant until one works
+      // 1) Try Finnhub first
+      const symbols = buildFinnhubSymbols(upper, assetType);
       for (const sym of symbols) {
         try {
-          const quote = await fetchQuote(sym, apiKey);
+          const quote = await fetchFinnhub(sym, apiKey);
           if (quote) {
-            // Determine if this is live or last-close data
-            const isMarketOpen = now - quote.timestamp < 5 * 60 * 1000;
-            quote.live = isMarketOpen;
-            results[upper] = quote;
-            cache.set(upper, { data: quote, ts: now });
+            const isLive = now - quote.timestamp < 5 * 60 * 1000;
+            results[upper] = { ...quote, live: isLive, source: "finnhub" };
+            cache.set(upper, { data: results[upper], ts: now });
             return;
           }
-        } catch {
-          // continue to next symbol
-        }
+        } catch { /* try next */ }
       }
+
+      // 2) Fallback to Yahoo Finance
+      const yahooSym = toYahooSymbol(upper, assetType);
+      try {
+        const quote = await fetchYahoo(yahooSym);
+        if (quote) {
+          const isLive = now - quote.timestamp < 5 * 60 * 1000;
+          results[upper] = { ...quote, live: isLive, source: "yahoo" };
+          cache.set(upper, { data: results[upper], ts: now });
+          return;
+        }
+      } catch { /* continue */ }
 
       results[upper] = null;
     });
 
-    // Run in sub-batches of 10 with small delay to respect rate limits
+    // Sub-batches of 10 with delay
     for (let i = 0; i < fetches.length; i += 10) {
       await Promise.all(fetches.slice(i, i + 10));
       if (i + 10 < fetches.length) {
