@@ -22,6 +22,7 @@ import { megaUSStocks, moreEUStocks, latamStocks } from "./megaBatch";
 import { expansionInternational, expansionUS, expansionETFs } from "./expansion";
 import { expansionExtra } from "./expansion2";
 import { expansion3 } from "./expansion3";
+import { expansion4 } from "./expansion4";
 
 const rawAssets = [
   ...stocks, ...etfs, ...crypto, ...indexFunds,
@@ -34,7 +35,7 @@ const rawAssets = [
   ...bulkUSStocks, ...moreInternationalStocks,
   ...megaUSStocks, ...moreEUStocks, ...latamStocks,
   ...expansionInternational, ...expansionUS, ...expansionETFs,
-  ...expansionExtra, ...expansion3,
+  ...expansionExtra, ...expansion3, ...expansion4,
 ];
 
 // Deduplicate by ticker — first occurrence wins
