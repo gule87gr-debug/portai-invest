@@ -8,7 +8,9 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { getStockDescription } from "@/lib/stockDescriptions";
 import { getTradingViewSymbol } from "@/lib/tradingViewSymbol";
 import { assetDatabase } from "@/lib/stockDatabase";
-import { ArrowLeft, Building2, Newspaper, BarChart3, AlertTriangle } from "lucide-react";
+import { useQuotes } from "@/hooks/useQuotes";
+import { ArrowLeft, Building2, Newspaper, BarChart3, AlertTriangle, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { useMemo } from "react";
 
 const StockDetail = () => {
   const { ticker } = useParams<{ ticker: string }>();
@@ -17,6 +19,12 @@ const StockDetail = () => {
   const info = getStockDescription(symbol);
   const assetEntry = assetDatabase.find((a) => a.ticker.toUpperCase() === symbol);
   const tvSymbol = getTradingViewSymbol(symbol, assetEntry?.type);
+
+  const tickerList = useMemo(() => [symbol], [symbol]);
+  const typeMap = useMemo(() => assetEntry ? { [symbol]: assetEntry.type } : {}, [symbol, assetEntry]);
+  const { quotes, loading } = useQuotes(tickerList, typeMap);
+  const quote = quotes[symbol];
+
   let t: (key: string) => string;
   try {
     const lang = useLanguage();
@@ -25,17 +33,61 @@ const StockDetail = () => {
     t = (key: string) => key;
   }
 
+  const isPositive = quote && quote.change > 0;
+  const isNegative = quote && quote.change < 0;
+
   return (
     <AppLayout>
       <div className="mb-4">
         <Link to="/watchlists" className="mb-3 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="h-4 w-4" /> {t("backToWatchlists")}
         </Link>
-        <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-bold">{symbol}</h1>
-          <span className="rounded-md bg-muted px-2.5 py-1 text-xs text-muted-foreground">{info.sector}</span>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold">{symbol}</h1>
+              <span className="rounded-md bg-muted px-2.5 py-1 text-xs text-muted-foreground">{info.sector}</span>
+            </div>
+            <p className="mt-1 text-muted-foreground">{info.name}</p>
+          </div>
+
+          {/* Yahoo Finance price block */}
+          <div className="flex items-end gap-4">
+            {loading ? (
+              <div className="h-10 w-32 animate-pulse rounded-md bg-muted" />
+            ) : quote ? (
+              <>
+                <span className="text-3xl font-bold tabular-nums font-mono">
+                  ${quote.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+                <div className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-sm font-semibold ${
+                  isPositive ? "bg-emerald-500/15 text-emerald-400" :
+                  isNegative ? "bg-red-500/15 text-red-400" :
+                  "bg-muted text-muted-foreground"
+                }`}>
+                  {isPositive ? <TrendingUp className="h-3.5 w-3.5" /> :
+                   isNegative ? <TrendingDown className="h-3.5 w-3.5" /> :
+                   <Minus className="h-3.5 w-3.5" />}
+                  <span className="tabular-nums font-mono">
+                    {quote.change >= 0 ? "+" : ""}{quote.change.toFixed(2)} ({quote.changePercent >= 0 ? "+" : ""}{quote.changePercent.toFixed(2)}%)
+                  </span>
+                </div>
+              </>
+            ) : (
+              <span className="text-sm text-muted-foreground">Price unavailable</span>
+            )}
+          </div>
         </div>
-        <p className="mt-1 text-muted-foreground">{info.name}</p>
+
+        {/* OHLC bar */}
+        {quote && (
+          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground font-mono tabular-nums">
+            <span>Open <strong className="text-foreground">${quote.open.toFixed(2)}</strong></span>
+            <span>High <strong className="text-foreground">${quote.high.toFixed(2)}</strong></span>
+            <span>Low <strong className="text-foreground">${quote.low.toFixed(2)}</strong></span>
+            <span>Prev Close <strong className="text-foreground">${quote.prevClose.toFixed(2)}</strong></span>
+          </div>
+        )}
       </div>
 
       {tvSymbol ? (
