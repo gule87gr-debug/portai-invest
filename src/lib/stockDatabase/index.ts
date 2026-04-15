@@ -45,14 +45,6 @@ export const assetDatabase = rawAssets.filter((a) => {
   return true;
 });
 
-// Deduplicate by ticker — first occurrence wins
-const seen = new Set<string>();
-export const assetDatabase = rawAssets.filter((a) => {
-  if (seen.has(a.ticker)) return false;
-  seen.add(a.ticker);
-  return true;
-});
-
 export type AssetRegion = "all" | "us" | "europe" | "asia" | "americas" | "africa" | "middle_east" | "oceania";
 
 const REGION_SUFFIXES: Record<string, AssetRegion> = {
