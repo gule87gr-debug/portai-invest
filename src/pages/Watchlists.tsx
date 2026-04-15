@@ -6,7 +6,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
-import { searchAssets, AssetEntry, assetDatabase } from "@/lib/stockDatabase";
+import { searchAssets, AssetEntry, assetDatabase, AssetRegion, REGION_LABELS } from "@/lib/stockDatabase";
 import { getTradingViewSymbol } from "@/lib/tradingViewSymbol";
 import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
 import { Sparkline, generateSparklineData } from "@/components/Sparkline";
@@ -29,6 +29,7 @@ const Watchlists = () => {
   const [showAddStock, setShowAddStock] = useState(false);
   const [stockSearch, setStockSearch] = useState("");
   const [assetFilter, setAssetFilter] = useState<"all" | "stock" | "etf" | "crypto" | "index">("all");
+  const [regionFilter, setRegionFilter] = useState<AssetRegion>("all");
   const [showListPicker, setShowListPicker] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeMsg, setUpgradeMsg] = useState("");
@@ -45,7 +46,7 @@ const Watchlists = () => {
     return map;
   }, [active]);
   const { quotes, loading: quotesLoading } = useQuotes(activeTickers, activeTypes);
-  const searchResults = searchAssets(stockSearch).filter(
+  const searchResults = searchAssets(stockSearch, regionFilter).filter(
     (a) => assetFilter === "all" || a.type === assetFilter
   );
 
@@ -163,12 +164,12 @@ const Watchlists = () => {
           <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-bold">{t("addStock")}</h2>
-              <button onClick={() => { setShowAddStock(false); setStockSearch(""); setAssetFilter("all"); }} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
+              <button onClick={() => { setShowAddStock(false); setStockSearch(""); setAssetFilter("all"); setRegionFilter("all"); }} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
             </div>
             {!isPro && (
               <p className="text-xs text-muted-foreground mb-2">{active?.stocks.length ?? 0}/{FREE_MAX_STOCKS} stocks used</p>
             )}
-            <div className="flex flex-wrap gap-1.5 mb-3">
+            <div className="flex flex-wrap gap-1.5 mb-2">
               {(["all", "stock", "etf", "index", "crypto"] as const).map((f) => (
                 <button
                   key={f}
@@ -181,6 +182,22 @@ const Watchlists = () => {
                   )}
                 >
                   {f === "all" ? "All" : f === "stock" ? "Stocks" : f === "etf" ? "ETFs" : f === "index" ? "Index Funds" : "Crypto"}
+                </button>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {(Object.entries(REGION_LABELS) as [AssetRegion, string][]).map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setRegionFilter(key)}
+                  className={cn(
+                    "rounded-lg px-2.5 py-1 text-[11px] font-medium transition-colors border",
+                    regionFilter === key
+                      ? "bg-chart-4 text-white border-chart-4"
+                      : "bg-accent/30 text-muted-foreground border-border hover:bg-accent/60"
+                  )}
+                >
+                  {label}
                 </button>
               ))}
             </div>
