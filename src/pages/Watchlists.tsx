@@ -31,6 +31,7 @@ const Watchlists = () => {
   const [assetFilter, setAssetFilter] = useState<"all" | "stock" | "etf" | "crypto" | "index">("all");
   const [regionFilter, setRegionFilter] = useState<AssetRegion>("all");
   const [showListPicker, setShowListPicker] = useState(false);
+  const [showRegionPicker, setShowRegionPicker] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeMsg, setUpgradeMsg] = useState("");
   const navigate = useNavigate();
