@@ -95,68 +95,74 @@ serve(async (req) => {
     );
 
     const authHeader = req.headers.get("Authorization");
-    let userId: string | null = null;
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Authentication required" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: userData } = await supabaseAdmin.auth.getUser(token);
+    if (!userData?.user) {
+      return new Response(JSON.stringify({ error: "Invalid or expired token" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const userId = userData.user.id;
     let isPro = false;
 
-    if (authHeader) {
-      const token = authHeader.replace("Bearer ", "");
-      const { data: userData } = await supabaseAdmin.auth.getUser(token);
-      if (userData?.user) {
-        userId = userData.user.id;
-
-        // Admin override
-        const ADMIN_EMAILS = ["gule.87.gr@gmail.com"];
-        if (userData.user.email && ADMIN_EMAILS.includes(userData.user.email.toLowerCase())) {
-          isPro = true;
-        } else {
-          // Check if user is Pro (has active Stripe subscription)
-          const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-          if (stripeKey && userData.user.email) {
-            try {
-              const Stripe = (await import("https://esm.sh/stripe@18.5.0")).default;
-              const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-              const customers = await stripe.customers.list({ email: userData.user.email, limit: 1 });
-              if (customers.data.length > 0) {
-                const subs = await stripe.subscriptions.list({ customer: customers.data[0].id, status: "active", limit: 1 });
-                isPro = subs.data.length > 0;
-              }
-            } catch {
-              // If Stripe check fails, default to free tier
-            }
+    // Admin override
+    const ADMIN_EMAILS = ["gule.87.gr@gmail.com"];
+    if (userData.user.email && ADMIN_EMAILS.includes(userData.user.email.toLowerCase())) {
+      isPro = true;
+    } else {
+      // Check if user is Pro (has active Stripe subscription)
+      const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+      if (stripeKey && userData.user.email) {
+        try {
+          const Stripe = (await import("https://esm.sh/stripe@18.5.0")).default;
+          const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+          const customers = await stripe.customers.list({ email: userData.user.email, limit: 1 });
+          if (customers.data.length > 0) {
+            const subs = await stripe.subscriptions.list({ customer: customers.data[0].id, status: "active", limit: 1 });
+            isPro = subs.data.length > 0;
           }
+        } catch {
+          // If Stripe check fails, default to free tier
         }
+      }
+    }
 
-        // Enforce limits for free users
-        if (!isPro) {
-          const msgCutoff = new Date(Date.now() - FREE_MSG_WINDOW_HOURS * 3600000).toISOString();
-          const { count: msgCount } = await supabaseAdmin
-            .from("chat_usage")
-            .select("*", { count: "exact", head: true })
-            .eq("user_id", userId)
-            .eq("usage_type", "message")
-            .gte("created_at", msgCutoff);
+    // Enforce limits for free users
+    if (!isPro) {
+      const msgCutoff = new Date(Date.now() - FREE_MSG_WINDOW_HOURS * 3600000).toISOString();
+      const { count: msgCount } = await supabaseAdmin
+        .from("chat_usage")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("usage_type", "message")
+        .gte("created_at", msgCutoff);
 
-          if ((msgCount ?? 0) >= FREE_MSG_LIMIT) {
-            return new Response(JSON.stringify({ error: "Message limit reached. Upgrade to Pro for unlimited messages." }), {
-              status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-            });
-          }
+      if ((msgCount ?? 0) >= FREE_MSG_LIMIT) {
+        return new Response(JSON.stringify({ error: "Message limit reached. Upgrade to Pro for unlimited messages." }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
-          if (hasImages) {
-            const imgCutoff = new Date(Date.now() - FREE_IMG_WINDOW_HOURS * 3600000).toISOString();
-            const { count: imgCount } = await supabaseAdmin
-              .from("chat_usage")
-              .select("*", { count: "exact", head: true })
-              .eq("user_id", userId)
-              .eq("usage_type", "image_analysis")
-              .gte("created_at", imgCutoff);
+      if (hasImages) {
+        const imgCutoff = new Date(Date.now() - FREE_IMG_WINDOW_HOURS * 3600000).toISOString();
+        const { count: imgCount } = await supabaseAdmin
+          .from("chat_usage")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .eq("usage_type", "image_analysis")
+          .gte("created_at", imgCutoff);
 
-            if ((imgCount ?? 0) >= FREE_IMG_LIMIT) {
-              return new Response(JSON.stringify({ error: "Image analysis limit reached. Upgrade to Pro for unlimited image analysis." }), {
-                status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-              });
-            }
-          }
+        if ((imgCount ?? 0) >= FREE_IMG_LIMIT) {
+          return new Response(JSON.stringify({ error: "Image analysis limit reached. Upgrade to Pro for unlimited image analysis." }), {
+            status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
         }
       }
     }

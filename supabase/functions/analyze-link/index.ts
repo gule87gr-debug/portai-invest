@@ -38,52 +38,57 @@ serve(async (req) => {
     );
 
     const authHeader = req.headers.get("Authorization");
-    let userId: string | null = null;
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Authentication required" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: userData } = await supabaseAdmin.auth.getUser(token);
+    if (!userData?.user) {
+      return new Response(JSON.stringify({ error: "Invalid or expired token" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const userId = userData.user.id;
     let isPro = false;
 
-    if (authHeader) {
-      const token = authHeader.replace("Bearer ", "");
-      const { data: userData } = await supabaseAdmin.auth.getUser(token);
-      if (userData?.user) {
-        userId = userData.user.id;
-
-        // Admin override
-        const ADMIN_EMAILS = ["gule.87.gr@gmail.com"];
-        if (userData.user.email && ADMIN_EMAILS.includes(userData.user.email.toLowerCase())) {
-          isPro = true;
-        } else {
-          // Check if user is Pro
-          const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-          if (stripeKey && userData.user.email) {
-            try {
-              const Stripe = (await import("https://esm.sh/stripe@18.5.0")).default;
-              const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-              const customers = await stripe.customers.list({ email: userData.user.email, limit: 1 });
-              if (customers.data.length > 0) {
-                const subs = await stripe.subscriptions.list({ customer: customers.data[0].id, status: "active", limit: 1 });
-                isPro = subs.data.length > 0;
-              }
-            } catch {
-              // Default to free tier
-            }
+    // Admin override
+    const ADMIN_EMAILS = ["gule.87.gr@gmail.com"];
+    if (userData.user.email && ADMIN_EMAILS.includes(userData.user.email.toLowerCase())) {
+      isPro = true;
+    } else {
+      const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+      if (stripeKey && userData.user.email) {
+        try {
+          const Stripe = (await import("https://esm.sh/stripe@18.5.0")).default;
+          const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+          const customers = await stripe.customers.list({ email: userData.user.email, limit: 1 });
+          if (customers.data.length > 0) {
+            const subs = await stripe.subscriptions.list({ customer: customers.data[0].id, status: "active", limit: 1 });
+            isPro = subs.data.length > 0;
           }
+        } catch {
+          // Default to free tier
         }
+      }
+    }
 
-        // Enforce daily analysis limit for free users
-        if (!isPro) {
-          const today = new Date().toISOString().split("T")[0];
-          const { count } = await supabaseAdmin
-            .from("analysis_usage")
-            .select("*", { count: "exact", head: true })
-            .eq("user_id", userId)
-            .eq("used_date", today);
+    // Enforce daily analysis limit for free users
+    if (!isPro) {
+      const today = new Date().toISOString().split("T")[0];
+      const { count } = await supabaseAdmin
+        .from("analysis_usage")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("used_date", today);
 
-          if ((count ?? 0) >= FREE_DAILY_ANALYSES) {
-            return new Response(JSON.stringify({ error: "Daily analysis limit reached. Upgrade to Pro for unlimited analyses." }), {
-              status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-            });
-          }
-        }
+      if ((count ?? 0) >= FREE_DAILY_ANALYSES) {
+        return new Response(JSON.stringify({ error: "Daily analysis limit reached. Upgrade to Pro for unlimited analyses." }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
     }
 
