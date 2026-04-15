@@ -31,6 +31,7 @@ const Watchlists = () => {
   const [assetFilter, setAssetFilter] = useState<"all" | "stock" | "etf" | "crypto" | "index">("all");
   const [regionFilter, setRegionFilter] = useState<AssetRegion>("all");
   const [showListPicker, setShowListPicker] = useState(false);
+  const [showRegionPicker, setShowRegionPicker] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeMsg, setUpgradeMsg] = useState("");
   const navigate = useNavigate();
@@ -164,7 +165,7 @@ const Watchlists = () => {
           <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-bold">{t("addStock")}</h2>
-              <button onClick={() => { setShowAddStock(false); setStockSearch(""); setAssetFilter("all"); setRegionFilter("all"); }} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
+              <button onClick={() => { setShowAddStock(false); setStockSearch(""); setAssetFilter("all"); setRegionFilter("all"); setShowRegionPicker(false); }} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
             </div>
             {!isPro && (
               <p className="text-xs text-muted-foreground mb-2">{active?.stocks.length ?? 0}/{FREE_MAX_STOCKS} stocks used</p>
@@ -185,21 +186,38 @@ const Watchlists = () => {
                 </button>
               ))}
             </div>
-            <div className="flex flex-wrap gap-1.5 mb-3">
-              {(Object.entries(REGION_LABELS) as [AssetRegion, string][]).map(([key, label]) => (
+            <div className="flex items-center gap-2 mb-3">
+              <div className="relative">
                 <button
-                  key={key}
-                  onClick={() => setRegionFilter(key)}
+                  onClick={() => setShowRegionPicker(!showRegionPicker)}
                   className={cn(
-                    "rounded-lg px-2.5 py-1 text-[11px] font-medium transition-colors border",
-                    regionFilter === key
+                    "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors border",
+                    regionFilter !== "all"
                       ? "bg-chart-4 text-white border-chart-4"
                       : "bg-accent/30 text-muted-foreground border-border hover:bg-accent/60"
                   )}
                 >
-                  {label}
+                  <Filter className="h-3 w-3" />
+                  {REGION_LABELS[regionFilter]}
+                  <ChevronDown className={cn("h-3 w-3 transition-transform", showRegionPicker && "rotate-180")} />
                 </button>
-              ))}
+                {showRegionPicker && (
+                  <div className="absolute top-full left-0 mt-1 z-10 w-48 rounded-xl border border-border bg-card shadow-xl animate-fade-in py-1">
+                    {(Object.entries(REGION_LABELS) as [AssetRegion, string][]).map(([key, label]) => (
+                      <button
+                        key={key}
+                        onClick={() => { setRegionFilter(key); setShowRegionPicker(false); }}
+                        className={cn(
+                          "w-full text-left px-3 py-2 text-xs font-medium transition-colors hover:bg-accent/50",
+                          regionFilter === key && "text-primary bg-primary/10"
+                        )}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
