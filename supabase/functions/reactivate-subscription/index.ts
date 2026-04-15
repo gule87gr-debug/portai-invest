@@ -31,15 +31,18 @@ serve(async (req) => {
     const user = userData.user;
     if (!user?.email) throw new Error("User not authenticated");
 
-    const { subscription_id } = await req.json();
-    if (!subscription_id) throw new Error("No subscription_id provided");
-
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
-    // Simply remove the cancel_at_period_end flag — Stripe resumes the
-    // existing subscription without creating a new charge until the next
-    // billing cycle.
-    await stripe.subscriptions.update(subscription_id, {
+    // Look up the subscription server-side by the authenticated user's email
+    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    if (customers.data.length === 0) throw new Error("No Stripe customer found");
+
+    // Find subscription that is active but scheduled for cancellation
+    const subs = await stripe.subscriptions.list({ customer: customers.data[0].id, status: "active", limit: 1 });
+    if (subs.data.length === 0) throw new Error("No active subscription found");
+
+    // Remove the cancel_at_period_end flag to reactivate
+    await stripe.subscriptions.update(subs.data[0].id, {
       cancel_at_period_end: false,
     });
 
