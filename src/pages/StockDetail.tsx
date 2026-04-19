@@ -41,9 +41,22 @@ const StockDetail = () => {
   return (
     <AppLayout>
       <div className="mb-4">
-        <Link to="/watchlists" className="mb-3 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft className="h-4 w-4" /> {t("backToWatchlists")}
-        </Link>
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <Link to="/watchlists" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <ArrowLeft className="h-4 w-4" /> {t("backToWatchlists")}
+          </Link>
+          <PriceAlertDialog
+            ticker={symbol}
+            assetName={info.name}
+            assetType={assetEntry?.type || "stock"}
+            currentPrice={quote?.price}
+            trigger={
+              <Button variant="outline" size="sm" className="gap-2">
+                <Bell className="h-4 w-4" /> Set Price Alert
+              </Button>
+            }
+          />
+        </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <div className="flex items-center gap-3">
