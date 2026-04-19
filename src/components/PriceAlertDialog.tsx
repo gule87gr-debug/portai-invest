@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { Bell, BellRing, Trash2, TrendingUp, TrendingDown } from "lucide-react";
+import { Bell, BellRing, Trash2, TrendingUp, TrendingDown, Sparkles, Lock } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
