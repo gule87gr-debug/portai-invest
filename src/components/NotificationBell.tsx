@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Bell, Check, CheckCheck, Trash2, ThumbsUp, MessageCircle, Reply } from "lucide-react";
+import { Bell, Check, CheckCheck, Trash2, ThumbsUp, MessageCircle, Reply, BellRing } from "lucide-react";
 import { useNotifications, Notification } from "@/contexts/NotificationContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
@@ -15,16 +15,18 @@ function timeAgo(dateStr: string): string {
   return `${days}d ago`;
 }
 
-const iconMap = {
+const iconMap: Record<string, typeof ThumbsUp> = {
   like: ThumbsUp,
   comment: MessageCircle,
   reply: Reply,
+  price_alert: BellRing,
 };
 
-const actionMap = {
+const actionMap: Record<string, string> = {
   like: "liked your post",
   comment: "commented on",
   reply: "replied to your comment on",
+  price_alert: "",
 };
 
 export const NotificationBell = () => {

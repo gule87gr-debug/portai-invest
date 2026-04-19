@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+export type NotificationType = "like" | "comment" | "reply" | "price_alert";
+
 export type Notification = {
   id: string;
-  type: "like" | "comment" | "reply";
+  type: NotificationType;
   fromUser: string;
   threadId: string;
   threadTitle: string;
@@ -12,7 +14,7 @@ export type Notification = {
 };
 
 type NotificationInput = {
-  type: "like" | "comment" | "reply";
+  type: NotificationType;
   fromUser: string;
   threadId: string;
   threadTitle: string;
