@@ -93,15 +93,23 @@ export const NotificationBell = () => {
                       !n.read && "bg-primary/5"
                     )}
                   >
-                    <div className={cn("mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full", n.type === "like" ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground")}>
+                    <div className={cn(
+                      "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
+                      n.type === "price_alert" ? "bg-primary/20 text-primary" :
+                      n.type === "like" ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
+                    )}>
                       <Icon className="h-3.5 w-3.5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs leading-relaxed">
-                        <span className="font-semibold text-foreground">{n.fromUser}</span>{" "}
-                        <span className="text-muted-foreground">{actionMap[n.type]}</span>{" "}
-                        <span className="font-medium text-foreground truncate">"{n.threadTitle}"</span>
-                      </p>
+                      {n.type === "price_alert" ? (
+                        <p className="text-xs leading-relaxed font-medium text-foreground">{n.threadTitle}</p>
+                      ) : (
+                        <p className="text-xs leading-relaxed">
+                          <span className="font-semibold text-foreground">{n.fromUser}</span>{" "}
+                          <span className="text-muted-foreground">{actionMap[n.type]}</span>{" "}
+                          <span className="font-medium text-foreground truncate">"{n.threadTitle}"</span>
+                        </p>
+                      )}
                       <p className="mt-0.5 text-[10px] text-muted-foreground">{timeAgo(n.createdAt)}</p>
                     </div>
                     {!n.read && <div className="mt-2 h-2 w-2 shrink-0 rounded-full bg-primary" />}

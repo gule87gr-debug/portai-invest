@@ -4,12 +4,14 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { TradingViewChart, TradingViewTechnicalAnalysis } from "@/components/TradingViewWidgets";
 import { StockNews } from "@/components/StockNews";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
+import { PriceAlertDialog } from "@/components/PriceAlertDialog";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getStockDescription } from "@/lib/stockDescriptions";
 import { getTradingViewSymbol } from "@/lib/tradingViewSymbol";
 import { assetDatabase } from "@/lib/stockDatabase";
 import { useQuotes } from "@/hooks/useQuotes";
-import { ArrowLeft, Building2, Newspaper, BarChart3, AlertTriangle, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { ArrowLeft, Building2, Newspaper, BarChart3, AlertTriangle, TrendingUp, TrendingDown, Minus, Bell } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useMemo } from "react";
 
 const StockDetail = () => {
