@@ -35,6 +35,8 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
   const [price, setPrice] = useState("");
   const [direction, setDirection] = useState<"above" | "below">("above");
   const [userId, setUserId] = useState<string | null>(null);
+  const { isPro, loading: subLoading } = useSubscription();
+  const navigate = useNavigate();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
