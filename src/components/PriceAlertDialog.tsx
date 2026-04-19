@@ -75,6 +75,10 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
       toast.error("Please sign in to set price alerts");
       return;
     }
+    if (!isPro) {
+      toast.error("Price alerts are a Pro feature. Upgrade to unlock.");
+      return;
+    }
     if (isNaN(target) || target <= 0) {
       toast.error("Enter a valid price greater than 0");
       return;
