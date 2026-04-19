@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { Bell, BellRing, Trash2, TrendingUp, TrendingDown } from "lucide-react";
+import { Bell, BellRing, Trash2, TrendingUp, TrendingDown, Sparkles, Lock } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +35,8 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
   const [price, setPrice] = useState("");
   const [direction, setDirection] = useState<"above" | "below">("above");
   const [userId, setUserId] = useState<string | null>(null);
+  const { isPro, loading: subLoading } = useSubscription();
+  const navigate = useNavigate();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -69,6 +73,10 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
     const target = parseFloat(price);
     if (!userId) {
       toast.error("Please sign in to set price alerts");
+      return;
+    }
+    if (!isPro) {
+      toast.error("Price alerts are a Pro feature. Upgrade to unlock.");
       return;
     }
     if (isNaN(target) || target <= 0) {
@@ -120,6 +128,24 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
         {!userId ? (
           <div className="py-6 text-center text-sm text-muted-foreground">
             Please sign in to set price alerts.
+          </div>
+        ) : !subLoading && !isPro ? (
+          <div className="py-6 px-2 text-center space-y-4">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/15">
+              <Lock className="h-6 w-6 text-primary" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-base font-semibold text-foreground">Pro Feature</h3>
+              <p className="text-sm text-muted-foreground">
+                Price alerts are available exclusively to Pro members. Upgrade to get notified the moment any asset hits your target price.
+              </p>
+            </div>
+            <Button
+              onClick={() => { setOpen(false); navigate("/pricing"); }}
+              className="w-full gap-2"
+            >
+              <Sparkles className="h-4 w-4" /> Upgrade to Pro
+            </Button>
           </div>
         ) : (
           <>
