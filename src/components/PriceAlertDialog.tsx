@@ -125,6 +125,24 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
           <div className="py-6 text-center text-sm text-muted-foreground">
             Please sign in to set price alerts.
           </div>
+        ) : !subLoading && !isPro ? (
+          <div className="py-6 px-2 text-center space-y-4">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/15">
+              <Lock className="h-6 w-6 text-primary" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-base font-semibold text-foreground">Pro Feature</h3>
+              <p className="text-sm text-muted-foreground">
+                Price alerts are available exclusively to Pro members. Upgrade to get notified the moment any asset hits your target price.
+              </p>
+            </div>
+            <Button
+              onClick={() => { setOpen(false); navigate("/pricing"); }}
+              className="w-full gap-2"
+            >
+              <Sparkles className="h-4 w-4" /> Upgrade to Pro
+            </Button>
+          </div>
         ) : (
           <>
             <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
