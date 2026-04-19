@@ -235,6 +235,45 @@ export type Database = {
         }
         Relationships: []
       }
+      price_alerts: {
+        Row: {
+          asset_name: string
+          asset_type: string
+          created_at: string
+          direction: string
+          id: string
+          target_price: number
+          ticker: string
+          triggered: boolean
+          triggered_at: string | null
+          user_id: string
+        }
+        Insert: {
+          asset_name?: string
+          asset_type?: string
+          created_at?: string
+          direction: string
+          id?: string
+          target_price: number
+          ticker: string
+          triggered?: boolean
+          triggered_at?: string | null
+          user_id: string
+        }
+        Update: {
+          asset_name?: string
+          asset_type?: string
+          created_at?: string
+          direction?: string
+          id?: string
+          target_price?: number
+          ticker?: string
+          triggered?: boolean
+          triggered_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
