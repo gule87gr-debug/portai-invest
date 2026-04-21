@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Newspaper, ExternalLink, RefreshCw, Search, SlidersHorizontal, X, Check } from "lucide-react";
+import { Newspaper, ExternalLink, RefreshCw, Search, SlidersHorizontal, X, Check, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { REGION_LABELS, AssetRegion } from "@/lib/stockDatabase";
 
 const categories = [
@@ -19,6 +20,30 @@ const categories = [
 
 const regions: AssetRegion[] = ["us", "europe", "asia", "americas", "africa", "middle_east", "oceania"];
 
+type SortMode = "newest" | "relevant" | "trust";
+
+// Trust score per source (0-100). Tier 1 = wires/papers of record, Tier 2 = major business press,
+// Tier 3 = mainstream finance media, Tier 4 = aggregators/blogs.
+const TRUST_SCORES: Record<string, number> = {
+  reuters: 95, "associated press": 95, ap: 95, bloomberg: 93, "financial times": 93, ft: 93,
+  "the wall street journal": 92, "wall street journal": 92, wsj: 92, "the economist": 90,
+  "the new york times": 88, "new york times": 88, nyt: 88, "the washington post": 86,
+  cnbc: 82, "barron's": 85, barrons: 85, marketwatch: 78, forbes: 75, fortune: 75,
+  "business insider": 70, "yahoo finance": 68, "seeking alpha": 60, "the motley fool": 55,
+  benzinga: 55, investorplace: 50, zacks: 60, investopedia: 70, morningstar: 80,
+  bbc: 88, "the guardian": 82, cnn: 75, "fox business": 70, axios: 80,
+};
+
+function getTrustScore(source: string): number {
+  if (!source) return 40;
+  const key = source.toLowerCase().trim();
+  if (TRUST_SCORES[key] !== undefined) return TRUST_SCORES[key];
+  for (const [name, score] of Object.entries(TRUST_SCORES)) {
+    if (key.includes(name)) return score;
+  }
+  return 40;
+}
+
 interface NewsItem {
   title: string;
   link: string;
@@ -32,10 +57,45 @@ export const StockNewsFeed = () => {
   const [selectedRegions, setSelectedRegions] = useState<AssetRegion[]>([]);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortMode, setSortMode] = useState<SortMode>("newest");
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
+
+  // Relevance score: matches search/filter terms in the title
+  const relevanceScore = useCallback(
+    (item: NewsItem): number => {
+      const haystack = item.title.toLowerCase();
+      const terms: string[] = [];
+      if (searchQuery) terms.push(...searchQuery.toLowerCase().split(/\s+/).filter(Boolean));
+      terms.push(...selectedCategories.map((c) => c.toLowerCase()));
+      terms.push(...selectedRegions.map((r) => r.replace("_", " ")));
+      if (terms.length === 0) return 0;
+      let score = 0;
+      for (const term of terms) {
+        if (haystack.includes(term)) score += 10;
+      }
+      return score;
+    },
+    [searchQuery, selectedCategories, selectedRegions]
+  );
+
+  const sortedNews = useMemo(() => {
+    const list = [...news];
+    if (sortMode === "newest") {
+      list.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
+    } else if (sortMode === "trust") {
+      list.sort((a, b) => getTrustScore(b.source) - getTrustScore(a.source));
+    } else if (sortMode === "relevant") {
+      list.sort((a, b) => {
+        const diff = relevanceScore(b) - relevanceScore(a);
+        if (diff !== 0) return diff;
+        return new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
+      });
+    }
+    return list;
+  }, [news, sortMode, relevanceScore]);
 
   const fetchNews = useCallback(
     async (cats: string[], regs: AssetRegion[], search: string) => {
@@ -157,6 +217,17 @@ export const StockNewsFeed = () => {
             </button>
           )}
         </form>
+
+        <Select value={sortMode} onValueChange={(v) => setSortMode(v as SortMode)}>
+          <SelectTrigger className="h-10 w-full sm:w-[170px] shrink-0 bg-accent/30">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent align="end">
+            <SelectItem value="newest">Newest first</SelectItem>
+            <SelectItem value="relevant">Most relevant</SelectItem>
+            <SelectItem value="trust">Highest trust</SelectItem>
+          </SelectContent>
+        </Select>
 
         <Popover open={filterOpen} onOpenChange={setFilterOpen}>
           <PopoverTrigger asChild>
@@ -285,11 +356,11 @@ export const StockNewsFeed = () => {
         </div>
       )}
 
-      {/* News list */}
+      {/* News list — fixed-height container so skeleton refreshes don't shift layout */}
       <div className="rounded-lg border border-border overflow-hidden">
-        {loading ? (
-          <div className="divide-y divide-border">
-            {Array.from({ length: 5 }).map((_, i) => (
+        <div className="divide-y divide-border h-[500px] overflow-y-auto scrollbar-thin relative">
+          {loading ? (
+            Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="flex items-start gap-3 p-3">
                 <div className="h-10 w-10 shrink-0 rounded-lg bg-muted animate-pulse" />
                 <div className="flex-1 space-y-2">
@@ -301,24 +372,27 @@ export const StockNewsFeed = () => {
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        ) : error ? (
-          <div className="flex items-center justify-center py-16 text-muted-foreground">
-            <span className="text-sm">{error}</span>
-          </div>
-        ) : news.length === 0 ? (
-          <div className="flex items-center justify-center py-16 text-muted-foreground">
-            <span className="text-sm">No news found</span>
-          </div>
-        ) : (
-          <div className="divide-y divide-border max-h-[500px] overflow-y-auto scrollbar-thin">
-            {news.map((item, i) => {
+            ))
+          ) : error ? (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+              <span className="text-sm">{error}</span>
+            </div>
+          ) : sortedNews.length === 0 ? (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+              <span className="text-sm">No news found</span>
+            </div>
+          ) : (
+            sortedNews.map((item, i) => {
               const sourceInitial = item.source?.[0]?.toUpperCase() || "N";
               const sourceColor = ["bg-primary/20 text-primary", "bg-chart-3/20 text-chart-3", "bg-warning/20 text-warning", "bg-gain/20 text-gain"][i % 4];
+              const trust = getTrustScore(item.source);
+              const trustTone =
+                trust >= 85 ? "text-gain bg-gain/10 border-gain/30" :
+                trust >= 70 ? "text-primary bg-primary/10 border-primary/30" :
+                "text-muted-foreground bg-muted border-border";
               return (
                 <a
-                  key={i}
+                  key={`${item.link}-${i}`}
                   href={item.link}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -331,9 +405,13 @@ export const StockNewsFeed = () => {
                     <p className="text-sm font-medium leading-snug group-hover:text-primary transition-colors line-clamp-2">
                       {item.title}
                     </p>
-                    <div className="flex items-center gap-2 mt-1.5">
+                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                       <span className="text-[11px] font-medium text-primary/80 bg-primary/10 px-1.5 py-0.5 rounded">
                         {item.source}
+                      </span>
+                      <span className={cn("inline-flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded border", trustTone)}>
+                        <Shield className="h-2.5 w-2.5" />
+                        {trust}
                       </span>
                       <span className="text-[10px] text-muted-foreground">
                         {formatTimeAgo(item.pubDate)}
@@ -343,9 +421,9 @@ export const StockNewsFeed = () => {
                   <ExternalLink className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </a>
               );
-            })}
-          </div>
-        )}
+            })
+          )}
+        </div>
       </div>
 
       <p className="mt-3 text-[10px] text-muted-foreground text-center">
