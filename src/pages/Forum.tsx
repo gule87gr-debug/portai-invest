@@ -55,7 +55,7 @@ const Forum = () => {
   const [showNewThread, setShowNewThread] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newBody, setNewBody] = useState("");
-  const [newTag, setNewTag] = useState("general");
+  const [newTag, setNewTag] = useState("personal");
   const [expandedThread, setExpandedThread] = useState<string | null>(null);
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [searchQuery, setSearchQuery] = useState("");
