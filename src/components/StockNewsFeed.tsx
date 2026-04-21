@@ -55,7 +55,6 @@ export const StockNewsFeed = () => {
   const { t } = useLanguage();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedRegions, setSelectedRegions] = useState<AssetRegion[]>([]);
-  const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("newest");
   const [news, setNews] = useState<NewsItem[]>([]);
@@ -168,13 +167,7 @@ export const StockNewsFeed = () => {
     setSelectedRegions([]);
   };
 
-  const submitSearch = (e?: React.FormEvent) => {
-    e?.preventDefault();
-    setSearchQuery(searchInput.trim());
-  };
-
   const clearSearch = () => {
-    setSearchInput("");
     setSearchQuery("");
   };
 
@@ -197,16 +190,16 @@ export const StockNewsFeed = () => {
 
       {/* Search + Filter row */}
       <div className="flex flex-col sm:flex-row gap-2 mb-3">
-        <form onSubmit={submitSearch} className="relative flex-1">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search articles, tickers, topics..."
             className="h-10 w-full rounded-lg border border-border bg-accent/30 pl-9 pr-9 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />
-          {searchInput && (
+          {searchQuery && (
             <button
               type="button"
               onClick={clearSearch}
@@ -216,7 +209,7 @@ export const StockNewsFeed = () => {
               <X className="h-3.5 w-3.5" />
             </button>
           )}
-        </form>
+        </div>
 
         <Select value={sortMode} onValueChange={(v) => setSortMode(v as SortMode)}>
           <SelectTrigger className="h-10 w-full sm:w-[170px] shrink-0 bg-accent/30">
