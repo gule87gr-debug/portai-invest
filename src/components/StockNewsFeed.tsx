@@ -216,23 +216,23 @@ export const StockNewsFeed = () => {
 
               <div className="border-t border-border px-4 py-3">
                 <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  Tickers
+                  Regions
                 </p>
                 <div className="flex flex-wrap gap-1.5">
-                  {allTickers.map((ticker) => {
-                    const active = selectedTickers.includes(ticker);
+                  {regions.map((region) => {
+                    const active = selectedRegions.includes(region);
                     return (
                       <button
-                        key={ticker}
-                        onClick={() => toggleTicker(ticker)}
+                        key={region}
+                        onClick={() => toggleRegion(region)}
                         className={cn(
-                          "rounded-md px-2 py-1 text-[11px] font-mono font-medium transition-colors border",
+                          "rounded-md px-2 py-1 text-[11px] font-medium transition-colors border",
                           active
                             ? "bg-primary/20 text-primary border-primary/40"
                             : "bg-accent/30 text-muted-foreground border-transparent hover:text-foreground"
                         )}
                       >
-                        {ticker}
+                        {REGION_LABELS[region]}
                       </button>
                     );
                   })}
@@ -271,13 +271,13 @@ export const StockNewsFeed = () => {
               </button>
             </span>
           ))}
-          {selectedTickers.map((tk) => (
+          {selectedRegions.map((region) => (
             <span
-              key={tk}
-              className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-mono text-foreground"
+              key={region}
+              className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] text-foreground"
             >
-              {tk}
-              <button onClick={() => toggleTicker(tk)} aria-label={`Remove ${tk}`}>
+              {REGION_LABELS[region]}
+              <button onClick={() => toggleRegion(region)} aria-label={`Remove ${region}`}>
                 <X className="h-3 w-3" />
               </button>
             </span>
