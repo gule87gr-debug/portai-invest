@@ -221,7 +221,7 @@ const Forum = () => {
               </div>
               <div className="flex justify-end gap-2 pt-2">
                 <button onClick={() => setShowNewThread(false)} className="rounded-lg border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent">{t("cancel")}</button>
-                <button onClick={handlePost} disabled={!newTitle.trim() || !newBody.trim() || isModeratingPost} className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-30">
+                <button onClick={handlePost} disabled={!newTitle.trim() || !newBody.trim() || newTags.length === 0 || isModeratingPost} className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-30">
                   {isModeratingPost && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                   {t("postThread")}
                 </button>
