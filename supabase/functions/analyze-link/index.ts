@@ -14,6 +14,90 @@ const inputSchema: SchemaDefinition = {
 
 const FREE_DAILY_ANALYSES = 3;
 
+// Must stay in sync with src/lib/trustScore.ts so the news-feed badge
+// and the article analyzer always return the same score for a known source.
+const TRUST_SCORES: Record<string, number> = {
+  reuters: 10, "associated press": 10, ap: 10, "ap news": 10,
+  "sec.gov": 10, sec: 10, "federal reserve": 10,
+  bloomberg: 8, "financial times": 8, ft: 8,
+  "the wall street journal": 8, "wall street journal": 8, wsj: 8,
+  "the economist": 8, bbc: 8, "bbc news": 8,
+  "the new york times": 7, "new york times": 7, nyt: 7,
+  "the washington post": 7, "washington post": 7,
+  cnbc: 7, "barron's": 7, barrons: 7, marketwatch: 7,
+  "the guardian": 7, guardian: 7, axios: 7, morningstar: 7,
+  forbes: 6, fortune: 6, "business insider": 6,
+  "yahoo finance": 6, yahoo: 6, investopedia: 6,
+  cnn: 6, "cnn business": 6, zacks: 6, kiplinger: 6,
+  "seeking alpha": 5, "the motley fool": 5, "motley fool": 5,
+  benzinga: 5, investorplace: 5, "fox business": 5,
+  thestreet: 5, "the street": 5,
+  reddit: 3, twitter: 3, x: 3, stocktwits: 3,
+};
+
+// Maps URL hostnames to the canonical source name used in TRUST_SCORES.
+const DOMAIN_TO_SOURCE: Record<string, string> = {
+  "reuters.com": "reuters",
+  "apnews.com": "associated press",
+  "ap.org": "associated press",
+  "sec.gov": "sec.gov",
+  "federalreserve.gov": "federal reserve",
+  "bloomberg.com": "bloomberg",
+  "ft.com": "financial times",
+  "wsj.com": "the wall street journal",
+  "economist.com": "the economist",
+  "nytimes.com": "the new york times",
+  "washingtonpost.com": "the washington post",
+  "cnbc.com": "cnbc",
+  "barrons.com": "barron's",
+  "marketwatch.com": "marketwatch",
+  "bbc.com": "bbc",
+  "bbc.co.uk": "bbc",
+  "theguardian.com": "the guardian",
+  "axios.com": "axios",
+  "morningstar.com": "morningstar",
+  "forbes.com": "forbes",
+  "fortune.com": "fortune",
+  "businessinsider.com": "business insider",
+  "finance.yahoo.com": "yahoo finance",
+  "yahoo.com": "yahoo finance",
+  "investopedia.com": "investopedia",
+  "cnn.com": "cnn",
+  "edition.cnn.com": "cnn",
+  "zacks.com": "zacks",
+  "kiplinger.com": "kiplinger",
+  "seekingalpha.com": "seeking alpha",
+  "fool.com": "the motley fool",
+  "benzinga.com": "benzinga",
+  "investorplace.com": "investorplace",
+  "foxbusiness.com": "fox business",
+  "thestreet.com": "thestreet",
+  "reddit.com": "reddit",
+  "twitter.com": "twitter",
+  "x.com": "x",
+  "stocktwits.com": "stocktwits",
+};
+
+function lookupKnownSource(urlStr: string): { source: string; score: number } | null {
+  try {
+    const host = new URL(urlStr).hostname.toLowerCase().replace(/^www\./, "");
+    // exact match first
+    if (DOMAIN_TO_SOURCE[host]) {
+      const src = DOMAIN_TO_SOURCE[host];
+      return { source: src, score: TRUST_SCORES[src] };
+    }
+    // suffix match (handles subdomains)
+    for (const [domain, src] of Object.entries(DOMAIN_TO_SOURCE)) {
+      if (host === domain || host.endsWith(`.${domain}`)) {
+        return { source: src, score: TRUST_SCORES[src] };
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -169,6 +253,16 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
         biases: ["Unable to fully parse structured analysis"],
         strengths: ["URL was analyzed by AI"],
       };
+    }
+
+    // Override AI score with deterministic score for known sources so the
+    // analyzer always agrees with the news-feed trust badge.
+    const known = lookupKnownSource(url);
+    if (known) {
+      analysis.trustScore = known.score;
+      if (!analysis.source || /^https?:|\./i.test(analysis.source)) {
+        analysis.source = known.source.replace(/\b\w/g, (c: string) => c.toUpperCase());
+      }
     }
 
     // Record usage server-side AFTER successful analysis
