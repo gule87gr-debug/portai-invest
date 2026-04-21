@@ -12,8 +12,8 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-const categories = ["All", "Personal", "Financial", "Political", "Stocks", "Crypto", "Healthcare", "Finance"];
-const tagOptions = ["personal", "financial", "political", "stocks", "crypto", "healthcare", "finance"];
+const categories = ["All", "Personal", "Financial", "Political", "Stocks", "Crypto", "Finance"];
+const tagOptions = ["personal", "financial", "political", "stocks", "crypto", "finance"];
 
 type FactCheckClaim = {
   claim: string;
