@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Newspaper, ExternalLink, RefreshCw, Search, SlidersHorizontal, X, Check } from "lucide-react";
+import { Newspaper, ExternalLink, RefreshCw, Search, SlidersHorizontal, X, Check, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { REGION_LABELS, AssetRegion } from "@/lib/stockDatabase";
 
 const categories = [
@@ -18,6 +19,30 @@ const categories = [
 ];
 
 const regions: AssetRegion[] = ["us", "europe", "asia", "americas", "africa", "middle_east", "oceania"];
+
+type SortMode = "newest" | "relevant" | "trust";
+
+// Trust score per source (0-100). Tier 1 = wires/papers of record, Tier 2 = major business press,
+// Tier 3 = mainstream finance media, Tier 4 = aggregators/blogs.
+const TRUST_SCORES: Record<string, number> = {
+  reuters: 95, "associated press": 95, ap: 95, bloomberg: 93, "financial times": 93, ft: 93,
+  "the wall street journal": 92, "wall street journal": 92, wsj: 92, "the economist": 90,
+  "the new york times": 88, "new york times": 88, nyt: 88, "the washington post": 86,
+  cnbc: 82, "barron's": 85, barrons: 85, marketwatch: 78, forbes: 75, fortune: 75,
+  "business insider": 70, "yahoo finance": 68, "seeking alpha": 60, "the motley fool": 55,
+  benzinga: 55, investorplace: 50, zacks: 60, investopedia: 70, morningstar: 80,
+  bbc: 88, "the guardian": 82, cnn: 75, "fox business": 70, axios: 80,
+};
+
+function getTrustScore(source: string): number {
+  if (!source) return 40;
+  const key = source.toLowerCase().trim();
+  if (TRUST_SCORES[key] !== undefined) return TRUST_SCORES[key];
+  for (const [name, score] of Object.entries(TRUST_SCORES)) {
+    if (key.includes(name)) return score;
+  }
+  return 40;
+}
 
 interface NewsItem {
   title: string;
