@@ -11,8 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
 
-const categories = ["All", "General", "Portfolios", "Markets", "Sectors"];
-const tagOptions = ["general", "portfolios", "markets", "sectors"];
+const categories = ["All", "Personal", "Financial", "Political", "Technology", "Healthcare", "Finance"];
+const tagOptions = ["personal", "financial", "political", "technology", "healthcare", "finance"];
 
 type FactCheckClaim = {
   claim: string;
@@ -55,7 +55,7 @@ const Forum = () => {
   const [showNewThread, setShowNewThread] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newBody, setNewBody] = useState("");
-  const [newTag, setNewTag] = useState("general");
+  const [newTag, setNewTag] = useState("personal");
   const [expandedThread, setExpandedThread] = useState<string | null>(null);
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [searchQuery, setSearchQuery] = useState("");
@@ -127,7 +127,7 @@ const Forum = () => {
     const avatarUrl = profile.anonymous ? null : profile.avatar;
     addThread({
       id: `t-${Date.now()}`, author: displayName, avatar: displayAvatar, avatarUrl, time: "just now",
-      tags: [{ label: newTag, color: newTag === "general" ? "bg-muted text-muted-foreground" : "bg-primary/20 text-primary" }],
+      tags: [{ label: newTag, color: newTag === "personal" ? "bg-muted text-muted-foreground" : "bg-primary/20 text-primary" }],
       title: newTitle, body: newBody, likes: 0, comments: [], likedByUser: false, userId: currentUserId || undefined,
     });
     setNewTitle(""); setNewBody(""); setShowNewThread(false); setIsModeratingPost(false);
