@@ -455,7 +455,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     return () => clearTimeout(timeout);
   }, [profile, currentUserId, profileLoaded, savedDisplayName]);
 
-  useEffect(() => { localStorage.setItem("portai-threads", JSON.stringify(threads)); }, [threads]);
+  useEffect(() => { localStorage.setItem("portai-threads-v2", JSON.stringify(threads)); }, [threads]);
 
   const addWatchlist = async (w: WatchlistData) => {
     if (!currentUserId) return;
