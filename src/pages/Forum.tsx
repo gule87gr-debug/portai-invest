@@ -11,8 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
 
-const categories = ["All", "General", "Portfolios", "Markets", "Sectors"];
-const tagOptions = ["general", "portfolios", "markets", "sectors"];
+const categories = ["All", "Personal", "Financial", "Political", "Technology", "Healthcare", "Finance"];
+const tagOptions = ["personal", "financial", "political", "technology", "healthcare", "finance"];
 
 type FactCheckClaim = {
   claim: string;
