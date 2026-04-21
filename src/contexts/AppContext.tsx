@@ -364,7 +364,7 @@ function loadFromLS<T>(key: string, fallback: T): T {
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [watchlists, setWatchlists] = useState<WatchlistData[]>([]);
   const [watchlistsLoaded, setWatchlistsLoaded] = useState(false);
-  const [threads, setThreads] = useState<ForumThread[]>(() => loadFromLS("portai-threads-v2", defaultThreads));
+  const [threads, setThreads] = useState<ForumThread[]>(() => loadFromLS("portai-threads-v3", defaultThreads));
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [profile, setProfile] = useState<UserProfile>(() => loadFromLS("portai-profile", { name: "Guest User", email: "", avatar: null, anonymous: false }));
   const [initialLanguage, setInitialLanguage] = useState("en");
@@ -495,7 +495,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     return () => clearTimeout(timeout);
   }, [profile, currentUserId, profileLoaded, savedDisplayName]);
 
-  useEffect(() => { localStorage.setItem("portai-threads-v2", JSON.stringify(threads)); }, [threads]);
+  useEffect(() => { localStorage.setItem("portai-threads-v3", JSON.stringify(threads)); }, [threads]);
 
   const addWatchlist = async (w: WatchlistData) => {
     if (!currentUserId) return;
