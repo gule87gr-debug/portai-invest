@@ -56,7 +56,7 @@ const Forum = () => {
   const [showNewThread, setShowNewThread] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newBody, setNewBody] = useState("");
-  const [newTag, setNewTag] = useState("personal");
+  const [newTags, setNewTags] = useState<string[]>(["personal"]);
   const [expandedThread, setExpandedThread] = useState<string | null>(null);
   const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
   const [searchQuery, setSearchQuery] = useState("");
@@ -126,12 +126,13 @@ const Forum = () => {
     const displayName = profile.anonymous ? t("anonymousTrader") : profile.name;
     const displayAvatar = profile.anonymous ? "?" : profile.name[0]?.toUpperCase() || "U";
     const avatarUrl = profile.anonymous ? null : profile.avatar;
+    const tagsToUse = newTags.length > 0 ? newTags : ["personal"];
     addThread({
       id: `t-${Date.now()}`, author: displayName, avatar: displayAvatar, avatarUrl, time: "just now",
-      tags: [{ label: newTag, color: newTag === "personal" ? "bg-muted text-muted-foreground" : "bg-primary/20 text-primary" }],
+      tags: tagsToUse.map((tag) => ({ label: tag, color: tag === "personal" ? "bg-muted text-muted-foreground" : "bg-primary/20 text-primary" })),
       title: newTitle, body: newBody, likes: 0, comments: [], likedByUser: false, userId: currentUserId || undefined,
     });
-    setNewTitle(""); setNewBody(""); setShowNewThread(false); setIsModeratingPost(false);
+    setNewTitle(""); setNewBody(""); setNewTags(["personal"]); setShowNewThread(false); setIsModeratingPost(false);
   };
 
   const handleLike = (threadId: string) => {
@@ -201,14 +202,26 @@ const Forum = () => {
               <input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} maxLength={500} placeholder={t("threadTitle")} className="h-10 w-full rounded-lg border border-border bg-accent/30 px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
               <textarea value={newBody} onChange={(e) => setNewBody(e.target.value)} maxLength={10000} placeholder={t("shareThoughts")} rows={4} className="w-full rounded-lg border border-border bg-accent/30 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs text-muted-foreground">{t("tag")}:</span>
-                {tagOptions.map((tag) => (
-                  <button key={tag} onClick={() => setNewTag(tag)} className={cn("rounded-md px-2.5 py-1 text-xs font-medium transition-colors capitalize", newTag === tag ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground")}>{t(tag)}</button>
-                ))}
+                <span className="text-xs text-muted-foreground w-full">{t("categories") || "Post to categories"}:</span>
+                {tagOptions.map((tag) => {
+                  const selected = newTags.includes(tag);
+                  return (
+                    <button
+                      key={tag}
+                      onClick={() => setNewTags((prev) => selected ? prev.filter((x) => x !== tag) : [...prev, tag])}
+                      className={cn(
+                        "rounded-md px-2.5 py-1 text-xs font-medium transition-colors capitalize border",
+                        selected ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-transparent hover:text-foreground"
+                      )}
+                    >
+                      {t(tag)}
+                    </button>
+                  );
+                })}
               </div>
               <div className="flex justify-end gap-2 pt-2">
                 <button onClick={() => setShowNewThread(false)} className="rounded-lg border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent">{t("cancel")}</button>
-                <button onClick={handlePost} disabled={!newTitle.trim() || !newBody.trim() || isModeratingPost} className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-30">
+                <button onClick={handlePost} disabled={!newTitle.trim() || !newBody.trim() || newTags.length === 0 || isModeratingPost} className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-30">
                   {isModeratingPost && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                   {t("postThread")}
                 </button>
