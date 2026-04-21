@@ -413,7 +413,7 @@ export const StockNewsFeed = () => {
                       </span>
                       <span className={cn("inline-flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded border", trustTone)}>
                         <Shield className="h-2.5 w-2.5" />
-                        {trust}
+                        {trust}/10
                       </span>
                       <span className="text-[10px] text-muted-foreground">
                         {formatTimeAgo(item.pubDate)}
