@@ -225,10 +225,39 @@ const Forum = () => {
         </div>
       </div>
 
-      <div className="mb-6 flex gap-1 rounded-lg bg-card p-1 w-fit overflow-x-auto">
-        {categories.map((cat) => (
-          <button key={cat} onClick={() => setActive(cat)} className={cn("rounded-md px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap", active === cat ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}>{t(cat.toLowerCase())}</button>
-        ))}
+      <div className="mb-6">
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            >
+              <span className="text-xs text-muted-foreground">{t("category") || "Category"}:</span>
+              <span>{t(active.toLowerCase())}</span>
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-56 p-1.5">
+            <div className="flex flex-col">
+              {categories.map((cat) => {
+                const isActive = active === cat;
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => setActive(cat)}
+                    className={cn(
+                      "flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors text-left",
+                      isActive ? "bg-primary/15 text-primary" : "text-foreground hover:bg-accent"
+                    )}
+                  >
+                    <span>{t(cat.toLowerCase())}</span>
+                    {isActive && <Check className="h-4 w-4" />}
+                  </button>
+                );
+              })}
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       <div className="space-y-4">
