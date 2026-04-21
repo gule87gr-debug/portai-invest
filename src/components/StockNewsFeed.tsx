@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Newspaper, ExternalLink, RefreshCw, Loader2 } from "lucide-react";
+import { Newspaper, ExternalLink, RefreshCw, Search, SlidersHorizontal, X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 
 const categories = [
-  { key: "all", tickers: [] },
   { key: "technology", tickers: ["AAPL", "MSFT", "GOOGL", "NVDA", "META", "AMD"] },
   { key: "finance", tickers: ["JPM", "GS", "V", "BRK.B"] },
   { key: "healthcare", tickers: ["JNJ", "UNH", "PFE", "ABBV"] },
@@ -24,45 +25,58 @@ interface NewsItem {
 
 export const StockNewsFeed = () => {
   const { t } = useLanguage();
-  const [activeCategory, setActiveCategory] = useState("all");
-  const [activeTicker, setActiveTicker] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedTickers, setSelectedTickers] = useState<string[]>([]);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [filterOpen, setFilterOpen] = useState(false);
 
-  const fetchNews = useCallback(async (category: string, ticker: string) => {
-    setLoading(true);
-    setError("");
-    try {
-      const { data, error: fnError } = await supabase.functions.invoke("fetch-news", {
-        body: { category, ticker: ticker || undefined },
-      });
-      if (fnError) throw new Error(fnError.message);
-      if (data?.items) {
-        setNews(data.items);
-      } else {
+  const allTickers = useMemo(
+    () => Array.from(new Set(categories.flatMap((c) => c.tickers))).sort(),
+    []
+  );
+
+  const fetchNews = useCallback(
+    async (cats: string[], tks: string[], search: string) => {
+      setLoading(true);
+      setError("");
+      try {
+        const { data, error: fnError } = await supabase.functions.invoke("fetch-news", {
+          body: {
+            categories: cats,
+            tickers: tks,
+            search: search || undefined,
+            // legacy fallback so cached deployments still work
+            category: cats.length === 1 ? cats[0] : "all",
+          },
+        });
+        if (fnError) throw new Error(fnError.message);
+        setNews(data?.items || []);
+      } catch (e: any) {
+        console.error("News fetch error:", e);
+        setError(e.message || "Failed to load news");
         setNews([]);
+      } finally {
+        setLoading(false);
       }
-    } catch (e: any) {
-      console.error("News fetch error:", e);
-      setError(e.message || "Failed to load news");
-      setNews([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    []
+  );
 
   useEffect(() => {
-    fetchNews(activeCategory, activeTicker);
-  }, [activeCategory, activeTicker, fetchNews]);
+    fetchNews(selectedCategories, selectedTickers, searchQuery);
+  }, [selectedCategories, selectedTickers, searchQuery, fetchNews]);
 
   // Auto-refresh every 5 minutes
   useEffect(() => {
     const interval = setInterval(() => {
-      fetchNews(activeCategory, activeTicker);
+      fetchNews(selectedCategories, selectedTickers, searchQuery);
     }, 5 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [activeCategory, activeTicker, fetchNews]);
+  }, [selectedCategories, selectedTickers, searchQuery, fetchNews]);
 
   const formatTimeAgo = (dateStr: string) => {
     try {
@@ -80,8 +94,34 @@ export const StockNewsFeed = () => {
     }
   };
 
-  const currentCategory = categories.find((c) => c.key === activeCategory);
-  const tickers = currentCategory?.tickers || [];
+  const toggleCategory = (key: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(key) ? prev.filter((c) => c !== key) : [...prev, key]
+    );
+  };
+
+  const toggleTicker = (ticker: string) => {
+    setSelectedTickers((prev) =>
+      prev.includes(ticker) ? prev.filter((c) => c !== ticker) : [...prev, ticker]
+    );
+  };
+
+  const clearFilters = () => {
+    setSelectedCategories([]);
+    setSelectedTickers([]);
+  };
+
+  const submitSearch = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    setSearchQuery(searchInput.trim());
+  };
+
+  const clearSearch = () => {
+    setSearchInput("");
+    setSearchQuery("");
+  };
+
+  const activeFilterCount = selectedCategories.length + selectedTickers.length;
 
   return (
     <div className="rounded-xl border border-border bg-card p-4 sm:p-6">
@@ -89,7 +129,7 @@ export const StockNewsFeed = () => {
         <Newspaper className="h-5 w-5 text-primary" />
         <h2 className="text-lg font-semibold">{t("marketNewsFeed")}</h2>
         <button
-          onClick={() => fetchNews(activeCategory, activeTicker)}
+          onClick={() => fetchNews(selectedCategories, selectedTickers, searchQuery)}
           className="ml-auto flex items-center gap-1 text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full hover:bg-accent transition-colors"
           disabled={loading}
         >
@@ -98,43 +138,152 @@ export const StockNewsFeed = () => {
         </button>
       </div>
 
-      {/* Category tabs */}
-      <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-thin pb-1">
-        {categories.map((cat) => (
-          <button
-            key={cat.key}
-            onClick={() => {
-              setActiveCategory(cat.key);
-              setActiveTicker("");
-            }}
-            className={cn(
-              "shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
-              activeCategory === cat.key
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted/50 text-muted-foreground hover:bg-accent/50"
-            )}
-          >
-            {t(cat.key)}
-          </button>
-        ))}
+      {/* Search + Filter row */}
+      <div className="flex flex-col sm:flex-row gap-2 mb-3">
+        <form onSubmit={submitSearch} className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search articles, tickers, topics..."
+            className="h-10 w-full rounded-lg border border-border bg-accent/30 pl-9 pr-9 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          {searchInput && (
+            <button
+              type="button"
+              onClick={clearSearch}
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
+              aria-label="Clear search"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </form>
+
+        <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className="h-10 gap-2 shrink-0"
+              type="button"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              <span>Filters</span>
+              {activeFilterCount > 0 && (
+                <span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
+                  {activeFilterCount}
+                </span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-80 p-0">
+            <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
+              <p className="text-sm font-semibold">Filter news</p>
+              {activeFilterCount > 0 && (
+                <button
+                  onClick={clearFilters}
+                  className="text-[11px] text-muted-foreground hover:text-foreground"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
+
+            <div className="max-h-[60vh] overflow-y-auto scrollbar-thin">
+              <div className="px-4 py-3">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Categories
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {categories.map((cat) => {
+                    const active = selectedCategories.includes(cat.key);
+                    return (
+                      <button
+                        key={cat.key}
+                        onClick={() => toggleCategory(cat.key)}
+                        className={cn(
+                          "flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+                          active
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted/50 text-muted-foreground hover:bg-accent"
+                        )}
+                      >
+                        {active && <Check className="h-3 w-3" />}
+                        {t(cat.key)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="border-t border-border px-4 py-3">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Tickers
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {allTickers.map((ticker) => {
+                    const active = selectedTickers.includes(ticker);
+                    return (
+                      <button
+                        key={ticker}
+                        onClick={() => toggleTicker(ticker)}
+                        className={cn(
+                          "rounded-md px-2 py-1 text-[11px] font-mono font-medium transition-colors border",
+                          active
+                            ? "bg-primary/20 text-primary border-primary/40"
+                            : "bg-accent/30 text-muted-foreground border-transparent hover:text-foreground"
+                        )}
+                      >
+                        {ticker}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 border-t border-border px-4 py-2.5">
+              <Button size="sm" onClick={() => setFilterOpen(false)}>
+                Done
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
-      {/* Ticker pills */}
-      {tickers.length > 0 && (
-        <div className="flex gap-1.5 mb-4 overflow-x-auto scrollbar-thin pb-1">
-          {tickers.map((ticker) => (
-            <button
-              key={ticker}
-              onClick={() => setActiveTicker(activeTicker === ticker ? "" : ticker)}
-              className={cn(
-                "shrink-0 rounded-md px-2.5 py-1 text-[11px] font-mono font-medium transition-colors",
-                activeTicker === ticker
-                  ? "bg-primary/20 text-primary border border-primary/40"
-                  : "bg-accent/30 text-muted-foreground hover:text-foreground border border-transparent"
-              )}
+      {/* Active filter chips */}
+      {(activeFilterCount > 0 || searchQuery) && (
+        <div className="flex flex-wrap items-center gap-1.5 mb-3">
+          {searchQuery && (
+            <span className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[11px] text-primary">
+              "{searchQuery}"
+              <button onClick={clearSearch} aria-label="Remove search">
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          )}
+          {selectedCategories.map((c) => (
+            <span
+              key={c}
+              className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] text-foreground"
             >
-              {ticker}
-            </button>
+              {t(c)}
+              <button onClick={() => toggleCategory(c)} aria-label={`Remove ${c}`}>
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          ))}
+          {selectedTickers.map((tk) => (
+            <span
+              key={tk}
+              className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-mono text-foreground"
+            >
+              {tk}
+              <button onClick={() => toggleTicker(tk)} aria-label={`Remove ${tk}`}>
+                <X className="h-3 w-3" />
+              </button>
+            </span>
           ))}
         </div>
       )}

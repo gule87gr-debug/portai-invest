@@ -11,6 +11,17 @@ interface NewsItem {
   pubDate: string;
 }
 
+function decodeHtmlEntities(s: string): string {
+  return s
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)));
+}
+
 function parseRSSItems(xml: string): NewsItem[] {
   const items: NewsItem[] = [];
   const itemRegex = /<item>([\s\S]*?)<\/item>/g;
@@ -19,10 +30,14 @@ function parseRSSItems(xml: string): NewsItem[] {
   while ((match = itemRegex.exec(xml)) !== null) {
     const itemXml = match[1];
 
-    const title = itemXml.match(/<title>([\s\S]*?)<\/title>/)?.[1]?.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")?.trim() || "";
+    const title = decodeHtmlEntities(
+      itemXml.match(/<title>([\s\S]*?)<\/title>/)?.[1]?.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")?.trim() || ""
+    );
     const link = itemXml.match(/<link>([\s\S]*?)<\/link>/)?.[1]?.trim() || "";
     const pubDate = itemXml.match(/<pubDate>([\s\S]*?)<\/pubDate>/)?.[1]?.trim() || "";
-    const source = itemXml.match(/<source[^>]*>([\s\S]*?)<\/source>/)?.[1]?.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")?.trim() || "News";
+    const source = decodeHtmlEntities(
+      itemXml.match(/<source[^>]*>([\s\S]*?)<\/source>/)?.[1]?.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")?.trim() || "News"
+    );
 
     if (title && !title.includes("View Full Coverage")) {
       items.push({ title, link, source, pubDate });
@@ -49,15 +64,41 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { category = "all", ticker } = await req.json();
+    const body = await req.json();
+    const {
+      category = "all",
+      ticker,
+      categories: catList,
+      tickers: tickerList,
+      search,
+    }: {
+      category?: string;
+      ticker?: string;
+      categories?: string[];
+      tickers?: string[];
+      search?: string;
+    } = body;
 
-    let query = categoryQueries[category] || categoryQueries.all;
-    if (ticker && ticker !== "SPY") {
+    let query: string;
+    const searchTrim = (search || "").trim();
+
+    if (searchTrim) {
+      // Free text search takes priority
+      query = searchTrim;
+    } else if (Array.isArray(tickerList) && tickerList.length > 0) {
+      query = tickerList.map((tk) => `"${tk}" stock`).join(" OR ");
+    } else if (ticker) {
       query = `${ticker} stock`;
+    } else if (Array.isArray(catList) && catList.length > 0 && !catList.includes("all")) {
+      query = catList
+        .map((c) => `(${categoryQueries[c] || c})`)
+        .join(" OR ");
+    } else {
+      query = categoryQueries[category] || categoryQueries.all;
     }
 
     const encodedQuery = encodeURIComponent(query);
-    const rssUrl = `https://news.google.com/rss/search?q=${encodedQuery}+when:3d&hl=en-US&gl=US&ceid=US:en`;
+    const rssUrl = `https://news.google.com/rss/search?q=${encodedQuery}+when:7d&hl=en-US&gl=US&ceid=US:en`;
 
     console.log("Fetching news for:", query);
 
@@ -72,7 +113,7 @@ Deno.serve(async (req) => {
     }
 
     const xml = await response.text();
-    const items = parseRSSItems(xml).slice(0, 15);
+    const items = parseRSSItems(xml).slice(0, 25);
 
     console.log(`Found ${items.length} news items`);
 
