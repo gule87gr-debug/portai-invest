@@ -218,24 +218,19 @@ export const StockNewsFeed = () => {
           )}
         </form>
 
+        <Select value={sortMode} onValueChange={(v) => setSortMode(v as SortMode)}>
+          <SelectTrigger className="h-10 w-full sm:w-[170px] shrink-0 bg-accent/30">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent align="end">
+            <SelectItem value="newest">Newest first</SelectItem>
+            <SelectItem value="relevant">Most relevant</SelectItem>
+            <SelectItem value="trust">Highest trust</SelectItem>
+          </SelectContent>
+        </Select>
+
         <Popover open={filterOpen} onOpenChange={setFilterOpen}>
           <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className="h-10 gap-2 shrink-0"
-              type="button"
-            >
-              <SlidersHorizontal className="h-4 w-4" />
-              <span>Filters</span>
-              {activeFilterCount > 0 && (
-                <span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
-                  {activeFilterCount}
-                </span>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent align="end" className="w-80 p-0">
-            {/* PLACEHOLDER */}
             <Button
               variant="outline"
               className="h-10 gap-2 shrink-0"
