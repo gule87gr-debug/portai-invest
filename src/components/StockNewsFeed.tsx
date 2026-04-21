@@ -235,6 +235,22 @@ export const StockNewsFeed = () => {
             </Button>
           </PopoverTrigger>
           <PopoverContent align="end" className="w-80 p-0">
+            {/* PLACEHOLDER */}
+            <Button
+              variant="outline"
+              className="h-10 gap-2 shrink-0"
+              type="button"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              <span>Filters</span>
+              {activeFilterCount > 0 && (
+                <span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
+                  {activeFilterCount}
+                </span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-80 p-0">
             <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
               <p className="text-sm font-semibold">Filter news</p>
               {activeFilterCount > 0 && (
