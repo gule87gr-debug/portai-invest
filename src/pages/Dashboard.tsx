@@ -84,10 +84,6 @@ const Dashboard = () => {
         <StockNewsFeed />
       </div>
 
-      <div className="mb-8">
-        <TrendingStocks />
-      </div>
-
       <div className="mb-8 rounded-xl border border-border bg-card p-4 sm:p-6" data-tour="analyze-link">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
