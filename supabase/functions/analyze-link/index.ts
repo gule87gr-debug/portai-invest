@@ -255,6 +255,16 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
       };
     }
 
+    // Override AI score with deterministic score for known sources so the
+    // analyzer always agrees with the news-feed trust badge.
+    const known = lookupKnownSource(url);
+    if (known) {
+      analysis.trustScore = known.score;
+      if (!analysis.source || /^https?:|\./i.test(analysis.source)) {
+        analysis.source = known.source.replace(/\b\w/g, (c: string) => c.toUpperCase());
+      }
+    }
+
     // Record usage server-side AFTER successful analysis
     if (userId && !isPro) {
       await supabaseAdmin.from("analysis_usage").insert({ user_id: userId });
