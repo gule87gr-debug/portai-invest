@@ -126,12 +126,13 @@ const Forum = () => {
     const displayName = profile.anonymous ? t("anonymousTrader") : profile.name;
     const displayAvatar = profile.anonymous ? "?" : profile.name[0]?.toUpperCase() || "U";
     const avatarUrl = profile.anonymous ? null : profile.avatar;
+    const tagsToUse = newTags.length > 0 ? newTags : ["personal"];
     addThread({
       id: `t-${Date.now()}`, author: displayName, avatar: displayAvatar, avatarUrl, time: "just now",
-      tags: [{ label: newTag, color: newTag === "personal" ? "bg-muted text-muted-foreground" : "bg-primary/20 text-primary" }],
+      tags: tagsToUse.map((tag) => ({ label: tag, color: tag === "personal" ? "bg-muted text-muted-foreground" : "bg-primary/20 text-primary" })),
       title: newTitle, body: newBody, likes: 0, comments: [], likedByUser: false, userId: currentUserId || undefined,
     });
-    setNewTitle(""); setNewBody(""); setShowNewThread(false); setIsModeratingPost(false);
+    setNewTitle(""); setNewBody(""); setNewTags(["personal"]); setShowNewThread(false); setIsModeratingPost(false);
   };
 
   const handleLike = (threadId: string) => {
