@@ -389,8 +389,8 @@ export const StockNewsFeed = () => {
               const sourceColor = ["bg-primary/20 text-primary", "bg-chart-3/20 text-chart-3", "bg-warning/20 text-warning", "bg-gain/20 text-gain"][i % 4];
               const trust = getTrustScore(item.source);
               const trustTone =
-                trust >= 85 ? "text-gain bg-gain/10 border-gain/30" :
-                trust >= 70 ? "text-primary bg-primary/10 border-primary/30" :
+                trust >= 8 ? "text-gain bg-gain/10 border-gain/30" :
+                trust >= 6 ? "text-primary bg-primary/10 border-primary/30" :
                 "text-muted-foreground bg-muted border-border";
               return (
                 <a
