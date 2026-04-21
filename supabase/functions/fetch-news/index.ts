@@ -58,6 +58,16 @@ const categoryQueries: Record<string, string> = {
   etfs: "ETF OR index fund OR S&P 500 OR market index",
 };
 
+const regionQueries: Record<string, string> = {
+  us: "US stocks OR Wall Street OR Nasdaq OR NYSE",
+  europe: "European stocks OR FTSE OR DAX OR CAC OR European markets",
+  asia: "Asian stocks OR Nikkei OR Hang Seng OR Shanghai OR Asian markets",
+  americas: "Canada stocks OR TSX OR Brazil stocks OR Bovespa OR Latin America",
+  africa: "African stocks OR Johannesburg OR Nigeria stocks OR African markets",
+  middle_east: "Middle East stocks OR Saudi stocks OR Tadawul OR Dubai stocks",
+  oceania: "Australia stocks OR ASX OR New Zealand stocks OR NZX",
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -67,15 +77,13 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const {
       category = "all",
-      ticker,
       categories: catList,
-      tickers: tickerList,
+      regions: regionList,
       search,
     }: {
       category?: string;
-      ticker?: string;
       categories?: string[];
-      tickers?: string[];
+      regions?: string[];
       search?: string;
     } = body;
 
@@ -83,12 +91,11 @@ Deno.serve(async (req) => {
     const searchTrim = (search || "").trim();
 
     if (searchTrim) {
-      // Free text search takes priority
       query = searchTrim;
-    } else if (Array.isArray(tickerList) && tickerList.length > 0) {
-      query = tickerList.map((tk) => `"${tk}" stock`).join(" OR ");
-    } else if (ticker) {
-      query = `${ticker} stock`;
+    } else if (Array.isArray(regionList) && regionList.length > 0) {
+      query = regionList
+        .map((r) => `(${regionQueries[r] || r})`)
+        .join(" OR ");
     } else if (Array.isArray(catList) && catList.length > 0 && !catList.includes("all")) {
       query = catList
         .map((c) => `(${categoryQueries[c] || c})`)

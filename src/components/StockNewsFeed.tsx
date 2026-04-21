@@ -5,16 +5,19 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { REGION_LABELS, AssetRegion } from "@/lib/stockDatabase";
 
 const categories = [
-  { key: "technology", tickers: ["AAPL", "MSFT", "GOOGL", "NVDA", "META", "AMD"] },
-  { key: "finance", tickers: ["JPM", "GS", "V", "BRK.B"] },
-  { key: "healthcare", tickers: ["JNJ", "UNH", "PFE", "ABBV"] },
-  { key: "energy", tickers: ["XOM", "CVX", "NEE"] },
-  { key: "consumer", tickers: ["TSLA", "PG", "KO", "DIS"] },
-  { key: "crypto", tickers: ["BTC", "ETH", "SOL", "XRP"] },
-  { key: "etfs", tickers: ["SPY", "QQQ", "VTI", "ARKK"] },
+  { key: "technology" },
+  { key: "finance" },
+  { key: "healthcare" },
+  { key: "energy" },
+  { key: "consumer" },
+  { key: "crypto" },
+  { key: "etfs" },
 ];
+
+const regions: AssetRegion[] = ["us", "europe", "asia", "americas", "africa", "middle_east", "oceania"];
 
 interface NewsItem {
   title: string;
@@ -26,7 +29,7 @@ interface NewsItem {
 export const StockNewsFeed = () => {
   const { t } = useLanguage();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedTickers, setSelectedTickers] = useState<string[]>([]);
+  const [selectedRegions, setSelectedRegions] = useState<AssetRegion[]>([]);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [news, setNews] = useState<NewsItem[]>([]);
@@ -34,22 +37,16 @@ export const StockNewsFeed = () => {
   const [error, setError] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
 
-  const allTickers = useMemo(
-    () => Array.from(new Set(categories.flatMap((c) => c.tickers))).sort(),
-    []
-  );
-
   const fetchNews = useCallback(
-    async (cats: string[], tks: string[], search: string) => {
+    async (cats: string[], regs: AssetRegion[], search: string) => {
       setLoading(true);
       setError("");
       try {
         const { data, error: fnError } = await supabase.functions.invoke("fetch-news", {
           body: {
             categories: cats,
-            tickers: tks,
+            regions: regs,
             search: search || undefined,
-            // legacy fallback so cached deployments still work
             category: cats.length === 1 ? cats[0] : "all",
           },
         });
@@ -67,16 +64,16 @@ export const StockNewsFeed = () => {
   );
 
   useEffect(() => {
-    fetchNews(selectedCategories, selectedTickers, searchQuery);
-  }, [selectedCategories, selectedTickers, searchQuery, fetchNews]);
+    fetchNews(selectedCategories, selectedRegions, searchQuery);
+  }, [selectedCategories, selectedRegions, searchQuery, fetchNews]);
 
   // Auto-refresh every 5 minutes
   useEffect(() => {
     const interval = setInterval(() => {
-      fetchNews(selectedCategories, selectedTickers, searchQuery);
+      fetchNews(selectedCategories, selectedRegions, searchQuery);
     }, 5 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [selectedCategories, selectedTickers, searchQuery, fetchNews]);
+  }, [selectedCategories, selectedRegions, searchQuery, fetchNews]);
 
   const formatTimeAgo = (dateStr: string) => {
     try {
@@ -100,15 +97,15 @@ export const StockNewsFeed = () => {
     );
   };
 
-  const toggleTicker = (ticker: string) => {
-    setSelectedTickers((prev) =>
-      prev.includes(ticker) ? prev.filter((c) => c !== ticker) : [...prev, ticker]
+  const toggleRegion = (region: AssetRegion) => {
+    setSelectedRegions((prev) =>
+      prev.includes(region) ? prev.filter((r) => r !== region) : [...prev, region]
     );
   };
 
   const clearFilters = () => {
     setSelectedCategories([]);
-    setSelectedTickers([]);
+    setSelectedRegions([]);
   };
 
   const submitSearch = (e?: React.FormEvent) => {
@@ -121,7 +118,7 @@ export const StockNewsFeed = () => {
     setSearchQuery("");
   };
 
-  const activeFilterCount = selectedCategories.length + selectedTickers.length;
+  const activeFilterCount = selectedCategories.length + selectedRegions.length;
 
   return (
     <div className="rounded-xl border border-border bg-card p-4 sm:p-6">
@@ -129,7 +126,7 @@ export const StockNewsFeed = () => {
         <Newspaper className="h-5 w-5 text-primary" />
         <h2 className="text-lg font-semibold">{t("marketNewsFeed")}</h2>
         <button
-          onClick={() => fetchNews(selectedCategories, selectedTickers, searchQuery)}
+          onClick={() => fetchNews(selectedCategories, selectedRegions, searchQuery)}
           className="ml-auto flex items-center gap-1 text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full hover:bg-accent transition-colors"
           disabled={loading}
         >
@@ -219,23 +216,23 @@ export const StockNewsFeed = () => {
 
               <div className="border-t border-border px-4 py-3">
                 <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  Tickers
+                  Regions
                 </p>
                 <div className="flex flex-wrap gap-1.5">
-                  {allTickers.map((ticker) => {
-                    const active = selectedTickers.includes(ticker);
+                  {regions.map((region) => {
+                    const active = selectedRegions.includes(region);
                     return (
                       <button
-                        key={ticker}
-                        onClick={() => toggleTicker(ticker)}
+                        key={region}
+                        onClick={() => toggleRegion(region)}
                         className={cn(
-                          "rounded-md px-2 py-1 text-[11px] font-mono font-medium transition-colors border",
+                          "rounded-md px-2 py-1 text-[11px] font-medium transition-colors border",
                           active
                             ? "bg-primary/20 text-primary border-primary/40"
                             : "bg-accent/30 text-muted-foreground border-transparent hover:text-foreground"
                         )}
                       >
-                        {ticker}
+                        {REGION_LABELS[region]}
                       </button>
                     );
                   })}
@@ -274,13 +271,13 @@ export const StockNewsFeed = () => {
               </button>
             </span>
           ))}
-          {selectedTickers.map((tk) => (
+          {selectedRegions.map((region) => (
             <span
-              key={tk}
-              className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-mono text-foreground"
+              key={region}
+              className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] text-foreground"
             >
-              {tk}
-              <button onClick={() => toggleTicker(tk)} aria-label={`Remove ${tk}`}>
+              {REGION_LABELS[region]}
+              <button onClick={() => toggleRegion(region)} aria-label={`Remove ${region}`}>
                 <X className="h-3 w-3" />
               </button>
             </span>
