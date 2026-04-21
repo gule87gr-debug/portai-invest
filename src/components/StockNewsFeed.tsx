@@ -29,18 +29,13 @@ interface NewsItem {
 export const StockNewsFeed = () => {
   const { t } = useLanguage();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedTickers, setSelectedTickers] = useState<string[]>([]);
+  const [selectedRegions, setSelectedRegions] = useState<AssetRegion[]>([]);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
-
-  const allTickers = useMemo(
-    () => Array.from(new Set(categories.flatMap((c) => c.tickers))).sort(),
-    []
-  );
 
   const fetchNews = useCallback(
     async (cats: string[], tks: string[], search: string) => {
