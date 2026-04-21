@@ -22,26 +22,35 @@ const regions: AssetRegion[] = ["us", "europe", "asia", "americas", "africa", "m
 
 type SortMode = "newest" | "relevant" | "trust";
 
-// Trust score per source (0-100). Tier 1 = wires/papers of record, Tier 2 = major business press,
-// Tier 3 = mainstream finance media, Tier 4 = aggregators/blogs.
+// Trust score per source (1-10), aligned with the article-analysis AI scoring guide:
+// 9-10: Major wire services (Reuters, AP), SEC filings, Fed publications
+// 7-8:  Established financial media (Bloomberg, CNBC, FT, WSJ)
+// 5-6:  Contributor platforms (Seeking Alpha, Motley Fool), established blogs
+// 3-4:  Social media, anonymous forums, unverified sources
+// 1-2:  Known misinformation sources
 const TRUST_SCORES: Record<string, number> = {
-  reuters: 95, "associated press": 95, ap: 95, bloomberg: 93, "financial times": 93, ft: 93,
-  "the wall street journal": 92, "wall street journal": 92, wsj: 92, "the economist": 90,
-  "the new york times": 88, "new york times": 88, nyt: 88, "the washington post": 86,
-  cnbc: 82, "barron's": 85, barrons: 85, marketwatch: 78, forbes: 75, fortune: 75,
-  "business insider": 70, "yahoo finance": 68, "seeking alpha": 60, "the motley fool": 55,
-  benzinga: 55, investorplace: 50, zacks: 60, investopedia: 70, morningstar: 80,
-  bbc: 88, "the guardian": 82, cnn: 75, "fox business": 70, axios: 80,
+  // 9-10: wires / papers of record
+  reuters: 10, "associated press": 10, ap: 10,
+  // 7-8: established financial media
+  bloomberg: 8, "financial times": 8, ft: 8,
+  "the wall street journal": 8, "wall street journal": 8, wsj: 8,
+  "the economist": 8, "the new york times": 7, "new york times": 7, nyt: 7,
+  "the washington post": 7, cnbc: 7, "barron's": 7, barrons: 7,
+  marketwatch: 7, bbc: 8, "the guardian": 7, axios: 7, morningstar: 7,
+  // 5-6: contributor platforms / mainstream blogs
+  forbes: 6, fortune: 6, "business insider": 6, "yahoo finance": 6,
+  "seeking alpha": 5, "the motley fool": 5, benzinga: 5,
+  investorplace: 5, zacks: 6, investopedia: 6, cnn: 6, "fox business": 5,
 };
 
 function getTrustScore(source: string): number {
-  if (!source) return 40;
+  if (!source) return 4;
   const key = source.toLowerCase().trim();
   if (TRUST_SCORES[key] !== undefined) return TRUST_SCORES[key];
   for (const [name, score] of Object.entries(TRUST_SCORES)) {
     if (key.includes(name)) return score;
   }
-  return 40;
+  return 4;
 }
 
 interface NewsItem {
@@ -380,8 +389,8 @@ export const StockNewsFeed = () => {
               const sourceColor = ["bg-primary/20 text-primary", "bg-chart-3/20 text-chart-3", "bg-warning/20 text-warning", "bg-gain/20 text-gain"][i % 4];
               const trust = getTrustScore(item.source);
               const trustTone =
-                trust >= 85 ? "text-gain bg-gain/10 border-gain/30" :
-                trust >= 70 ? "text-primary bg-primary/10 border-primary/30" :
+                trust >= 8 ? "text-gain bg-gain/10 border-gain/30" :
+                trust >= 6 ? "text-primary bg-primary/10 border-primary/30" :
                 "text-muted-foreground bg-muted border-border";
               return (
                 <a
@@ -404,7 +413,7 @@ export const StockNewsFeed = () => {
                       </span>
                       <span className={cn("inline-flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded border", trustTone)}>
                         <Shield className="h-2.5 w-2.5" />
-                        {trust}
+                        {trust}/10
                       </span>
                       <span className="text-[10px] text-muted-foreground">
                         {formatTimeAgo(item.pubDate)}
