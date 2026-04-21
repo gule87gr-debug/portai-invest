@@ -356,11 +356,11 @@ export const StockNewsFeed = () => {
         </div>
       )}
 
-      {/* News list */}
+      {/* News list — fixed-height container so skeleton refreshes don't shift layout */}
       <div className="rounded-lg border border-border overflow-hidden">
-        {loading ? (
-          <div className="divide-y divide-border">
-            {Array.from({ length: 5 }).map((_, i) => (
+        <div className="divide-y divide-border h-[500px] overflow-y-auto scrollbar-thin relative">
+          {loading ? (
+            Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="flex items-start gap-3 p-3">
                 <div className="h-10 w-10 shrink-0 rounded-lg bg-muted animate-pulse" />
                 <div className="flex-1 space-y-2">
@@ -372,24 +372,27 @@ export const StockNewsFeed = () => {
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        ) : error ? (
-          <div className="flex items-center justify-center py-16 text-muted-foreground">
-            <span className="text-sm">{error}</span>
-          </div>
-        ) : news.length === 0 ? (
-          <div className="flex items-center justify-center py-16 text-muted-foreground">
-            <span className="text-sm">No news found</span>
-          </div>
-        ) : (
-          <div className="divide-y divide-border max-h-[500px] overflow-y-auto scrollbar-thin">
-            {news.map((item, i) => {
+            ))
+          ) : error ? (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+              <span className="text-sm">{error}</span>
+            </div>
+          ) : sortedNews.length === 0 ? (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+              <span className="text-sm">No news found</span>
+            </div>
+          ) : (
+            sortedNews.map((item, i) => {
               const sourceInitial = item.source?.[0]?.toUpperCase() || "N";
               const sourceColor = ["bg-primary/20 text-primary", "bg-chart-3/20 text-chart-3", "bg-warning/20 text-warning", "bg-gain/20 text-gain"][i % 4];
+              const trust = getTrustScore(item.source);
+              const trustTone =
+                trust >= 85 ? "text-gain bg-gain/10 border-gain/30" :
+                trust >= 70 ? "text-primary bg-primary/10 border-primary/30" :
+                "text-muted-foreground bg-muted border-border";
               return (
                 <a
-                  key={i}
+                  key={`${item.link}-${i}`}
                   href={item.link}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -402,9 +405,13 @@ export const StockNewsFeed = () => {
                     <p className="text-sm font-medium leading-snug group-hover:text-primary transition-colors line-clamp-2">
                       {item.title}
                     </p>
-                    <div className="flex items-center gap-2 mt-1.5">
+                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                       <span className="text-[11px] font-medium text-primary/80 bg-primary/10 px-1.5 py-0.5 rounded">
                         {item.source}
+                      </span>
+                      <span className={cn("inline-flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded border", trustTone)}>
+                        <Shield className="h-2.5 w-2.5" />
+                        {trust}
                       </span>
                       <span className="text-[10px] text-muted-foreground">
                         {formatTimeAgo(item.pubDate)}
@@ -414,9 +421,9 @@ export const StockNewsFeed = () => {
                   <ExternalLink className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </a>
               );
-            })}
-          </div>
-        )}
+            })
+          )}
+        </div>
       </div>
 
       <p className="mt-3 text-[10px] text-muted-foreground text-center">
