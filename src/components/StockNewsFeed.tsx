@@ -5,16 +5,19 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { REGION_LABELS, AssetRegion } from "@/lib/stockDatabase";
 
 const categories = [
-  { key: "technology", tickers: ["AAPL", "MSFT", "GOOGL", "NVDA", "META", "AMD"] },
-  { key: "finance", tickers: ["JPM", "GS", "V", "BRK.B"] },
-  { key: "healthcare", tickers: ["JNJ", "UNH", "PFE", "ABBV"] },
-  { key: "energy", tickers: ["XOM", "CVX", "NEE"] },
-  { key: "consumer", tickers: ["TSLA", "PG", "KO", "DIS"] },
-  { key: "crypto", tickers: ["BTC", "ETH", "SOL", "XRP"] },
-  { key: "etfs", tickers: ["SPY", "QQQ", "VTI", "ARKK"] },
+  { key: "technology" },
+  { key: "finance" },
+  { key: "healthcare" },
+  { key: "energy" },
+  { key: "consumer" },
+  { key: "crypto" },
+  { key: "etfs" },
 ];
+
+const regions: AssetRegion[] = ["us", "europe", "asia", "americas", "africa", "middle_east", "oceania"];
 
 interface NewsItem {
   title: string;
