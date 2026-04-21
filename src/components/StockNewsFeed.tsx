@@ -57,10 +57,45 @@ export const StockNewsFeed = () => {
   const [selectedRegions, setSelectedRegions] = useState<AssetRegion[]>([]);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortMode, setSortMode] = useState<SortMode>("newest");
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
+
+  // Relevance score: matches search/filter terms in the title
+  const relevanceScore = useCallback(
+    (item: NewsItem): number => {
+      const haystack = item.title.toLowerCase();
+      const terms: string[] = [];
+      if (searchQuery) terms.push(...searchQuery.toLowerCase().split(/\s+/).filter(Boolean));
+      terms.push(...selectedCategories.map((c) => c.toLowerCase()));
+      terms.push(...selectedRegions.map((r) => r.replace("_", " ")));
+      if (terms.length === 0) return 0;
+      let score = 0;
+      for (const term of terms) {
+        if (haystack.includes(term)) score += 10;
+      }
+      return score;
+    },
+    [searchQuery, selectedCategories, selectedRegions]
+  );
+
+  const sortedNews = useMemo(() => {
+    const list = [...news];
+    if (sortMode === "newest") {
+      list.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
+    } else if (sortMode === "trust") {
+      list.sort((a, b) => getTrustScore(b.source) - getTrustScore(a.source));
+    } else if (sortMode === "relevant") {
+      list.sort((a, b) => {
+        const diff = relevanceScore(b) - relevanceScore(a);
+        if (diff !== 0) return diff;
+        return new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
+      });
+    }
+    return list;
+  }, [news, sortMode, relevanceScore]);
 
   const fetchNews = useCallback(
     async (cats: string[], regs: AssetRegion[], search: string) => {
