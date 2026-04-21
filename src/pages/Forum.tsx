@@ -4,15 +4,16 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { useApp } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNotifications } from "@/contexts/NotificationContext";
-import { Search, Plus, ThumbsUp, MessageCircle, Sparkles, X, Send, Trash2, Loader2, CheckCircle, AlertTriangle, XCircle, HelpCircle, MessageSquare, Lock, Crown } from "lucide-react";
+import { Search, Plus, ThumbsUp, MessageCircle, Sparkles, X, Send, Trash2, Loader2, CheckCircle, AlertTriangle, XCircle, HelpCircle, MessageSquare, Lock, Crown, ChevronDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-const categories = ["All", "Personal", "Financial", "Political", "Stocks", "Healthcare", "Finance"];
-const tagOptions = ["personal", "financial", "political", "stocks", "healthcare", "finance"];
+const categories = ["All", "Personal", "Financial", "Political", "Stocks", "Crypto", "Healthcare", "Finance"];
+const tagOptions = ["personal", "financial", "political", "stocks", "crypto", "healthcare", "finance"];
 
 type FactCheckClaim = {
   claim: string;
