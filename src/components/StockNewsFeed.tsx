@@ -38,16 +38,15 @@ export const StockNewsFeed = () => {
   const [filterOpen, setFilterOpen] = useState(false);
 
   const fetchNews = useCallback(
-    async (cats: string[], tks: string[], search: string) => {
+    async (cats: string[], regs: AssetRegion[], search: string) => {
       setLoading(true);
       setError("");
       try {
         const { data, error: fnError } = await supabase.functions.invoke("fetch-news", {
           body: {
             categories: cats,
-            tickers: tks,
+            regions: regs,
             search: search || undefined,
-            // legacy fallback so cached deployments still work
             category: cats.length === 1 ? cats[0] : "all",
           },
         });
@@ -65,16 +64,16 @@ export const StockNewsFeed = () => {
   );
 
   useEffect(() => {
-    fetchNews(selectedCategories, selectedTickers, searchQuery);
-  }, [selectedCategories, selectedTickers, searchQuery, fetchNews]);
+    fetchNews(selectedCategories, selectedRegions, searchQuery);
+  }, [selectedCategories, selectedRegions, searchQuery, fetchNews]);
 
   // Auto-refresh every 5 minutes
   useEffect(() => {
     const interval = setInterval(() => {
-      fetchNews(selectedCategories, selectedTickers, searchQuery);
+      fetchNews(selectedCategories, selectedRegions, searchQuery);
     }, 5 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [selectedCategories, selectedTickers, searchQuery, fetchNews]);
+  }, [selectedCategories, selectedRegions, searchQuery, fetchNews]);
 
   const formatTimeAgo = (dateStr: string) => {
     try {
@@ -98,15 +97,15 @@ export const StockNewsFeed = () => {
     );
   };
 
-  const toggleTicker = (ticker: string) => {
-    setSelectedTickers((prev) =>
-      prev.includes(ticker) ? prev.filter((c) => c !== ticker) : [...prev, ticker]
+  const toggleRegion = (region: AssetRegion) => {
+    setSelectedRegions((prev) =>
+      prev.includes(region) ? prev.filter((r) => r !== region) : [...prev, region]
     );
   };
 
   const clearFilters = () => {
     setSelectedCategories([]);
-    setSelectedTickers([]);
+    setSelectedRegions([]);
   };
 
   const submitSearch = (e?: React.FormEvent) => {
@@ -119,7 +118,7 @@ export const StockNewsFeed = () => {
     setSearchQuery("");
   };
 
-  const activeFilterCount = selectedCategories.length + selectedTickers.length;
+  const activeFilterCount = selectedCategories.length + selectedRegions.length;
 
   return (
     <div className="rounded-xl border border-border bg-card p-4 sm:p-6">
@@ -127,7 +126,7 @@ export const StockNewsFeed = () => {
         <Newspaper className="h-5 w-5 text-primary" />
         <h2 className="text-lg font-semibold">{t("marketNewsFeed")}</h2>
         <button
-          onClick={() => fetchNews(selectedCategories, selectedTickers, searchQuery)}
+          onClick={() => fetchNews(selectedCategories, selectedRegions, searchQuery)}
           className="ml-auto flex items-center gap-1 text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full hover:bg-accent transition-colors"
           disabled={loading}
         >
