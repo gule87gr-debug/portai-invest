@@ -15,6 +15,8 @@ type SubscriptionState = {
   subscriptionEnd: string | null;
   cancelAtPeriodEnd: boolean;
   subscriptionId: string | null;
+  scheduledTier: SubscriptionTier | null;
+  scheduledStart: string | null;
   dailyAnalysesUsed: number;
   canAnalyze: boolean;
   refresh: () => Promise<void>;
@@ -28,6 +30,8 @@ export const useSubscription = (): SubscriptionState => {
   const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null);
   const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(false);
   const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
+  const [scheduledTier, setScheduledTier] = useState<SubscriptionTier | null>(null);
+  const [scheduledStart, setScheduledStart] = useState<string | null>(null);
   const [dailyAnalysesUsed, setDailyAnalysesUsed] = useState(0);
 
   const checkSubscription = useCallback(async () => {
@@ -39,6 +43,8 @@ export const useSubscription = (): SubscriptionState => {
       setSubscriptionEnd(data?.subscription_end ?? null);
       setCancelAtPeriodEnd(data?.cancel_at_period_end ?? false);
       setSubscriptionId(data?.subscription_id ?? null);
+      setScheduledTier((data?.scheduled_tier as SubscriptionTier | null) ?? null);
+      setScheduledStart(data?.scheduled_start ?? null);
     } catch {
       setTier("free");
     }
