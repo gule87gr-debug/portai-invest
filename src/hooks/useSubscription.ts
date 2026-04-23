@@ -18,6 +18,7 @@ type SubscriptionState = {
   subscriptionStatus: string | null;
   scheduledTier: SubscriptionTier | null;
   scheduledStart: string | null;
+  scheduledChangesCount: number;
   dailyAnalysesUsed: number;
   canAnalyze: boolean;
   refresh: () => Promise<void>;
@@ -34,6 +35,7 @@ export const useSubscription = (): SubscriptionState => {
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
   const [scheduledTier, setScheduledTier] = useState<SubscriptionTier | null>(null);
   const [scheduledStart, setScheduledStart] = useState<string | null>(null);
+  const [scheduledChangesCount, setScheduledChangesCount] = useState(0);
   const [dailyAnalysesUsed, setDailyAnalysesUsed] = useState(0);
 
   const checkSubscription = useCallback(async () => {
@@ -48,6 +50,7 @@ export const useSubscription = (): SubscriptionState => {
       setSubscriptionStatus(data?.subscription_status ?? null);
       setScheduledTier((data?.scheduled_tier as SubscriptionTier | null) ?? null);
       setScheduledStart(data?.scheduled_start ?? null);
+      setScheduledChangesCount(data?.scheduled_changes_count ?? 0);
     } catch {
       setTier("free");
     }
@@ -97,6 +100,7 @@ export const useSubscription = (): SubscriptionState => {
     subscriptionStatus,
     scheduledTier,
     scheduledStart,
+    scheduledChangesCount,
     dailyAnalysesUsed,
     // Only Pro gets unlimited article analyses; Plus uses free limit
     canAnalyze: isPro || dailyAnalysesUsed < FREE_DAILY_ANALYSES,

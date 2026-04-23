@@ -138,6 +138,7 @@ serve(async (req) => {
     // phase whose price maps to a known tier AND differs from the current tier.
     let scheduledTier: "free" | "plus" | "pro" | null = null;
     let scheduledStart: string | null = null;
+    let scheduledChangesCount = 0;
     if (subscriptionId) {
       try {
         const schedules = await stripe.subscriptionSchedules.list({ customer: customerId, limit: 20 });
@@ -177,6 +178,11 @@ serve(async (req) => {
             ? (sch as any).current_phase.start_date as number
             : null;
 
+          // Track the previous candidate-eligible tier within this schedule so we can detect
+          // distinct transitions even when intermediate phases happen between now and a future
+          // phase (e.g. pro -> plus -> free counts as 2 changes).
+          let prevTierForThisSchedule: "free" | "plus" | "pro" = tier;
+
           for (const phase of phases) {
             const startSec = typeof phase.start_date === "number" ? phase.start_date : null;
             if (startSec === null) continue;
@@ -187,13 +193,11 @@ serve(async (req) => {
             // Skip the phase that's already in progress according to Stripe
             if (currentPhaseStart !== null && startSec === currentPhaseStart) continue;
 
-            // Skip phases whose own end_date has already passed (defensive — shouldn't happen
-            // for a future start, but guards against malformed data)
+            // Skip phases whose own end_date has already passed (defensive)
             const endSec = typeof phase.end_date === "number" ? phase.end_date : null;
             if (endSec !== null && endSec <= nowSec) continue;
 
-            // A phase can have multiple items — find the first one with a known tier mapping.
-            // If items lack a tier mapping, skip rather than guess.
+            // Resolve the phase tier from its first item with a known mapping
             let phaseTier: "free" | "plus" | "pro" | null = null;
             for (const item of phase.items ?? []) {
               const priceRef = (item as any).price;
@@ -204,15 +208,18 @@ serve(async (req) => {
             }
             if (!phaseTier) continue;
 
-            // Skip phases that don't actually change the tier (no-op continuation phases)
-            if (phaseTier === tier) continue;
+            // Skip no-op continuation phases (same tier as the previous phase / current tier)
+            if (phaseTier === prevTierForThisSchedule) continue;
 
             candidates.push({ startSec, tier: phaseTier, scheduleId: sch.id });
+            prevTierForThisSchedule = phaseTier;
           }
         }
 
-        // Soonest upcoming change wins
+        // Sort chronologically and surface the soonest as the "next" change,
+        // while reporting the total number of distinct queued changes.
         candidates.sort((a, b) => a.startSec - b.startSec);
+        scheduledChangesCount = candidates.length;
         const next = candidates[0];
         if (next) {
           scheduledTier = next.tier;
@@ -232,6 +239,7 @@ serve(async (req) => {
       subscription_status: subscriptionStatus,
       scheduled_tier: scheduledTier,
       scheduled_start: scheduledStart,
+      scheduled_changes_count: scheduledChangesCount,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
