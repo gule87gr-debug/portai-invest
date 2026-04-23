@@ -105,6 +105,36 @@ serve(async (req) => {
     const idempotencyDay = new Date().toISOString().split("T")[0];
     const baseIdemKey = `chk_${user.id}_${tier}_${idempotencyDay}`;
 
+    // Helper: record consent BEFORE any Stripe write. If recording fails, we still proceed
+    // (a logging failure must not block the user from being charged for a service they want),
+    // but we log loudly so legal/support can investigate.
+    const recordConsent = async (consent_type: string, extra?: Record<string, unknown>) => {
+      try {
+        await supabaseAdmin.from("payment_consents").insert({
+          user_id: user.id,
+          user_email: user.email!,
+          consent_type,
+          tier,
+          price_id: targetPriceId,
+          consent_text: consentText,
+          ip_address: ipAddress,
+          user_agent: userAgent,
+          metadata: { eu_waiver: euWaiver, accepted_terms: acceptedTerms, ...extra },
+        });
+      } catch (e) {
+        console.error("[create-checkout] failed to record consent", consent_type, e);
+      }
+    };
+
+    // Stripe metadata: attach the consent state to the underlying object so it's queryable
+    // from the Stripe dashboard and persisted on every invoice.
+    const consentMetadata: Record<string, string> = {
+      user_id: user.id,
+      accepted_terms: String(acceptedTerms),
+      eu_withdrawal_waiver: String(euWaiver),
+      consent_recorded_at: new Date().toISOString(),
+    };
+
     // Check for an existing subscription — if found, modify it instead of creating new checkout.
     if (customerId) {
       // Include trialing/past_due so we don't accidentally double-charge a customer who has
