@@ -9,13 +9,14 @@ const corsHeaders = {
 
 const PRICE_BY_TIER: Record<"plus" | "pro", string> = {
   plus: "price_1TPM56PJefLcxc6CzfD5CUaS", // €8.99/mo
-  pro: "price_1TPM5RPJefLcxc6Cap03GhJm",  // €18.99/mo
+  pro: "price_1TPQ1oPJefLcxc6CTI4Hf42E",  // €15.99/mo
 };
 
 const PRICE_TO_TIER: Record<string, "plus" | "pro"> = {
   "price_1TPM56PJefLcxc6CzfD5CUaS": "plus",
   "price_1TFyVKPJefLcxc6Cn1iwdSTk": "pro",
   "price_1TPM5RPJefLcxc6Cap03GhJm": "pro",
+  "price_1TPQ1oPJefLcxc6CTI4Hf42E": "pro",
 };
 
 const TIER_RANK = { plus: 1, pro: 2 } as const;
