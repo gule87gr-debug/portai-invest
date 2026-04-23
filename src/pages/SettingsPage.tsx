@@ -496,7 +496,52 @@ const SettingsPage = () => {
                     </div>
                   </div>
 
-                  {blocked && (
+                  {blocked && hasPendingChange && (() => {
+                    const fromLabel = tier === "pro" ? "Pro" : tier === "plus" ? "Plus" : "Free";
+                    const fromPrice = tier === "pro" ? "€15.99/mo" : tier === "plus" ? "€8.99/mo" : "€0";
+                    const toLabel = scheduledTier === "pro" ? "Pro" : scheduledTier === "plus" ? "Plus" : "Free";
+                    const toPrice = scheduledTier === "pro" ? "€15.99/mo" : scheduledTier === "plus" ? "€8.99/mo" : "€0";
+                    const effectiveDate = scheduledStart
+                      ? new Date(scheduledStart).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+                      : null;
+                    const isScheduledDowngrade =
+                      (tier === "pro" && (scheduledTier === "plus" || scheduledTier === "free")) ||
+                      (tier === "plus" && scheduledTier === "free");
+                    return (
+                      <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 space-y-3">
+                        <div>
+                          <p className="font-semibold text-foreground mb-1">
+                            {isScheduledDowngrade ? "Downgrade already scheduled" : "Plan change already scheduled"}
+                          </p>
+                          <p className="text-muted-foreground text-xs">
+                            You can't queue another change until this one is applied or cancelled via Manage Billing.
+                          </p>
+                        </div>
+                        <div className="rounded-md border border-border/60 bg-background/60 p-3">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex-1 text-center">
+                              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">From</p>
+                              <p className="text-sm font-semibold text-foreground">{fromLabel}</p>
+                              <p className="text-[11px] text-muted-foreground">{fromPrice}</p>
+                            </div>
+                            <span aria-hidden className="text-muted-foreground text-lg leading-none">→</span>
+                            <div className="flex-1 text-center">
+                              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">To</p>
+                              <p className="text-sm font-semibold text-primary">{toLabel}</p>
+                              <p className="text-[11px] text-muted-foreground">{toPrice}</p>
+                            </div>
+                          </div>
+                          {effectiveDate && (
+                            <div className="mt-3 pt-3 border-t border-border/60 flex items-center justify-between text-xs">
+                              <span className="text-muted-foreground">Effective</span>
+                              <span className="font-medium text-foreground">{effectiveDate}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                  {blocked && !hasPendingChange && (
                     <div className="rounded-lg border border-loss/40 bg-loss/10 p-3">
                       <p className="font-semibold text-foreground mb-1">Action required</p>
                       <p className="text-muted-foreground text-xs">{blockReason}</p>
