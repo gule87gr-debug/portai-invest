@@ -81,17 +81,21 @@ serve(async (req) => {
     }
 
     const customerId = customers.data[0].id;
+    // Include trialing/past_due so we surface accurate status in the UI
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
-      status: "active",
-      limit: 5,
+      status: "all",
+      limit: 10,
     });
+    const liveStatuses = new Set(["active", "trialing", "past_due"]);
+    const liveSubs = subscriptions.data.filter((s) => liveStatuses.has(s.status));
 
-    const hasActiveSub = subscriptions.data.length > 0;
+    const hasActiveSub = liveSubs.length > 0;
     let tier: "free" | "plus" | "pro" = "free";
     let subscriptionEnd: string | null = null;
     let cancelAtPeriodEnd = false;
     let subscriptionId: string | null = null;
+    let subscriptionStatus: string | null = null;
 
     if (hasActiveSub) {
       // Pick the highest tier among active subscriptions (pro > plus)
