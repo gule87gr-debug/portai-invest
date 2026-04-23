@@ -41,8 +41,30 @@ const SettingsPage = () => {
   const [reactivateLoading, setReactivateLoading] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showReactivateModal, setShowReactivateModal] = useState(false);
+  const [planChangeLoading, setPlanChangeLoading] = useState<"plus" | "pro" | null>(null);
 
   const formattedEnd = subscriptionEnd ? new Date(subscriptionEnd).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : null;
+
+  const handleChangePlan = async (target: "plus" | "pro") => {
+    setPlanChangeLoading(target);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout", { body: { tier: target } });
+      if (error) throw error;
+      if (data?.action === "upgraded") {
+        toast.success("Plan upgraded! You've only been charged the prorated difference.");
+        await refresh();
+      } else if (data?.action === "downgrade_scheduled") {
+        toast.success(`Downgrade scheduled. You'll switch to ${target === "plus" ? "Plus" : "Pro"} at the end of your current billing period.`);
+        await refresh();
+      } else if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Failed to change plan");
+    } finally {
+      setPlanChangeLoading(null);
+    }
+  };
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
