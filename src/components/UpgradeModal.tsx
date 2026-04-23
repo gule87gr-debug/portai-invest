@@ -8,14 +8,17 @@ interface UpgradeModalProps {
   description?: string;
 }
 
-const features = [
+const plusFeatures = [
   { icon: BarChart3, text: "Full investor quiz results" },
   { icon: MessageCircle, text: "Unlimited AI chat & image analysis" },
   { icon: TrendingUp, text: "Unlimited watchlists & stocks" },
-  { icon: Zap, text: "Pro adds unlimited article analyses & price alerts" },
 ];
 
-export const UpgradeModal = ({ open, onClose, title = "Upgrade your plan", description = "Unlock more of PortAI with Plus or Pro." }: UpgradeModalProps) => {
+const proExtras = [
+  { icon: Zap, text: "Unlimited article analyses & AI price alerts" },
+];
+
+export const UpgradeModal = ({ open, onClose, title = "Upgrade your plan", description = "Choose Plus for the essentials, or Pro for the full experience." }: UpgradeModalProps) => {
   const navigate = useNavigate();
 
   if (!open) return null;

@@ -11,9 +11,10 @@ const corsHeaders = {
 const PRICE_TO_TIER: Record<string, "plus" | "pro"> = {
   // Plus
   "price_1TPM56PJefLcxc6CzfD5CUaS": "plus",
-  // Pro (legacy USD price + new EUR price)
+  // Pro (legacy USD + previous EUR + current EUR price)
   "price_1TFyVKPJefLcxc6Cn1iwdSTk": "pro",
   "price_1TPM5RPJefLcxc6Cap03GhJm": "pro",
+  "price_1TPQ1oPJefLcxc6CTI4Hf42E": "pro",
 };
 
 const PRODUCT_TO_TIER: Record<string, "plus" | "pro"> = {
