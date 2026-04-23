@@ -44,6 +44,8 @@ const SettingsPage = () => {
   const [planChangeLoading, setPlanChangeLoading] = useState<"plus" | "pro" | null>(null);
   const [pendingPlanChange, setPendingPlanChange] = useState<"plus" | "pro" | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  // LEGAL: explicit informed consent that current period is non-refundable.
+  const [cancelAck, setCancelAck] = useState(false);
 
   const formattedEnd = subscriptionEnd ? new Date(subscriptionEnd).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : null;
 
