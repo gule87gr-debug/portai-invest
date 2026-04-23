@@ -15,7 +15,7 @@ const SettingsPage = () => {
   const { profile, setProfile, setShowTutorial } = useApp();
   const navigate = useNavigate();
   usePageTitle("Settings | PortAI");
-  const { tier, isPaid, isPlus, isPro, subscriptionEnd, cancelAtPeriodEnd, subscriptionId, loading: subLoading, refresh } = useSubscription();
+  const { tier, isPaid, isPlus, isPro, subscriptionEnd, cancelAtPeriodEnd, subscriptionId, scheduledTier, scheduledStart, loading: subLoading, refresh } = useSubscription();
 
   let language: Language, setLanguage: (l: Language) => void, t: (key: string) => string, langNames: Record<Language, string>;
   try {
@@ -279,17 +279,39 @@ const SettingsPage = () => {
                 </div>
               )}
 
-              {!cancelAtPeriodEnd && formattedEnd && (
+              {!cancelAtPeriodEnd && formattedEnd && !scheduledTier && (
                 <p className="text-sm text-muted-foreground">
-                  Next billing: {formattedEnd}
+                  Next billing: <span className="font-medium text-foreground">{formattedEnd}</span> · {isPro ? "€15.99" : "€8.99"}/mo
                 </p>
               )}
+
+              {/* Scheduled plan change banner */}
+              {!cancelAtPeriodEnd && scheduledTier && scheduledStart && (() => {
+                const scheduledDate = new Date(scheduledStart).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+                const scheduledLabel = scheduledTier === "pro" ? "Pro" : scheduledTier === "plus" ? "Plus" : "Free";
+                const scheduledPrice = scheduledTier === "pro" ? "€15.99" : scheduledTier === "plus" ? "€8.99" : "€0";
+                return (
+                  <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-1">
+                    <div className="flex items-start gap-3">
+                      <Crown className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                      <div className="space-y-1">
+                        <p className="text-sm font-semibold text-foreground">
+                          You're on {isPro ? "Pro" : "Plus"} until {scheduledDate}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Then you'll switch to <span className="font-medium text-foreground">{scheduledLabel}</span> ({scheduledPrice}/mo) — first {scheduledLabel} charge on {scheduledDate}.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Plan switcher */}
               {!cancelAtPeriodEnd && (
                 <div className="rounded-lg border border-border bg-background/50 p-4">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Change plan</p>
-                  {isPlus && (
+                  {isPlus && scheduledTier !== "pro" && (
                     <button
                       onClick={() => setPendingPlanChange("pro")}
                       disabled={planChangeLoading !== null}
@@ -302,7 +324,7 @@ const SettingsPage = () => {
                       <span className="text-xs opacity-80">€15.99/mo · prorated today</span>
                     </button>
                   )}
-                  {isPro && (
+                  {isPro && scheduledTier !== "plus" && (
                     <button
                       onClick={() => setPendingPlanChange("plus")}
                       disabled={planChangeLoading !== null}
@@ -314,6 +336,9 @@ const SettingsPage = () => {
                       </span>
                       <span className="text-xs text-muted-foreground">€8.99/mo · starts {formattedEnd ?? "next cycle"}</span>
                     </button>
+                  )}
+                  {scheduledTier && (
+                    <p className="text-xs text-muted-foreground text-center">A plan change is already scheduled. Manage it via Manage Billing below.</p>
                   )}
                 </div>
               )}
