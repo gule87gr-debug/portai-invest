@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, Loader2, Download, FileText, AlertCircle, Scale, Lock } from "lucide-react";
+import { ShieldCheck, Loader2, Download, FileText, AlertCircle, Scale, Lock, Undo2, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -83,6 +83,23 @@ const BillingConsents = () => {
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState<ConsentRow[]>([]);
   const [authed, setAuthed] = useState<boolean | null>(null);
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
+  const [withdrawReason, setWithdrawReason] = useState("");
+  const [withdrawSubmitting, setWithdrawSubmitting] = useState(false);
+
+  // Compute statutory withdrawal eligibility from the user's own records.
+  // Eligible if: a `checkout_terms` exists in the last 14 days, AND no
+  // `eu_withdrawal_waiver` was given for that purchase, AND no withdrawal
+  // has already been exercised in the same window.
+  const fourteenDaysAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
+  const recentRows = rows.filter((r) => new Date(r.created_at).getTime() >= fourteenDaysAgo);
+  const recentCheckout = recentRows.find((r) => r.consent_type === "checkout_terms");
+  const recentWaiver = recentRows.find((r) => r.consent_type === "eu_withdrawal_waiver");
+  const alreadyExercised = recentRows.some((r) => r.consent_type === "eu_withdrawal_exercised");
+  const withdrawalEligible = !!recentCheckout && !recentWaiver && !alreadyExercised;
+  const windowEnds = recentCheckout
+    ? new Date(new Date(recentCheckout.created_at).getTime() + 14 * 24 * 60 * 60 * 1000)
+    : null;
 
   useEffect(() => {
     let cancelled = false;
@@ -123,6 +140,35 @@ const BillingConsents = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const handleSubmitWithdrawal = async () => {
+    if (!recentCheckout) return;
+    setWithdrawSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("request-withdrawal", {
+        body: {
+          reason: withdrawReason || undefined,
+          tier: recentCheckout.tier ?? undefined,
+          price_id: recentCheckout.price_id ?? undefined,
+        },
+      });
+      if (error) throw error;
+      toast.success(data?.message ?? "Withdrawal request recorded.");
+      setWithdrawOpen(false);
+      setWithdrawReason("");
+      // Refresh the log so the new immutable record appears.
+      const { data: refreshed } = await supabase
+        .from("payment_consents")
+        .select("id, created_at, consent_type, consent_text, consent_version, tier, price_id, ip_address, user_agent, metadata")
+        .order("created_at", { ascending: false });
+      setRows((refreshed ?? []) as ConsentRow[]);
+    } catch (e: any) {
+      const msg = e?.context?.error || e?.message || "Could not submit withdrawal request.";
+      toast.error(msg);
+    } finally {
+      setWithdrawSubmitting(false);
+    }
   };
 
   return (
