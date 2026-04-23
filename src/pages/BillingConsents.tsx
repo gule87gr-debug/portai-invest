@@ -145,17 +145,14 @@ const BillingConsents = () => {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-6 w-6 text-primary" />
-              <h1 className="text-2xl font-bold tracking-tight font-display">My Billing Consents</h1>
+              <h1 className="text-2xl font-bold tracking-tight font-display">{copy.page.title}</h1>
             </div>
-            <p className="text-sm text-muted-foreground">
-              A tamper-resistant record of every payment, waiver, and cancellation acknowledgement you've given.
-              These records are immutable — kept as legal proof of your informed consent (Directive 2011/83/EU).
-            </p>
+            <p className="text-sm text-muted-foreground">{copy.page.subtitle}</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => navigate("/settings")}>Back to Settings</Button>
+            <Button variant="outline" size="sm" onClick={() => navigate("/settings")}>{copy.page.backToSettings}</Button>
             <Button variant="default" size="sm" onClick={handleExport} disabled={rows.length === 0}>
-              <Download className="mr-2 h-4 w-4" /> Export
+              <Download className="mr-2 h-4 w-4" /> {copy.page.export}
             </Button>
           </div>
         </div>
@@ -168,7 +165,7 @@ const BillingConsents = () => {
           <Card>
             <CardContent className="flex flex-col items-center gap-3 p-8 text-center">
               <AlertCircle className="h-8 w-8 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">Please sign in to view your billing consents.</p>
+              <p className="text-sm text-muted-foreground">{copy.page.signInRequired}</p>
             </CardContent>
           </Card>
         ) : (
@@ -177,22 +174,22 @@ const BillingConsents = () => {
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
                   <Scale className="h-4 w-4 text-primary" />
-                  <CardTitle className="text-sm">What this log proves under EU law</CardTitle>
+                  <CardTitle className="text-sm">{copy.explainer.title}</CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="space-y-2 pt-0 text-xs text-muted-foreground">
-                <p>
-                  This page is your personal audit trail of every <span className="font-medium text-foreground">informed consent</span> you've given for paid services on PortAI. It exists to satisfy our obligations and protect your rights under:
-                </p>
+                <p>{copy.explainer.intro}</p>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li><span className="font-medium text-foreground">Directive 2011/83/EU</span> (Consumer Rights) — pre-contractual information, the 14-day right of withdrawal (Art. 9), the explicit waiver for digital services (Art. 16(m)), and pro-rata refund rules (Art. 14(3)).</li>
-                  <li><span className="font-medium text-foreground">GDPR (Regulation 2016/679)</span> — Art. 7(1) requires us to demonstrate that you consented; Art. 15 gives you the right to access these records.</li>
-                  <li><span className="font-medium text-foreground">Spanish Law 3/2014</span> (TRLGDCU) and <span className="font-medium text-foreground">LSSI-CE Law 34/2002</span> — local transposition of the above for distance contracts concluded in Spain.</li>
+                  {copy.explainer.bullets.map((b, i) => (
+                    <li key={i}>
+                      <span className="font-medium text-foreground">{b.strong}</span>{b.rest}
+                    </li>
+                  ))}
                 </ul>
                 <div className="flex items-start gap-2 rounded-md border border-border/60 bg-background/60 p-2.5 mt-2">
                   <Lock className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
                   <p>
-                    <span className="font-medium text-foreground">Immutable by design.</span> Each record below is written once and can never be edited or back-dated — neither by you nor by us. The exact wording you saw, the timestamp, IP address, browser, plan, and price are preserved verbatim. You can export the full log at any time as JSON proof.
+                    <span className="font-medium text-foreground">{copy.explainer.immutableStrong}</span>{copy.explainer.immutableRest}
                   </p>
                 </div>
               </CardContent>
@@ -204,16 +201,19 @@ const BillingConsents = () => {
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-2">
                     <Undo2 className="h-4 w-4 text-warning" />
-                    <CardTitle className="text-sm">Exercise your 14-day right of withdrawal</CardTitle>
+                    <CardTitle className="text-sm">{copy.withdrawal.eligibleTitle}</CardTitle>
                   </div>
                   <CardDescription className="text-xs">
-                    You purchased on {formatDate(recentCheckout!.created_at)} and did not waive your withdrawal right.
-                    You may cancel this purchase and receive a refund (reduced pro-rata for any service already used) until <span className="font-medium text-foreground">{formatDate(windowEnds.toISOString())}</span>.
+                    {copy.withdrawal.eligibleBodyPrefix}
+                    <span className="font-medium text-foreground">{formatDate(recentCheckout!.created_at, intlLocale)}</span>
+                    {copy.withdrawal.eligibleBodyMiddle}
+                    <span className="font-medium text-foreground">{formatDate(windowEnds.toISOString(), intlLocale)}</span>
+                    {copy.withdrawal.eligibleBodySuffix}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-0">
                   <Button size="sm" variant="outline" onClick={() => setWithdrawOpen(true)}>
-                    Submit withdrawal request
+                    {copy.withdrawal.submitCta}
                   </Button>
                 </CardContent>
               </Card>
