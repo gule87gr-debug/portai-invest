@@ -81,24 +81,28 @@ serve(async (req) => {
     }
 
     const customerId = customers.data[0].id;
+    // Include trialing/past_due so we surface accurate status in the UI
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
-      status: "active",
-      limit: 5,
+      status: "all",
+      limit: 10,
     });
+    const liveStatuses = new Set(["active", "trialing", "past_due"]);
+    const liveSubs = subscriptions.data.filter((s) => liveStatuses.has(s.status));
 
-    const hasActiveSub = subscriptions.data.length > 0;
+    const hasActiveSub = liveSubs.length > 0;
     let tier: "free" | "plus" | "pro" = "free";
     let subscriptionEnd: string | null = null;
     let cancelAtPeriodEnd = false;
     let subscriptionId: string | null = null;
+    let subscriptionStatus: string | null = null;
 
     if (hasActiveSub) {
       // Pick the highest tier among active subscriptions (pro > plus)
       const rank = { free: 0, plus: 1, pro: 2 } as const;
-      let best = subscriptions.data[0];
+      let best = liveSubs[0];
       let bestTier: "free" | "plus" | "pro" = "free";
-      for (const sub of subscriptions.data) {
+      for (const sub of liveSubs) {
         const item = sub.items.data[0];
         const priceId = item?.price?.id ?? "";
         const productId = typeof item?.price?.product === "string" ? item.price.product : "";
@@ -121,6 +125,11 @@ serve(async (req) => {
       }
       cancelAtPeriodEnd = best.cancel_at_period_end;
       subscriptionId = best.id;
+      subscriptionStatus = best.status;
+    } else {
+      // Fall back to most recent canceled/incomplete sub for status info
+      const fallback = subscriptions.data[0];
+      if (fallback) subscriptionStatus = fallback.status;
     }
 
     // Detect a scheduled plan change (e.g. downgrade to Plus at period end)
@@ -153,6 +162,7 @@ serve(async (req) => {
       subscription_end: subscriptionEnd,
       cancel_at_period_end: cancelAtPeriodEnd,
       subscription_id: subscriptionId,
+      subscription_status: subscriptionStatus,
       scheduled_tier: scheduledTier,
       scheduled_start: scheduledStart,
     }), {
