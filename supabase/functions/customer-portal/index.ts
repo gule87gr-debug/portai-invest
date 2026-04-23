@@ -26,7 +26,7 @@ serve(async (req) => {
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "Authentication required" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 401,
+        status: 200,
       });
     }
 
@@ -35,7 +35,7 @@ serve(async (req) => {
     if (userError || !userData.user?.email) {
       return new Response(JSON.stringify({ error: "Authentication required" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 401,
+        status: 200,
       });
     }
     const user = userData.user;
@@ -45,7 +45,7 @@ serve(async (req) => {
     if (customers.data.length === 0) {
       return new Response(JSON.stringify({ error: "No active subscription found." }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 404,
+        status: 200,
       });
     }
 
