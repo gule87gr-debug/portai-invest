@@ -167,7 +167,7 @@ const Watchlists = () => {
               <h2 className="text-lg font-bold">{t("addStock")}</h2>
               <button onClick={() => { setShowAddStock(false); setStockSearch(""); setAssetFilter("all"); setRegionFilter("all"); setShowRegionPicker(false); }} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
             </div>
-            {!isPro && (
+            {!hasUnlimitedWatchlists && (
               <p className="text-xs text-muted-foreground mb-2">{active?.stocks.length ?? 0}/{FREE_MAX_STOCKS} stocks used</p>
             )}
             <div className="flex flex-wrap gap-1.5 mb-2">
