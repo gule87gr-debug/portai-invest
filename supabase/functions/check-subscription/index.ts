@@ -132,24 +132,54 @@ serve(async (req) => {
       if (fallback) subscriptionStatus = fallback.status;
     }
 
-    // Detect a scheduled plan change (e.g. downgrade to Plus at period end)
+    // Detect the next scheduled plan change across all schedules.
+    // A customer may have multiple subscription schedules and each may have multiple
+    // future phases (e.g. upgrade now + downgrade later). We pick the soonest future
+    // phase whose price maps to a known tier AND differs from the current tier.
     let scheduledTier: "free" | "plus" | "pro" | null = null;
     let scheduledStart: string | null = null;
     if (subscriptionId) {
       try {
-        const schedules = await stripe.subscriptionSchedules.list({ customer: customerId, limit: 5 });
+        const schedules = await stripe.subscriptionSchedules.list({ customer: customerId, limit: 20 });
+        const nowSec = Math.floor(Date.now() / 1000);
+
+        type Candidate = { startSec: number; tier: "free" | "plus" | "pro"; scheduleId: string };
+        const candidates: Candidate[] = [];
+
         for (const sch of schedules.data) {
+          // Only consider schedules attached to the current subscription and not done
           if (sch.subscription !== subscriptionId) continue;
           if (sch.status !== "active" && sch.status !== "not_started") continue;
-          // Find the next phase that starts in the future
-          const nowSec = Math.floor(Date.now() / 1000);
-          const futurePhase = sch.phases.find((p) => typeof p.start_date === "number" && p.start_date > nowSec);
-          if (!futurePhase) continue;
-          const priceId = (futurePhase.items?.[0] as any)?.price as string | undefined;
-          if (!priceId) continue;
-          scheduledTier = PRICE_TO_TIER[priceId] ?? null;
-          scheduledStart = new Date(futurePhase.start_date * 1000).toISOString();
-          break;
+
+          for (const phase of sch.phases ?? []) {
+            const startSec = typeof phase.start_date === "number" ? phase.start_date : null;
+            if (startSec === null || startSec <= nowSec) continue;
+
+            // A phase can have multiple items — find the first one with a known tier mapping.
+            // If items lack a tier mapping, skip rather than guess.
+            let phaseTier: "free" | "plus" | "pro" | null = null;
+            for (const item of phase.items ?? []) {
+              const priceRef = (item as any).price;
+              const priceId = typeof priceRef === "string" ? priceRef : (priceRef?.id ?? "");
+              if (!priceId) continue;
+              const t = PRICE_TO_TIER[priceId];
+              if (t) { phaseTier = t; break; }
+            }
+            if (!phaseTier) continue;
+
+            // Skip phases that don't actually change the tier (no-op continuation phases)
+            if (phaseTier === tier) continue;
+
+            candidates.push({ startSec, tier: phaseTier, scheduleId: sch.id });
+          }
+        }
+
+        // Soonest upcoming change wins
+        candidates.sort((a, b) => a.startSec - b.startSec);
+        const next = candidates[0];
+        if (next) {
+          scheduledTier = next.tier;
+          scheduledStart = new Date(next.startSec * 1000).toISOString();
         }
       } catch (e) {
         console.error("Failed to load subscription schedules:", (e as Error).message);
