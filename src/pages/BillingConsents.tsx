@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { ShieldCheck, Loader2, Download, FileText, AlertCircle, Scale, Lock, Undo2, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getLegalCopy, type LegalConsentMeta } from "@/lib/legalI18n";
 
 type ConsentRow = {
   id: string;
@@ -22,54 +24,8 @@ type ConsentRow = {
   metadata: Record<string, unknown> | null;
 };
 
-type ConsentMeta = {
-  label: string;
-  tone: "default" | "secondary" | "destructive" | "outline";
-  proves: string;
-  legalBasis: string;
-};
-
-const CONSENT_LABELS: Record<string, ConsentMeta> = {
-  checkout_terms: {
-    label: "Checkout — Terms accepted",
-    tone: "default",
-    proves: "You read and accepted the Terms of Service, Privacy Policy and the recurring price before paying.",
-    legalBasis: "Directive 2011/83/EU Art. 6 & 8 (pre-contractual information for distance contracts).",
-  },
-  eu_withdrawal_waiver: {
-    label: "EU 14-day withdrawal — Waived",
-    tone: "destructive",
-    proves: "You expressly requested immediate access to the digital service AND acknowledged that this waives your 14-day right of withdrawal once performance has fully begun. No refund is owed after that point.",
-    legalBasis: "Directive 2011/83/EU Art. 16(m) — requires explicit prior consent + acknowledgement of loss of withdrawal right.",
-  },
-  no_waiver_acknowledged: {
-    label: "EU 14-day withdrawal — Kept",
-    tone: "secondary",
-    proves: "You did NOT waive your 14-day withdrawal right. You may request a refund within 14 calendar days, reduced in proportion to the service already used.",
-    legalBasis: "Directive 2011/83/EU Art. 9 (right of withdrawal) & Art. 14(3) (pro-rata deduction).",
-  },
-  cancel_no_refund_acknowledged: {
-    label: "Cancellation — No-refund acknowledged",
-    tone: "outline",
-    proves: "You cancelled auto-renewal and acknowledged that the current pre-paid billing period is not refunded. Access continues until the period ends.",
-    legalBasis: "Contractual — cancellation of a recurring subscription does not retroactively refund a paid period (outside the 14-day withdrawal window).",
-  },
-  reactivate: {
-    label: "Subscription reactivated",
-    tone: "default",
-    proves: "You reactivated auto-renewal on an existing subscription. Original consent and pricing terms continue to apply.",
-    legalBasis: "Continuation of an existing distance contract (no new pre-contractual information required).",
-  },
-  eu_withdrawal_exercised: {
-    label: "EU 14-day withdrawal — Exercised",
-    tone: "destructive",
-    proves: "You formally exercised your statutory 14-day right of withdrawal using the in-app model form. Our legal team must process a pro-rata refund within 14 days of receipt.",
-    legalBasis: "Directive 2011/83/EU Art. 9, Art. 11 (means of withdrawal), Art. 13(1) (refund deadline) & Art. 14(3) (pro-rata deduction); Spanish RDL 1/2007 Art. 102 & 108.",
-  },
-};
-
-const formatDate = (iso: string) =>
-  new Date(iso).toLocaleString(undefined, {
+const formatDate = (iso: string, locale: string) =>
+  new Date(iso).toLocaleString(locale, {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -78,7 +34,18 @@ const formatDate = (iso: string) =>
   });
 
 const BillingConsents = () => {
-  usePageTitle("My Billing Consents | PortAI");
+  const { language } = useLanguage();
+  const copy = getLegalCopy(language);
+  // Map our language codes to BCP-47 tags accepted by Intl.
+  const intlLocale =
+    language === "es" ? "es-ES" :
+    language === "fr" ? "fr-FR" :
+    language === "pt" ? "pt-PT" :
+    language === "de" ? "de-DE" :
+    language === "it" ? "it-IT" : "en-GB";
+
+  usePageTitle(`${copy.page.title} | PortAI`);
+
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState<ConsentRow[]>([]);
