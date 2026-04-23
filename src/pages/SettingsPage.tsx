@@ -448,14 +448,20 @@ const SettingsPage = () => {
             : "muted";
 
           // Block conditions
-          const hasPendingChange = !!scheduledTier && scheduledTier !== tier;
+          const hasResolvedPendingChange = !!scheduledTier && scheduledTier !== tier;
+          // Edge function reported queued changes but couldn't map the next phase to a known tier
+          const hasUnresolvedPendingChange =
+            !hasResolvedPendingChange && (scheduledChangesCount ?? 0) > 0;
+          const hasPendingChange = hasResolvedPendingChange || hasUnresolvedPendingChange;
           const hasPendingCancel = cancelAtPeriodEnd;
           const isUnpaidStatus = status === "past_due" || status === "unpaid" || status === "incomplete";
           const isCanceledStatus = status === "canceled" || status === "incomplete_expired";
           // Free→paid is always allowed; otherwise block when there's a pending change/cancel or status problem
           const blocked = !isFromFree && (hasPendingChange || hasPendingCancel || isUnpaidStatus || isCanceledStatus);
-          const blockReason = hasPendingChange
+          const blockReason = hasResolvedPendingChange
             ? `A switch to ${scheduledTier === "pro" ? "Pro" : "Plus"} is already scheduled${scheduledStart ? ` for ${new Date(scheduledStart).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}` : ""}. Manage it via Manage Billing first.`
+            : hasUnresolvedPendingChange
+            ? `A plan change is queued on your subscription, but we couldn't read its details. Open Manage Billing for full information.`
             : hasPendingCancel
             ? `Your subscription is set to cancel at period end. Re-subscribe before changing plans.`
             : isUnpaidStatus
