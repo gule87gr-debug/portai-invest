@@ -37,6 +37,13 @@ serve(async (req) => {
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
 
+    // Opt-in debug mode: include detailed schedule/phase decision trace.
+    // Enabled via ?debug=1 query param OR x-debug: 1 header.
+    const url = new URL(req.url);
+    const debugMode =
+      url.searchParams.get("debug") === "1" ||
+      req.headers.get("x-debug") === "1";
+
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "Authentication required" }), {
