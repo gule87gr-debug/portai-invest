@@ -119,9 +119,20 @@ const SettingsPage = () => {
 
   const handleCancelSubscription = async () => {
     if (!subscriptionId) return;
+    if (!cancelAck) {
+      toast.error("Please confirm you understand the current period is not refunded.");
+      return;
+    }
     setCancelLoading(true);
+    const consentText = `I confirm I want to cancel my ${isPro ? "Pro" : "Plus"} subscription. I understand my access continues until ${formattedEnd ?? "the end of the current billing period"} and that the current period is not refunded.`;
     try {
-      const { error } = await supabase.functions.invoke("cancel-subscription", { body: { subscription_id: subscriptionId } });
+      const { error } = await supabase.functions.invoke("cancel-subscription", {
+        body: {
+          subscription_id: subscriptionId,
+          acknowledged_no_refund: true,
+          consent_text: consentText,
+        },
+      });
       if (error) throw error;
       toast.success("Subscription cancelled. You'll retain access until the end of your billing period.");
       await refresh();
@@ -130,6 +141,7 @@ const SettingsPage = () => {
     } finally {
       setCancelLoading(false);
       setShowCancelModal(false);
+      setCancelAck(false);
     }
   };
 
