@@ -355,16 +355,66 @@ const SettingsPage = () => {
               </div>
             </div>
           ) : (
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">You're on the <span className="font-medium text-foreground">Free</span> plan.</p>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <button onClick={() => setPendingPlanChange("plus")} disabled={planChangeLoading !== null} className="flex items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20 disabled:opacity-50">
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                You're on the <span className="font-medium text-foreground">Free</span> plan. Choose Plus for the essentials, or Pro for the full experience.
+              </p>
+
+              <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Crown className="h-4 w-4 text-primary" />
+                      <h3 className="text-base font-semibold">Plus</h3>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">Essentials for serious investors</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-base font-bold text-foreground">€8.99<span className="text-xs font-normal text-muted-foreground">/mo</span></div>
+                  </div>
+                </div>
+                <ul className="space-y-1.5 text-sm">
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Full investor quiz results</span></li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Unlimited AI chat & image analysis</span></li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Unlimited watchlists & stocks</span></li>
+                </ul>
+                <button
+                  onClick={() => setPendingPlanChange("plus")}
+                  disabled={planChangeLoading !== null}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary/20 disabled:opacity-50"
+                >
                   {planChangeLoading === "plus" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  Upgrade to Plus — €8.99/mo
+                  Upgrade to Plus
                 </button>
-                <button onClick={() => setPendingPlanChange("pro")} disabled={planChangeLoading !== null} className="flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
+              </div>
+
+              <div className="relative rounded-xl border border-primary bg-primary/10 p-4 space-y-3">
+                <span className="absolute -top-2 right-4 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary-foreground">Best value</span>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Crown className="h-4 w-4 text-primary" />
+                      <h3 className="text-base font-semibold">Pro</h3>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">Everything in Plus, and more</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-base font-bold text-foreground">€15.99<span className="text-xs font-normal text-muted-foreground">/mo</span></div>
+                  </div>
+                </div>
+                <ul className="space-y-1.5 text-sm">
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Full investor quiz results</span></li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Unlimited AI chat & image analysis</span></li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Unlimited watchlists & stocks</span></li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Unlimited article analyses & AI price alerts</span></li>
+                </ul>
+                <button
+                  onClick={() => setPendingPlanChange("pro")}
+                  disabled={planChangeLoading !== null}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                >
                   {planChangeLoading === "pro" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
-                  Upgrade to Pro — €15.99/mo
+                  Upgrade to Pro
                 </button>
               </div>
             </div>
