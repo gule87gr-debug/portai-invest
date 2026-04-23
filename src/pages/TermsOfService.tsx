@@ -80,14 +80,29 @@ const TermsOfService = () => {
         <li>We do not guarantee the accuracy, completeness, or reliability of any AI output</li>
       </ul>
 
-      <h2>9. Subscription and Payments</h2>
-      <p>Certain premium features require a paid subscription processed through Stripe. By subscribing, you agree to:</p>
+      <h2>9. Subscription, Payments and Right of Withdrawal</h2>
+      <p><strong>Subscription terms.</strong> Certain premium features (Plus and Pro plans) require a paid monthly subscription processed by <strong>Stripe Payments Europe, Ltd.</strong> By subscribing, you agree to:</p>
       <ul className="list-disc pl-5">
-        <li>Pay all fees associated with your chosen plan</li>
-        <li>Automatic renewal unless canceled before the renewal date</li>
-        <li>Provide accurate and complete billing information</li>
+        <li>Pay all fees associated with your chosen plan in advance, in EUR, on a recurring monthly basis</li>
+        <li>Automatic renewal at the end of each billing period until you cancel</li>
+        <li>Provide accurate, complete and up-to-date billing information</li>
+        <li>Authorize PortAI (via Stripe) to charge your selected payment method on each renewal</li>
       </ul>
-      <p>Refund policies will be outlined at the time of purchase. We reserve the right to change pricing with reasonable notice to subscribers.</p>
+
+      <p><strong>Cancelling.</strong> You may cancel at any time from <em>Settings → Subscription</em>. After you cancel, you retain full access to your paid plan until the end of the current billing period; no further charges are made and you are not refunded for the remainder of the period (unless required by mandatory law — see the right of withdrawal below).</p>
+
+      <p><strong>Plan changes.</strong> Upgrading from Plus to Pro charges only the prorated price difference for the remaining days of the current period. Downgrading from Pro to Plus is scheduled to take effect at the end of the current billing period — you are not charged again until the new plan begins.</p>
+
+      <p><strong>Right of withdrawal (EU consumers).</strong> If you are a consumer resident in the European Union, you have the right to withdraw from a subscription contract within <strong>14 calendar days</strong> of the initial purchase, without giving any reason, in accordance with Directive 2011/83/EU and the Spanish General Law for the Defence of Consumers and Users (Real Decreto Legislativo 1/2007). To exercise this right, send an email to <a href="mailto:legal@portai-invest.com">legal@portai-invest.com</a> from the address associated with your account, stating your wish to withdraw.</p>
+
+      <p><em>Important — partial use during the withdrawal period:</em> By starting to use any premium feature (AI chat beyond the free tier, full quiz results, unlimited watchlists, article analyses or any other paid functionality) during the 14-day window, you expressly acknowledge and request that performance of the digital service begins immediately. If you then exercise your right of withdrawal, we may deduct an amount proportional to the service already provided (Art. 14(3) of Directive 2011/83/EU and Art. 108 of RDL 1/2007). For monthly subscriptions, this typically means a refund of the unused portion of the current month.</p>
+
+      <p><strong>Refund policy.</strong> Outside of the statutory withdrawal right described above, subscription fees are <strong>non-refundable</strong>. We will, however, consider refund requests on a case-by-case basis for documented technical issues that prevented use of the service for an extended period.</p>
+
+      <p><strong>Price changes.</strong> We reserve the right to change subscription pricing. Existing subscribers will be notified by email at least 30 days before any price change takes effect, and may cancel before the new price is applied.</p>
+
+      <p><strong>Failed payments.</strong> If a renewal payment fails, your subscription will enter a "past due" state and we may attempt to collect again. If we are unable to collect within a reasonable period, your subscription will be cancelled and you will be returned to the Free plan.</p>
+
 
       <h2>10. Account Termination</h2>
       <p>We may suspend or terminate your account at any time for:</p>
