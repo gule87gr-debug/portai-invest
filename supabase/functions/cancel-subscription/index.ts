@@ -93,16 +93,35 @@ serve(async (req) => {
       });
     }
 
+    // Compose the canonical consent text server-side from Stripe's authoritative
+    // period_end. We deliberately do NOT trust the client text alone — if the
+    // client lies about the date, the audit record would be misleading.
+    const periodEndIso = (() => {
+      const v = (liveSub as any).current_period_end;
+      return typeof v === "number" ? new Date(v * 1000).toISOString() : null;
+    })();
+    const periodEndHuman = periodEndIso
+      ? new Date(periodEndIso).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" })
+      : "the end of the current billing period";
+    const canonicalText =
+      `I confirm I want to cancel my PortAI subscription. ` +
+      `I understand my access continues until ${periodEndHuman} and that the current billing period is NOT refunded. ` +
+      `Statutory 14-day right of withdrawal (Directive 2011/83/EU Art. 9) is unaffected and may be exercised separately if still within window.`;
+
     // Record the user's informed acknowledgement BEFORE we cancel.
     try {
       await supabaseClient.from("payment_consents").insert({
         user_id: user.id,
         user_email: user.email,
         consent_type: "cancel_no_refund_acknowledged",
-        consent_text: consentText || "User confirmed they understand the current billing period is not refunded.",
+        consent_text: canonicalText,
         ip_address: ipAddress,
         user_agent: userAgent,
-        metadata: { subscription_id: liveSub.id },
+        metadata: {
+          subscription_id: liveSub.id,
+          period_end: periodEndIso,
+          client_consent_text: consentText || null,
+        },
       });
     } catch (e) {
       console.error("[cancel-subscription] failed to record consent", e);

@@ -69,6 +69,38 @@ serve(async (req) => {
       });
     }
 
+    const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+    const userAgent = req.headers.get("user-agent") ?? null;
+    const priceId = liveSub.items.data[0]?.price?.id ?? null;
+    const periodEnd = (() => {
+      const v = (liveSub as any).current_period_end;
+      return typeof v === "number" ? new Date(v * 1000).toISOString() : null;
+    })();
+
+    // Record consent BEFORE the Stripe write so we keep proof even if the API call fails.
+    // Reactivating restarts auto-renewal — under Directive 2011/83/EU Art. 8(2) this is a
+    // new commercial commitment and must be recorded.
+    try {
+      await supabaseClient.from("payment_consents").insert({
+        user_id: user.id,
+        user_email: user.email,
+        consent_type: "reactivate",
+        price_id: priceId,
+        consent_text:
+          `I reactivate my PortAI subscription. Auto-renewal resumes immediately. ` +
+          `My next billing date remains ${periodEnd ?? "the previously scheduled period end"}, ` +
+          `and the original Terms of Service, Privacy Policy and pricing continue to apply.`,
+        ip_address: ipAddress,
+        user_agent: userAgent,
+        metadata: {
+          subscription_id: liveSub.id,
+          period_end: periodEnd,
+        },
+      });
+    } catch (e) {
+      console.error("[reactivate-subscription] failed to record consent", e);
+    }
+
     const idemKey = `reactivate_${user.id}_${liveSub.id}_${new Date().toISOString().split("T")[0]}`;
     await stripe.subscriptions.update(
       liveSub.id,
