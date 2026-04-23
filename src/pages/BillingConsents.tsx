@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, Loader2, Download, FileText, AlertCircle, Scale, Lock } from "lucide-react";
+import { ShieldCheck, Loader2, Download, FileText, AlertCircle, Scale, Lock, Undo2, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -60,6 +60,12 @@ const CONSENT_LABELS: Record<string, ConsentMeta> = {
     proves: "You reactivated auto-renewal on an existing subscription. Original consent and pricing terms continue to apply.",
     legalBasis: "Continuation of an existing distance contract (no new pre-contractual information required).",
   },
+  eu_withdrawal_exercised: {
+    label: "EU 14-day withdrawal — Exercised",
+    tone: "destructive",
+    proves: "You formally exercised your statutory 14-day right of withdrawal using the in-app model form. Our legal team must process a pro-rata refund within 14 days of receipt.",
+    legalBasis: "Directive 2011/83/EU Art. 9, Art. 11 (means of withdrawal), Art. 13(1) (refund deadline) & Art. 14(3) (pro-rata deduction); Spanish RDL 1/2007 Art. 102 & 108.",
+  },
 };
 
 const formatDate = (iso: string) =>
@@ -77,6 +83,23 @@ const BillingConsents = () => {
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState<ConsentRow[]>([]);
   const [authed, setAuthed] = useState<boolean | null>(null);
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
+  const [withdrawReason, setWithdrawReason] = useState("");
+  const [withdrawSubmitting, setWithdrawSubmitting] = useState(false);
+
+  // Compute statutory withdrawal eligibility from the user's own records.
+  // Eligible if: a `checkout_terms` exists in the last 14 days, AND no
+  // `eu_withdrawal_waiver` was given for that purchase, AND no withdrawal
+  // has already been exercised in the same window.
+  const fourteenDaysAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
+  const recentRows = rows.filter((r) => new Date(r.created_at).getTime() >= fourteenDaysAgo);
+  const recentCheckout = recentRows.find((r) => r.consent_type === "checkout_terms");
+  const recentWaiver = recentRows.find((r) => r.consent_type === "eu_withdrawal_waiver");
+  const alreadyExercised = recentRows.some((r) => r.consent_type === "eu_withdrawal_exercised");
+  const withdrawalEligible = !!recentCheckout && !recentWaiver && !alreadyExercised;
+  const windowEnds = recentCheckout
+    ? new Date(new Date(recentCheckout.created_at).getTime() + 14 * 24 * 60 * 60 * 1000)
+    : null;
 
   useEffect(() => {
     let cancelled = false;
@@ -117,6 +140,35 @@ const BillingConsents = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const handleSubmitWithdrawal = async () => {
+    if (!recentCheckout) return;
+    setWithdrawSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("request-withdrawal", {
+        body: {
+          reason: withdrawReason || undefined,
+          tier: recentCheckout.tier ?? undefined,
+          price_id: recentCheckout.price_id ?? undefined,
+        },
+      });
+      if (error) throw error;
+      toast.success(data?.message ?? "Withdrawal request recorded.");
+      setWithdrawOpen(false);
+      setWithdrawReason("");
+      // Refresh the log so the new immutable record appears.
+      const { data: refreshed } = await supabase
+        .from("payment_consents")
+        .select("id, created_at, consent_type, consent_text, consent_version, tier, price_id, ip_address, user_agent, metadata")
+        .order("created_at", { ascending: false });
+      setRows((refreshed ?? []) as ConsentRow[]);
+    } catch (e: any) {
+      const msg = e?.context?.error || e?.message || "Could not submit withdrawal request.";
+      toast.error(msg);
+    } finally {
+      setWithdrawSubmitting(false);
+    }
   };
 
   return (
@@ -178,6 +230,78 @@ const BillingConsents = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Statutory withdrawal CTA — shown only when actually eligible. */}
+            {withdrawalEligible && windowEnds && (
+              <Card className="border-warning/40 bg-warning/5">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2">
+                    <Undo2 className="h-4 w-4 text-warning" />
+                    <CardTitle className="text-sm">Exercise your 14-day right of withdrawal</CardTitle>
+                  </div>
+                  <CardDescription className="text-xs">
+                    You purchased on {formatDate(recentCheckout!.created_at)} and did not waive your withdrawal right.
+                    You may cancel this purchase and receive a refund (reduced pro-rata for any service already used) until <span className="font-medium text-foreground">{formatDate(windowEnds.toISOString())}</span>.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <Button size="sm" variant="outline" onClick={() => setWithdrawOpen(true)}>
+                    Submit withdrawal request
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+            {alreadyExercised && (
+              <Card className="border-destructive/30 bg-destructive/5">
+                <CardContent className="p-4 text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground">Withdrawal request on file.</span> Your statutory withdrawal request was received. Our legal team will process the pro-rata refund within 14 days of receipt (Directive 2011/83/EU Art. 13(1)). The immutable record is below.
+                </CardContent>
+              </Card>
+            )}
+
+            {withdrawOpen && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 animate-fade-in">
+                <div className="w-full max-w-lg rounded-2xl border border-warning/40 bg-card p-6 shadow-xl">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Undo2 className="h-5 w-5 text-warning" />
+                      <h2 className="text-lg font-bold">Statutory withdrawal — Model form</h2>
+                    </div>
+                    <button onClick={() => setWithdrawOpen(false)} className="text-muted-foreground hover:text-foreground">
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Submitting this form is the official Annex I(B) model withdrawal statement under <span className="font-medium text-foreground">Directive 2011/83/EU Art. 11</span>. We will record it immutably, stop your subscription, and process a pro-rata refund within 14 days (Art. 13(1) & 14(3)).
+                  </p>
+                  <label className="block text-xs font-medium text-foreground mb-1">Optional — reason for withdrawal</label>
+                  <textarea
+                    value={withdrawReason}
+                    onChange={(e) => setWithdrawReason(e.target.value.slice(0, 2000))}
+                    rows={4}
+                    placeholder="You are NOT required to give a reason. Anything you write here is stored verbatim with your withdrawal record."
+                    className="w-full rounded-lg border border-border bg-background p-2 text-sm mb-4"
+                  />
+                  <div className="rounded-lg border border-border bg-muted/40 p-3 text-[11px] text-muted-foreground mb-4 space-y-1">
+                    <p><span className="font-medium text-foreground">What happens next:</span></p>
+                    <ul className="list-disc pl-4 space-y-0.5">
+                      <li>Your withdrawal is timestamped and added to this log (immutable).</li>
+                      <li>Our legal team is notified and will refund the unused portion of the current month within 14 days, using your original payment method.</li>
+                      <li>Your subscription will be cancelled. You retain access only for the days you've already paid for, pro-rata.</li>
+                    </ul>
+                  </div>
+                  <div className="flex gap-3">
+                    <Button variant="outline" className="flex-1" onClick={() => setWithdrawOpen(false)} disabled={withdrawSubmitting}>
+                      Cancel
+                    </Button>
+                    <Button className="flex-1" onClick={handleSubmitWithdrawal} disabled={withdrawSubmitting}>
+                      {withdrawSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Submit withdrawal
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {rows.length === 0 ? (
               <Card>
