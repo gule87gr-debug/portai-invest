@@ -507,6 +507,7 @@ const SettingsPage = () => {
                     const isScheduledDowngrade =
                       (tier === "pro" && (scheduledTier === "plus" || scheduledTier === "free")) ||
                       (tier === "plus" && scheduledTier === "free");
+                    const extraQueued = Math.max(0, (scheduledChangesCount ?? 0) - 1);
                     return (
                       <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 space-y-3">
                         <div>
@@ -514,10 +515,20 @@ const SettingsPage = () => {
                             {isScheduledDowngrade ? "Downgrade already scheduled" : "Plan change already scheduled"}
                           </p>
                           <p className="text-muted-foreground text-xs">
-                            You can't queue another change until this one is applied or cancelled via Manage Billing.
+                            {extraQueued > 0
+                              ? `You have ${extraQueued + 1} plan changes queued. Showing the next one — manage the full sequence via Manage Billing.`
+                              : "You can't queue another change until this one is applied or cancelled via Manage Billing."}
                           </p>
                         </div>
                         <div className="rounded-md border border-border/60 bg-background/60 p-3">
+                          <div className="flex items-center justify-between gap-1 mb-2">
+                            <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Next change</p>
+                            {extraQueued > 0 && (
+                              <span className="rounded-full bg-warning/20 px-2 py-0.5 text-[10px] font-semibold text-warning">
+                                +{extraQueued} more queued
+                              </span>
+                            )}
+                          </div>
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex-1 text-center">
                               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">From</p>
