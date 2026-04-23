@@ -21,7 +21,7 @@ const FREE_MAX_STOCKS = 5;
 const Watchlists = () => {
   const { watchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, deleteWatchlist, watchlistsLoaded } = useApp();
   const { t } = useLanguage();
-  const { isPro } = useSubscription();
+  const { hasUnlimitedWatchlists } = useSubscription();
   usePageTitle("Stock Watchlists | PortAI");
   const [activeIdx, setActiveIdx] = useState(0);
   const [showNewList, setShowNewList] = useState(false);
@@ -51,12 +51,12 @@ const Watchlists = () => {
     (a) => assetFilter === "all" || a.type === assetFilter
   );
 
-  const canCreateWatchlist = isPro || watchlists.length < FREE_MAX_WATCHLISTS;
-  const canAddStock = isPro || (active?.stocks.length ?? 0) < FREE_MAX_STOCKS;
+  const canCreateWatchlist = hasUnlimitedWatchlists || watchlists.length < FREE_MAX_WATCHLISTS;
+  const canAddStock = hasUnlimitedWatchlists || (active?.stocks.length ?? 0) < FREE_MAX_STOCKS;
 
   const handleNewListClick = () => {
     if (!canCreateWatchlist) {
-      setUpgradeMsg("Free users can create 1 watchlist. Upgrade to Pro for unlimited watchlists.");
+      setUpgradeMsg("Free users can create 1 watchlist. Upgrade to Plus or Pro for unlimited watchlists.");
       setShowUpgrade(true);
       return;
     }
@@ -65,7 +65,7 @@ const Watchlists = () => {
 
   const handleAddStockClick = () => {
     if (!canAddStock) {
-      setUpgradeMsg("Free users can add up to 5 stocks per watchlist. Upgrade to Pro for unlimited stocks.");
+      setUpgradeMsg("Free users can add up to 5 stocks per watchlist. Upgrade to Plus or Pro for unlimited stocks.");
       setShowUpgrade(true);
       return;
     }

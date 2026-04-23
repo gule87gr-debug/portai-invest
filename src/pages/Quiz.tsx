@@ -19,7 +19,7 @@ const Quiz = () => {
   const [showResults, setShowResults] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const { watchlists, addWatchlist } = useApp();
-  const { isPro } = useSubscription();
+  const { hasFullQuiz } = useSubscription();
   const navigate = useNavigate();
 
   const steps = [
