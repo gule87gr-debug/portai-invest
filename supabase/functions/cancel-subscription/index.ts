@@ -38,6 +38,27 @@ serve(async (req) => {
     }
     const user = userData.user;
 
+    // LEGAL: cancellation is irreversible-mid-period (no refund unless statutory withdrawal).
+    // We require the user to acknowledge that the current period is non-refundable so the
+    // decision is informed (and we keep proof of that acknowledgement).
+    let body: { acknowledged_no_refund?: unknown; consent_text?: unknown } = {};
+    try {
+      body = await req.json();
+    } catch {
+      // Backward-compatible: legacy callers may not send a body. We still require ack going forward.
+      body = {};
+    }
+    const acknowledgedNoRefund = body?.acknowledged_no_refund === true;
+    if (!acknowledgedNoRefund) {
+      return json(400, {
+        error: "Please confirm you understand the current billing period is not refunded.",
+        code: "ack_required",
+      });
+    }
+    const consentText = typeof body?.consent_text === "string" ? body.consent_text.slice(0, 5000) : "";
+    const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+    const userAgent = req.headers.get("user-agent") ?? null;
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     if (customers.data.length === 0) {
@@ -70,6 +91,21 @@ serve(async (req) => {
         cancel_at_period_end: true,
         period_end: endIso,
       });
+    }
+
+    // Record the user's informed acknowledgement BEFORE we cancel.
+    try {
+      await supabaseClient.from("payment_consents").insert({
+        user_id: user.id,
+        user_email: user.email,
+        consent_type: "cancel_no_refund_acknowledged",
+        consent_text: consentText || "User confirmed they understand the current billing period is not refunded.",
+        ip_address: ipAddress,
+        user_agent: userAgent,
+        metadata: { subscription_id: liveSub.id },
+      });
+    } catch (e) {
+      console.error("[cancel-subscription] failed to record consent", e);
     }
 
     const idemKey = `cancel_${user.id}_${liveSub.id}_${new Date().toISOString().split("T")[0]}`;

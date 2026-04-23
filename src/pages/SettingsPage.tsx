@@ -44,6 +44,8 @@ const SettingsPage = () => {
   const [planChangeLoading, setPlanChangeLoading] = useState<"plus" | "pro" | null>(null);
   const [pendingPlanChange, setPendingPlanChange] = useState<"plus" | "pro" | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  // LEGAL: explicit informed consent that current period is non-refundable.
+  const [cancelAck, setCancelAck] = useState(false);
 
   const formattedEnd = subscriptionEnd ? new Date(subscriptionEnd).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : null;
 
@@ -117,9 +119,20 @@ const SettingsPage = () => {
 
   const handleCancelSubscription = async () => {
     if (!subscriptionId) return;
+    if (!cancelAck) {
+      toast.error("Please confirm you understand the current period is not refunded.");
+      return;
+    }
     setCancelLoading(true);
+    const consentText = `I confirm I want to cancel my ${isPro ? "Pro" : "Plus"} subscription. I understand my access continues until ${formattedEnd ?? "the end of the current billing period"} and that the current period is not refunded.`;
     try {
-      const { error } = await supabase.functions.invoke("cancel-subscription", { body: { subscription_id: subscriptionId } });
+      const { error } = await supabase.functions.invoke("cancel-subscription", {
+        body: {
+          subscription_id: subscriptionId,
+          acknowledged_no_refund: true,
+          consent_text: consentText,
+        },
+      });
       if (error) throw error;
       toast.success("Subscription cancelled. You'll retain access until the end of your billing period.");
       await refresh();
@@ -128,6 +141,7 @@ const SettingsPage = () => {
     } finally {
       setCancelLoading(false);
       setShowCancelModal(false);
+      setCancelAck(false);
     }
   };
 
@@ -471,16 +485,44 @@ const SettingsPage = () => {
                 </div>
                 <h2 className="text-lg font-bold">Cancel Subscription?</h2>
               </div>
-              <p className="text-sm text-muted-foreground mb-6">
-                You'll keep Pro access until the end of your current billing period{formattedEnd ? ` (${formattedEnd})` : ""}. After that, you'll be downgraded to the Free plan.
-              </p>
+              <div className="rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground space-y-2 mb-4">
+                <p>
+                  Your <span className="font-medium text-foreground">{isPro ? "Pro" : "Plus"}</span> access continues until <span className="font-medium text-foreground">{formattedEnd ?? "the end of the current billing period"}</span>.
+                  After that, you'll be moved to the Free plan and no further charges will be made.
+                </p>
+                <p>
+                  <span className="font-medium text-foreground">No refund</span> is issued for the remaining days of the current period (unless required by your statutory right of withdrawal — see Terms §9).
+                </p>
+              </div>
+
+              <label className="flex items-start gap-2 text-xs text-muted-foreground mb-4 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={cancelAck}
+                  onChange={(e) => setCancelAck(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-primary"
+                  aria-required="true"
+                />
+                <span>
+                  I understand the current billing period is <span className="font-medium text-foreground">not refunded</span> and that my access ends on {formattedEnd ?? "the period end date"}.
+                </span>
+              </label>
+
               <div className="flex gap-3">
-                <button onClick={() => setShowCancelModal(false)} className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium hover:bg-accent">
-                  Keep Pro
+                <button
+                  onClick={() => { setShowCancelModal(false); setCancelAck(false); }}
+                  disabled={cancelLoading}
+                  className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium hover:bg-accent disabled:opacity-50"
+                >
+                  Keep {isPro ? "Pro" : "Plus"}
                 </button>
-                <button onClick={handleCancelSubscription} disabled={cancelLoading} className="flex-1 rounded-xl bg-loss py-2.5 text-sm font-medium text-white hover:bg-loss/90 disabled:opacity-50 flex items-center justify-center gap-2">
+                <button
+                  onClick={handleCancelSubscription}
+                  disabled={cancelLoading || !cancelAck}
+                  className="flex-1 rounded-xl bg-loss py-2.5 text-sm font-medium text-primary-foreground hover:bg-loss/90 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
                   {cancelLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                  Cancel Subscription
+                  Confirm Cancellation
                 </button>
               </div>
             </div>

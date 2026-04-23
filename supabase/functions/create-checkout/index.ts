@@ -36,6 +36,12 @@ serve(async (req) => {
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_ANON_KEY") ?? ""
   );
+  // Service-role client for writing immutable consent records (RLS forbids client INSERTs).
+  const supabaseAdmin = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    { auth: { persistSession: false } }
+  );
 
   try {
     const authHeader = req.headers.get("Authorization");
@@ -48,7 +54,7 @@ serve(async (req) => {
 
     // STRICT input validation: tier must be explicitly provided.
     // We do NOT default to "pro" because that could charge a user €15.99 for a malformed request.
-    let body: { tier?: unknown } = {};
+    let body: { tier?: unknown; accepted_terms?: unknown; eu_withdrawal_waiver?: unknown; consent_text?: unknown } = {};
     try {
       body = await req.json();
     } catch {
@@ -65,6 +71,25 @@ serve(async (req) => {
     }
     const tier = body.tier as "plus" | "pro";
 
+    // LEGAL: Terms acceptance is mandatory for any paid action (Directive 2011/83/EU Art. 6).
+    // We refuse the request rather than silently proceeding without consent.
+    const acceptedTerms = body?.accepted_terms === true;
+    if (!acceptedTerms) {
+      return json(400, {
+        error: "You must accept the Terms of Service and Privacy Policy to subscribe.",
+        code: "terms_not_accepted",
+      });
+    }
+
+    // EU Art. 16(m): the 14-day right of withdrawal for digital services is lost ONLY IF the
+    // consumer (a) expressly consented to immediate performance and (b) acknowledged losing
+    // the right. We treat this as opt-in: if the user did NOT tick the waiver box, they keep
+    // their full statutory refund right and we record that explicitly.
+    const euWaiver = body?.eu_withdrawal_waiver === true;
+    const consentText = typeof body?.consent_text === "string" ? body.consent_text.slice(0, 5000) : "";
+    const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+    const userAgent = req.headers.get("user-agent") ?? null;
+
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
     });
@@ -79,6 +104,36 @@ serve(async (req) => {
     // which protects against double-clicks and accidental retries.
     const idempotencyDay = new Date().toISOString().split("T")[0];
     const baseIdemKey = `chk_${user.id}_${tier}_${idempotencyDay}`;
+
+    // Helper: record consent BEFORE any Stripe write. If recording fails, we still proceed
+    // (a logging failure must not block the user from being charged for a service they want),
+    // but we log loudly so legal/support can investigate.
+    const recordConsent = async (consent_type: string, extra?: Record<string, unknown>) => {
+      try {
+        await supabaseAdmin.from("payment_consents").insert({
+          user_id: user.id,
+          user_email: user.email!,
+          consent_type,
+          tier,
+          price_id: targetPriceId,
+          consent_text: consentText,
+          ip_address: ipAddress,
+          user_agent: userAgent,
+          metadata: { eu_waiver: euWaiver, accepted_terms: acceptedTerms, ...extra },
+        });
+      } catch (e) {
+        console.error("[create-checkout] failed to record consent", consent_type, e);
+      }
+    };
+
+    // Stripe metadata: attach the consent state to the underlying object so it's queryable
+    // from the Stripe dashboard and persisted on every invoice.
+    const consentMetadata: Record<string, string> = {
+      user_id: user.id,
+      accepted_terms: String(acceptedTerms),
+      eu_withdrawal_waiver: String(euWaiver),
+      consent_recorded_at: new Date().toISOString(),
+    };
 
     // Check for an existing subscription — if found, modify it instead of creating new checkout.
     if (customerId) {
@@ -162,6 +217,13 @@ serve(async (req) => {
         const isUpgrade = TIER_RANK[tier] > TIER_RANK[currentTier];
 
         if (isUpgrade) {
+          // Record consent BEFORE charging.
+          await recordConsent("checkout_terms", { action: "upgrade", from_tier: currentTier });
+          await recordConsent(
+            euWaiver ? "eu_withdrawal_waiver" : "no_waiver_acknowledged",
+            { action: "upgrade", from_tier: currentTier }
+          );
+
           // Upgrade: charge prorated difference immediately
           await stripe.subscriptions.update(
             current.id,
@@ -169,6 +231,7 @@ serve(async (req) => {
               items: [{ id: currentItem.id, price: targetPriceId }],
               proration_behavior: "always_invoice",
               cancel_at_period_end: false,
+              metadata: consentMetadata,
             },
             { idempotencyKey: `${baseIdemKey}_upgrade` }
           );
@@ -177,6 +240,9 @@ serve(async (req) => {
             action: "upgraded",
           });
         } else {
+          // Downgrade: no immediate charge, but still record the user's informed decision.
+          await recordConsent("checkout_terms", { action: "downgrade_scheduled", from_tier: currentTier });
+
           // Downgrade: schedule the change for end of current period (no immediate charge).
           const schedule = await stripe.subscriptionSchedules.create(
             { from_subscription: current.id },
@@ -188,6 +254,7 @@ serve(async (req) => {
             schedule.id,
             {
               end_behavior: "release",
+              metadata: consentMetadata,
               phases: [
                 {
                   items: [{ price: currentPriceId, quantity: 1 }],
@@ -230,6 +297,14 @@ serve(async (req) => {
       }
     }
 
+    // Record consent BEFORE creating the checkout session so we have proof even if
+    // the user abandons mid-flow.
+    await recordConsent("checkout_terms", { action: "new_checkout" });
+    await recordConsent(
+      euWaiver ? "eu_withdrawal_waiver" : "no_waiver_acknowledged",
+      { action: "new_checkout" }
+    );
+
     // No live subscription — normal checkout
     const session = await stripe.checkout.sessions.create(
       {
@@ -242,11 +317,18 @@ serve(async (req) => {
         // Surface terms acceptance + show clear billing terms in Stripe-hosted checkout.
         consent_collection: { terms_of_service: "required" },
         billing_address_collection: "auto",
+        // Persist consent state on the Stripe session AND propagate it to the
+        // resulting subscription so it appears on every invoice / dashboard view.
+        metadata: consentMetadata,
+        subscription_data: { metadata: consentMetadata },
         // Custom legal text shown above the pay button in Stripe Checkout.
+        // Worded differently depending on whether the user waived the EU 14-day right,
+        // so the disclosure on Stripe matches what they ticked in our app.
         custom_text: {
           submit: {
-            message:
-              "Subscriptions renew automatically each month. You can cancel anytime from Settings — your access continues until the end of your current billing period. EU customers retain their statutory 14-day right of withdrawal where applicable.",
+            message: euWaiver
+              ? "By clicking Pay, you expressly request immediate access to the digital service and acknowledge that, by doing so, you LOSE your statutory 14-day right of withdrawal once performance has fully begun (Directive 2011/83/EU, Art. 16(m)). The subscription renews automatically each month and can be cancelled anytime from Settings."
+              : "Subscriptions renew automatically each month and can be cancelled anytime from Settings. EU consumers keep their full statutory 14-day right of withdrawal — to exercise it, email legal@portai-invest.com from your account email within 14 days of purchase.",
           },
         },
       },
