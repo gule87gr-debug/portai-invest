@@ -1,10 +1,11 @@
 import { AppLayout } from "@/components/AppLayout";
 import { useSubscription, type SubscriptionTier } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
-import { Crown, Check, Loader2, X, Sparkles } from "lucide-react";
+import { Crown, Check, Loader2, X, Sparkles, AlertTriangle, ShieldCheck } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 const freeTierFeatures = [
   "3 article analyses per day",
@@ -31,27 +32,96 @@ const proTierFeatures = [
   "Forum access (read & post)",
 ];
 
+const TIER_PRICE: Record<"plus" | "pro", string> = {
+  plus: "€8.99",
+  pro: "€15.99",
+};
+
 const Pricing = () => {
-  const { tier, loading, cancelAtPeriodEnd } = useSubscription();
+  const { tier, loading, cancelAtPeriodEnd, refresh } = useSubscription();
   const navigate = useNavigate();
   const [checkoutLoading, setCheckoutLoading] = useState<SubscriptionTier | null>(null);
+  const [pendingTarget, setPendingTarget] = useState<"plus" | "pro" | null>(null);
+  const [consent, setConsent] = useState(false);
+  const [reactivating, setReactivating] = useState(false);
 
-  const handleUpgrade = async (target: "plus" | "pro") => {
+  const beginUpgradeFlow = (target: "plus" | "pro") => {
+    setConsent(false);
+    setPendingTarget(target);
+  };
+
+  const confirmUpgrade = async () => {
+    if (!pendingTarget) return;
+    if (!consent) {
+      toast.error("Please confirm the billing terms before continuing.");
+      return;
+    }
+    const target = pendingTarget;
     setCheckoutLoading(target);
     try {
       const { data, error } = await supabase.functions.invoke("create-checkout", {
         body: { tier: target },
       });
       if (error) throw error;
+
+      // Server may detect duplicate / pending-cancel / past-due states and respond accordingly.
+      if (data?.action === "manage" && data?.url) {
+        toast.info(
+          data.reason === "already_subscribed"
+            ? "You're already on this plan — opening your billing portal."
+            : "Opening your billing portal."
+        );
+        window.location.href = data.url;
+        return;
+      }
+      if (data?.action === "upgraded") {
+        toast.success("Plan upgraded — only the prorated difference was charged.");
+        await refresh();
+        navigate("/upgrade-success");
+        return;
+      }
+      if (data?.action === "downgrade_scheduled") {
+        toast.success("Downgrade scheduled for the end of your current billing period.");
+        await refresh();
+        navigate("/settings");
+        return;
+      }
       if (data?.url) {
         window.location.href = data.url;
-      } else {
-        console.error("No checkout URL returned:", data);
+        return;
       }
+      console.error("Unexpected checkout response:", data);
+      toast.error("Couldn't start checkout — please try again.");
     } catch (e: any) {
       console.error("Checkout error:", e);
+      const ctx = e?.context;
+      const code = ctx?.code ?? e?.code;
+      const msg =
+        code === "subscription_past_due"
+          ? "Your subscription has an unpaid invoice. Please update your payment method first."
+          : code === "schedule_already_pending"
+          ? "A plan change is already scheduled. Manage it from Settings before changing again."
+          : code === "subscription_pending_cancel"
+          ? "Your subscription is set to cancel. Reactivate it from Settings before changing plans."
+          : e?.message || "Checkout failed — please try again.";
+      toast.error(msg);
     } finally {
       setCheckoutLoading(null);
+      setPendingTarget(null);
+    }
+  };
+
+  const handleReactivate = async () => {
+    setReactivating(true);
+    try {
+      const { error } = await supabase.functions.invoke("reactivate-subscription");
+      if (error) throw error;
+      toast.success("Subscription reactivated — you won't be charged again until your next billing date.");
+      await refresh();
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to reactivate subscription");
+    } finally {
+      setReactivating(false);
     }
   };
 
@@ -66,6 +136,7 @@ const Pricing = () => {
           onClick={() => navigate(-1)}
           className="absolute top-8 right-0 rounded-full p-2 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
           title="Close"
+          aria-label="Close pricing page"
         >
           <X className="h-5 w-5" />
         </button>
@@ -117,7 +188,7 @@ const Pricing = () => {
             </ul>
             {!isPlus && !isPro && (
               <button
-                onClick={() => handleUpgrade("plus")}
+                onClick={() => beginUpgradeFlow("plus")}
                 disabled={checkoutLoading !== null || loading}
                 className="w-full rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
               >
@@ -132,12 +203,12 @@ const Pricing = () => {
             )}
             {isPlus && cancelAtPeriodEnd && (
               <button
-                onClick={() => handleUpgrade("plus")}
-                disabled={checkoutLoading !== null}
+                onClick={handleReactivate}
+                disabled={reactivating}
                 className="w-full rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {checkoutLoading === "plus" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                Resubscribe
+                {reactivating ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                Reactivate (no extra charge)
               </button>
             )}
             {isPro && (
@@ -168,7 +239,7 @@ const Pricing = () => {
             </ul>
             {!isPro && (
               <button
-                onClick={() => handleUpgrade("pro")}
+                onClick={() => beginUpgradeFlow("pro")}
                 disabled={checkoutLoading !== null || loading}
                 className="w-full rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
               >
@@ -183,17 +254,120 @@ const Pricing = () => {
             )}
             {isPro && cancelAtPeriodEnd && (
               <button
-                onClick={() => handleUpgrade("pro")}
-                disabled={checkoutLoading !== null}
+                onClick={handleReactivate}
+                disabled={reactivating}
                 className="w-full rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {checkoutLoading === "pro" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                Resubscribe
+                {reactivating ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                Reactivate (no extra charge)
               </button>
             )}
           </div>
         </div>
+
+        {/* Trust footer */}
+        <div className="mt-10 grid sm:grid-cols-3 gap-4 text-xs text-muted-foreground">
+          <div className="rounded-lg border border-border bg-card/50 p-3 flex items-start gap-2">
+            <ShieldCheck className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+            <span>Secure checkout via Stripe. We never store your card details.</span>
+          </div>
+          <div className="rounded-lg border border-border bg-card/50 p-3 flex items-start gap-2">
+            <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+            <span>Cancel anytime from Settings — access continues until the end of your billing period.</span>
+          </div>
+          <div className="rounded-lg border border-border bg-card/50 p-3 flex items-start gap-2">
+            <AlertTriangle className="h-4 w-4 text-warning mt-0.5 shrink-0" />
+            <span>EU customers retain a 14-day right of withdrawal where applicable. See <Link to="/terms-of-service" className="underline">Terms</Link>.</span>
+          </div>
+        </div>
       </div>
+
+      {/* Confirmation modal — required before any new charge */}
+      {pendingTarget && (() => {
+        const target = pendingTarget;
+        const targetLabel = target === "pro" ? "Pro" : "Plus";
+        const price = TIER_PRICE[target];
+        const inFlight = checkoutLoading === target;
+        return (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="confirm-upgrade-title"
+          >
+            <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20">
+                  {target === "pro" ? <Crown className="h-5 w-5 text-primary" /> : <Sparkles className="h-5 w-5 text-primary" />}
+                </div>
+                <h2 id="confirm-upgrade-title" className="text-lg font-bold">Subscribe to {targetLabel}?</h2>
+              </div>
+
+              <div className="rounded-lg bg-muted/50 p-3 text-sm space-y-1 mb-4">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Plan</span>
+                  <span className="font-semibold text-foreground">{targetLabel}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Price</span>
+                  <span className="font-semibold text-foreground">{price}/month, billed monthly</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">First charge</span>
+                  <span className="text-foreground">Today</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Renews</span>
+                  <span className="text-foreground">Automatically each month</span>
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-xs text-muted-foreground mb-4 space-y-2">
+                <p>
+                  You will be redirected to <span className="font-medium text-foreground">Stripe</span> to complete payment.
+                  Your subscription will renew automatically each month at {price} until you cancel.
+                </p>
+                <p>
+                  You can cancel anytime from Settings — your access continues until the end of the current billing period.
+                  EU customers retain their statutory <span className="font-medium text-foreground">14-day right of withdrawal</span> where applicable.
+                </p>
+              </div>
+
+              <label className="flex items-start gap-2 text-xs text-muted-foreground mb-4 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={consent}
+                  onChange={(e) => setConsent(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-primary"
+                />
+                <span>
+                  I understand I will be charged {price} today and every month until I cancel. I have read and accept the{" "}
+                  <Link to="/terms-of-service" target="_blank" className="underline">Terms of Service</Link> and{" "}
+                  <Link to="/privacy-policy" target="_blank" className="underline">Privacy Policy</Link>.
+                </span>
+              </label>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setPendingTarget(null)}
+                  disabled={inFlight}
+                  className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium hover:bg-accent disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmUpgrade}
+                  disabled={inFlight || !consent}
+                  className="flex-1 rounded-xl bg-primary py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {inFlight && <Loader2 className="h-4 w-4 animate-spin" />}
+                  Continue to secure checkout
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </AppLayout>
   );
 };
