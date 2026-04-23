@@ -36,6 +36,12 @@ serve(async (req) => {
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_ANON_KEY") ?? ""
   );
+  // Service-role client for writing immutable consent records (RLS forbids client INSERTs).
+  const supabaseAdmin = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    { auth: { persistSession: false } }
+  );
 
   try {
     const authHeader = req.headers.get("Authorization");
@@ -48,7 +54,7 @@ serve(async (req) => {
 
     // STRICT input validation: tier must be explicitly provided.
     // We do NOT default to "pro" because that could charge a user €15.99 for a malformed request.
-    let body: { tier?: unknown } = {};
+    let body: { tier?: unknown; accepted_terms?: unknown; eu_withdrawal_waiver?: unknown; consent_text?: unknown } = {};
     try {
       body = await req.json();
     } catch {
@@ -64,6 +70,25 @@ serve(async (req) => {
       });
     }
     const tier = body.tier as "plus" | "pro";
+
+    // LEGAL: Terms acceptance is mandatory for any paid action (Directive 2011/83/EU Art. 6).
+    // We refuse the request rather than silently proceeding without consent.
+    const acceptedTerms = body?.accepted_terms === true;
+    if (!acceptedTerms) {
+      return json(400, {
+        error: "You must accept the Terms of Service and Privacy Policy to subscribe.",
+        code: "terms_not_accepted",
+      });
+    }
+
+    // EU Art. 16(m): the 14-day right of withdrawal for digital services is lost ONLY IF the
+    // consumer (a) expressly consented to immediate performance and (b) acknowledged losing
+    // the right. We treat this as opt-in: if the user did NOT tick the waiver box, they keep
+    // their full statutory refund right and we record that explicitly.
+    const euWaiver = body?.eu_withdrawal_waiver === true;
+    const consentText = typeof body?.consent_text === "string" ? body.consent_text.slice(0, 5000) : "";
+    const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+    const userAgent = req.headers.get("user-agent") ?? null;
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
