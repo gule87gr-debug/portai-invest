@@ -250,10 +250,12 @@ const SettingsPage = () => {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" /> Loading subscription...
             </div>
-          ) : isPro ? (
+          ) : isPaid ? (
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <span className="rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary">Pro Plan</span>
+                <span className="rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary">
+                  {isPro ? "Pro Plan · €15.99/mo" : "Plus Plan · €8.99/mo"}
+                </span>
                 {cancelAtPeriodEnd && <span className="rounded-full bg-warning/20 px-3 py-1 text-xs font-semibold text-warning">Cancelling</span>}
               </div>
 
@@ -264,14 +266,14 @@ const SettingsPage = () => {
                     <AlertTriangle className="h-5 w-5 text-warning mt-0.5 shrink-0" />
                     <div>
                       <p className="text-sm font-semibold text-foreground">Your subscription expires on {formattedEnd}</p>
-                      <p className="text-xs text-muted-foreground mt-1">You'll retain full Pro access until then. After that you'll be downgraded to the Free plan.</p>
+                      <p className="text-xs text-muted-foreground mt-1">You'll retain full {isPro ? "Pro" : "Plus"} access until then. After that you'll be downgraded to the Free plan.</p>
                     </div>
                   </div>
                   <button
                     onClick={() => setShowReactivateModal(true)}
                     className="flex items-center justify-center gap-2 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                   >
-                    <Crown className="h-4 w-4" /> Re-subscribe to Pro
+                    <Crown className="h-4 w-4" /> Re-subscribe
                   </button>
                 </div>
               )}
@@ -282,7 +284,40 @@ const SettingsPage = () => {
                 </p>
               )}
 
-              <div className="flex gap-3">
+              {/* Plan switcher */}
+              {!cancelAtPeriodEnd && (
+                <div className="rounded-lg border border-border bg-background/50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Change plan</p>
+                  {isPlus && (
+                    <button
+                      onClick={() => handleChangePlan("pro")}
+                      disabled={planChangeLoading !== null}
+                      className="flex w-full items-center justify-between gap-3 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                    >
+                      <span className="flex items-center gap-2">
+                        {planChangeLoading === "pro" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
+                        Upgrade to Pro
+                      </span>
+                      <span className="text-xs opacity-80">€15.99/mo · prorated today</span>
+                    </button>
+                  )}
+                  {isPro && (
+                    <button
+                      onClick={() => handleChangePlan("plus")}
+                      disabled={planChangeLoading !== null}
+                      className="flex w-full items-center justify-between gap-3 rounded-lg border border-border px-4 py-2.5 text-sm font-medium hover:bg-accent disabled:opacity-50"
+                    >
+                      <span className="flex items-center gap-2">
+                        {planChangeLoading === "plus" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                        Downgrade to Plus
+                      </span>
+                      <span className="text-xs text-muted-foreground">€8.99/mo · starts {formattedEnd ?? "next cycle"}</span>
+                    </button>
+                  )}
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-3">
                 <button onClick={handleManageBilling} className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-accent">
                   <CreditCard className="h-4 w-4" /> Manage Billing
                 </button>
@@ -296,9 +331,16 @@ const SettingsPage = () => {
           ) : (
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">You're on the <span className="font-medium text-foreground">Free</span> plan.</p>
-              <button onClick={() => navigate("/pricing")} className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-                <Crown className="h-4 w-4" /> Upgrade to Pro — $9.99/mo
-              </button>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <button onClick={() => handleChangePlan("plus")} disabled={planChangeLoading !== null} className="flex items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20 disabled:opacity-50">
+                  {planChangeLoading === "plus" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  Upgrade to Plus — €8.99/mo
+                </button>
+                <button onClick={() => handleChangePlan("pro")} disabled={planChangeLoading !== null} className="flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
+                  {planChangeLoading === "pro" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
+                  Upgrade to Pro — €15.99/mo
+                </button>
+              </div>
             </div>
           )}
         </div>
