@@ -146,10 +146,39 @@ serve(async (req) => {
     let scheduledTier: "free" | "plus" | "pro" | null = null;
     let scheduledStart: string | null = null;
     let scheduledChangesCount = 0;
+
+    // Debug trace (only populated when debugMode === true).
+    // Reason codes:
+    //  Schedule-level skips: not_attached, schedule_status, released, completed, canceled, last_phase_ended
+    //  Phase-level skips:    no_start_date, in_past, current_phase, end_in_past, no_known_price, no_tier_change
+    //  Phase accepted:       candidate
+    type DebugPhase = {
+      start_date: string | null;
+      end_date: string | null;
+      tier: string | null;
+      price_id: string | null;
+      decision: string;
+    };
+    type DebugSchedule = {
+      schedule_id: string;
+      status: string;
+      subscription: string | null;
+      attached_to_current: boolean;
+      released_at: string | null;
+      completed_at: string | null;
+      canceled_at: string | null;
+      current_phase_start: string | null;
+      decision: string; // "considered" | "skipped:<reason>"
+      phases: DebugPhase[];
+    };
+    const debugSchedules: DebugSchedule[] = [];
+
     if (subscriptionId) {
       try {
         const schedules = await stripe.subscriptionSchedules.list({ customer: customerId, limit: 20 });
         const nowSec = Math.floor(Date.now() / 1000);
+        const toIso = (s: number | null | undefined) =>
+          typeof s === "number" && s > 0 ? new Date(s * 1000).toISOString() : null;
 
         // Only schedules in these states can still produce upcoming changes.
         // Explicitly exclude: "completed", "canceled", "released" (and any unknown future state).
@@ -159,68 +188,94 @@ serve(async (req) => {
         const candidates: Candidate[] = [];
 
         for (const sch of schedules.data) {
-          // Must be attached to the current subscription
-          if (sch.subscription !== subscriptionId) continue;
-
-          // Skip schedules that are not in a pending state (canceled / completed / released / unknown)
-          if (!PENDING_SCHEDULE_STATUSES.has(sch.status)) continue;
-
-          // If the schedule has already been released or fully completed it will have a
-          // released_at / completed_at timestamp. Belt-and-braces guard in case status lags.
           const releasedAt = (sch as any).released_at as number | null | undefined;
           const completedAt = (sch as any).completed_at as number | null | undefined;
           const canceledAt = (sch as any).canceled_at as number | null | undefined;
-          if (typeof releasedAt === "number" && releasedAt > 0) continue;
-          if (typeof completedAt === "number" && completedAt > 0) continue;
-          if (typeof canceledAt === "number" && canceledAt > 0) continue;
-
-          // If end_behavior is "release" and the schedule's last phase already ended, skip it
-          const phases = sch.phases ?? [];
-          const lastPhase = phases[phases.length - 1];
-          const lastEnd = typeof lastPhase?.end_date === "number" ? lastPhase.end_date : null;
-          if (lastEnd !== null && lastEnd <= nowSec) continue;
-
-          // The phase Stripe currently considers active on this schedule (if any).
           const currentPhaseStart = typeof (sch as any).current_phase?.start_date === "number"
             ? (sch as any).current_phase.start_date as number
             : null;
 
-          // Track the previous candidate-eligible tier within this schedule so we can detect
-          // distinct transitions even when intermediate phases happen between now and a future
-          // phase (e.g. pro -> plus -> free counts as 2 changes).
+          const dbgSchedule: DebugSchedule = {
+            schedule_id: sch.id,
+            status: sch.status,
+            subscription: typeof sch.subscription === "string" ? sch.subscription : null,
+            attached_to_current: sch.subscription === subscriptionId,
+            released_at: toIso(releasedAt),
+            completed_at: toIso(completedAt),
+            canceled_at: toIso(canceledAt),
+            current_phase_start: toIso(currentPhaseStart),
+            decision: "considered",
+            phases: [],
+          };
+
+          // Schedule-level filters with debug reason capture
+          let scheduleSkip: string | null = null;
+          if (sch.subscription !== subscriptionId) scheduleSkip = "not_attached";
+          else if (!PENDING_SCHEDULE_STATUSES.has(sch.status)) scheduleSkip = `schedule_status:${sch.status}`;
+          else if (typeof releasedAt === "number" && releasedAt > 0) scheduleSkip = "released";
+          else if (typeof completedAt === "number" && completedAt > 0) scheduleSkip = "completed";
+          else if (typeof canceledAt === "number" && canceledAt > 0) scheduleSkip = "canceled";
+
+          const phases = sch.phases ?? [];
+          if (!scheduleSkip) {
+            const lastPhase = phases[phases.length - 1];
+            const lastEnd = typeof lastPhase?.end_date === "number" ? lastPhase.end_date : null;
+            if (lastEnd !== null && lastEnd <= nowSec) scheduleSkip = "last_phase_ended";
+          }
+
+          if (scheduleSkip) {
+            dbgSchedule.decision = `skipped:${scheduleSkip}`;
+            if (debugMode) debugSchedules.push(dbgSchedule);
+            continue;
+          }
+
+          // Track previous candidate-eligible tier within this schedule for distinct transitions.
           let prevTierForThisSchedule: "free" | "plus" | "pro" = tier;
 
           for (const phase of phases) {
             const startSec = typeof phase.start_date === "number" ? phase.start_date : null;
-            if (startSec === null) continue;
-
-            // Strictly future phases only
-            if (startSec <= nowSec) continue;
-
-            // Skip the phase that's already in progress according to Stripe
-            if (currentPhaseStart !== null && startSec === currentPhaseStart) continue;
-
-            // Skip phases whose own end_date has already passed (defensive)
             const endSec = typeof phase.end_date === "number" ? phase.end_date : null;
-            if (endSec !== null && endSec <= nowSec) continue;
 
-            // Resolve the phase tier from its first item with a known mapping
+            // Resolve phase tier + first known priceId for debug visibility
             let phaseTier: "free" | "plus" | "pro" | null = null;
+            let firstKnownPriceId: string | null = null;
             for (const item of phase.items ?? []) {
               const priceRef = (item as any).price;
               const priceId = typeof priceRef === "string" ? priceRef : (priceRef?.id ?? "");
               if (!priceId) continue;
               const t = PRICE_TO_TIER[priceId];
-              if (t) { phaseTier = t; break; }
+              if (t) { phaseTier = t; firstKnownPriceId = priceId; break; }
             }
-            if (!phaseTier) continue;
 
-            // Skip no-op continuation phases (same tier as the previous phase / current tier)
-            if (phaseTier === prevTierForThisSchedule) continue;
+            const dbgPhase: DebugPhase = {
+              start_date: toIso(startSec),
+              end_date: toIso(endSec),
+              tier: phaseTier,
+              price_id: firstKnownPriceId,
+              decision: "candidate",
+            };
 
-            candidates.push({ startSec, tier: phaseTier, scheduleId: sch.id });
-            prevTierForThisSchedule = phaseTier;
+            let phaseSkip: string | null = null;
+            if (startSec === null) phaseSkip = "no_start_date";
+            else if (startSec <= nowSec) phaseSkip = "in_past";
+            else if (currentPhaseStart !== null && startSec === currentPhaseStart) phaseSkip = "current_phase";
+            else if (endSec !== null && endSec <= nowSec) phaseSkip = "end_in_past";
+            else if (!phaseTier) phaseSkip = "no_known_price";
+            else if (phaseTier === prevTierForThisSchedule) phaseSkip = "no_tier_change";
+
+            if (phaseSkip) {
+              dbgPhase.decision = `skipped:${phaseSkip}`;
+              dbgSchedule.phases.push(dbgPhase);
+              continue;
+            }
+
+            // Accepted candidate
+            candidates.push({ startSec: startSec!, tier: phaseTier!, scheduleId: sch.id });
+            prevTierForThisSchedule = phaseTier!;
+            dbgSchedule.phases.push(dbgPhase);
           }
+
+          if (debugMode) debugSchedules.push(dbgSchedule);
         }
 
         // Sort chronologically and surface the soonest as the "next" change,
@@ -234,10 +289,24 @@ serve(async (req) => {
         }
       } catch (e) {
         console.error("Failed to load subscription schedules:", (e as Error).message);
+        if (debugMode) {
+          debugSchedules.push({
+            schedule_id: "(error)",
+            status: "error",
+            subscription: null,
+            attached_to_current: false,
+            released_at: null,
+            completed_at: null,
+            canceled_at: null,
+            current_phase_start: null,
+            decision: `error:${(e as Error).message}`,
+            phases: [],
+          });
+        }
       }
     }
 
-    return new Response(JSON.stringify({
+    const responseBody: Record<string, unknown> = {
       subscribed: hasActiveSub,
       tier,
       subscription_end: subscriptionEnd,
@@ -247,7 +316,23 @@ serve(async (req) => {
       scheduled_tier: scheduledTier,
       scheduled_start: scheduledStart,
       scheduled_changes_count: scheduledChangesCount,
-    }), {
+    };
+
+    if (debugMode) {
+      responseBody.debug = {
+        now: new Date().toISOString(),
+        current_tier: tier,
+        subscription_id: subscriptionId,
+        schedules_examined: debugSchedules.length,
+        schedules: debugSchedules,
+        legend: {
+          schedule_skips: ["not_attached", "schedule_status:<state>", "released", "completed", "canceled", "last_phase_ended"],
+          phase_skips: ["no_start_date", "in_past", "current_phase", "end_in_past", "no_known_price", "no_tier_change"],
+        },
+      };
+    }
+
+    return new Response(JSON.stringify(responseBody), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
