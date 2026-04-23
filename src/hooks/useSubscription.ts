@@ -91,6 +91,8 @@ export const useSubscription = (): SubscriptionState => {
     subscriptionEnd,
     cancelAtPeriodEnd,
     subscriptionId,
+    scheduledTier,
+    scheduledStart,
     dailyAnalysesUsed,
     // Only Pro gets unlimited article analyses; Plus uses free limit
     canAnalyze: isPro || dailyAnalysesUsed < FREE_DAILY_ANALYSES,
