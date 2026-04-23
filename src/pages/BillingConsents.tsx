@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, Loader2, Download, FileText, AlertCircle } from "lucide-react";
+import { ShieldCheck, Loader2, Download, FileText, AlertCircle, Scale, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -22,12 +22,44 @@ type ConsentRow = {
   metadata: Record<string, unknown> | null;
 };
 
-const CONSENT_LABELS: Record<string, { label: string; tone: "default" | "secondary" | "destructive" | "outline" }> = {
-  checkout_terms: { label: "Checkout — Terms accepted", tone: "default" },
-  eu_withdrawal_waiver: { label: "EU 14-day withdrawal — Waived", tone: "destructive" },
-  no_waiver_acknowledged: { label: "EU 14-day withdrawal — Kept", tone: "secondary" },
-  cancel_no_refund_acknowledged: { label: "Cancellation — No-refund acknowledged", tone: "outline" },
-  reactivate: { label: "Subscription reactivated", tone: "default" },
+type ConsentMeta = {
+  label: string;
+  tone: "default" | "secondary" | "destructive" | "outline";
+  proves: string;
+  legalBasis: string;
+};
+
+const CONSENT_LABELS: Record<string, ConsentMeta> = {
+  checkout_terms: {
+    label: "Checkout — Terms accepted",
+    tone: "default",
+    proves: "You read and accepted the Terms of Service, Privacy Policy and the recurring price before paying.",
+    legalBasis: "Directive 2011/83/EU Art. 6 & 8 (pre-contractual information for distance contracts).",
+  },
+  eu_withdrawal_waiver: {
+    label: "EU 14-day withdrawal — Waived",
+    tone: "destructive",
+    proves: "You expressly requested immediate access to the digital service AND acknowledged that this waives your 14-day right of withdrawal once performance has fully begun. No refund is owed after that point.",
+    legalBasis: "Directive 2011/83/EU Art. 16(m) — requires explicit prior consent + acknowledgement of loss of withdrawal right.",
+  },
+  no_waiver_acknowledged: {
+    label: "EU 14-day withdrawal — Kept",
+    tone: "secondary",
+    proves: "You did NOT waive your 14-day withdrawal right. You may request a refund within 14 calendar days, reduced in proportion to the service already used.",
+    legalBasis: "Directive 2011/83/EU Art. 9 (right of withdrawal) & Art. 14(3) (pro-rata deduction).",
+  },
+  cancel_no_refund_acknowledged: {
+    label: "Cancellation — No-refund acknowledged",
+    tone: "outline",
+    proves: "You cancelled auto-renewal and acknowledged that the current pre-paid billing period is not refunded. Access continues until the period ends.",
+    legalBasis: "Contractual — cancellation of a recurring subscription does not retroactively refund a paid period (outside the 14-day withdrawal window).",
+  },
+  reactivate: {
+    label: "Subscription reactivated",
+    tone: "default",
+    proves: "You reactivated auto-renewal on an existing subscription. Original consent and pricing terms continue to apply.",
+    legalBasis: "Continuation of an existing distance contract (no new pre-contractual information required).",
+  },
 };
 
 const formatDate = (iso: string) =>
