@@ -37,12 +37,22 @@ serve(async (req) => {
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
 
-    // Opt-in debug mode: include detailed schedule/phase decision trace.
-    // Enabled via ?debug=1 query param OR x-debug: 1 header.
+    // Debug mode is REQUESTED via ?debug=1 query param or x-debug: 1 header,
+    // but only ENABLED for authorized callers (admin email or matching x-debug-secret header).
+    // This prevents accidental disclosure of internal schedule/phase data in production.
     const url = new URL(req.url);
-    const debugMode =
+    const debugRequested =
       url.searchParams.get("debug") === "1" ||
       req.headers.get("x-debug") === "1";
+
+    // Optional shared-secret header bypass — set DEBUG_SECRET in edge function secrets to enable.
+    const debugSecret = Deno.env.get("DEBUG_SECRET");
+    const providedDebugSecret = req.headers.get("x-debug-secret");
+    const hasValidDebugSecret =
+      debugRequested &&
+      !!debugSecret &&
+      !!providedDebugSecret &&
+      providedDebugSecret === debugSecret;
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
@@ -62,9 +72,19 @@ serve(async (req) => {
     }
     const user = userData.user;
 
-    // Admin override: grant permanent Pro access
+    // Admin allowlist: grants permanent Pro access AND unlocks debug payload
     const ADMIN_EMAILS = ["gule.87.gr@gmail.com"];
-    if (ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+    const isAdminCaller = ADMIN_EMAILS.includes(user.email.toLowerCase());
+
+    // Final debug gate: must be requested AND (admin caller OR valid shared secret)
+    const debugMode = debugRequested && (isAdminCaller || hasValidDebugSecret);
+    if (debugRequested && !debugMode) {
+      console.warn(
+        `[check-subscription] Debug payload requested by non-privileged caller (${user.email}) — suppressed.`
+      );
+    }
+
+    if (isAdminCaller) {
       return new Response(JSON.stringify({
         subscribed: true,
         tier: "pro",
