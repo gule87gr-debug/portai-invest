@@ -18,6 +18,7 @@ type SubscriptionState = {
   subscriptionStatus: string | null;
   scheduledTier: SubscriptionTier | null;
   scheduledStart: string | null;
+  scheduledChangesCount: number;
   dailyAnalysesUsed: number;
   canAnalyze: boolean;
   refresh: () => Promise<void>;
