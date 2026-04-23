@@ -231,6 +231,78 @@ const BillingConsents = () => {
               </CardContent>
             </Card>
 
+            {/* Statutory withdrawal CTA — shown only when actually eligible. */}
+            {withdrawalEligible && windowEnds && (
+              <Card className="border-warning/40 bg-warning/5">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2">
+                    <Undo2 className="h-4 w-4 text-warning" />
+                    <CardTitle className="text-sm">Exercise your 14-day right of withdrawal</CardTitle>
+                  </div>
+                  <CardDescription className="text-xs">
+                    You purchased on {formatDate(recentCheckout!.created_at)} and did not waive your withdrawal right.
+                    You may cancel this purchase and receive a refund (reduced pro-rata for any service already used) until <span className="font-medium text-foreground">{formatDate(windowEnds.toISOString())}</span>.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <Button size="sm" variant="outline" onClick={() => setWithdrawOpen(true)}>
+                    Submit withdrawal request
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+            {alreadyExercised && (
+              <Card className="border-destructive/30 bg-destructive/5">
+                <CardContent className="p-4 text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground">Withdrawal request on file.</span> Your statutory withdrawal request was received. Our legal team will process the pro-rata refund within 14 days of receipt (Directive 2011/83/EU Art. 13(1)). The immutable record is below.
+                </CardContent>
+              </Card>
+            )}
+
+            {withdrawOpen && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 animate-fade-in">
+                <div className="w-full max-w-lg rounded-2xl border border-warning/40 bg-card p-6 shadow-xl">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Undo2 className="h-5 w-5 text-warning" />
+                      <h2 className="text-lg font-bold">Statutory withdrawal — Model form</h2>
+                    </div>
+                    <button onClick={() => setWithdrawOpen(false)} className="text-muted-foreground hover:text-foreground">
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Submitting this form is the official Annex I(B) model withdrawal statement under <span className="font-medium text-foreground">Directive 2011/83/EU Art. 11</span>. We will record it immutably, stop your subscription, and process a pro-rata refund within 14 days (Art. 13(1) & 14(3)).
+                  </p>
+                  <label className="block text-xs font-medium text-foreground mb-1">Optional — reason for withdrawal</label>
+                  <textarea
+                    value={withdrawReason}
+                    onChange={(e) => setWithdrawReason(e.target.value.slice(0, 2000))}
+                    rows={4}
+                    placeholder="You are NOT required to give a reason. Anything you write here is stored verbatim with your withdrawal record."
+                    className="w-full rounded-lg border border-border bg-background p-2 text-sm mb-4"
+                  />
+                  <div className="rounded-lg border border-border bg-muted/40 p-3 text-[11px] text-muted-foreground mb-4 space-y-1">
+                    <p><span className="font-medium text-foreground">What happens next:</span></p>
+                    <ul className="list-disc pl-4 space-y-0.5">
+                      <li>Your withdrawal is timestamped and added to this log (immutable).</li>
+                      <li>Our legal team is notified and will refund the unused portion of the current month within 14 days, using your original payment method.</li>
+                      <li>Your subscription will be cancelled. You retain access only for the days you've already paid for, pro-rata.</li>
+                    </ul>
+                  </div>
+                  <div className="flex gap-3">
+                    <Button variant="outline" className="flex-1" onClick={() => setWithdrawOpen(false)} disabled={withdrawSubmitting}>
+                      Cancel
+                    </Button>
+                    <Button className="flex-1" onClick={handleSubmitWithdrawal} disabled={withdrawSubmitting}>
+                      {withdrawSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Submit withdrawal
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {rows.length === 0 ? (
               <Card>
                 <CardContent className="flex flex-col items-center gap-3 p-8 text-center">
