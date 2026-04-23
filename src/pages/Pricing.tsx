@@ -372,21 +372,34 @@ const Pricing = () => {
                 </span>
               </label>
 
-              {/* Optional: EU Art. 16(m) waiver — only ticking this box loses the 14-day right */}
-              <label className="flex items-start gap-2 text-xs text-muted-foreground mb-2 cursor-pointer rounded-md border border-border bg-background/50 p-2">
-                <input
-                  type="checkbox"
-                  checked={euWaiver}
-                  onChange={(e) => setEuWaiver(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 accent-primary"
-                />
-                <span>
-                  <span className="font-medium text-foreground">Optional (EU consumers):</span> I expressly request immediate access to the digital service and acknowledge that, by doing so, I lose my <span className="font-medium text-foreground">14-day right of withdrawal</span> once performance has fully begun.
-                </span>
-              </label>
-              <p className="text-[11px] text-muted-foreground/80 mb-4 pl-6">
-                If you leave this unticked, you keep your full statutory 14-day refund right (with a deduction proportional to any service already used).
-              </p>
+              {/* EU Art. 16(m) waiver — explicit informed choice */}
+              <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 mb-4 space-y-2.5">
+                <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+                  <AlertTriangle className="h-3.5 w-3.5 text-primary" />
+                  EU consumers — your 14-day right of withdrawal
+                </div>
+                <p className="text-[11px] leading-relaxed text-muted-foreground">
+                  Under EU law (Directive 2011/83/EU, Art. 16(m)), digital services normally come with a <span className="font-medium text-foreground">14-day right to cancel and get a refund</span>. You must choose one of the two options below before paying:
+                </p>
+
+                <label className="flex items-start gap-2 text-xs cursor-pointer rounded-md border border-border bg-background/60 p-2.5 hover:border-primary/40 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={euWaiver}
+                    onChange={(e) => setEuWaiver(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 accent-primary"
+                  />
+                  <span className="text-muted-foreground">
+                    <span className="block font-medium text-foreground mb-0.5">✓ Tick to start using {targetLabel} immediately</span>
+                    I expressly request that the service begins right now and I understand that, by doing so, I <span className="font-medium text-foreground">waive my 14-day right of withdrawal</span> as soon as performance has fully begun. No refund will be available after that point.
+                  </span>
+                </label>
+
+                <div className="rounded-md border border-dashed border-border/70 bg-background/30 p-2.5 text-[11px] text-muted-foreground">
+                  <span className="block font-medium text-foreground mb-0.5">☐ Leave unticked to keep your refund right</span>
+                  You will still be charged {price} today and access starts immediately, but you may request a refund within <span className="font-medium text-foreground">14 days</span>. The refund will be reduced in proportion to the service already used during that period.
+                </div>
+              </div>
 
               <div className="flex gap-3">
                 <button
