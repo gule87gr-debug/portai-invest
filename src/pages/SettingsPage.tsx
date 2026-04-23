@@ -384,6 +384,12 @@ const SettingsPage = () => {
                 <Crown className="h-4 w-4" />
                 Upgrade Plan
               </button>
+              <button
+                onClick={() => navigate("/billing-consents")}
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-accent"
+              >
+                <ShieldCheck className="h-4 w-4" /> My Billing Consents
+              </button>
             </div>
           )}
         </div>
