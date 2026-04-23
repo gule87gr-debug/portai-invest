@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { ShieldCheck, Loader2, Download, FileText, AlertCircle, Scale, Lock, Undo2, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getLegalCopy, type LegalConsentMeta } from "@/lib/legalI18n";
 
 type ConsentRow = {
   id: string;
@@ -22,54 +24,8 @@ type ConsentRow = {
   metadata: Record<string, unknown> | null;
 };
 
-type ConsentMeta = {
-  label: string;
-  tone: "default" | "secondary" | "destructive" | "outline";
-  proves: string;
-  legalBasis: string;
-};
-
-const CONSENT_LABELS: Record<string, ConsentMeta> = {
-  checkout_terms: {
-    label: "Checkout — Terms accepted",
-    tone: "default",
-    proves: "You read and accepted the Terms of Service, Privacy Policy and the recurring price before paying.",
-    legalBasis: "Directive 2011/83/EU Art. 6 & 8 (pre-contractual information for distance contracts).",
-  },
-  eu_withdrawal_waiver: {
-    label: "EU 14-day withdrawal — Waived",
-    tone: "destructive",
-    proves: "You expressly requested immediate access to the digital service AND acknowledged that this waives your 14-day right of withdrawal once performance has fully begun. No refund is owed after that point.",
-    legalBasis: "Directive 2011/83/EU Art. 16(m) — requires explicit prior consent + acknowledgement of loss of withdrawal right.",
-  },
-  no_waiver_acknowledged: {
-    label: "EU 14-day withdrawal — Kept",
-    tone: "secondary",
-    proves: "You did NOT waive your 14-day withdrawal right. You may request a refund within 14 calendar days, reduced in proportion to the service already used.",
-    legalBasis: "Directive 2011/83/EU Art. 9 (right of withdrawal) & Art. 14(3) (pro-rata deduction).",
-  },
-  cancel_no_refund_acknowledged: {
-    label: "Cancellation — No-refund acknowledged",
-    tone: "outline",
-    proves: "You cancelled auto-renewal and acknowledged that the current pre-paid billing period is not refunded. Access continues until the period ends.",
-    legalBasis: "Contractual — cancellation of a recurring subscription does not retroactively refund a paid period (outside the 14-day withdrawal window).",
-  },
-  reactivate: {
-    label: "Subscription reactivated",
-    tone: "default",
-    proves: "You reactivated auto-renewal on an existing subscription. Original consent and pricing terms continue to apply.",
-    legalBasis: "Continuation of an existing distance contract (no new pre-contractual information required).",
-  },
-  eu_withdrawal_exercised: {
-    label: "EU 14-day withdrawal — Exercised",
-    tone: "destructive",
-    proves: "You formally exercised your statutory 14-day right of withdrawal using the in-app model form. Our legal team must process a pro-rata refund within 14 days of receipt.",
-    legalBasis: "Directive 2011/83/EU Art. 9, Art. 11 (means of withdrawal), Art. 13(1) (refund deadline) & Art. 14(3) (pro-rata deduction); Spanish RDL 1/2007 Art. 102 & 108.",
-  },
-};
-
-const formatDate = (iso: string) =>
-  new Date(iso).toLocaleString(undefined, {
+const formatDate = (iso: string, locale: string) =>
+  new Date(iso).toLocaleString(locale, {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -78,7 +34,18 @@ const formatDate = (iso: string) =>
   });
 
 const BillingConsents = () => {
-  usePageTitle("My Billing Consents | PortAI");
+  const { language } = useLanguage();
+  const copy = getLegalCopy(language);
+  // Map our language codes to BCP-47 tags accepted by Intl.
+  const intlLocale =
+    language === "es" ? "es-ES" :
+    language === "fr" ? "fr-FR" :
+    language === "pt" ? "pt-PT" :
+    language === "de" ? "de-DE" :
+    language === "it" ? "it-IT" : "en-GB";
+
+  usePageTitle(`${copy.page.title} | PortAI`);
+
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState<ConsentRow[]>([]);
@@ -178,17 +145,14 @@ const BillingConsents = () => {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-6 w-6 text-primary" />
-              <h1 className="text-2xl font-bold tracking-tight font-display">My Billing Consents</h1>
+              <h1 className="text-2xl font-bold tracking-tight font-display">{copy.page.title}</h1>
             </div>
-            <p className="text-sm text-muted-foreground">
-              A tamper-resistant record of every payment, waiver, and cancellation acknowledgement you've given.
-              These records are immutable — kept as legal proof of your informed consent (Directive 2011/83/EU).
-            </p>
+            <p className="text-sm text-muted-foreground">{copy.page.subtitle}</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => navigate("/settings")}>Back to Settings</Button>
+            <Button variant="outline" size="sm" onClick={() => navigate("/settings")}>{copy.page.backToSettings}</Button>
             <Button variant="default" size="sm" onClick={handleExport} disabled={rows.length === 0}>
-              <Download className="mr-2 h-4 w-4" /> Export
+              <Download className="mr-2 h-4 w-4" /> {copy.page.export}
             </Button>
           </div>
         </div>
@@ -201,7 +165,7 @@ const BillingConsents = () => {
           <Card>
             <CardContent className="flex flex-col items-center gap-3 p-8 text-center">
               <AlertCircle className="h-8 w-8 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">Please sign in to view your billing consents.</p>
+              <p className="text-sm text-muted-foreground">{copy.page.signInRequired}</p>
             </CardContent>
           </Card>
         ) : (
@@ -210,22 +174,22 @@ const BillingConsents = () => {
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
                   <Scale className="h-4 w-4 text-primary" />
-                  <CardTitle className="text-sm">What this log proves under EU law</CardTitle>
+                  <CardTitle className="text-sm">{copy.explainer.title}</CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="space-y-2 pt-0 text-xs text-muted-foreground">
-                <p>
-                  This page is your personal audit trail of every <span className="font-medium text-foreground">informed consent</span> you've given for paid services on PortAI. It exists to satisfy our obligations and protect your rights under:
-                </p>
+                <p>{copy.explainer.intro}</p>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li><span className="font-medium text-foreground">Directive 2011/83/EU</span> (Consumer Rights) — pre-contractual information, the 14-day right of withdrawal (Art. 9), the explicit waiver for digital services (Art. 16(m)), and pro-rata refund rules (Art. 14(3)).</li>
-                  <li><span className="font-medium text-foreground">GDPR (Regulation 2016/679)</span> — Art. 7(1) requires us to demonstrate that you consented; Art. 15 gives you the right to access these records.</li>
-                  <li><span className="font-medium text-foreground">Spanish Law 3/2014</span> (TRLGDCU) and <span className="font-medium text-foreground">LSSI-CE Law 34/2002</span> — local transposition of the above for distance contracts concluded in Spain.</li>
+                  {copy.explainer.bullets.map((b, i) => (
+                    <li key={i}>
+                      <span className="font-medium text-foreground">{b.strong}</span>{b.rest}
+                    </li>
+                  ))}
                 </ul>
                 <div className="flex items-start gap-2 rounded-md border border-border/60 bg-background/60 p-2.5 mt-2">
                   <Lock className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
                   <p>
-                    <span className="font-medium text-foreground">Immutable by design.</span> Each record below is written once and can never be edited or back-dated — neither by you nor by us. The exact wording you saw, the timestamp, IP address, browser, plan, and price are preserved verbatim. You can export the full log at any time as JSON proof.
+                    <span className="font-medium text-foreground">{copy.explainer.immutableStrong}</span>{copy.explainer.immutableRest}
                   </p>
                 </div>
               </CardContent>
@@ -237,16 +201,19 @@ const BillingConsents = () => {
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-2">
                     <Undo2 className="h-4 w-4 text-warning" />
-                    <CardTitle className="text-sm">Exercise your 14-day right of withdrawal</CardTitle>
+                    <CardTitle className="text-sm">{copy.withdrawal.eligibleTitle}</CardTitle>
                   </div>
                   <CardDescription className="text-xs">
-                    You purchased on {formatDate(recentCheckout!.created_at)} and did not waive your withdrawal right.
-                    You may cancel this purchase and receive a refund (reduced pro-rata for any service already used) until <span className="font-medium text-foreground">{formatDate(windowEnds.toISOString())}</span>.
+                    {copy.withdrawal.eligibleBodyPrefix}
+                    <span className="font-medium text-foreground">{formatDate(recentCheckout!.created_at, intlLocale)}</span>
+                    {copy.withdrawal.eligibleBodyMiddle}
+                    <span className="font-medium text-foreground">{formatDate(windowEnds.toISOString(), intlLocale)}</span>
+                    {copy.withdrawal.eligibleBodySuffix}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-0">
                   <Button size="sm" variant="outline" onClick={() => setWithdrawOpen(true)}>
-                    Submit withdrawal request
+                    {copy.withdrawal.submitCta}
                   </Button>
                 </CardContent>
               </Card>
@@ -254,7 +221,7 @@ const BillingConsents = () => {
             {alreadyExercised && (
               <Card className="border-destructive/30 bg-destructive/5">
                 <CardContent className="p-4 text-xs text-muted-foreground">
-                  <span className="font-medium text-foreground">Withdrawal request on file.</span> Your statutory withdrawal request was received. Our legal team will process the pro-rata refund within 14 days of receipt (Directive 2011/83/EU Art. 13(1)). The immutable record is below.
+                  {copy.withdrawal.alreadyOnFile}
                 </CardContent>
               </Card>
             )}
@@ -265,38 +232,34 @@ const BillingConsents = () => {
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <Undo2 className="h-5 w-5 text-warning" />
-                      <h2 className="text-lg font-bold">Statutory withdrawal — Model form</h2>
+                      <h2 className="text-lg font-bold">{copy.withdrawal.modalTitle}</h2>
                     </div>
                     <button onClick={() => setWithdrawOpen(false)} className="text-muted-foreground hover:text-foreground">
                       <X className="h-5 w-5" />
                     </button>
                   </div>
-                  <p className="text-xs text-muted-foreground mb-3">
-                    Submitting this form is the official Annex I(B) model withdrawal statement under <span className="font-medium text-foreground">Directive 2011/83/EU Art. 11</span>. We will record it immutably, stop your subscription, and process a pro-rata refund within 14 days (Art. 13(1) & 14(3)).
-                  </p>
-                  <label className="block text-xs font-medium text-foreground mb-1">Optional — reason for withdrawal</label>
+                  <p className="text-xs text-muted-foreground mb-3">{copy.withdrawal.modalIntro}</p>
+                  <label className="block text-xs font-medium text-foreground mb-1">{copy.withdrawal.optionalReasonLabel}</label>
                   <textarea
                     value={withdrawReason}
                     onChange={(e) => setWithdrawReason(e.target.value.slice(0, 2000))}
                     rows={4}
-                    placeholder="You are NOT required to give a reason. Anything you write here is stored verbatim with your withdrawal record."
+                    placeholder={copy.withdrawal.optionalReasonPlaceholder}
                     className="w-full rounded-lg border border-border bg-background p-2 text-sm mb-4"
                   />
                   <div className="rounded-lg border border-border bg-muted/40 p-3 text-[11px] text-muted-foreground mb-4 space-y-1">
-                    <p><span className="font-medium text-foreground">What happens next:</span></p>
+                    <p><span className="font-medium text-foreground">{copy.withdrawal.whatHappensNext}</span></p>
                     <ul className="list-disc pl-4 space-y-0.5">
-                      <li>Your withdrawal is timestamped and added to this log (immutable).</li>
-                      <li>Our legal team is notified and will refund the unused portion of the current month within 14 days, using your original payment method.</li>
-                      <li>Your subscription will be cancelled. You retain access only for the days you've already paid for, pro-rata.</li>
+                      {copy.withdrawal.happens.map((line, i) => <li key={i}>{line}</li>)}
                     </ul>
                   </div>
                   <div className="flex gap-3">
                     <Button variant="outline" className="flex-1" onClick={() => setWithdrawOpen(false)} disabled={withdrawSubmitting}>
-                      Cancel
+                      {copy.withdrawal.cancelBtn}
                     </Button>
                     <Button className="flex-1" onClick={handleSubmitWithdrawal} disabled={withdrawSubmitting}>
                       {withdrawSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Submit withdrawal
+                      {copy.withdrawal.submitBtn}
                     </Button>
                   </div>
                 </div>
@@ -307,21 +270,18 @@ const BillingConsents = () => {
               <Card>
                 <CardContent className="flex flex-col items-center gap-3 p-8 text-center">
                   <FileText className="h-8 w-8 text-muted-foreground" />
-                  <p className="text-sm font-medium">No consent records yet</p>
-                  <p className="text-xs text-muted-foreground max-w-md">
-                    Once you upgrade, change, or cancel a plan, the corresponding informed-consent records will appear
-                    here for your transparency and audit needs.
-                  </p>
+                  <p className="text-sm font-medium">{copy.page.noRecordsTitle}</p>
+                  <p className="text-xs text-muted-foreground max-w-md">{copy.page.noRecordsBody}</p>
                 </CardContent>
               </Card>
             ) : (
               <div className="space-y-4">
                 {rows.map((row) => {
-                  const meta: ConsentMeta = CONSENT_LABELS[row.consent_type] ?? {
+                  const meta: LegalConsentMeta = copy.consentLabels[row.consent_type] ?? {
                     label: row.consent_type,
                     tone: "secondary",
-                    proves: "Recorded acknowledgement related to your subscription.",
-                    legalBasis: "General contractual record.",
+                    proves: copy.consentLabels.checkout_terms.proves, // safe generic fallback
+                    legalBasis: "—",
                   };
                   return (
                     <Card key={row.id}>
@@ -334,22 +294,22 @@ const BillingConsents = () => {
                               {row.tier && <Badge variant="outline" className="capitalize">{row.tier}</Badge>}
                             </div>
                             <CardDescription className="text-xs font-mono">
-                              {formatDate(row.created_at)}
+                              {formatDate(row.created_at, intlLocale)}
                             </CardDescription>
                           </div>
                         </div>
                       </CardHeader>
                       <CardContent className="space-y-4 pt-0">
                         <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-1.5">
-                          <div className="text-[11px] font-semibold uppercase tracking-wide text-primary">What this record proves</div>
+                          <div className="text-[11px] font-semibold uppercase tracking-wide text-primary">{copy.card.provesHeading}</div>
                           <p className="text-xs text-foreground leading-relaxed">{meta.proves}</p>
                           <p className="text-[11px] text-muted-foreground">
-                            <span className="font-medium text-foreground">Legal basis:</span> {meta.legalBasis}
+                            <span className="font-medium text-foreground">{copy.card.legalBasisLabel}</span> {meta.legalBasis}
                           </p>
                         </div>
 
                         <div>
-                          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Exact consent text shown to you</div>
+                          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">{copy.card.exactTextHeading}</div>
                           <p className="text-sm whitespace-pre-wrap rounded-lg bg-muted/40 p-3 border border-border/40">
                             {row.consent_text}
                           </p>
@@ -357,13 +317,13 @@ const BillingConsents = () => {
 
                         <div>
                           <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2 flex items-center gap-1.5">
-                            <Lock className="h-3 w-3" /> Immutable proof metadata
+                            <Lock className="h-3 w-3" /> {copy.card.immutableHeading}
                           </div>
                           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <ProofRow label="IP address" value={row.ip_address ?? "—"} mono />
-                            <ProofRow label="Price ID" value={row.price_id ?? "—"} mono />
+                            <ProofRow label={copy.card.ipLabel} value={row.ip_address ?? "—"} mono />
+                            <ProofRow label={copy.card.priceIdLabel} value={row.price_id ?? "—"} mono />
                             <ProofRow
-                              label="User agent"
+                              label={copy.card.userAgentLabel}
                               value={row.user_agent ?? "—"}
                               mono
                               className="sm:col-span-2"
@@ -371,7 +331,7 @@ const BillingConsents = () => {
                             />
                             {row.metadata && Object.keys(row.metadata).length > 0 && (
                               <ProofRow
-                                label="Metadata"
+                                label={copy.card.metadataLabel}
                                 value={JSON.stringify(row.metadata, null, 2)}
                                 mono
                                 className="sm:col-span-2"
@@ -382,7 +342,7 @@ const BillingConsents = () => {
                         </div>
 
                         <div className="text-[11px] text-muted-foreground">
-                          Record ID: <span className="font-mono">{row.id}</span> · Stored permanently and cannot be modified.
+                          {copy.page.recordIdLabel} <span className="font-mono">{row.id}</span> · {copy.page.recordIdSuffix}
                         </div>
                       </CardContent>
                     </Card>

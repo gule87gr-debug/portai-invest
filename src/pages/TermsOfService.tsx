@@ -1,8 +1,13 @@
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { LegalPageLayout } from "@/components/LegalPageLayout";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getLegalCopy } from "@/lib/legalI18n";
 
 const TermsOfService = () => {
   usePageTitle("Terms of Service | PortAI");
+  const { language } = useLanguage();
+  const copy = getLegalCopy(language);
+
   return (
     <LegalPageLayout title="Terms of Service" lastUpdated="April 4, 2026">
       <h2>1. Acceptance of Terms</h2>
@@ -80,28 +85,45 @@ const TermsOfService = () => {
         <li>We do not guarantee the accuracy, completeness, or reliability of any AI output</li>
       </ul>
 
-      <h2>9. Subscription, Payments and Right of Withdrawal</h2>
-      <p><strong>Subscription terms.</strong> Certain premium features (Plus and Pro plans) require a paid monthly subscription processed by <strong>Stripe Payments Europe, Ltd.</strong> By subscribing, you agree to:</p>
+      {/* Section 9 — localised. Spanish + English carry official statutory wording. */}
+      <h2>{copy.tos.sectionTitle}</h2>
+      <p>
+        <strong>{copy.tos.subscriptionStrong}</strong>{copy.tos.subscriptionIntro}
+      </p>
       <ul className="list-disc pl-5">
-        <li>Pay all fees associated with your chosen plan in advance, in EUR, on a recurring monthly basis</li>
-        <li>Automatic renewal at the end of each billing period until you cancel</li>
-        <li>Provide accurate, complete and up-to-date billing information</li>
-        <li>Authorize PortAI (via Stripe) to charge your selected payment method on each renewal</li>
+        {copy.tos.subscriptionBullets.map((b, i) => <li key={i}>{b}</li>)}
       </ul>
 
-      <p><strong>Cancelling.</strong> You may cancel at any time from <em>Settings → Subscription</em>. After you cancel, you retain full access to your paid plan until the end of the current billing period; no further charges are made and you are not refunded for the remainder of the period (unless required by mandatory law — see the right of withdrawal below).</p>
+      <p>
+        <strong>{copy.tos.cancellingStrong}</strong>{copy.tos.cancellingBody}
+      </p>
 
-      <p><strong>Plan changes.</strong> Upgrading from Plus to Pro charges only the prorated price difference for the remaining days of the current period. Downgrading from Pro to Plus is scheduled to take effect at the end of the current billing period — you are not charged again until the new plan begins.</p>
+      <p>
+        <strong>{copy.tos.planChangesStrong}</strong>{copy.tos.planChangesBody}
+      </p>
 
-      <p><strong>Right of withdrawal (EU consumers).</strong> If you are a consumer resident in the European Union, you have the right to withdraw from a subscription contract within <strong>14 calendar days</strong> of the initial purchase, without giving any reason, in accordance with Directive 2011/83/EU and the Spanish General Law for the Defence of Consumers and Users (Real Decreto Legislativo 1/2007). To exercise this right, you may either: (a) submit the in-app model withdrawal form available in <em>Settings → My Billing Consents</em> (preferred — your statement is timestamped and acknowledged automatically), or (b) send an email to <a href="mailto:legal@portai-invest.com">legal@portai-invest.com</a> from the address associated with your account, stating your wish to withdraw. We will refund the amount due (after any pro-rata deduction) within 14 days of receipt, using your original payment method (Art. 13(1) of Directive 2011/83/EU).</p>
+      <p>
+        <strong>{copy.tos.withdrawalStrong}</strong>
+        {copy.tos.withdrawalBodyBefore}
+        <a href={`mailto:${copy.tos.withdrawalEmailLabel}`}>{copy.tos.withdrawalEmailLabel}</a>
+        {copy.tos.withdrawalBodyAfter}
+      </p>
 
-      <p><em>Important — partial use during the withdrawal period:</em> By starting to use any premium feature (AI chat beyond the free tier, full quiz results, unlimited watchlists, article analyses or any other paid functionality) during the 14-day window, you expressly acknowledge and request that performance of the digital service begins immediately. If you then exercise your right of withdrawal, we may deduct an amount proportional to the service already provided (Art. 14(3) of Directive 2011/83/EU and Art. 108 of RDL 1/2007). For monthly subscriptions, this typically means a refund of the unused portion of the current month.</p>
+      <p>
+        <em>{copy.tos.partialUseEm}</em>{copy.tos.partialUseBody}
+      </p>
 
-      <p><strong>Refund policy.</strong> Outside of the statutory withdrawal right described above, subscription fees are <strong>non-refundable</strong>. We will, however, consider refund requests on a case-by-case basis for documented technical issues that prevented use of the service for an extended period.</p>
+      <p>
+        <strong>{copy.tos.refundStrong}</strong>{copy.tos.refundBody}
+      </p>
 
-      <p><strong>Price changes.</strong> We reserve the right to change subscription pricing. Existing subscribers will be notified by email at least 30 days before any price change takes effect, and may cancel before the new price is applied.</p>
+      <p>
+        <strong>{copy.tos.priceChangeStrong}</strong>{copy.tos.priceChangeBody}
+      </p>
 
-      <p><strong>Failed payments.</strong> If a renewal payment fails, your subscription will enter a "past due" state and we may attempt to collect again. If we are unable to collect within a reasonable period, your subscription will be cancelled and you will be returned to the Free plan.</p>
+      <p>
+        <strong>{copy.tos.failedPaymentStrong}</strong>{copy.tos.failedPaymentBody}
+      </p>
 
 
       <h2>10. Account Termination</h2>
