@@ -291,7 +291,7 @@ const SettingsPage = () => {
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Change plan</p>
                   {isPlus && (
                     <button
-                      onClick={() => handleChangePlan("pro")}
+                      onClick={() => setPendingPlanChange("pro")}
                       disabled={planChangeLoading !== null}
                       className="flex w-full items-center justify-between gap-3 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
                     >
@@ -304,7 +304,7 @@ const SettingsPage = () => {
                   )}
                   {isPro && (
                     <button
-                      onClick={() => handleChangePlan("plus")}
+                      onClick={() => setPendingPlanChange("plus")}
                       disabled={planChangeLoading !== null}
                       className="flex w-full items-center justify-between gap-3 rounded-lg border border-border px-4 py-2.5 text-sm font-medium hover:bg-accent disabled:opacity-50"
                     >
@@ -333,11 +333,11 @@ const SettingsPage = () => {
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">You're on the <span className="font-medium text-foreground">Free</span> plan.</p>
               <div className="flex flex-col sm:flex-row gap-2">
-                <button onClick={() => handleChangePlan("plus")} disabled={planChangeLoading !== null} className="flex items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20 disabled:opacity-50">
+                <button onClick={() => setPendingPlanChange("plus")} disabled={planChangeLoading !== null} className="flex items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/20 disabled:opacity-50">
                   {planChangeLoading === "plus" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                   Upgrade to Plus — €8.99/mo
                 </button>
-                <button onClick={() => handleChangePlan("pro")} disabled={planChangeLoading !== null} className="flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
+                <button onClick={() => setPendingPlanChange("pro")} disabled={planChangeLoading !== null} className="flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
                   {planChangeLoading === "pro" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
                   Upgrade to Pro — €15.99/mo
                 </button>
@@ -400,6 +400,84 @@ const SettingsPage = () => {
             </div>
           </div>
         )}
+
+        {/* Plan Change Confirmation Modal */}
+        {pendingPlanChange && (() => {
+          const target = pendingPlanChange;
+          const targetLabel = target === "pro" ? "Pro" : "Plus";
+          const targetPrice = target === "pro" ? "€15.99" : "€8.99";
+          // Determine direction: from current tier (free/plus/pro) to target
+          const isUpgrade = (tier === "free") || (tier === "plus" && target === "pro");
+          const isDowngrade = tier === "pro" && target === "plus";
+          const isFromFree = tier === "free";
+
+          return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in p-4">
+              <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={cn("flex h-10 w-10 items-center justify-center rounded-full", isDowngrade ? "bg-warning/20" : "bg-primary/20")}>
+                    {isDowngrade ? <AlertTriangle className="h-5 w-5 text-warning" /> : <Crown className="h-5 w-5 text-primary" />}
+                  </div>
+                  <h2 className="text-lg font-bold">
+                    {isFromFree ? `Subscribe to ${targetLabel}?` : isUpgrade ? `Upgrade to ${targetLabel}?` : `Downgrade to ${targetLabel}?`}
+                  </h2>
+                </div>
+
+                <div className="space-y-3 text-sm mb-6">
+                  <div className="rounded-lg bg-muted/50 p-3 space-y-1">
+                    <div className="flex justify-between"><span className="text-muted-foreground">New plan</span><span className="font-semibold text-foreground">{targetLabel} — {targetPrice}/mo</span></div>
+                    {!isFromFree && (
+                      <div className="flex justify-between"><span className="text-muted-foreground">Current plan</span><span className="text-foreground">{isPro ? "Pro — €15.99/mo" : "Plus — €8.99/mo"}</span></div>
+                    )}
+                  </div>
+
+                  {isFromFree && (
+                    <p className="text-muted-foreground">
+                      You'll be redirected to secure checkout. Billing starts today and renews monthly at {targetPrice}.
+                    </p>
+                  )}
+                  {isUpgrade && !isFromFree && (
+                    <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
+                      <p className="font-semibold text-foreground mb-1">Charged today: prorated difference</p>
+                      <p className="text-muted-foreground text-xs">
+                        You'll only pay the difference between your current plan and {targetLabel} for the remaining days of this billing cycle. Full {targetLabel} access starts immediately and your normal {targetPrice}/mo billing begins on {formattedEnd ?? "your next renewal"}.
+                      </p>
+                    </div>
+                  )}
+                  {isDowngrade && (
+                    <div className="rounded-lg border border-warning/40 bg-warning/10 p-3">
+                      <p className="font-semibold text-foreground mb-1">No charge today</p>
+                      <p className="text-muted-foreground text-xs">
+                        You'll keep full Pro access until {formattedEnd ?? "the end of your current billing period"}. After that, you'll switch to Plus and be billed {targetPrice}/mo.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setPendingPlanChange(null)}
+                    disabled={planChangeLoading !== null}
+                    className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium hover:bg-accent disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={async () => { await handleChangePlan(target); setPendingPlanChange(null); }}
+                    disabled={planChangeLoading !== null}
+                    className={cn(
+                      "flex-1 rounded-xl py-2.5 text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50",
+                      isDowngrade ? "border border-warning/40 bg-warning/20 text-foreground hover:bg-warning/30" : "bg-primary text-primary-foreground hover:bg-primary/90"
+                    )}
+                  >
+                    {planChangeLoading === target && <Loader2 className="h-4 w-4 animate-spin" />}
+                    {isFromFree ? "Continue to Checkout" : isUpgrade ? "Confirm Upgrade" : "Schedule Downgrade"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         <div className="rounded-xl border border-border bg-card p-6">
           <div className="flex items-center gap-3 mb-4">
