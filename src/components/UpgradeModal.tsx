@@ -9,13 +9,13 @@ interface UpgradeModalProps {
 }
 
 const features = [
-  { icon: Zap, text: "Unlimited article analyses" },
-  { icon: TrendingUp, text: "Unlimited watchlists & stocks" },
   { icon: BarChart3, text: "Full investor quiz results" },
-  { icon: MessageCircle, text: "Priority AI chat responses" },
+  { icon: MessageCircle, text: "Unlimited AI chat & image analysis" },
+  { icon: TrendingUp, text: "Unlimited watchlists & stocks" },
+  { icon: Zap, text: "Pro adds unlimited article analyses & price alerts" },
 ];
 
-export const UpgradeModal = ({ open, onClose, title = "Upgrade to Pro", description = "Unlock the full power of PortAI with unlimited features." }: UpgradeModalProps) => {
+export const UpgradeModal = ({ open, onClose, title = "Upgrade your plan", description = "Unlock more of PortAI with Plus or Pro." }: UpgradeModalProps) => {
   const navigate = useNavigate();
 
   if (!open) return null;
@@ -34,7 +34,6 @@ export const UpgradeModal = ({ open, onClose, title = "Upgrade to Pro", descript
 
         <div className="flex items-center gap-2 mb-1">
           <h2 className="text-xl font-bold">{title}</h2>
-          <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-semibold text-primary">40% OFF</span>
         </div>
         <p className="text-sm text-muted-foreground mb-5">{description}</p>
 
@@ -58,7 +57,7 @@ export const UpgradeModal = ({ open, onClose, title = "Upgrade to Pro", descript
             onClick={() => { onClose(); navigate("/pricing"); }}
             className="flex-1 rounded-xl bg-primary py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Upgrade — <span className="line-through opacity-60 mr-1">$16.99</span>$9.99/mo
+            See Plans
           </button>
         </div>
       </div>
