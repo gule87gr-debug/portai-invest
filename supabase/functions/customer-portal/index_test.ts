@@ -7,16 +7,19 @@ const SUPABASE_ANON_KEY =
 
 const url = `${SUPABASE_URL}/functions/v1/customer-portal`;
 
-Deno.test("customer-portal: rejects unauthenticated (error in body)", async () => {
+Deno.test("customer-portal: rejects unauthenticated (200 with {error}, no url)", async () => {
   const res = await fetch(url, {
     method: "POST",
     headers: { apikey: SUPABASE_ANON_KEY, "Content-Type": "application/json" },
     body: "{}",
   });
   const body = await res.json();
-  // customer-portal intentionally returns 200 with { error } so the client surfaces a friendly message.
-  // The contract that matters: never return a portal URL without auth.
+  // Contract: customer-portal returns HTTP 200 with { error } (never a 401) so the
+  // client can surface a friendly message. Critically, no portal URL must ever be
+  // returned without a valid Authorization header.
+  assertEquals(res.status, 200);
   assertExists(body.error);
+  assertEquals(typeof body.error, "string");
   assertEquals(body.url, undefined);
 });
 
