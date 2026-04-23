@@ -235,6 +235,51 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_consents: {
+        Row: {
+          consent_text: string
+          consent_type: string
+          consent_version: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          price_id: string | null
+          tier: string | null
+          user_agent: string | null
+          user_email: string
+          user_id: string
+        }
+        Insert: {
+          consent_text: string
+          consent_type: string
+          consent_version?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          price_id?: string | null
+          tier?: string | null
+          user_agent?: string | null
+          user_email: string
+          user_id: string
+        }
+        Update: {
+          consent_text?: string
+          consent_type?: string
+          consent_version?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          price_id?: string | null
+          tier?: string | null
+          user_agent?: string | null
+          user_email?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       price_alerts: {
         Row: {
           asset_name: string
