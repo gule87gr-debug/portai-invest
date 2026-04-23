@@ -100,9 +100,9 @@ serve(async (req) => {
     if (hasActiveSub) {
       // Pick the highest tier among active subscriptions (pro > plus)
       const rank = { free: 0, plus: 1, pro: 2 } as const;
-      let best = subscriptions.data[0];
+      let best = liveSubs[0];
       let bestTier: "free" | "plus" | "pro" = "free";
-      for (const sub of subscriptions.data) {
+      for (const sub of liveSubs) {
         const item = sub.items.data[0];
         const priceId = item?.price?.id ?? "";
         const productId = typeof item?.price?.product === "string" ? item.price.product : "";
@@ -125,6 +125,11 @@ serve(async (req) => {
       }
       cancelAtPeriodEnd = best.cancel_at_period_end;
       subscriptionId = best.id;
+      subscriptionStatus = best.status;
+    } else {
+      // Fall back to most recent canceled/incomplete sub for status info
+      const fallback = subscriptions.data[0];
+      if (fallback) subscriptionStatus = fallback.status;
     }
 
     // Detect a scheduled plan change (e.g. downgrade to Plus at period end)
@@ -157,6 +162,7 @@ serve(async (req) => {
       subscription_end: subscriptionEnd,
       cancel_at_period_end: cancelAtPeriodEnd,
       subscription_id: subscriptionId,
+      subscription_status: subscriptionStatus,
       scheduled_tier: scheduledTier,
       scheduled_start: scheduledStart,
     }), {
