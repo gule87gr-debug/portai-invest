@@ -348,27 +348,45 @@ const Pricing = () => {
               <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-xs text-muted-foreground mb-4 space-y-2">
                 <p>
                   You will be redirected to <span className="font-medium text-foreground">Stripe</span> to complete payment.
-                  Your subscription will renew automatically each month at {price} until you cancel.
+                  Your subscription renews automatically each month at {price} until you cancel.
                 </p>
                 <p>
                   You can cancel anytime from Settings — your access continues until the end of the current billing period.
-                  EU customers retain their statutory <span className="font-medium text-foreground">14-day right of withdrawal</span> where applicable.
+                  Cancelling does <span className="font-medium text-foreground">not</span> refund the current period.
                 </p>
               </div>
 
-              <label className="flex items-start gap-2 text-xs text-muted-foreground mb-4 cursor-pointer">
+              {/* Mandatory: Terms acceptance */}
+              <label className="flex items-start gap-2 text-xs text-muted-foreground mb-3 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={consent}
-                  onChange={(e) => setConsent(e.target.checked)}
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
                   className="mt-0.5 h-4 w-4 accent-primary"
+                  aria-required="true"
                 />
                 <span>
-                  I understand I will be charged {price} today and every month until I cancel. I have read and accept the{" "}
+                  <span className="font-medium text-foreground">Required.</span> I will be charged {price} today and every month until I cancel. I have read and accept the{" "}
                   <Link to="/terms-of-service" target="_blank" className="underline">Terms of Service</Link> and{" "}
                   <Link to="/privacy-policy" target="_blank" className="underline">Privacy Policy</Link>.
                 </span>
               </label>
+
+              {/* Optional: EU Art. 16(m) waiver — only ticking this box loses the 14-day right */}
+              <label className="flex items-start gap-2 text-xs text-muted-foreground mb-2 cursor-pointer rounded-md border border-border bg-background/50 p-2">
+                <input
+                  type="checkbox"
+                  checked={euWaiver}
+                  onChange={(e) => setEuWaiver(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-primary"
+                />
+                <span>
+                  <span className="font-medium text-foreground">Optional (EU consumers):</span> I expressly request immediate access to the digital service and acknowledge that, by doing so, I lose my <span className="font-medium text-foreground">14-day right of withdrawal</span> once performance has fully begun.
+                </span>
+              </label>
+              <p className="text-[11px] text-muted-foreground/80 mb-4 pl-6">
+                If you leave this unticked, you keep your full statutory 14-day refund right (with a deduction proportional to any service already used).
+              </p>
 
               <div className="flex gap-3">
                 <button
@@ -380,7 +398,7 @@ const Pricing = () => {
                 </button>
                 <button
                   onClick={confirmUpgrade}
-                  disabled={inFlight || !consent}
+                  disabled={inFlight || !acceptedTerms}
                   className="flex-1 rounded-xl bg-primary py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {inFlight && <Loader2 className="h-4 w-4 animate-spin" />}
