@@ -52,7 +52,24 @@ const SettingsPage = () => {
   const handleChangePlan = async (target: "plus" | "pro") => {
     setPlanChangeLoading(target);
     try {
-      const { data, error } = await supabase.functions.invoke("create-checkout", { body: { tier: target } });
+      const targetLabel = target === "pro" ? "Pro" : "Plus";
+      const targetPrice = target === "pro" ? "€15.99" : "€8.99";
+      const fromLabel = isPro ? "Pro" : isPlus ? "Plus" : "Free";
+      // Verbatim consent recorded server-side as legal proof of the user's
+      // explicit confirmation in the in-app plan-change modal.
+      const consentText = [
+        `I confirm changing my PortAI subscription from ${fromLabel} to ${targetLabel} (${targetPrice}/month, billed monthly via Stripe).`,
+        `I have read and accept the Terms of Service and Privacy Policy.`,
+        `For plan changes from an existing paid subscription, my original 14-day right of withdrawal acknowledgment from initial signup remains on file; this change is initiated from my authenticated account in Settings.`,
+      ].join(" ");
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: {
+          tier: target,
+          accepted_terms: true,
+          eu_withdrawal_waiver: false,
+          consent_text: consentText,
+        },
+      });
       if (error) throw error;
       if (data?.action === "upgraded") {
         toast.success("Plan upgraded! You've only been charged the prorated difference.");
