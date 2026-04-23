@@ -60,6 +60,12 @@ const CONSENT_LABELS: Record<string, ConsentMeta> = {
     proves: "You reactivated auto-renewal on an existing subscription. Original consent and pricing terms continue to apply.",
     legalBasis: "Continuation of an existing distance contract (no new pre-contractual information required).",
   },
+  eu_withdrawal_exercised: {
+    label: "EU 14-day withdrawal — Exercised",
+    tone: "destructive",
+    proves: "You formally exercised your statutory 14-day right of withdrawal using the in-app model form. Our legal team must process a pro-rata refund within 14 days of receipt.",
+    legalBasis: "Directive 2011/83/EU Art. 9, Art. 11 (means of withdrawal), Art. 13(1) (refund deadline) & Art. 14(3) (pro-rata deduction); Spanish RDL 1/2007 Art. 102 & 108.",
+  },
 };
 
 const formatDate = (iso: string) =>
