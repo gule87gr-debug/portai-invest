@@ -15,7 +15,7 @@ const SettingsPage = () => {
   const { profile, setProfile, setShowTutorial } = useApp();
   const navigate = useNavigate();
   usePageTitle("Settings | PortAI");
-  const { tier, isPaid, isPlus, isPro, subscriptionEnd, cancelAtPeriodEnd, subscriptionId, scheduledTier, scheduledStart, loading: subLoading, refresh } = useSubscription();
+  const { tier, isPaid, isPlus, isPro, subscriptionEnd, cancelAtPeriodEnd, subscriptionId, subscriptionStatus, scheduledTier, scheduledStart, loading: subLoading, refresh } = useSubscription();
 
   let language: Language, setLanguage: (l: Language) => void, t: (key: string) => string, langNames: Record<Language, string>;
   try {
@@ -436,15 +436,43 @@ const SettingsPage = () => {
           const isDowngrade = tier === "pro" && target === "plus";
           const isFromFree = tier === "free";
 
+          // Subscription status & block conditions
+          const status = subscriptionStatus ?? (isPaid ? "active" : null);
+          const statusLabel = status
+            ? status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+            : "None";
+          const statusTone =
+            status === "active" || status === "trialing" ? "primary"
+            : status === "past_due" ? "warning"
+            : status === "canceled" || status === "incomplete_expired" ? "loss"
+            : "muted";
+
+          // Block conditions
+          const hasPendingChange = !!scheduledTier && scheduledTier !== tier;
+          const hasPendingCancel = cancelAtPeriodEnd;
+          const isUnpaidStatus = status === "past_due" || status === "unpaid" || status === "incomplete";
+          const isCanceledStatus = status === "canceled" || status === "incomplete_expired";
+          // Free→paid is always allowed; otherwise block when there's a pending change/cancel or status problem
+          const blocked = !isFromFree && (hasPendingChange || hasPendingCancel || isUnpaidStatus || isCanceledStatus);
+          const blockReason = hasPendingChange
+            ? `A switch to ${scheduledTier === "pro" ? "Pro" : "Plus"} is already scheduled${scheduledStart ? ` for ${new Date(scheduledStart).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}` : ""}. Manage it via Manage Billing first.`
+            : hasPendingCancel
+            ? `Your subscription is set to cancel at period end. Re-subscribe before changing plans.`
+            : isUnpaidStatus
+            ? `Your subscription has an unpaid invoice (${statusLabel}). Please update your payment method via Manage Billing.`
+            : isCanceledStatus
+            ? `Your subscription is ${statusLabel}. Subscribe again from the Pricing page.`
+            : "";
+
           return (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in p-4">
               <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className={cn("flex h-10 w-10 items-center justify-center rounded-full", isDowngrade ? "bg-warning/20" : "bg-primary/20")}>
-                    {isDowngrade ? <AlertTriangle className="h-5 w-5 text-warning" /> : <Crown className="h-5 w-5 text-primary" />}
+                  <div className={cn("flex h-10 w-10 items-center justify-center rounded-full", blocked ? "bg-loss/20" : isDowngrade ? "bg-warning/20" : "bg-primary/20")}>
+                    {blocked ? <AlertTriangle className="h-5 w-5 text-loss" /> : isDowngrade ? <AlertTriangle className="h-5 w-5 text-warning" /> : <Crown className="h-5 w-5 text-primary" />}
                   </div>
                   <h2 className="text-lg font-bold">
-                    {isFromFree ? `Subscribe to ${targetLabel}?` : isUpgrade ? `Upgrade to ${targetLabel}?` : `Downgrade to ${targetLabel}?`}
+                    {blocked ? "Cannot change plan" : isFromFree ? `Subscribe to ${targetLabel}?` : isUpgrade ? `Upgrade to ${targetLabel}?` : `Downgrade to ${targetLabel}?`}
                   </h2>
                 </div>
 
@@ -454,14 +482,32 @@ const SettingsPage = () => {
                     {!isFromFree && (
                       <div className="flex justify-between"><span className="text-muted-foreground">Current plan</span><span className="text-foreground">{isPro ? "Pro — €15.99/mo" : "Plus — €8.99/mo"}</span></div>
                     )}
+                    <div className="flex justify-between items-center pt-1">
+                      <span className="text-muted-foreground">Status</span>
+                      <span className={cn(
+                        "rounded-full px-2 py-0.5 text-xs font-semibold",
+                        statusTone === "primary" && "bg-primary/15 text-primary",
+                        statusTone === "warning" && "bg-warning/20 text-warning",
+                        statusTone === "loss" && "bg-loss/20 text-loss",
+                        statusTone === "muted" && "bg-muted text-muted-foreground"
+                      )}>
+                        {statusLabel}
+                      </span>
+                    </div>
                   </div>
 
-                  {isFromFree && (
+                  {blocked && (
+                    <div className="rounded-lg border border-loss/40 bg-loss/10 p-3">
+                      <p className="font-semibold text-foreground mb-1">Action required</p>
+                      <p className="text-muted-foreground text-xs">{blockReason}</p>
+                    </div>
+                  )}
+                  {!blocked && isFromFree && (
                     <p className="text-muted-foreground">
                       You'll be redirected to secure checkout. Billing starts today and renews monthly at {targetPrice}.
                     </p>
                   )}
-                  {isUpgrade && !isFromFree && (
+                  {!blocked && isUpgrade && !isFromFree && (
                     <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
                       <p className="font-semibold text-foreground mb-1">Charged today: prorated difference</p>
                       <p className="text-muted-foreground text-xs">
@@ -469,7 +515,7 @@ const SettingsPage = () => {
                       </p>
                     </div>
                   )}
-                  {isDowngrade && (
+                  {!blocked && isDowngrade && (
                     <div className="rounded-lg border border-warning/40 bg-warning/10 p-3">
                       <p className="font-semibold text-foreground mb-1">No charge today</p>
                       <p className="text-muted-foreground text-xs">
@@ -485,19 +531,29 @@ const SettingsPage = () => {
                     disabled={planChangeLoading !== null}
                     className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium hover:bg-accent disabled:opacity-50"
                   >
-                    Cancel
+                    {blocked ? "Close" : "Cancel"}
                   </button>
-                  <button
-                    onClick={async () => { await handleChangePlan(target); setPendingPlanChange(null); }}
-                    disabled={planChangeLoading !== null}
-                    className={cn(
-                      "flex-1 rounded-xl py-2.5 text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50",
-                      isDowngrade ? "border border-warning/40 bg-warning/20 text-foreground hover:bg-warning/30" : "bg-primary text-primary-foreground hover:bg-primary/90"
-                    )}
-                  >
-                    {planChangeLoading === target && <Loader2 className="h-4 w-4 animate-spin" />}
-                    {isFromFree ? "Continue to Checkout" : isUpgrade ? "Confirm Upgrade" : "Schedule Downgrade"}
-                  </button>
+                  {!blocked && (
+                    <button
+                      onClick={async () => { await handleChangePlan(target); setPendingPlanChange(null); }}
+                      disabled={planChangeLoading !== null}
+                      className={cn(
+                        "flex-1 rounded-xl py-2.5 text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50",
+                        isDowngrade ? "border border-warning/40 bg-warning/20 text-foreground hover:bg-warning/30" : "bg-primary text-primary-foreground hover:bg-primary/90"
+                      )}
+                    >
+                      {planChangeLoading === target && <Loader2 className="h-4 w-4 animate-spin" />}
+                      {isFromFree ? "Continue to Checkout" : isUpgrade ? "Confirm Upgrade" : "Schedule Downgrade"}
+                    </button>
+                  )}
+                  {blocked && (
+                    <button
+                      onClick={async () => { setPendingPlanChange(null); await handleManageBilling(); }}
+                      className="flex-1 rounded-xl bg-primary py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 flex items-center justify-center gap-2"
+                    >
+                      <CreditCard className="h-4 w-4" /> Manage Billing
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
