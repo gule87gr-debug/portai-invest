@@ -42,25 +42,46 @@ const Pricing = () => {
   const navigate = useNavigate();
   const [checkoutLoading, setCheckoutLoading] = useState<SubscriptionTier | null>(null);
   const [pendingTarget, setPendingTarget] = useState<"plus" | "pro" | null>(null);
-  const [consent, setConsent] = useState(false);
+  // LEGAL: terms acceptance is mandatory.
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  // LEGAL (EU Art. 16(m)): the 14-day right of withdrawal is only lost if the user
+  // EXPRESSLY waives it. We default to false so users keep the refund right unless
+  // they tick this box. We allow checkout either way — the box is informational, not blocking.
+  const [euWaiver, setEuWaiver] = useState(false);
   const [reactivating, setReactivating] = useState(false);
 
   const beginUpgradeFlow = (target: "plus" | "pro") => {
-    setConsent(false);
+    setAcceptedTerms(false);
+    setEuWaiver(false);
     setPendingTarget(target);
   };
 
   const confirmUpgrade = async () => {
     if (!pendingTarget) return;
-    if (!consent) {
-      toast.error("Please confirm the billing terms before continuing.");
+    if (!acceptedTerms) {
+      toast.error("Please accept the Terms of Service and Privacy Policy to continue.");
       return;
     }
     const target = pendingTarget;
+    const targetLabel = target === "pro" ? "Pro" : "Plus";
+    const price = TIER_PRICE[target];
+    // Verbatim consent text recorded server-side as legal proof.
+    const consentText = [
+      `I subscribe to PortAI ${targetLabel} at ${price}/month, billed monthly via Stripe.`,
+      `I have read and accept the Terms of Service and Privacy Policy.`,
+      euWaiver
+        ? `I expressly request that performance of the digital service begins immediately and acknowledge that, by doing so, I lose my 14-day right of withdrawal once performance has fully begun (Directive 2011/83/EU, Art. 16(m)).`
+        : `I have NOT waived my 14-day right of withdrawal. I may request a full refund within 14 calendar days of purchase, subject to a deduction proportional to any service already used.`,
+    ].join(" ");
     setCheckoutLoading(target);
     try {
       const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { tier: target },
+        body: {
+          tier: target,
+          accepted_terms: acceptedTerms,
+          eu_withdrawal_waiver: euWaiver,
+          consent_text: consentText,
+        },
       });
       if (error) throw error;
 
@@ -103,6 +124,8 @@ const Pricing = () => {
           ? "A plan change is already scheduled. Manage it from Settings before changing again."
           : code === "subscription_pending_cancel"
           ? "Your subscription is set to cancel. Reactivate it from Settings before changing plans."
+          : code === "terms_not_accepted"
+          ? "You must accept the Terms of Service and Privacy Policy to subscribe."
           : e?.message || "Checkout failed — please try again.";
       toast.error(msg);
     } finally {
