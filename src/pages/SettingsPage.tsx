@@ -448,14 +448,20 @@ const SettingsPage = () => {
             : "muted";
 
           // Block conditions
-          const hasPendingChange = !!scheduledTier && scheduledTier !== tier;
+          const hasResolvedPendingChange = !!scheduledTier && scheduledTier !== tier;
+          // Edge function reported queued changes but couldn't map the next phase to a known tier
+          const hasUnresolvedPendingChange =
+            !hasResolvedPendingChange && (scheduledChangesCount ?? 0) > 0;
+          const hasPendingChange = hasResolvedPendingChange || hasUnresolvedPendingChange;
           const hasPendingCancel = cancelAtPeriodEnd;
           const isUnpaidStatus = status === "past_due" || status === "unpaid" || status === "incomplete";
           const isCanceledStatus = status === "canceled" || status === "incomplete_expired";
           // Free→paid is always allowed; otherwise block when there's a pending change/cancel or status problem
           const blocked = !isFromFree && (hasPendingChange || hasPendingCancel || isUnpaidStatus || isCanceledStatus);
-          const blockReason = hasPendingChange
+          const blockReason = hasResolvedPendingChange
             ? `A switch to ${scheduledTier === "pro" ? "Pro" : "Plus"} is already scheduled${scheduledStart ? ` for ${new Date(scheduledStart).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}` : ""}. Manage it via Manage Billing first.`
+            : hasUnresolvedPendingChange
+            ? `A plan change is queued on your subscription, but we couldn't read its details. Open Manage Billing for full information.`
             : hasPendingCancel
             ? `Your subscription is set to cancel at period end. Re-subscribe before changing plans.`
             : isUnpaidStatus
@@ -496,7 +502,7 @@ const SettingsPage = () => {
                     </div>
                   </div>
 
-                  {blocked && hasPendingChange && (() => {
+                  {blocked && hasResolvedPendingChange && (() => {
                     const fromLabel = tier === "pro" ? "Pro" : tier === "plus" ? "Plus" : "Free";
                     const fromPrice = tier === "pro" ? "€15.99/mo" : tier === "plus" ? "€8.99/mo" : "€0";
                     const toLabel = scheduledTier === "pro" ? "Pro" : scheduledTier === "plus" ? "Plus" : "Free";
@@ -552,6 +558,25 @@ const SettingsPage = () => {
                       </div>
                     );
                   })()}
+                  {blocked && hasUnresolvedPendingChange && (
+                    <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 space-y-2">
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="h-4 w-4 text-warning mt-0.5 shrink-0" />
+                        <div>
+                          <p className="font-semibold text-foreground mb-1">Pending change details unavailable</p>
+                          <p className="text-muted-foreground text-xs">
+                            {(scheduledChangesCount ?? 0) > 1
+                              ? `${scheduledChangesCount} plan changes are queued on your subscription, but we couldn't read the next phase's plan or date.`
+                              : "A plan change is queued on your subscription, but we couldn't read the next phase's plan or date."}
+                            {" "}This usually means the upcoming price isn't recognized by the app.
+                          </p>
+                          <p className="text-muted-foreground text-xs mt-1">
+                            Open <span className="font-medium text-foreground">Manage Billing</span> to see the exact tier, amount, and effective date.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   {blocked && !hasPendingChange && (
                     <div className="rounded-lg border border-loss/40 bg-loss/10 p-3">
                       <p className="font-semibold text-foreground mb-1">Action required</p>
