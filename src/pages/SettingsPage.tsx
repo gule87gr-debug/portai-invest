@@ -385,7 +385,7 @@ const SettingsPage = () => {
                 Your subscription will resume and you will <span className="font-semibold text-foreground">not</span> be charged again until your next billing cycle{formattedEnd ? ` (${formattedEnd})` : ""}.
               </p>
               <p className="text-xs text-muted-foreground mb-6">
-                By confirming, you agree to resume the Pro plan at $9.99/month, billed at the start of each new billing period.
+                By confirming, you agree to resume your current plan ({isPro ? "Pro €15.99/month" : "Plus €8.99/month"}), billed at the start of each new billing period.
               </p>
               <div className="flex gap-3">
                 <button onClick={() => setShowReactivateModal(false)} className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium hover:bg-accent">
