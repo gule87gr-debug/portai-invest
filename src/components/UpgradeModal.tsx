@@ -1,4 +1,4 @@
-import { Crown, X, Zap, TrendingUp, BarChart3, MessageCircle } from "lucide-react";
+import { Crown, X, Zap, TrendingUp, BarChart3, MessageCircle, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface UpgradeModalProps {
@@ -40,13 +40,33 @@ export const UpgradeModal = ({ open, onClose, title = "Upgrade your plan", descr
         </div>
         <p className="text-sm text-muted-foreground mb-5">{description}</p>
 
-        <div className="space-y-3 mb-6">
-          {features.map((f, i) => (
-            <div key={i} className="flex items-center gap-3 text-sm">
-              <f.icon className="h-4 w-4 text-primary shrink-0" />
-              <span>{f.text}</span>
+        <div className="space-y-4 mb-6">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-wide text-primary mb-2 flex items-center gap-2">
+              <Sparkles className="h-3.5 w-3.5" /> Plus — €8.99/mo
             </div>
-          ))}
+            <div className="space-y-2 pl-1">
+              {plusFeatures.map((f, i) => (
+                <div key={i} className="flex items-center gap-3 text-sm">
+                  <f.icon className="h-4 w-4 text-primary shrink-0" />
+                  <span>{f.text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="border-t border-border pt-3">
+            <div className="text-xs font-semibold uppercase tracking-wide text-primary mb-2 flex items-center gap-2">
+              <Crown className="h-3.5 w-3.5" /> Pro — €15.99/mo (everything in Plus, and:)
+            </div>
+            <div className="space-y-2 pl-1">
+              {proExtras.map((f, i) => (
+                <div key={i} className="flex items-center gap-3 text-sm">
+                  <f.icon className="h-4 w-4 text-primary shrink-0" />
+                  <span>{f.text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="flex gap-3">
