@@ -15,6 +15,7 @@ type SubscriptionState = {
   subscriptionEnd: string | null;
   cancelAtPeriodEnd: boolean;
   subscriptionId: string | null;
+  subscriptionStatus: string | null;
   scheduledTier: SubscriptionTier | null;
   scheduledStart: string | null;
   dailyAnalysesUsed: number;
@@ -30,6 +31,7 @@ export const useSubscription = (): SubscriptionState => {
   const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null);
   const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(false);
   const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
   const [scheduledTier, setScheduledTier] = useState<SubscriptionTier | null>(null);
   const [scheduledStart, setScheduledStart] = useState<string | null>(null);
   const [dailyAnalysesUsed, setDailyAnalysesUsed] = useState(0);
@@ -43,6 +45,7 @@ export const useSubscription = (): SubscriptionState => {
       setSubscriptionEnd(data?.subscription_end ?? null);
       setCancelAtPeriodEnd(data?.cancel_at_period_end ?? false);
       setSubscriptionId(data?.subscription_id ?? null);
+      setSubscriptionStatus(data?.subscription_status ?? null);
       setScheduledTier((data?.scheduled_tier as SubscriptionTier | null) ?? null);
       setScheduledStart(data?.scheduled_start ?? null);
     } catch {
@@ -91,6 +94,7 @@ export const useSubscription = (): SubscriptionState => {
     subscriptionEnd,
     cancelAtPeriodEnd,
     subscriptionId,
+    subscriptionStatus,
     scheduledTier,
     scheduledStart,
     dailyAnalysesUsed,
