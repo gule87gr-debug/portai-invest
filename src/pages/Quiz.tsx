@@ -19,7 +19,7 @@ const Quiz = () => {
   const [showResults, setShowResults] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const { watchlists, addWatchlist } = useApp();
-  const { isPro } = useSubscription();
+  const { hasFullQuiz } = useSubscription();
   const navigate = useNavigate();
 
   const steps = [
@@ -86,11 +86,11 @@ const Quiz = () => {
             </div>
             <h2 className="text-center text-2xl font-bold">{t("yourPersonalizedPortfolio")}</h2>
             <p className="mx-auto mt-3 max-w-lg text-center text-sm leading-relaxed text-muted-foreground">
-              {isPro ? portfolio.rationale : "Your personalized portfolio is ready! Upgrade to Pro to unlock your full results."}
+              {hasFullQuiz ? portfolio.rationale : "Your personalized portfolio is ready! Upgrade to Plus or Pro to unlock your full results."}
             </p>
 
             <div className="relative">
-              {!isPro && (
+              {!hasFullQuiz && (
                 <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-xl bg-background/80 backdrop-blur-sm">
                   <Lock className="h-8 w-8 text-primary mb-3" />
                   <h3 className="text-lg font-bold mb-1">Results Locked</h3>
@@ -101,7 +101,7 @@ const Quiz = () => {
                 </div>
               )}
 
-              <div className={cn(!isPro && "blur-md select-none pointer-events-none")}>
+              <div className={cn(!hasFullQuiz && "blur-md select-none pointer-events-none")}>
                 <h3 className="mb-4 mt-8 text-lg font-semibold">{t("recommendedAllocations")}</h3>
                 <div className="space-y-4">
                   {portfolio.allocations.map((a, i) => (
@@ -146,7 +146,7 @@ const Quiz = () => {
               <button onClick={() => { setShowResults(false); setStep(0); setAnswers({}); }} className="flex-1 rounded-xl border border-border bg-card py-3 text-sm font-medium transition-colors hover:bg-accent">
                 {t("retakeQuiz")}
               </button>
-              {isPro && (
+              {hasFullQuiz && (
                 <button onClick={handleBuildPortfolio} className="flex-1 rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
                   {t("buildThisPortfolio")}
                 </button>

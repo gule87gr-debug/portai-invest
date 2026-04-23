@@ -1,8 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+export type SubscriptionTier = "free" | "plus" | "pro";
+
 type SubscriptionState = {
+  tier: SubscriptionTier;
   isPro: boolean;
+  isPlus: boolean;
+  isPaid: boolean;
+  hasUnlimitedChat: boolean;
+  hasUnlimitedWatchlists: boolean;
+  hasFullQuiz: boolean;
   loading: boolean;
   subscriptionEnd: string | null;
   cancelAtPeriodEnd: boolean;
@@ -15,7 +23,7 @@ type SubscriptionState = {
 const FREE_DAILY_ANALYSES = 3;
 
 export const useSubscription = (): SubscriptionState => {
-  const [isPro, setIsPro] = useState(false);
+  const [tier, setTier] = useState<SubscriptionTier>("free");
   const [loading, setLoading] = useState(true);
   const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null);
   const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(false);
@@ -26,12 +34,13 @@ export const useSubscription = (): SubscriptionState => {
     try {
       const { data, error } = await supabase.functions.invoke("check-subscription");
       if (error) throw error;
-      setIsPro(data?.subscribed ?? false);
+      const nextTier: SubscriptionTier = data?.tier ?? (data?.subscribed ? "pro" : "free");
+      setTier(nextTier);
       setSubscriptionEnd(data?.subscription_end ?? null);
       setCancelAtPeriodEnd(data?.cancel_at_period_end ?? false);
       setSubscriptionId(data?.subscription_id ?? null);
     } catch {
-      setIsPro(false);
+      setTier("free");
     }
     setLoading(false);
   }, []);
@@ -59,13 +68,25 @@ export const useSubscription = (): SubscriptionState => {
     return () => clearInterval(interval);
   }, [refresh, checkSubscription]);
 
+  const isPro = tier === "pro";
+  const isPlus = tier === "plus";
+  const isPaid = isPro || isPlus;
+
   return {
+    tier,
     isPro,
+    isPlus,
+    isPaid,
+    // Plus & Pro both grant these:
+    hasUnlimitedChat: isPaid,
+    hasUnlimitedWatchlists: isPaid,
+    hasFullQuiz: isPaid,
     loading,
     subscriptionEnd,
     cancelAtPeriodEnd,
     subscriptionId,
     dailyAnalysesUsed,
+    // Only Pro gets unlimited article analyses; Plus uses free limit
     canAnalyze: isPro || dailyAnalysesUsed < FREE_DAILY_ANALYSES,
     refresh,
   };

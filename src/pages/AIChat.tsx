@@ -109,14 +109,14 @@ const AIChat = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { isPro } = useSubscription();
+  const { isPro, hasUnlimitedChat } = useSubscription();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState("");
   const welcomeShown = messages.length === 0;
   const suggestions = [t("suggestETF"), t("suggestDiversify"), t("suggestPE"), t("suggestDCA")];
 
-  const msgLimitReached = !isPro && msgUsage >= FREE_MSG_LIMIT;
-  const imgLimitReached = !isPro && imgUsage >= FREE_IMG_LIMIT;
+  const msgLimitReached = !hasUnlimitedChat && msgUsage >= FREE_MSG_LIMIT;
+  const imgLimitReached = !hasUnlimitedChat && imgUsage >= FREE_IMG_LIMIT;
 
   const loadUsage = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -187,14 +187,14 @@ const AIChat = () => {
     if ((!text.trim() && !imagePreview) || isTyping) return;
     const hasImage = !!imagePreview;
 
-    if (!isPro) {
+    if (!hasUnlimitedChat) {
       if (msgLimitReached) {
-        setUpgradeReason(`You've used all ${FREE_MSG_LIMIT} free messages (resets every ${FREE_MSG_WINDOW_HOURS}h). Upgrade to Pro for unlimited messages.`);
+        setUpgradeReason(`You've used all ${FREE_MSG_LIMIT} free messages (resets every ${FREE_MSG_WINDOW_HOURS}h). Upgrade to Plus or Pro for unlimited messages.`);
         setShowUpgrade(true);
         return;
       }
       if (hasImage && imgLimitReached) {
-        setUpgradeReason(`You've used all ${FREE_IMG_LIMIT} free image analyses (resets every ${FREE_IMG_WINDOW_HOURS}h). Upgrade to Pro for unlimited image analyses.`);
+        setUpgradeReason(`You've used all ${FREE_IMG_LIMIT} free image analyses (resets every ${FREE_IMG_WINDOW_HOURS}h). Upgrade to Plus or Pro for unlimited image analyses.`);
         setShowUpgrade(true);
         return;
       }
@@ -289,7 +289,7 @@ const AIChat = () => {
 
       <DisclaimerBanner />
 
-      {!isPro && (
+      {!hasUnlimitedChat && (
         <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
           <span className={cn(msgLimitReached && "text-destructive font-semibold")}>
             Messages: {msgUsage}/{FREE_MSG_LIMIT} (resets every {FREE_MSG_WINDOW_HOURS}h)
@@ -303,14 +303,14 @@ const AIChat = () => {
       {msgLimitReached && (
         <div className="mt-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3 flex items-center gap-2 text-sm">
           <Crown className="h-4 w-4 text-primary shrink-0" />
-          <span>You've reached your free message limit ({FREE_MSG_LIMIT} every {FREE_MSG_WINDOW_HOURS}h). <a href="/pricing" className="text-primary font-semibold hover:underline">Upgrade to Pro</a> for unlimited messages.</span>
+          <span>You've reached your free message limit ({FREE_MSG_LIMIT} every {FREE_MSG_WINDOW_HOURS}h). <a href="/pricing" className="text-primary font-semibold hover:underline">Upgrade to Plus or Pro</a> for unlimited messages.</span>
         </div>
       )}
 
       {imgLimitReached && !msgLimitReached && (
         <div className="mt-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3 flex items-center gap-2 text-sm">
           <Crown className="h-4 w-4 text-primary shrink-0" />
-          <span>You've used all {FREE_IMG_LIMIT} free image analyses today. <a href="/pricing" className="text-primary font-semibold hover:underline">Upgrade to Pro</a> for unlimited analyses.</span>
+          <span>You've used all {FREE_IMG_LIMIT} free image analyses today. <a href="/pricing" className="text-primary font-semibold hover:underline">Upgrade to Plus or Pro</a> for unlimited analyses.</span>
         </div>
       )}
 

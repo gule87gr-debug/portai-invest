@@ -36,6 +36,20 @@ serve(async (req) => {
       });
     }
 
+    // Determine which tier to checkout (default: pro for backwards compat)
+    let tier: "plus" | "pro" = "pro";
+    try {
+      const body = await req.json();
+      if (body?.tier === "plus" || body?.tier === "pro") tier = body.tier;
+    } catch {
+      // No body provided — keep default
+    }
+
+    const PRICE_BY_TIER: Record<"plus" | "pro", string> = {
+      plus: "price_1TPM56PJefLcxc6CzfD5CUaS", // €8.99/mo
+      pro: "price_1TPM5RPJefLcxc6Cap03GhJm",  // €18.99/mo
+    };
+
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     let customerId;
@@ -47,7 +61,7 @@ serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
-      line_items: [{ price: "price_1TFyVKPJefLcxc6Cn1iwdSTk", quantity: 1 }],
+      line_items: [{ price: PRICE_BY_TIER[tier], quantity: 1 }],
       mode: "subscription",
       success_url: `${origin}/upgrade-success`,
       cancel_url: `${origin}/pricing`,

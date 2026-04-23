@@ -147,12 +147,28 @@ serve(async (req) => {
       const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
       if (stripeKey && userData.user.email) {
         try {
+          // Only the Pro tier grants unlimited article analyses.
+          // Plus ("price_1TPM56PJefLcxc6CzfD5CUaS" / "prod_UO8LzRA6kfvdwm")
+          // remains on the free daily quota for this feature.
+          const PRO_PRICE_IDS = new Set([
+            "price_1TFyVKPJefLcxc6Cn1iwdSTk",
+            "price_1TPM5RPJefLcxc6Cap03GhJm",
+          ]);
+          const PRO_PRODUCT_ID = "prod_UEROAe01UbaEpK";
           const Stripe = (await import("https://esm.sh/stripe@18.5.0")).default;
           const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
           const customers = await stripe.customers.list({ email: userData.user.email, limit: 1 });
           if (customers.data.length > 0) {
-            const subs = await stripe.subscriptions.list({ customer: customers.data[0].id, status: "active", limit: 1 });
-            isPro = subs.data.length > 0;
+            const subs = await stripe.subscriptions.list({ customer: customers.data[0].id, status: "active", limit: 5 });
+            for (const sub of subs.data) {
+              const item = sub.items.data[0];
+              const priceId = item?.price?.id ?? "";
+              const productId = typeof item?.price?.product === "string" ? item.price.product : "";
+              if (PRO_PRICE_IDS.has(priceId) || productId === PRO_PRODUCT_ID) {
+                isPro = true;
+                break;
+              }
+            }
           }
         } catch {
           // Default to free tier

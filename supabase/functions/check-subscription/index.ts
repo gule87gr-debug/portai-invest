@@ -7,6 +7,20 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Map of Stripe price IDs to subscription tiers
+const PRICE_TO_TIER: Record<string, "plus" | "pro"> = {
+  // Plus
+  "price_1TPM56PJefLcxc6CzfD5CUaS": "plus",
+  // Pro (legacy USD price + new EUR price)
+  "price_1TFyVKPJefLcxc6Cn1iwdSTk": "pro",
+  "price_1TPM5RPJefLcxc6Cap03GhJm": "pro",
+};
+
+const PRODUCT_TO_TIER: Record<string, "plus" | "pro"> = {
+  "prod_UO8LzRA6kfvdwm": "plus",
+  "prod_UEROAe01UbaEpK": "pro",
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -45,6 +59,7 @@ serve(async (req) => {
     if (ADMIN_EMAILS.includes(user.email.toLowerCase())) {
       return new Response(JSON.stringify({
         subscribed: true,
+        tier: "pro",
         subscription_end: null,
         cancel_at_period_end: false,
         subscription_id: "admin_override",
@@ -58,7 +73,7 @@ serve(async (req) => {
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
 
     if (customers.data.length === 0) {
-      return new Response(JSON.stringify({ subscribed: false }), {
+      return new Response(JSON.stringify({ subscribed: false, tier: "free" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
@@ -68,18 +83,33 @@ serve(async (req) => {
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
       status: "active",
-      limit: 1,
+      limit: 5,
     });
 
     const hasActiveSub = subscriptions.data.length > 0;
-    let subscriptionEnd = null;
+    let tier: "free" | "plus" | "pro" = "free";
+    let subscriptionEnd: string | null = null;
     let cancelAtPeriodEnd = false;
-    let subscriptionId = null;
+    let subscriptionId: string | null = null;
 
     if (hasActiveSub) {
-      const subscription = subscriptions.data[0];
+      // Pick the highest tier among active subscriptions (pro > plus)
+      const rank = { free: 0, plus: 1, pro: 2 } as const;
+      let best = subscriptions.data[0];
+      let bestTier: "free" | "plus" | "pro" = "free";
+      for (const sub of subscriptions.data) {
+        const item = sub.items.data[0];
+        const priceId = item?.price?.id ?? "";
+        const productId = typeof item?.price?.product === "string" ? item.price.product : "";
+        const t = PRICE_TO_TIER[priceId] ?? PRODUCT_TO_TIER[productId] ?? "pro";
+        if (rank[t] >= rank[bestTier]) {
+          bestTier = t;
+          best = sub;
+        }
+      }
+      tier = bestTier;
       try {
-        const endVal = subscription.current_period_end;
+        const endVal = best.current_period_end;
         if (typeof endVal === 'number') {
           subscriptionEnd = new Date(endVal * 1000).toISOString();
         } else if (typeof endVal === 'string') {
@@ -88,12 +118,13 @@ serve(async (req) => {
       } catch {
         subscriptionEnd = null;
       }
-      cancelAtPeriodEnd = subscription.cancel_at_period_end;
-      subscriptionId = subscription.id;
+      cancelAtPeriodEnd = best.cancel_at_period_end;
+      subscriptionId = best.id;
     }
 
     return new Response(JSON.stringify({
       subscribed: hasActiveSub,
+      tier,
       subscription_end: subscriptionEnd,
       cancel_at_period_end: cancelAtPeriodEnd,
       subscription_id: subscriptionId,
