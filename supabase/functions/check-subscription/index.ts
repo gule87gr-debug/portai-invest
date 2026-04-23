@@ -143,17 +143,54 @@ serve(async (req) => {
         const schedules = await stripe.subscriptionSchedules.list({ customer: customerId, limit: 20 });
         const nowSec = Math.floor(Date.now() / 1000);
 
+        // Only schedules in these states can still produce upcoming changes.
+        // Explicitly exclude: "completed", "canceled", "released" (and any unknown future state).
+        const PENDING_SCHEDULE_STATUSES = new Set(["active", "not_started"]);
+
         type Candidate = { startSec: number; tier: "free" | "plus" | "pro"; scheduleId: string };
         const candidates: Candidate[] = [];
 
         for (const sch of schedules.data) {
-          // Only consider schedules attached to the current subscription and not done
+          // Must be attached to the current subscription
           if (sch.subscription !== subscriptionId) continue;
-          if (sch.status !== "active" && sch.status !== "not_started") continue;
 
-          for (const phase of sch.phases ?? []) {
+          // Skip schedules that are not in a pending state (canceled / completed / released / unknown)
+          if (!PENDING_SCHEDULE_STATUSES.has(sch.status)) continue;
+
+          // If the schedule has already been released or fully completed it will have a
+          // released_at / completed_at timestamp. Belt-and-braces guard in case status lags.
+          const releasedAt = (sch as any).released_at as number | null | undefined;
+          const completedAt = (sch as any).completed_at as number | null | undefined;
+          const canceledAt = (sch as any).canceled_at as number | null | undefined;
+          if (typeof releasedAt === "number" && releasedAt > 0) continue;
+          if (typeof completedAt === "number" && completedAt > 0) continue;
+          if (typeof canceledAt === "number" && canceledAt > 0) continue;
+
+          // If end_behavior is "release" and the schedule's last phase already ended, skip it
+          const phases = sch.phases ?? [];
+          const lastPhase = phases[phases.length - 1];
+          const lastEnd = typeof lastPhase?.end_date === "number" ? lastPhase.end_date : null;
+          if (lastEnd !== null && lastEnd <= nowSec) continue;
+
+          // The phase Stripe currently considers active on this schedule (if any).
+          const currentPhaseStart = typeof (sch as any).current_phase?.start_date === "number"
+            ? (sch as any).current_phase.start_date as number
+            : null;
+
+          for (const phase of phases) {
             const startSec = typeof phase.start_date === "number" ? phase.start_date : null;
-            if (startSec === null || startSec <= nowSec) continue;
+            if (startSec === null) continue;
+
+            // Strictly future phases only
+            if (startSec <= nowSec) continue;
+
+            // Skip the phase that's already in progress according to Stripe
+            if (currentPhaseStart !== null && startSec === currentPhaseStart) continue;
+
+            // Skip phases whose own end_date has already passed (defensive — shouldn't happen
+            // for a future start, but guards against malformed data)
+            const endSec = typeof phase.end_date === "number" ? phase.end_date : null;
+            if (endSec !== null && endSec <= nowSec) continue;
 
             // A phase can have multiple items — find the first one with a known tier mapping.
             // If items lack a tier mapping, skip rather than guess.
