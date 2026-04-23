@@ -43,6 +43,7 @@ const SettingsPage = () => {
   const [showReactivateModal, setShowReactivateModal] = useState(false);
   const [planChangeLoading, setPlanChangeLoading] = useState<"plus" | "pro" | null>(null);
   const [pendingPlanChange, setPendingPlanChange] = useState<"plus" | "pro" | null>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const formattedEnd = subscriptionEnd ? new Date(subscriptionEnd).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : null;
 
