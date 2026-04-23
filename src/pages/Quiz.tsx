@@ -86,7 +86,7 @@ const Quiz = () => {
             </div>
             <h2 className="text-center text-2xl font-bold">{t("yourPersonalizedPortfolio")}</h2>
             <p className="mx-auto mt-3 max-w-lg text-center text-sm leading-relaxed text-muted-foreground">
-              {isPro ? portfolio.rationale : "Your personalized portfolio is ready! Upgrade to Pro to unlock your full results."}
+              {hasFullQuiz ? portfolio.rationale : "Your personalized portfolio is ready! Upgrade to Plus or Pro to unlock your full results."}
             </p>
 
             <div className="relative">
