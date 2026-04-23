@@ -217,6 +217,13 @@ serve(async (req) => {
         const isUpgrade = TIER_RANK[tier] > TIER_RANK[currentTier];
 
         if (isUpgrade) {
+          // Record consent BEFORE charging.
+          await recordConsent("checkout_terms", { action: "upgrade", from_tier: currentTier });
+          await recordConsent(
+            euWaiver ? "eu_withdrawal_waiver" : "no_waiver_acknowledged",
+            { action: "upgrade", from_tier: currentTier }
+          );
+
           // Upgrade: charge prorated difference immediately
           await stripe.subscriptions.update(
             current.id,
@@ -224,6 +231,7 @@ serve(async (req) => {
               items: [{ id: currentItem.id, price: targetPriceId }],
               proration_behavior: "always_invoice",
               cancel_at_period_end: false,
+              metadata: consentMetadata,
             },
             { idempotencyKey: `${baseIdemKey}_upgrade` }
           );
@@ -232,6 +240,9 @@ serve(async (req) => {
             action: "upgraded",
           });
         } else {
+          // Downgrade: no immediate charge, but still record the user's informed decision.
+          await recordConsent("checkout_terms", { action: "downgrade_scheduled", from_tier: currentTier });
+
           // Downgrade: schedule the change for end of current period (no immediate charge).
           const schedule = await stripe.subscriptionSchedules.create(
             { from_subscription: current.id },
@@ -243,6 +254,7 @@ serve(async (req) => {
             schedule.id,
             {
               end_behavior: "release",
+              metadata: consentMetadata,
               phases: [
                 {
                   items: [{ price: currentPriceId, quantity: 1 }],
