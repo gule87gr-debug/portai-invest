@@ -314,8 +314,13 @@ serve(async (req) => {
         mode: "subscription",
         success_url: `${origin}/upgrade-success`,
         cancel_url: `${origin}/pricing`,
-        // Surface terms acceptance + show clear billing terms in Stripe-hosted checkout.
-        consent_collection: { terms_of_service: "required" },
+        // NOTE: We do NOT use Stripe's `consent_collection.terms_of_service` here because it
+        // requires a Terms of Service URL configured in the Stripe Dashboard's public business
+        // details. Our app already collects explicit, verbatim terms acceptance BEFORE invoking
+        // this function (see `accepted_terms` validation above) and persists it to the
+        // `payment_consents` audit table along with IP/UA/consent_text — which is stronger legal
+        // evidence than Stripe's checkbox. The custom_text below also restates the terms above
+        // the pay button.
         billing_address_collection: "auto",
         // Persist consent state on the Stripe session AND propagate it to the
         // resulting subscription so it appears on every invoice / dashboard view.
