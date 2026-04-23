@@ -152,102 +152,121 @@ const BillingConsents = () => {
               <p className="text-sm text-muted-foreground">Please sign in to view your billing consents.</p>
             </CardContent>
           </Card>
-        {!loading && authed && (
-          <Card className="border-primary/30 bg-primary/5">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <Scale className="h-4 w-4 text-primary" />
-                <CardTitle className="text-sm">What this log proves under EU law</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-2 pt-0 text-xs text-muted-foreground">
-              <p>
-                This page is your personal audit trail of every <span className="font-medium text-foreground">informed consent</span> you've given for paid services on PortAI. It exists to satisfy our obligations and protect your rights under:
-              </p>
-              <ul className="list-disc pl-5 space-y-1">
-                <li><span className="font-medium text-foreground">Directive 2011/83/EU</span> (Consumer Rights) — pre-contractual information, the 14-day right of withdrawal (Art. 9), the explicit waiver for digital services (Art. 16(m)), and pro-rata refund rules (Art. 14(3)).</li>
-                <li><span className="font-medium text-foreground">GDPR (Regulation 2016/679)</span> — Art. 7(1) requires us to demonstrate that you consented; Art. 15 gives you the right to access these records.</li>
-                <li><span className="font-medium text-foreground">Spanish Law 3/2014</span> (TRLGDCU) and <span className="font-medium text-foreground">LSSI-CE Law 34/2002</span> — local transposition of the above for distance contracts concluded in Spain.</li>
-              </ul>
-              <div className="flex items-start gap-2 rounded-md border border-border/60 bg-background/60 p-2.5 mt-2">
-                <Lock className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
+        ) : (
+          <>
+            <Card className="border-primary/30 bg-primary/5">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <Scale className="h-4 w-4 text-primary" />
+                  <CardTitle className="text-sm">What this log proves under EU law</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2 pt-0 text-xs text-muted-foreground">
                 <p>
-                  <span className="font-medium text-foreground">Immutable by design.</span> Each record below is written once and can never be edited or back-dated — neither by you nor by us. The exact wording you saw, the timestamp, IP address, browser, plan, and price are preserved verbatim. You can export the full log at any time as JSON proof.
+                  This page is your personal audit trail of every <span className="font-medium text-foreground">informed consent</span> you've given for paid services on PortAI. It exists to satisfy our obligations and protect your rights under:
                 </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                <ul className="list-disc pl-5 space-y-1">
+                  <li><span className="font-medium text-foreground">Directive 2011/83/EU</span> (Consumer Rights) — pre-contractual information, the 14-day right of withdrawal (Art. 9), the explicit waiver for digital services (Art. 16(m)), and pro-rata refund rules (Art. 14(3)).</li>
+                  <li><span className="font-medium text-foreground">GDPR (Regulation 2016/679)</span> — Art. 7(1) requires us to demonstrate that you consented; Art. 15 gives you the right to access these records.</li>
+                  <li><span className="font-medium text-foreground">Spanish Law 3/2014</span> (TRLGDCU) and <span className="font-medium text-foreground">LSSI-CE Law 34/2002</span> — local transposition of the above for distance contracts concluded in Spain.</li>
+                </ul>
+                <div className="flex items-start gap-2 rounded-md border border-border/60 bg-background/60 p-2.5 mt-2">
+                  <Lock className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
+                  <p>
+                    <span className="font-medium text-foreground">Immutable by design.</span> Each record below is written once and can never be edited or back-dated — neither by you nor by us. The exact wording you saw, the timestamp, IP address, browser, plan, and price are preserved verbatim. You can export the full log at any time as JSON proof.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
 
-        {rows.length === 0 && !loading && authed ? (
-          <Card>
-            <CardContent className="flex flex-col items-center gap-3 p-8 text-center">
-              <FileText className="h-8 w-8 text-muted-foreground" />
-              <p className="text-sm font-medium">No consent records yet</p>
-              <p className="text-xs text-muted-foreground max-w-md">
-                Once you upgrade, change, or cancel a plan, the corresponding informed-consent records will appear
-                here for your transparency and audit needs.
-              </p>
-            </CardContent>
-          </Card>
-        ) : null}
-        {false && (
-          <div className="space-y-4">
-            {rows.map((row) => {
-              const meta = CONSENT_LABELS[row.consent_type] ?? { label: row.consent_type, tone: "secondary" as const };
-              return (
-                <Card key={row.id}>
-                  <CardHeader className="pb-3">
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <div className="space-y-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <CardTitle className="text-base">{meta.label}</CardTitle>
-                          <Badge variant={meta.tone}>{row.consent_version}</Badge>
-                          {row.tier && <Badge variant="outline" className="capitalize">{row.tier}</Badge>}
+            {rows.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center gap-3 p-8 text-center">
+                  <FileText className="h-8 w-8 text-muted-foreground" />
+                  <p className="text-sm font-medium">No consent records yet</p>
+                  <p className="text-xs text-muted-foreground max-w-md">
+                    Once you upgrade, change, or cancel a plan, the corresponding informed-consent records will appear
+                    here for your transparency and audit needs.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {rows.map((row) => {
+                  const meta: ConsentMeta = CONSENT_LABELS[row.consent_type] ?? {
+                    label: row.consent_type,
+                    tone: "secondary",
+                    proves: "Recorded acknowledgement related to your subscription.",
+                    legalBasis: "General contractual record.",
+                  };
+                  return (
+                    <Card key={row.id}>
+                      <CardHeader className="pb-3">
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <div className="space-y-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <CardTitle className="text-base">{meta.label}</CardTitle>
+                              <Badge variant={meta.tone}>{row.consent_version}</Badge>
+                              {row.tier && <Badge variant="outline" className="capitalize">{row.tier}</Badge>}
+                            </div>
+                            <CardDescription className="text-xs font-mono">
+                              {formatDate(row.created_at)}
+                            </CardDescription>
+                          </div>
                         </div>
-                        <CardDescription className="text-xs font-mono">
-                          {formatDate(row.created_at)}
-                        </CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4 pt-0">
-                    <div>
-                      <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Consent text</div>
-                      <p className="text-sm whitespace-pre-wrap rounded-lg bg-muted/40 p-3 border border-border/40">
-                        {row.consent_text}
-                      </p>
-                    </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4 pt-0">
+                        <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-1.5">
+                          <div className="text-[11px] font-semibold uppercase tracking-wide text-primary">What this record proves</div>
+                          <p className="text-xs text-foreground leading-relaxed">{meta.proves}</p>
+                          <p className="text-[11px] text-muted-foreground">
+                            <span className="font-medium text-foreground">Legal basis:</span> {meta.legalBasis}
+                          </p>
+                        </div>
 
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                      <ProofRow label="IP address" value={row.ip_address ?? "—"} mono />
-                      <ProofRow label="Price ID" value={row.price_id ?? "—"} mono />
-                      <ProofRow
-                        label="User agent"
-                        value={row.user_agent ?? "—"}
-                        mono
-                        className="sm:col-span-2"
-                        truncate
-                      />
-                      {row.metadata && Object.keys(row.metadata).length > 0 && (
-                        <ProofRow
-                          label="Metadata"
-                          value={JSON.stringify(row.metadata, null, 2)}
-                          mono
-                          className="sm:col-span-2"
-                          pre
-                        />
-                      )}
-                    </div>
+                        <div>
+                          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Exact consent text shown to you</div>
+                          <p className="text-sm whitespace-pre-wrap rounded-lg bg-muted/40 p-3 border border-border/40">
+                            {row.consent_text}
+                          </p>
+                        </div>
 
-                    <div className="text-[11px] text-muted-foreground">
-                      Record ID: <span className="font-mono">{row.id}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+                        <div>
+                          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2 flex items-center gap-1.5">
+                            <Lock className="h-3 w-3" /> Immutable proof metadata
+                          </div>
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <ProofRow label="IP address" value={row.ip_address ?? "—"} mono />
+                            <ProofRow label="Price ID" value={row.price_id ?? "—"} mono />
+                            <ProofRow
+                              label="User agent"
+                              value={row.user_agent ?? "—"}
+                              mono
+                              className="sm:col-span-2"
+                              truncate
+                            />
+                            {row.metadata && Object.keys(row.metadata).length > 0 && (
+                              <ProofRow
+                                label="Metadata"
+                                value={JSON.stringify(row.metadata, null, 2)}
+                                mono
+                                className="sm:col-span-2"
+                                pre
+                              />
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="text-[11px] text-muted-foreground">
+                          Record ID: <span className="font-mono">{row.id}</span> · Stored permanently and cannot be modified.
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
       </div>
     </AppLayout>
