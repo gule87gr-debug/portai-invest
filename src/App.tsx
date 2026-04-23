@@ -26,6 +26,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Unsubscribe from "./pages/Unsubscribe";
 import UpgradeSuccess from "./pages/UpgradeSuccess";
+import BillingConsents from "./pages/BillingConsents";
 import DataCompliance from "./pages/DataCompliance";
 import IPPolicy from "./pages/IPPolicy";
 import { CookieConsent } from "./components/CookieConsent";
@@ -55,6 +56,7 @@ const AppWithLanguage = () => {
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/upgrade-success" element={<UpgradeSuccess />} />
+        <Route path="/billing-consents" element={<BillingConsents />} />
         <Route path="*" element={<NotFound />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

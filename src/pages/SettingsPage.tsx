@@ -4,7 +4,7 @@ import { useApp } from "@/contexts/AppContext";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useSubscription } from "@/hooks/useSubscription";
-import { User, Eye, EyeOff, Upload, Camera, LogOut, Globe, Sun, Moon, Check, X as XIcon, Loader2, GraduationCap, Crown, CreditCard, AlertTriangle } from "lucide-react";
+import { User, Eye, EyeOff, Upload, Camera, LogOut, Globe, Sun, Moon, Check, X as XIcon, Loader2, GraduationCap, Crown, CreditCard, AlertTriangle, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "@/hooks/use-theme";
@@ -362,6 +362,9 @@ const SettingsPage = () => {
                 <button onClick={handleManageBilling} className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-accent">
                   <CreditCard className="h-4 w-4" /> Manage Billing
                 </button>
+                <button onClick={() => navigate("/billing-consents")} className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-accent">
+                  <ShieldCheck className="h-4 w-4" /> My Billing Consents
+                </button>
                 {!cancelAtPeriodEnd && (
                   <button onClick={() => setShowCancelModal(true)} className="flex items-center gap-2 rounded-lg border border-loss/30 px-4 py-2 text-sm font-medium text-loss hover:bg-loss/10">
                     Cancel Subscription
@@ -380,6 +383,12 @@ const SettingsPage = () => {
               >
                 <Crown className="h-4 w-4" />
                 Upgrade Plan
+              </button>
+              <button
+                onClick={() => navigate("/billing-consents")}
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-accent"
+              >
+                <ShieldCheck className="h-4 w-4" /> My Billing Consents
               </button>
             </div>
           )}
