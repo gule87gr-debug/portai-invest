@@ -123,12 +123,38 @@ serve(async (req) => {
       subscriptionId = best.id;
     }
 
+    // Detect a scheduled plan change (e.g. downgrade to Plus at period end)
+    let scheduledTier: "free" | "plus" | "pro" | null = null;
+    let scheduledStart: string | null = null;
+    if (subscriptionId) {
+      try {
+        const schedules = await stripe.subscriptionSchedules.list({ customer: customerId, limit: 5 });
+        for (const sch of schedules.data) {
+          if (sch.subscription !== subscriptionId) continue;
+          if (sch.status !== "active" && sch.status !== "not_started") continue;
+          // Find the next phase that starts in the future
+          const nowSec = Math.floor(Date.now() / 1000);
+          const futurePhase = sch.phases.find((p) => typeof p.start_date === "number" && p.start_date > nowSec);
+          if (!futurePhase) continue;
+          const priceId = (futurePhase.items?.[0] as any)?.price as string | undefined;
+          if (!priceId) continue;
+          scheduledTier = PRICE_TO_TIER[priceId] ?? null;
+          scheduledStart = new Date(futurePhase.start_date * 1000).toISOString();
+          break;
+        }
+      } catch (e) {
+        console.error("Failed to load subscription schedules:", (e as Error).message);
+      }
+    }
+
     return new Response(JSON.stringify({
       subscribed: hasActiveSub,
       tier,
       subscription_end: subscriptionEnd,
       cancel_at_period_end: cancelAtPeriodEnd,
       subscription_id: subscriptionId,
+      scheduled_tier: scheduledTier,
+      scheduled_start: scheduledStart,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
