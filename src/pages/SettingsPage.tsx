@@ -356,71 +356,110 @@ const SettingsPage = () => {
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                You're on the <span className="font-medium text-foreground">Free</span> plan. Choose Plus for the essentials, or Pro for the full experience.
+                You're on the <span className="font-medium text-foreground">Free</span> plan.
               </p>
-
-              <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <Crown className="h-4 w-4 text-primary" />
-                      <h3 className="text-base font-semibold">Plus</h3>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">Essentials for serious investors</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-base font-bold text-foreground">€8.99<span className="text-xs font-normal text-muted-foreground">/mo</span></div>
-                  </div>
-                </div>
-                <ul className="space-y-1.5 text-sm">
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Full investor quiz results</span></li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Unlimited AI chat & image analysis</span></li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Unlimited watchlists & stocks</span></li>
-                </ul>
-                <button
-                  onClick={() => setPendingPlanChange("plus")}
-                  disabled={planChangeLoading !== null}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary/20 disabled:opacity-50"
-                >
-                  {planChangeLoading === "plus" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  Upgrade to Plus
-                </button>
-              </div>
-
-              <div className="relative rounded-xl border border-primary bg-primary/10 p-4 space-y-3">
-                <span className="absolute -top-2 right-4 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary-foreground">Best value</span>
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <Crown className="h-4 w-4 text-primary" />
-                      <h3 className="text-base font-semibold">Pro</h3>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">Everything in Plus, and more</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-base font-bold text-foreground">€15.99<span className="text-xs font-normal text-muted-foreground">/mo</span></div>
-                  </div>
-                </div>
-                <ul className="space-y-1.5 text-sm">
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Full investor quiz results</span></li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Unlimited AI chat & image analysis</span></li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Unlimited watchlists & stocks</span></li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Unlimited article analyses & AI price alerts</span></li>
-                </ul>
-                <button
-                  onClick={() => setPendingPlanChange("pro")}
-                  disabled={planChangeLoading !== null}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-                >
-                  {planChangeLoading === "pro" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
-                  Upgrade to Pro
-                </button>
-              </div>
+              <button
+                onClick={() => setShowUpgradeModal(true)}
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              >
+                <Crown className="h-4 w-4" />
+                Upgrade Plan
+              </button>
             </div>
           )}
         </div>
+
+        {/* Upgrade Modal (popup) */}
+        {showUpgradeModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in p-4">
+            <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-primary/30 bg-card p-6 shadow-xl shadow-primary/10">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20">
+                  <Crown className="h-6 w-6 text-primary" />
+                </div>
+                <button onClick={() => setShowUpgradeModal(false)} className="text-muted-foreground hover:text-foreground">
+                  <XIcon className="h-5 w-5" />
+                </button>
+              </div>
+
+              <h2 className="text-xl font-bold mb-1">Upgrade your plan</h2>
+              <p className="text-sm text-muted-foreground mb-5">
+                Choose Plus for the essentials, or Pro for the full experience.
+              </p>
+
+              <div className="space-y-4">
+                {/* Plus card */}
+                <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Crown className="h-4 w-4 text-primary" />
+                        <h3 className="text-base font-semibold">Plus</h3>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">Essentials for serious investors</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-base font-bold text-foreground">€8.99<span className="text-xs font-normal text-muted-foreground">/mo</span></div>
+                    </div>
+                  </div>
+                  <ul className="space-y-1.5 text-sm">
+                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Full investor quiz results</span></li>
+                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Unlimited AI chat & image analysis</span></li>
+                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Unlimited watchlists & stocks</span></li>
+                  </ul>
+                  <button
+                    onClick={() => { setShowUpgradeModal(false); setPendingPlanChange("plus"); }}
+                    disabled={planChangeLoading !== null}
+                    className="flex w-full items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary/20 disabled:opacity-50"
+                  >
+                    {planChangeLoading === "plus" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                    Upgrade to Plus
+                  </button>
+                </div>
+
+                {/* Pro card */}
+                <div className="relative rounded-xl border border-primary bg-primary/10 p-4 space-y-3">
+                  <span className="absolute -top-2 right-4 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary-foreground">Best value</span>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Crown className="h-4 w-4 text-primary" />
+                        <h3 className="text-base font-semibold">Pro</h3>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">Everything in Plus, and more</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-base font-bold text-foreground">€15.99<span className="text-xs font-normal text-muted-foreground">/mo</span></div>
+                    </div>
+                  </div>
+                  <ul className="space-y-1.5 text-sm">
+                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Full investor quiz results</span></li>
+                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Unlimited AI chat & image analysis</span></li>
+                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Unlimited watchlists & stocks</span></li>
+                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Unlimited article analyses & AI price alerts</span></li>
+                  </ul>
+                  <button
+                    onClick={() => { setShowUpgradeModal(false); setPendingPlanChange("pro"); }}
+                    disabled={planChangeLoading !== null}
+                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                  >
+                    {planChangeLoading === "pro" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
+                    Upgrade to Pro
+                  </button>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowUpgradeModal(false)}
+                className="mt-5 w-full rounded-xl border border-border py-2.5 text-sm font-medium hover:bg-accent"
+              >
+                Maybe Later
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Cancel Modal */}
         {showCancelModal && (
