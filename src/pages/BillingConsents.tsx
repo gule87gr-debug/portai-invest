@@ -152,7 +152,34 @@ const BillingConsents = () => {
               <p className="text-sm text-muted-foreground">Please sign in to view your billing consents.</p>
             </CardContent>
           </Card>
-        ) : rows.length === 0 ? (
+        {!loading && authed && (
+          <Card className="border-primary/30 bg-primary/5">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Scale className="h-4 w-4 text-primary" />
+                <CardTitle className="text-sm">What this log proves under EU law</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-2 pt-0 text-xs text-muted-foreground">
+              <p>
+                This page is your personal audit trail of every <span className="font-medium text-foreground">informed consent</span> you've given for paid services on PortAI. It exists to satisfy our obligations and protect your rights under:
+              </p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li><span className="font-medium text-foreground">Directive 2011/83/EU</span> (Consumer Rights) — pre-contractual information, the 14-day right of withdrawal (Art. 9), the explicit waiver for digital services (Art. 16(m)), and pro-rata refund rules (Art. 14(3)).</li>
+                <li><span className="font-medium text-foreground">GDPR (Regulation 2016/679)</span> — Art. 7(1) requires us to demonstrate that you consented; Art. 15 gives you the right to access these records.</li>
+                <li><span className="font-medium text-foreground">Spanish Law 3/2014</span> (TRLGDCU) and <span className="font-medium text-foreground">LSSI-CE Law 34/2002</span> — local transposition of the above for distance contracts concluded in Spain.</li>
+              </ul>
+              <div className="flex items-start gap-2 rounded-md border border-border/60 bg-background/60 p-2.5 mt-2">
+                <Lock className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
+                <p>
+                  <span className="font-medium text-foreground">Immutable by design.</span> Each record below is written once and can never be edited or back-dated — neither by you nor by us. The exact wording you saw, the timestamp, IP address, browser, plan, and price are preserved verbatim. You can export the full log at any time as JSON proof.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {rows.length === 0 && !loading && authed ? (
           <Card>
             <CardContent className="flex flex-col items-center gap-3 p-8 text-center">
               <FileText className="h-8 w-8 text-muted-foreground" />
@@ -163,7 +190,8 @@ const BillingConsents = () => {
               </p>
             </CardContent>
           </Card>
-        ) : (
+        ) : null}
+        {false && (
           <div className="space-y-4">
             {rows.map((row) => {
               const meta = CONSENT_LABELS[row.consent_type] ?? { label: row.consent_type, tone: "secondary" as const };
