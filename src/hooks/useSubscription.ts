@@ -50,7 +50,7 @@ export const useSubscription = (): SubscriptionState => {
       setSubscriptionStatus(data?.subscription_status ?? null);
       setScheduledTier((data?.scheduled_tier as SubscriptionTier | null) ?? null);
       setScheduledStart(data?.scheduled_start ?? null);
-    } catch {
+      setScheduledChangesCount(data?.scheduled_changes_count ?? 0);
       setTier("free");
     }
     setLoading(false);
