@@ -297,6 +297,14 @@ serve(async (req) => {
       }
     }
 
+    // Record consent BEFORE creating the checkout session so we have proof even if
+    // the user abandons mid-flow.
+    await recordConsent("checkout_terms", { action: "new_checkout" });
+    await recordConsent(
+      euWaiver ? "eu_withdrawal_waiver" : "no_waiver_acknowledged",
+      { action: "new_checkout" }
+    );
+
     // No live subscription — normal checkout
     const session = await stripe.checkout.sessions.create(
       {
@@ -309,11 +317,18 @@ serve(async (req) => {
         // Surface terms acceptance + show clear billing terms in Stripe-hosted checkout.
         consent_collection: { terms_of_service: "required" },
         billing_address_collection: "auto",
+        // Persist consent state on the Stripe session AND propagate it to the
+        // resulting subscription so it appears on every invoice / dashboard view.
+        metadata: consentMetadata,
+        subscription_data: { metadata: consentMetadata },
         // Custom legal text shown above the pay button in Stripe Checkout.
+        // Worded differently depending on whether the user waived the EU 14-day right,
+        // so the disclosure on Stripe matches what they ticked in our app.
         custom_text: {
           submit: {
-            message:
-              "Subscriptions renew automatically each month. You can cancel anytime from Settings — your access continues until the end of your current billing period. EU customers retain their statutory 14-day right of withdrawal where applicable.",
+            message: euWaiver
+              ? "By clicking Pay, you expressly request immediate access to the digital service and acknowledge that, by doing so, you LOSE your statutory 14-day right of withdrawal once performance has fully begun (Directive 2011/83/EU, Art. 16(m)). The subscription renews automatically each month and can be cancelled anytime from Settings."
+              : "Subscriptions renew automatically each month and can be cancelled anytime from Settings. EU consumers keep their full statutory 14-day right of withdrawal — to exercise it, email legal@portai-invest.com from your account email within 14 days of purchase.",
           },
         },
       },
