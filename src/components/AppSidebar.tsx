@@ -84,7 +84,7 @@ export const AppSidebar = () => {
         </div>
 
         <nav className="mt-2 flex flex-1 flex-col gap-1 px-3">
-          {navKeys.map(({ to, icon: Icon, key, tour, badge }) => {
+          {navKeys.map(({ to, icon: Icon, key, tour }) => {
             const [path, hash] = to.split("#");
             const active = location.pathname === path && (!hash || location.hash === `#${hash}`);
             return (
@@ -102,11 +102,6 @@ export const AppSidebar = () => {
               >
                 <Icon className="h-4.5 w-4.5" />
                 <span className="flex-1">{t(key)}</span>
-                {badge && (
-                  <span className="rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary-foreground animate-pulse">
-                    {t(badge)}
-                  </span>
-                )}
               </NavLink>
             );
           })}
