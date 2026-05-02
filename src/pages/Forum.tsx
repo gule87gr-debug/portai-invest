@@ -311,16 +311,16 @@ const Forum = () => {
                         AI Deep Dive
                       </span>
                     </div>
-                    {isPro && (
+                    {isPaid && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-bold text-primary">
-                        <Crown className="h-2.5 w-2.5" /> PRO
+                        <Crown className="h-2.5 w-2.5" /> {isPro ? "PRO" : "PLUS"}
                       </span>
                     )}
                   </div>
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
                     Hidden Angle
                   </p>
-                  {isPro ? (
+                  {isPaid ? (
                     <p className="text-sm leading-relaxed text-foreground/90">
                       {a.hidden_angle || "No hidden angle detected for this article."}
                     </p>
