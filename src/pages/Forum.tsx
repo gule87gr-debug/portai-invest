@@ -70,7 +70,7 @@ const toneClasses = {
 const Forum = () => {
   usePageTitle("AI Media Bias Pulse | PortAI");
   const { toast } = useToast();
-  const { isPro } = useSubscription();
+  const { isPro, isPaid } = useSubscription();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [articles, setArticles] = useState<AnalyzedArticle[]>([]);
   const [loading, setLoading] = useState(true);
