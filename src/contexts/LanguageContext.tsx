@@ -5,7 +5,7 @@ export type Language = "en" | "es" | "fr" | "pt" | "de" | "it";
 const translations: Record<Language, Record<string, string>> = {
   en: {
     // Nav
-    home: "Home", dashboard: "Dashboard", aiChat: "AI Chat", quiz: "Quiz", forum: "Media Pulse", watchlists: "Watchlists", settings: "Settings", articleAnalyzer: "Article Analyzer", new: "NEW",
+    home: "Home", dashboard: "Dashboard", aiChat: "AI Chat", quiz: "Quiz", forum: "Media Pulse", watchlists: "Watchlists", settings: "Settings", news: "News", articleAnalyzer: "News", new: "NEW",
     // Landing
     landingBanner: "Soft Launch: Pro Tier 50% Off — limited time",
     heroBadge: "AI-Powered Bias Shield",
@@ -116,7 +116,7 @@ const translations: Record<Language, Record<string, string>> = {
     imageAttached: "Image attached", uploadImage: "Upload image",
   },
   es: {
-    home: "Inicio", dashboard: "Panel", aiChat: "Chat IA", quiz: "Cuestionario", forum: "Pulso Media", watchlists: "Listas", settings: "Ajustes", articleAnalyzer: "Analizador de Artículos", new: "NUEVO",
+    home: "Inicio", dashboard: "Panel", aiChat: "Chat IA", quiz: "Cuestionario", forum: "Pulso Media", watchlists: "Listas", settings: "Ajustes", news: "Noticias", articleAnalyzer: "Noticias", new: "NUEVO",
     // Landing
     landingBanner: "Lanzamiento: Plan Pro al 50% — tiempo limitado",
     heroBadge: "Escudo IA contra el sesgo",
@@ -214,7 +214,7 @@ const translations: Record<Language, Record<string, string>> = {
     imageAttached: "Imagen adjunta", uploadImage: "Subir imagen",
   },
   fr: {
-    home: "Accueil", dashboard: "Tableau de bord", aiChat: "Chat IA", quiz: "Quiz", forum: "Pulse Média", watchlists: "Listes", settings: "Paramètres", articleAnalyzer: "Analyseur d'Articles", new: "NOUVEAU",
+    home: "Accueil", dashboard: "Tableau de bord", aiChat: "Chat IA", quiz: "Quiz", forum: "Pulse Média", watchlists: "Listes", settings: "Paramètres", news: "Actualités", articleAnalyzer: "Actualités", new: "NOUVEAU",
     // Landing
     landingBanner: "Lancement : Plan Pro à -50% — durée limitée",
     heroBadge: "Bouclier IA contre les biais",
@@ -312,7 +312,7 @@ const translations: Record<Language, Record<string, string>> = {
     imageAttached: "Image jointe", uploadImage: "Télécharger une image",
   },
   pt: {
-    home: "Início", dashboard: "Painel", aiChat: "Chat IA", quiz: "Quiz", forum: "Pulso Media", watchlists: "Listas", settings: "Configurações", articleAnalyzer: "Analisador de Artigos", new: "NOVO",
+    home: "Início", dashboard: "Painel", aiChat: "Chat IA", quiz: "Quiz", forum: "Pulso Media", watchlists: "Listas", settings: "Configurações", news: "Notícias", articleAnalyzer: "Notícias", new: "NOVO",
     // Landing
     landingBanner: "Lançamento: Plano Pro com 50% OFF — por tempo limitado",
     heroBadge: "Escudo IA contra o viés",
@@ -410,7 +410,7 @@ const translations: Record<Language, Record<string, string>> = {
     imageAttached: "Imagem anexada", uploadImage: "Enviar imagem",
   },
   de: {
-    home: "Startseite", dashboard: "Dashboard", aiChat: "KI-Chat", quiz: "Quiz", forum: "Medien-Puls", watchlists: "Beobachtungslisten", settings: "Einstellungen", articleAnalyzer: "Artikel-Analysator", new: "NEU",
+    home: "Startseite", dashboard: "Dashboard", aiChat: "KI-Chat", quiz: "Quiz", forum: "Medien-Puls", watchlists: "Beobachtungslisten", settings: "Einstellungen", news: "Nachrichten", articleAnalyzer: "Nachrichten", new: "NEU",
     // Landing
     landingBanner: "Soft-Launch: Pro-Tarif 50% günstiger — nur für kurze Zeit",
     heroBadge: "KI-Schild gegen Voreingenommenheit",
@@ -508,7 +508,7 @@ const translations: Record<Language, Record<string, string>> = {
     imageAttached: "Bild angehängt", uploadImage: "Bild hochladen",
   },
   it: {
-    home: "Home", dashboard: "Dashboard", aiChat: "Chat IA", quiz: "Quiz", forum: "Polso Media", watchlists: "Liste", settings: "Impostazioni", articleAnalyzer: "Analizzatore Articoli", new: "NUOVO",
+    home: "Home", dashboard: "Dashboard", aiChat: "Chat IA", quiz: "Quiz", forum: "Polso Media", watchlists: "Liste", settings: "Impostazioni", news: "Notizie", articleAnalyzer: "Notizie", new: "NUOVO",
     // Landing
     landingBanner: "Soft Launch: Piano Pro al 50% — tempo limitato",
     heroBadge: "Scudo IA anti-bias",

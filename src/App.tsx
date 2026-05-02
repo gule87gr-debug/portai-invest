@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, useNavigate } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,7 +10,6 @@ import { OnboardingTutorial } from "@/components/OnboardingTutorial";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Dashboard from "./pages/Dashboard";
-import HomePage from "./pages/HomePage";
 import AIChat from "./pages/AIChat";
 import Quiz from "./pages/Quiz";
 import Forum from "./pages/Forum";
@@ -46,7 +45,7 @@ const AppWithLanguage = () => {
         }} />
       )}
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/chat" element={<AIChat />} />
         <Route path="/quiz" element={<Quiz />} />
