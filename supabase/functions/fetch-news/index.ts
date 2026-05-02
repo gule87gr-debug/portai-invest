@@ -109,14 +109,28 @@ Deno.serve(async (req) => {
 
     console.log("Fetching news for:", query);
 
-    const response = await fetch(rssUrl, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; NewsBot/1.0)",
-      },
-    });
+    // Retry up to 3 times with backoff for transient 5xx errors
+    let response: Response | null = null;
+    let lastStatus = 0;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      response = await fetch(rssUrl, {
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; NewsBot/1.0)" },
+      });
+      if (response.ok) break;
+      lastStatus = response.status;
+      // Drain body to free resources before retrying
+      await response.text().catch(() => "");
+      response = null;
+      if (lastStatus < 500) break; // don't retry client errors
+      await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
+    }
 
-    if (!response.ok) {
-      throw new Error(`RSS fetch failed: ${response.status}`);
+    if (!response) {
+      console.error(`RSS unavailable after retries (last status: ${lastStatus})`);
+      return new Response(
+        JSON.stringify({ success: false, error: "SERVICE_UNAVAILABLE", fallback: true, items: [] }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     const xml = await response.text();
@@ -130,8 +144,8 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error("Error fetching news:", error);
     return new Response(
-      JSON.stringify({ success: false, error: error.message, items: [] }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({ success: false, error: (error as Error).message, fallback: true, items: [] }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
