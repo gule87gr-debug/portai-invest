@@ -381,7 +381,7 @@ const Forum = () => {
         Not financial advice. Bias scores are AI-generated estimates for informational purposes only.
       </p>
 
-      <UpgradeModal open={showUpgrade} onOpenChange={setShowUpgrade} />
+      <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} />
     </AppLayout>
   );
 };
