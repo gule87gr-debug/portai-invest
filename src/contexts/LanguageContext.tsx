@@ -5,7 +5,7 @@ export type Language = "en" | "es" | "fr" | "pt" | "de" | "it";
 const translations: Record<Language, Record<string, string>> = {
   en: {
     // Nav
-    home: "Home", dashboard: "Dashboard", aiChat: "AI Chat", quiz: "Quiz", forum: "Forum", watchlists: "Watchlists", settings: "Settings",
+    home: "Home", dashboard: "Dashboard", aiChat: "AI Chat", quiz: "Quiz", forum: "Media Pulse", watchlists: "Watchlists", settings: "Settings",
     // Dashboard
     marketIntelligence: "Market Intelligence", aiCuratedAnalysis: "AI-curated analysis with trust scores and live market data",
     analyzeLink: "Analyze Link", analyze: "Analyze", analyzing: "Analyzing...",
@@ -97,7 +97,7 @@ const translations: Record<Language, Record<string, string>> = {
     imageAttached: "Image attached", uploadImage: "Upload image",
   },
   es: {
-    home: "Inicio", dashboard: "Panel", aiChat: "Chat IA", quiz: "Cuestionario", forum: "Foro", watchlists: "Listas", settings: "Ajustes",
+    home: "Inicio", dashboard: "Panel", aiChat: "Chat IA", quiz: "Cuestionario", forum: "Pulso Media", watchlists: "Listas", settings: "Ajustes",
     marketIntelligence: "Inteligencia de Mercado", aiCuratedAnalysis: "Análisis con IA, puntuaciones de confianza y datos en vivo",
     analyzeLink: "Analizar Enlace", analyze: "Analizar", analyzing: "Analizando...",
     pasteUrl: "Pega cualquier URL de artículo financiero. La IA proporcionará una puntuación de confianza (1-10), resumen y detección de sesgo.",
@@ -176,7 +176,7 @@ const translations: Record<Language, Record<string, string>> = {
     imageAttached: "Imagen adjunta", uploadImage: "Subir imagen",
   },
   fr: {
-    home: "Accueil", dashboard: "Tableau de bord", aiChat: "Chat IA", quiz: "Quiz", forum: "Forum", watchlists: "Listes", settings: "Paramètres",
+    home: "Accueil", dashboard: "Tableau de bord", aiChat: "Chat IA", quiz: "Quiz", forum: "Pulse Média", watchlists: "Listes", settings: "Paramètres",
     marketIntelligence: "Intelligence de Marché", aiCuratedAnalysis: "Analyse IA avec scores de confiance et données en direct",
     analyzeLink: "Analyser le Lien", analyze: "Analyser", analyzing: "Analyse en cours...",
     pasteUrl: "Collez l'URL d'un article financier. L'IA fournira un score de confiance (1-10), un résumé et une détection de biais.",
@@ -255,7 +255,7 @@ const translations: Record<Language, Record<string, string>> = {
     imageAttached: "Image jointe", uploadImage: "Télécharger une image",
   },
   pt: {
-    home: "Início", dashboard: "Painel", aiChat: "Chat IA", quiz: "Quiz", forum: "Fórum", watchlists: "Listas", settings: "Configurações",
+    home: "Início", dashboard: "Painel", aiChat: "Chat IA", quiz: "Quiz", forum: "Pulso Media", watchlists: "Listas", settings: "Configurações",
     marketIntelligence: "Inteligência de Mercado", aiCuratedAnalysis: "Análise com IA, pontuações de confiança e dados ao vivo",
     analyzeLink: "Analisar Link", analyze: "Analisar", analyzing: "Analisando...",
     pasteUrl: "Cole qualquer URL de artigo financeiro. A IA fornecerá uma pontuação de confiança (1-10), resumo e detecção de viés.",
@@ -334,7 +334,7 @@ const translations: Record<Language, Record<string, string>> = {
     imageAttached: "Imagem anexada", uploadImage: "Enviar imagem",
   },
   de: {
-    home: "Startseite", dashboard: "Dashboard", aiChat: "KI-Chat", quiz: "Quiz", forum: "Forum", watchlists: "Beobachtungslisten", settings: "Einstellungen",
+    home: "Startseite", dashboard: "Dashboard", aiChat: "KI-Chat", quiz: "Quiz", forum: "Medien-Puls", watchlists: "Beobachtungslisten", settings: "Einstellungen",
     marketIntelligence: "Marktintelligenz", aiCuratedAnalysis: "KI-kuratierte Analyse mit Vertrauenswerten und Live-Marktdaten",
     analyzeLink: "Link analysieren", analyze: "Analysieren", analyzing: "Analyse läuft...",
     pasteUrl: "Fügen Sie eine URL eines Finanzartikels ein. Die KI liefert einen Vertrauenswert (1-10), eine Zusammenfassung und eine Bias-Erkennung.",
@@ -413,7 +413,7 @@ const translations: Record<Language, Record<string, string>> = {
     imageAttached: "Bild angehängt", uploadImage: "Bild hochladen",
   },
   it: {
-    home: "Home", dashboard: "Dashboard", aiChat: "Chat IA", quiz: "Quiz", forum: "Forum", watchlists: "Liste", settings: "Impostazioni",
+    home: "Home", dashboard: "Dashboard", aiChat: "Chat IA", quiz: "Quiz", forum: "Polso Media", watchlists: "Liste", settings: "Impostazioni",
     marketIntelligence: "Intelligenza di Mercato", aiCuratedAnalysis: "Analisi IA con punteggi di fiducia e dati di mercato in tempo reale",
     analyzeLink: "Analizza Link", analyze: "Analizza", analyzing: "Analisi in corso...",
     pasteUrl: "Incolla l'URL di un articolo finanziario. L'IA fornirà un punteggio di fiducia (1-10), un riepilogo e il rilevamento dei bias.",
