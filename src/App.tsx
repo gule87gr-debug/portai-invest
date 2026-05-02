@@ -10,7 +10,6 @@ import { OnboardingTutorial } from "@/components/OnboardingTutorial";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Dashboard from "./pages/Dashboard";
-import HomePage from "./pages/HomePage";
 import AIChat from "./pages/AIChat";
 import Quiz from "./pages/Quiz";
 import Forum from "./pages/Forum";
