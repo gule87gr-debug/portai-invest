@@ -35,6 +35,51 @@ export type Database = {
         }
         Relationships: []
       }
+      analyzed_articles: {
+        Row: {
+          bias_score: number
+          created_at: string
+          hidden_angle: string
+          id: string
+          red_flag: string
+          source: string
+          submitted_by: string | null
+          summary: string
+          title: string
+          url: string
+          view_count: number
+          vindicate_count: number
+        }
+        Insert: {
+          bias_score?: number
+          created_at?: string
+          hidden_angle?: string
+          id?: string
+          red_flag?: string
+          source?: string
+          submitted_by?: string | null
+          summary?: string
+          title?: string
+          url: string
+          view_count?: number
+          vindicate_count?: number
+        }
+        Update: {
+          bias_score?: number
+          created_at?: string
+          hidden_angle?: string
+          id?: string
+          red_flag?: string
+          source?: string
+          submitted_by?: string | null
+          summary?: string
+          title?: string
+          url?: string
+          view_count?: number
+          vindicate_count?: number
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           content: string
@@ -495,6 +540,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      vindicate_article: { Args: { _article_id: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
