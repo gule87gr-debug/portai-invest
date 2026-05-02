@@ -21,6 +21,7 @@ const plusTierFeatures = [
   "Unlimited AI chat messages",
   "Unlimited image analyses",
   "Unlimited watchlists & stocks",
+  "AI Deep Dive (Hidden Angles)",
   "Forum access (read & post)",
 ];
 
