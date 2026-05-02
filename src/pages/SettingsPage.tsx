@@ -479,7 +479,10 @@ const SettingsPage = () => {
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Full investor quiz results</span></li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Unlimited AI chat & image analysis</span></li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Unlimited watchlists & stocks</span></li>
-                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Unlimited article analyses & AI price alerts</span></li>
+                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>AI Deep Dive (Hidden Angles)</span></li>
+                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Unlimited article analyses</span></li>
+                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>AI price alerts</span></li>
+                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary shrink-0" /><span>Priority AI chat (faster, better)</span></li>
                   </ul>
                   <button
                     onClick={() => { setShowUpgradeModal(false); setPendingPlanChange("pro"); }}
