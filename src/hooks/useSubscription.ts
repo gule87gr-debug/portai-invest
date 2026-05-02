@@ -24,7 +24,7 @@ type SubscriptionState = {
   refresh: () => Promise<void>;
 };
 
-const FREE_DAILY_ANALYSES = 3;
+const FREE_DAILY_ANALYSES = 1;
 
 export const useSubscription = (): SubscriptionState => {
   const [tier, setTier] = useState<SubscriptionTier>("free");
