@@ -42,6 +42,23 @@ const Dashboard = () => {
     }
   }, [searchParams, refresh]);
 
+  // Consume any pending URL the user pasted on the landing page,
+  // and scroll the Analyzer card into view when arriving via #analyzer.
+  useEffect(() => {
+    try {
+      const pending = sessionStorage.getItem("pendingAnalyzeUrl");
+      if (pending) {
+        setUrl(pending);
+        sessionStorage.removeItem("pendingAnalyzeUrl");
+      }
+    } catch { /* ignore */ }
+    if (window.location.hash === "#analyzer" || sessionStorage.getItem("pendingAnalyzeUrl")) {
+      requestAnimationFrame(() => {
+        document.getElementById("analyzer")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  }, []);
+
   const handleAnalyze = async () => {
     if (!url.trim()) return;
     if (!canAnalyze) {
@@ -84,7 +101,7 @@ const Dashboard = () => {
         <StockNewsFeed />
       </div>
 
-      <div className="mb-8 rounded-xl border border-border bg-card p-4 sm:p-6" data-tour="analyze-link">
+      <div id="analyzer" className="mb-8 rounded-xl border border-border bg-card p-4 sm:p-6 scroll-mt-20" data-tour="analyze-link">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <LinkIcon className="h-5 w-5 text-primary" />
