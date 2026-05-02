@@ -12,7 +12,7 @@ const inputSchema: SchemaDefinition = {
   url: { type: "string", required: true, minLength: 5, maxLength: 2048, pattern: /^https?:\/\/.+/ },
 };
 
-const FREE_DAILY_ANALYSES = 3;
+const FREE_DAILY_ANALYSES = 1;
 
 // Must stay in sync with src/lib/trustScore.ts so the news-feed badge
 // and the article analyzer always return the same score for a known source.

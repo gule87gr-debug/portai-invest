@@ -22,7 +22,7 @@ type AnalysisResult = {
   strengths: string[];
 };
 
-const FREE_DAILY_ANALYSES = 3;
+const FREE_DAILY_ANALYSES = 1;
 
 const Dashboard = () => {
   usePageTitle("Market Intelligence | PortAI");
