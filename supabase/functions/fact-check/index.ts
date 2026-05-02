@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { checkRateLimit, getClientIP, rateLimitResponse } from "../_shared/rate-limiter.ts";
 import { validateInput, validationErrorResponse, type SchemaDefinition } from "../_shared/input-validator.ts";
 
@@ -15,9 +16,28 @@ const inputSchema: SchemaDefinition = {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  // Rate limit: 10 requests per minute per IP
-  const ip = getClientIP(req);
-  const rl = checkRateLimit(`factcheck:${ip}`, { maxRequests: 10, windowMs: 60_000 });
+  // Require authenticated user
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) {
+    return new Response(JSON.stringify({ error: "Authentication required" }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  const supabaseAdmin = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    { auth: { persistSession: false } }
+  );
+  const token = authHeader.replace("Bearer ", "");
+  const { data: userData } = await supabaseAdmin.auth.getUser(token);
+  if (!userData?.user) {
+    return new Response(JSON.stringify({ error: "Invalid or expired token" }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // Rate limit: 10 requests per minute per user
+  const rl = checkRateLimit(`factcheck:${userData.user.id}`, { maxRequests: 10, windowMs: 60_000 });
   if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs, corsHeaders);
 
   try {
