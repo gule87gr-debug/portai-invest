@@ -1,82 +1,14 @@
-import { TrendingUp, Brain, BarChart3, MessageSquare, Eye, ArrowRight, Sparkles, LayoutDashboard, BookOpen, Shield, Globe, ChevronRight, Zap, Target, Users, LineChart, Newspaper, CheckCircle2, Lock, ShieldCheck, Fingerprint } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { Brain, BarChart3, MessageSquare, Eye, ArrowRight, Sparkles, LayoutDashboard, Shield, Globe, ChevronRight, Zap, ShieldCheck, Lock, Fingerprint, CheckCircle2, ChevronDown, Search, Activity, Database, CreditCard, Cpu } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useLanguage, type Language } from "@/contexts/LanguageContext";
 
-
-const features = [
-  {
-    icon: LayoutDashboard,
-    title: "Market Intelligence",
-    tagline: "AI-curated financial news with trust scores and bias detection",
-    details: [
-      "AI-curated financial news with trust scores and bias detection. Know exactly which sources to trust before making investment decisions.",
-      "Paste any financial article URL for instant AI analysis",
-      "See bias detection, credibility ratings, and smart summaries",
-      "Stay informed with real-time news from major financial sources",
-    ],
-  },
-  {
-    icon: Brain,
-    title: "AI Financial Advisor",
-    tagline: "Your personal AI financial advisor available 24/7",
-    details: [
-      "Your personal AI financial advisor available 24/7. Ask about stocks, ETFs, crypto, portfolio strategy and market trends.",
-      "Get personalized portfolio recommendations and analysis",
-      "Ask about specific stocks, sectors, or investment concepts",
-      "Conversation history saved across sessions for continuity",
-    ],
-  },
-  {
-    icon: Sparkles,
-    title: "Investment Quiz",
-    tagline: "Discover your personalized investor profile",
-    details: [
-      "Get your personalized investor profile and AI stock recommendations tailored to your goals and risk tolerance.",
-      "Complete a guided 5-step questionnaire about your goals",
-      "Receive tailored stock and ETF recommendations",
-      "Learn which sectors and asset classes fit your risk tolerance",
-    ],
-  },
-  {
-    icon: MessageSquare,
-    title: "Smart Forum",
-    tagline: "The smartest investing community on the web",
-    details: [
-      "Discuss stocks and market trends with AI-powered fact checking on every post. The smartest investing community on the web.",
-      "AI-powered fact-checking flags unverified claims automatically",
-      "Reply, upvote, and engage in meaningful financial discussions",
-      "Moderated by AI to keep conversations grounded and respectful",
-    ],
-  },
-  {
-    icon: Eye,
-    title: "Watchlists",
-    tagline: "Track 10,000+ stocks, ETFs, index funds and crypto from 20+ countries",
-    details: [
-      "Track 10,000+ stocks, ETFs, index funds and crypto assets from global markets in real time with live prices, charts and AI analysis.",
-      "View interactive TradingView charts with technical indicators",
-      "Organize assets by sector, signal strength, or personal tags",
-      "Monitor real-time price movements and market data",
-    ],
-  },
-  {
-    icon: Globe,
-    title: "Multi-Language Support",
-    tagline: "Use PortAI in your language",
-    details: [
-      "Full interface available in 6 languages",
-      "English, Spanish, French, Portuguese, German, and Italian",
-      "Switch languages instantly from settings",
-      "All AI responses adapt to your chosen language",
-    ],
-  },
-];
-
-const howItWorks = [
-  { step: "1", title: "Create your account", desc: "Sign up in seconds with email. No credit card required." },
-  { step: "2", title: "Explore the dashboard", desc: "Browse curated news, paste article links for AI analysis, and get trust scores." },
-  { step: "3", title: "Take the quiz", desc: "Answer 5 questions to discover your investor profile and get personalized picks." },
-  { step: "4", title: "Build watchlists", desc: "Add stocks, ETFs, and crypto to custom lists. Track charts and signals." },
-  { step: "5", title: "Ask the AI", desc: "Chat with your AI advisor about any investment question, anytime." },
+const supportingFeatures = [
+  { icon: LayoutDashboard, key: "marketIntelligence", desc: "Live S&P 500 heatmap and curated news feed." },
+  { icon: Brain, key: "aiChat", desc: "Personal AI advisor for stocks, ETFs and strategy." },
+  { icon: Sparkles, key: "quiz", desc: "Personalized portfolio quiz in 5 questions." },
+  { icon: Eye, key: "watchlists", desc: "Track 10,000+ assets across 20+ countries." },
+  { icon: MessageSquare, key: "forum", desc: "Community media-bias dashboard, live." },
+  { icon: Globe, key: "settings", desc: "Available in 6 languages, instantly switchable." },
 ];
 
 function useScrollReveal() {
@@ -109,9 +41,23 @@ const RevealSection = ({ children, className = "" }: { children: React.ReactNode
 };
 
 const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
+  const { t, language, setLanguage, languageNames } = useLanguage();
+  const [url, setUrl] = useState("");
+  const [langOpen, setLangOpen] = useState(false);
+
   useEffect(() => {
-    document.title = "PortAI — AI-Powered Investment Platform | Smart Investing with Artificial Intelligence";
+    document.title = "PortAI — Stop Trading on Biased News | AI Article Analyzer";
   }, []);
+
+  const handleAnalyze = () => {
+    const trimmed = url.trim();
+    if (trimmed) {
+      try {
+        sessionStorage.setItem("pendingAnalyzeUrl", trimmed);
+      } catch { /* ignore */ }
+    }
+    onGetStarted();
+  };
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden noise-overlay">
@@ -129,55 +75,170 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           transform: translateY(0);
           filter: blur(0);
         }
+        @keyframes hero-pulse {
+          0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.5), 0 0 0 0 hsl(var(--primary) / 0.25); }
+          50% { box-shadow: 0 0 0 10px hsl(var(--primary) / 0), 0 0 0 22px hsl(var(--primary) / 0); }
+        }
+        .hero-input-pulse {
+          animation: hero-pulse 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
       `}</style>
 
+      {/* Top promo banner */}
+      <div className="bg-primary text-primary-foreground px-4 py-2 text-center text-xs sm:text-sm font-semibold tracking-wide">
+        <span className="inline-flex items-center gap-2">
+          <Sparkles className="h-3.5 w-3.5" />
+          {t("landingBanner")}
+        </span>
+      </div>
+
       {/* Nav */}
-      <nav className="flex items-center justify-between px-6 py-5 max-w-6xl mx-auto glass rounded-b-xl">
+      <nav className="flex items-center justify-between px-4 sm:px-6 py-4 max-w-6xl mx-auto">
         <div className="flex items-center gap-2.5">
           <img src="/logo.png" alt="PortAI" className="h-9 w-9 rounded-lg" />
           <span className="text-lg font-bold text-foreground">PortAI</span>
         </div>
-        <button
-          onClick={onGetStarted}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97]"
-        >
-          Get Started
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Language switcher */}
+          <div className="relative">
+            <button
+              onClick={() => setLangOpen((o) => !o)}
+              className="flex items-center gap-1.5 rounded-lg border border-border bg-card/60 px-3 py-2 text-xs font-medium text-foreground hover:bg-accent transition-colors"
+              aria-label="Change language"
+            >
+              <Globe className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">{languageNames[language]}</span>
+              <span className="sm:hidden uppercase">{language}</span>
+              <ChevronDown className="h-3 w-3 opacity-60" />
+            </button>
+            {langOpen && (
+              <>
+                <div className="fixed inset-0 z-30" onClick={() => setLangOpen(false)} />
+                <div className="absolute right-0 mt-1.5 w-44 rounded-lg border border-border bg-card shadow-xl z-40 p-1 animate-fade-in">
+                  {(Object.keys(languageNames) as Language[]).map((lng) => (
+                    <button
+                      key={lng}
+                      onClick={() => { setLanguage(lng); setLangOpen(false); }}
+                      className={`w-full text-left rounded-md px-3 py-2 text-sm font-medium transition-colors ${language === lng ? "bg-primary/15 text-primary" : "text-foreground hover:bg-accent"}`}
+                    >
+                      {languageNames[lng]}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+          <button
+            onClick={onGetStarted}
+            className="rounded-lg bg-primary px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97]"
+          >
+            {t("heroCreate")}
+          </button>
+        </div>
       </nav>
 
       {/* Hero */}
-      <section className="px-6 pt-16 pb-12 max-w-4xl mx-auto text-center relative gold-glow">
-        <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary mb-6 tracking-label uppercase">
-          <Sparkles className="h-3.5 w-3.5" /> AI-Powered Investment Platform
+      <section className="px-4 sm:px-6 pt-12 sm:pt-16 pb-10 max-w-4xl mx-auto text-center relative gold-glow">
+        <div className="inline-flex items-center gap-2 rounded-full border border-loss/30 bg-loss/10 px-4 py-1.5 text-xs font-bold text-loss mb-6 tracking-label uppercase">
+          <ShieldCheck className="h-3.5 w-3.5" /> {t("heroBadge")}
         </div>
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight relative z-10" style={{ lineHeight: "1.08" }}>
-          Invest smarter with
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight relative z-10" style={{ lineHeight: "1.05" }}>
+          {t("heroTitleA")}
           <br />
-          <span className="text-primary">artificial intelligence</span>
+          <span className="text-primary">{t("heroTitleB")}</span>
         </h1>
-        <p className="mt-5 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed relative z-10" style={{ textWrap: "pretty" as any }}>
-          The AI-powered investment platform that detects bias in financial news, tracks your portfolio in real time and gives you personalized AI financial advice — free.
+        <p className="mt-5 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed relative z-10" style={{ textWrap: "pretty" as any }}>
+          {t("heroSubtitle")}
         </p>
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 relative z-10">
-          <button
-            onClick={onGetStarted}
-            className="flex items-center gap-2 rounded-xl bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97]"
-          >
-            Create Free Account <ArrowRight className="h-4 w-4" />
-          </button>
-          <a
-            href="#features"
-            className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-          >
-            See what's inside <ChevronRight className="h-3.5 w-3.5" />
-          </a>
+
+        {/* Prominent input box with pulse */}
+        <div className="mt-9 max-w-2xl mx-auto relative z-10">
+          <div className="hero-input-pulse rounded-2xl">
+            <div className="flex flex-col sm:flex-row items-stretch gap-2 rounded-2xl border-2 border-primary/40 bg-card p-2 shadow-2xl">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <input
+                  type="url"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
+                  placeholder={t("heroPlaceholder")}
+                  className="h-12 w-full rounded-xl bg-transparent pl-11 pr-4 text-sm sm:text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
+                  aria-label="Article URL to analyze"
+                />
+              </div>
+              <button
+                onClick={handleAnalyze}
+                className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm sm:text-base font-bold text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97] shrink-0"
+              >
+                {t("heroAnalyze")} <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            {t("heroOr")}{" "}
+            <button onClick={onGetStarted} className="font-semibold text-primary hover:underline">
+              {t("heroCreate")}
+            </button>
+          </p>
         </div>
       </section>
 
+      {/* Three value cards — the "Wait, I need this" moment */}
+      <section className="px-4 sm:px-6 pt-8 pb-16 max-w-5xl mx-auto">
+        <RevealSection>
+          <h2 className="text-center text-xl sm:text-2xl font-bold text-foreground mb-10" style={{ textWrap: "balance" as any }}>
+            {t("valueCardsTitle")}
+          </h2>
+        </RevealSection>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            { icon: ShieldCheck, title: t("valueBiasTitle"), desc: t("valueBiasDesc"), tone: "primary" },
+            { icon: CheckCircle2, title: t("valueFactTitle"), desc: t("valueFactDesc"), tone: "primary" },
+            { icon: Globe, title: t("valueGlobalTitle"), desc: t("valueGlobalDesc"), tone: "primary" },
+          ].map((c, i) => (
+            <RevealSection key={c.title}>
+              <div
+                className="glass-card rounded-2xl p-6 h-full text-center card-hover"
+                style={{ transitionDelay: `${i * 60}ms` }}
+              >
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15 border border-primary/25">
+                  <c.icon className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-base font-bold text-foreground mb-1.5">{c.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{c.desc}</p>
+              </div>
+            </RevealSection>
+          ))}
+        </div>
+      </section>
 
-      {/* Stats bar */}
+      {/* Tech stack — social proof */}
       <RevealSection>
-        <div className="border-y border-border bg-card/50 py-8 px-6">
+        <section className="px-4 sm:px-6 py-8 border-y border-border bg-card/30">
+          <div className="max-w-5xl mx-auto">
+            <p className="text-center text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-5">
+              {t("techStackLabel")}
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+              {[
+                { icon: Cpu, label: "Powered by OpenAI" },
+                { icon: Database, label: "Secured by Supabase" },
+                { icon: CreditCard, label: "Payments by Stripe" },
+              ].map((t) => (
+                <div key={t.label} className="flex items-center gap-2 text-sm font-semibold text-foreground/70">
+                  <t.icon className="h-4 w-4 text-primary/70" />
+                  {t.label}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </RevealSection>
+
+      {/* Stats bar — moved below tech stack */}
+      <RevealSection>
+        <div className="py-10 px-6">
           <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
             {[
               { value: "10,000+", label: "Global Stocks, ETFs & Crypto", icon: BarChart3 },
@@ -195,83 +256,42 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </div>
       </RevealSection>
 
-      {/* Features — detailed */}
-      <section id="features" className="px-6 pt-20 pb-16 max-w-5xl mx-auto">
+      {/* Demoted Supporting Features — heatmap, watchlist, etc. */}
+      <section id="features" className="px-4 sm:px-6 pt-12 pb-16 max-w-5xl mx-auto">
         <RevealSection>
-          <p className="text-center text-xs font-semibold uppercase tracking-label text-primary mb-3">Platform Features</p>
-          <h2 className="text-center text-2xl sm:text-3xl font-bold text-foreground mb-4" style={{ textWrap: "balance" as any }}>
-            Everything you need to invest with confidence
+          <p className="text-center text-xs font-semibold uppercase tracking-label text-muted-foreground mb-2">{t("supportingFeatures")}</p>
+          <h2 className="text-center text-xl sm:text-2xl font-bold text-foreground mb-3" style={{ textWrap: "balance" as any }}>
+            {t("supportingFeaturesSub")}
           </h2>
-          <p className="text-center text-muted-foreground max-w-xl mx-auto mb-14 text-sm leading-relaxed">
-            From AI-powered analysis to community discussions, PortAI gives you the tools professional investors use — in a simple, unified interface.
-          </p>
         </RevealSection>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {features.map((f, i) => (
-            <RevealSection key={f.title}>
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {supportingFeatures.map((f, i) => (
+            <RevealSection key={f.key}>
               <div
-                className="glass-card rounded-2xl p-6 h-full transition-all card-hover"
-                style={{ transitionDelay: `${i * 60}ms` }}
+                className="glass-card rounded-xl p-5 h-full transition-all card-hover"
+                style={{ transitionDelay: `${i * 40}ms` }}
               >
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/15">
-                    <f.icon className="h-5 w-5 text-primary" />
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                    <f.icon className="h-4.5 w-4.5 text-primary/80" />
                   </div>
-                  <div>
-                    <h3 className="text-base font-semibold text-foreground">{f.title}</h3>
-                    <p className="text-sm text-muted-foreground">{f.tagline}</p>
-                  </div>
+                  <h3 className="text-sm font-semibold text-foreground">{t(f.key)}</h3>
                 </div>
-                <ul className="space-y-2.5 ml-1">
-                  {f.details.map((d) => (
-                    <li key={d} className="flex items-start gap-2.5 text-sm text-muted-foreground leading-relaxed">
-                      <CheckCircle2 className="h-4 w-4 shrink-0 text-success mt-0.5" />
-                      {d}
-                    </li>
-                  ))}
-                </ul>
+                <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
               </div>
             </RevealSection>
           ))}
         </div>
-      </section>
 
-      {/* How it works */}
-      <section className="px-6 py-20 bg-card/40 border-y border-border">
-        <div className="max-w-3xl mx-auto">
-          <RevealSection>
-            <p className="text-center text-xs font-semibold uppercase tracking-label text-primary mb-3">Getting Started</p>
-            <h2 className="text-center text-2xl sm:text-3xl font-bold text-foreground mb-12" style={{ textWrap: "balance" as any }}>
-              Up and running in minutes
-            </h2>
-          </RevealSection>
-
-          <div className="space-y-6">
-            {howItWorks.map((h, i) => (
-              <RevealSection key={h.step}>
-                <div className="flex items-start gap-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary font-mono">
-                    {h.step}
-                  </div>
-                  <div className="pt-1">
-                    <h3 className="text-sm font-semibold text-foreground mb-0.5">{h.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{h.desc}</p>
-                  </div>
-                </div>
-              </RevealSection>
-            ))}
-          </div>
-
-          <RevealSection className="mt-10 text-center">
-            <button
-              onClick={onGetStarted}
-              className="inline-flex items-center gap-2 rounded-xl bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97]"
-            >
-              Start Now — It's Free <ArrowRight className="h-4 w-4" />
-            </button>
-          </RevealSection>
-        </div>
+        <RevealSection className="mt-12 text-center">
+          <button
+            onClick={onGetStarted}
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97]"
+          >
+            {t("heroCreate")} <ArrowRight className="h-4 w-4" />
+          </button>
+        </RevealSection>
       </section>
 
       {/* Trust & Compliance badges */}
@@ -287,27 +307,6 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
               <div key={badge.label} className="flex items-center gap-2 rounded-full border border-border bg-card/60 backdrop-blur-sm px-4 py-2" style={{ borderColor: "rgba(46, 204, 143, 0.08)" }}>
                 <badge.icon className="h-4 w-4 text-primary" />
                 <span className="text-xs font-medium text-foreground">{badge.label}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-      </RevealSection>
-
-      {/* Trust signals */}
-      <RevealSection>
-        <section className="px-6 py-16 max-w-4xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
-            {[
-              { icon: Shield, title: "Secure by default", desc: "Email verification, encrypted data, and privacy-first design." },
-              { icon: Zap, title: "No setup required", desc: "No API keys, no downloads. Sign up and start using every feature instantly." },
-              { icon: Lock, title: "Not financial advice", desc: "PortAI is for education and research. Always consult a licensed advisor." },
-            ].map((t) => (
-              <div key={t.title} className="flex flex-col items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                  <t.icon className="h-5 w-5 text-primary/70" />
-                </div>
-                <h3 className="text-sm font-semibold text-foreground">{t.title}</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed max-w-[220px]">{t.desc}</p>
               </div>
             ))}
           </div>
