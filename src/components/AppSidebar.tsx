@@ -1,4 +1,4 @@
-import { LayoutDashboard, MessageCircle, Sparkles, MessageSquare, Eye, Settings, TrendingUp, Menu, X, Home, LogOut, Search } from "lucide-react";
+import { MessageCircle, Sparkles, MessageSquare, Eye, Settings, TrendingUp, Menu, X, LogOut, Newspaper } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
