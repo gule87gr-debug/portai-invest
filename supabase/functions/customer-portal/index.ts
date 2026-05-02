@@ -49,7 +49,15 @@ serve(async (req) => {
       });
     }
 
-    const origin = req.headers.get("origin") || "http://localhost:3000";
+    const ALLOWED_ORIGINS = new Set([
+      "https://portai-invest.lovable.app",
+      "https://www.portai-invest.com",
+      "https://portai-invest.com",
+      "https://id-preview--5bccf231-23e4-4163-8c8a-8a3af99cb665.lovable.app",
+      "http://localhost:3000",
+    ]);
+    const rawOrigin = req.headers.get("origin") ?? "";
+    const origin = ALLOWED_ORIGINS.has(rawOrigin) ? rawOrigin : "https://portai-invest.lovable.app";
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customers.data[0].id,
       return_url: `${origin}/settings`,
