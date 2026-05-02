@@ -8,9 +8,7 @@ import { NotificationBell } from "@/components/NotificationBell";
 import { supabase } from "@/integrations/supabase/client";
 
 const navKeys = [
-  { to: "/dashboard#analyzer", icon: Search, key: "articleAnalyzer", tour: "nav-analyzer", badge: "new" as const },
-  { to: "/", icon: Home, key: "home", tour: "" },
-  { to: "/dashboard", icon: LayoutDashboard, key: "dashboard", tour: "" },
+  { to: "/dashboard", icon: Newspaper, key: "news", tour: "nav-news" },
   { to: "/chat", icon: MessageCircle, key: "aiChat", tour: "nav-chat" },
   { to: "/quiz", icon: Sparkles, key: "quiz", tour: "nav-quiz" },
   { to: "/forum", icon: MessageSquare, key: "forum", tour: "nav-forum" },
