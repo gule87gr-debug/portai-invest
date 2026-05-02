@@ -215,7 +215,9 @@ Return this exact JSON structure:
   "trustScore": <number 1-10>,
   "summary": "200 word max summary of what you can infer about the content and source credibility",
   "biases": ["list", "of", "potential", "biases"],
-  "strengths": ["list", "of", "credibility", "strengths"]
+  "strengths": ["list", "of", "credibility", "strengths"],
+  "redFlag": "ONE short tag (2-4 words): Promotional Language | Conflict of Interest | One-Sided | Pump Pattern | Sensational Headline | Cherry-Picked Data | Unverified Claims | Objective Reporting",
+  "hiddenAngle": "2-3 sentence Pro insight describing what the article is hiding, omitting, or downplaying. Be concrete."
 }
 
 Scoring guide:
@@ -268,8 +270,12 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
         summary: content.slice(0, 500),
         biases: ["Unable to fully parse structured analysis"],
         strengths: ["URL was analyzed by AI"],
+        redFlag: "Unverified Claims",
+        hiddenAngle: "Automated parsing failed; manual review recommended.",
       };
     }
+    if (!analysis.redFlag) analysis.redFlag = "Unverified Claims";
+    if (!analysis.hiddenAngle) analysis.hiddenAngle = analysis.summary?.slice(0, 220) ?? "";
 
     // Override AI score with deterministic score for known sources so the
     // analyzer always agrees with the news-feed trust badge.
@@ -284,6 +290,22 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
     // Record usage server-side AFTER successful analysis
     if (userId && !isPro) {
       await supabaseAdmin.from("analysis_usage").insert({ user_id: userId });
+    }
+
+    // Persist to the public Media Bias Pulse feed
+    try {
+      await supabaseAdmin.from("analyzed_articles").insert({
+        url,
+        source: String(analysis.source ?? "Unknown").slice(0, 120),
+        title: String(analysis.title ?? "Article Analysis").slice(0, 300),
+        bias_score: Math.max(1, Math.min(10, Number(analysis.trustScore) || 5)),
+        red_flag: String(analysis.redFlag ?? "Unverified").slice(0, 60),
+        hidden_angle: String(analysis.hiddenAngle ?? "").slice(0, 600),
+        summary: String(analysis.summary ?? "").slice(0, 1000),
+        submitted_by: userId,
+      });
+    } catch (e) {
+      console.error("Failed to persist analyzed_article:", e);
     }
 
     return new Response(JSON.stringify({ success: true, analysis }), {
