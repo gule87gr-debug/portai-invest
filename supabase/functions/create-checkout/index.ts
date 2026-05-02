@@ -343,6 +343,6 @@ serve(async (req) => {
     return json(200, { url: session.url, action: "checkout" });
   } catch (error) {
     console.error("create-checkout error:", (error as Error).message);
-    return json(500, { error: (error as Error).message || "Internal server error" });
+    return json(500, { error: "Internal server error" });
   }
 });
