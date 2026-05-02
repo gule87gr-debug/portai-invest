@@ -101,10 +101,11 @@ const AppRoutes = () => {
   }
 
   if (!session) {
-    if (showAuth) {
-      return <AuthPage onAuth={() => {}} />;
-    }
-    return <LandingPage onGetStarted={handleGetStarted} />;
+    return (
+      <LanguageProvider initialLanguage="en">
+        {showAuth ? <AuthPage onAuth={() => {}} /> : <LandingPage onGetStarted={handleGetStarted} />}
+      </LanguageProvider>
+    );
   }
 
   // If user arrived via password recovery, force them to set a new password
