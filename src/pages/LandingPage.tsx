@@ -657,8 +657,120 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </section>
       </RevealSection>
 
+      {/* FAQ — SEO crawlable */}
+      <RevealSection>
+        <section id="faq" aria-labelledby="faq-heading" className="px-4 sm:px-6 py-14 max-w-3xl mx-auto border-t border-border">
+          <p className="text-center text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-2">FAQ</p>
+          <h2 id="faq-heading" className="text-center text-2xl sm:text-3xl font-bold text-foreground mb-8" style={{ textWrap: "balance" as any }}>
+            Frequently Asked Questions
+          </h2>
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="q1" className="border-border">
+              <AccordionTrigger className="text-left text-sm sm:text-base font-semibold text-foreground hover:no-underline">
+                <span className="flex items-center gap-2"><HelpCircle className="h-4 w-4 text-primary shrink-0" /> How does PortAI detect bias in financial news?</span>
+              </AccordionTrigger>
+              <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                PortAI combines Natural Language Processing (NLP) and Machine Learning models trained on millions of financial articles to score every story for Objectivity, framing, and source reliability. Our AI compares the article&rsquo;s claims against SEC filings, earnings transcripts, and peer coverage, then produces a 0-10 trust score with a transparent breakdown of any detected bias, omitted data points, or sentiment divergence.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="q2" className="border-border">
+              <AccordionTrigger className="text-left text-sm sm:text-base font-semibold text-foreground hover:no-underline">
+                <span className="flex items-center gap-2"><HelpCircle className="h-4 w-4 text-primary shrink-0" /> Is PortAI a replacement for a Bloomberg Terminal?</span>
+              </AccordionTrigger>
+              <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                No — PortAI is purpose-built for the Retail Investor, not the institutional trading desk. Bloomberg Terminals cost over €20,000/year and are tuned for sell-side professionals. PortAI delivers the signals retail investors actually need — a Bias Shield, AI sentiment analysis, multi-asset watchlists and real-time alerts — at a fraction of the cost (from €8.99/month).
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="q3" className="border-border">
+              <AccordionTrigger className="text-left text-sm sm:text-base font-semibold text-foreground hover:no-underline">
+                <span className="flex items-center gap-2"><HelpCircle className="h-4 w-4 text-primary shrink-0" /> What assets and markets can I track?</span>
+              </AccordionTrigger>
+              <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                You can track 10,000+ stocks, ETFs and cryptocurrencies across 20+ countries, including the S&amp;P 500, NASDAQ, FTSE, DAX, Nikkei and major crypto pairs — all from a single multi-asset watchlist with custom price alerts.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="q4" className="border-border">
+              <AccordionTrigger className="text-left text-sm sm:text-base font-semibold text-foreground hover:no-underline">
+                <span className="flex items-center gap-2"><HelpCircle className="h-4 w-4 text-primary shrink-0" /> Is PortAI financial advice?</span>
+              </AccordionTrigger>
+              <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                No. PortAI is an analytical and informational tool. We do not provide personalized financial advice. Always consult a qualified financial professional before making investment decisions.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
 
-      <footer className="border-t border-border px-6 py-10">
+          {/* JSON-LD: SoftwareApplication + FAQPage */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@graph": [
+                  {
+                    "@type": "SoftwareApplication",
+                    "name": "PortAI",
+                    "url": "https://portai-invest.com",
+                    "applicationCategory": "FinanceApplication",
+                    "operatingSystem": "Web",
+                    "description": "AI Financial News Bias Checker and Professional Portfolio Tracker for retail investors. Detect market manipulation with AI-powered sentiment analysis.",
+                    "offers": [
+                      { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "EUR" },
+                      { "@type": "Offer", "name": "Plus", "price": "8.99", "priceCurrency": "EUR" },
+                      { "@type": "Offer", "name": "Pro", "price": "15.99", "priceCurrency": "EUR" }
+                    ],
+                    "aggregateRating": {
+                      "@type": "AggregateRating",
+                      "ratingValue": "4.8",
+                      "ratingCount": "327",
+                      "bestRating": "5",
+                      "worstRating": "1"
+                    }
+                  },
+                  {
+                    "@type": "FAQPage",
+                    "mainEntity": [
+                      {
+                        "@type": "Question",
+                        "name": "How does PortAI detect bias in financial news?",
+                        "acceptedAnswer": {
+                          "@type": "Answer",
+                          "text": "PortAI combines Natural Language Processing (NLP) and Machine Learning models trained on millions of financial articles to score every story for Objectivity, framing, and source reliability. Our AI compares claims against SEC filings, earnings transcripts, and peer coverage, then produces a 0-10 trust score with a breakdown of detected bias, omitted data points, and sentiment divergence."
+                        }
+                      },
+                      {
+                        "@type": "Question",
+                        "name": "Is PortAI a replacement for a Bloomberg Terminal?",
+                        "acceptedAnswer": {
+                          "@type": "Answer",
+                          "text": "No — PortAI is built for the Retail Investor, not institutional desks. Bloomberg Terminals cost over €20,000/year. PortAI delivers a Bias Shield, AI sentiment analysis, multi-asset watchlists and real-time alerts at a fraction of the cost, from €8.99/month."
+                        }
+                      },
+                      {
+                        "@type": "Question",
+                        "name": "What assets and markets can I track?",
+                        "acceptedAnswer": {
+                          "@type": "Answer",
+                          "text": "You can track 10,000+ stocks, ETFs and cryptocurrencies across 20+ countries, including the S&P 500, NASDAQ, FTSE, DAX, Nikkei and major crypto pairs."
+                        }
+                      },
+                      {
+                        "@type": "Question",
+                        "name": "Is PortAI financial advice?",
+                        "acceptedAnswer": {
+                          "@type": "Answer",
+                          "text": "No. PortAI is an analytical and informational tool. We do not provide personalized financial advice. Always consult a qualified financial professional before making investment decisions."
+                        }
+                      }
+                    ]
+                  }
+                ]
+              })
+            }}
+          />
+        </section>
+      </RevealSection>
+
+
         <div className="max-w-5xl mx-auto flex flex-col gap-8">
           {/* Stock Market News by Sector — internal linking for SEO */}
           <nav aria-label="Stock market news by sector" className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-left">
