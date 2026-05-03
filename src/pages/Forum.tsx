@@ -270,9 +270,9 @@ const Forum = () => {
     if (filter === "all") return articles;
     return articles.filter((a) => {
       const t = trustBucket(a.bias_score).tone;
-      if (filter === "high") return t === "loss";
+      if (filter === "high") return t === "gain";
       if (filter === "moderate") return t === "warning";
-      return t === "gain";
+      return t === "loss";
     });
   }, [articles, filter]);
 
@@ -280,9 +280,9 @@ const Forum = () => {
     if (filter === "all") return featured;
     return featured.filter((a) => {
       const t = trustBucket(a.bias_score).tone;
-      if (filter === "high") return t === "loss";
+      if (filter === "high") return t === "gain";
       if (filter === "moderate") return t === "warning";
-      return t === "gain";
+      return t === "loss";
     });
   }, [featured, filter]);
 
@@ -312,7 +312,7 @@ const Forum = () => {
 
   const handleShare = async (a: AnalyzedArticle) => {
     const shareUrl = a.url;
-    const shareText = `${a.title} — bias score ${a.bias_score}/10 (${a.red_flag}) via PortAI Media Pulse`;
+    const shareText = `${a.title} — trust score ${a.bias_score}/10 (${a.red_flag}) via PortAI Media Pulse`;
     try {
       if (navigator.share) {
         await navigator.share({ title: a.title, text: shareText, url: shareUrl });
@@ -327,9 +327,9 @@ const Forum = () => {
 
   const filters: { key: typeof filter; label: string; tone?: "loss" | "warning" | "gain" }[] = [
     { key: "all", label: "All" },
-    { key: "high", label: "High Bias", tone: "loss" },
+    { key: "high", label: "Trusted", tone: "gain" },
     { key: "moderate", label: "Moderate", tone: "warning" },
-    { key: "objective", label: "Objective", tone: "gain" },
+    { key: "objective", label: "Low Trust", tone: "loss" },
   ];
 
   const renderArticleCard = (a: AnalyzedArticle, i: number, isFeatured: boolean) => {
@@ -376,7 +376,7 @@ const Forum = () => {
         <div className="mb-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-1.5">
             <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Bias Score
+              Trust Score
             </span>
             <span className={cn("text-xs font-mono font-bold", `text-${bucket.tone}`)}>
               {a.bias_score}/10 · {bucket.label}
