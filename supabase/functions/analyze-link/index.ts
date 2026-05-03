@@ -316,6 +316,7 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
         red_flag: String(analysis.redFlag ?? "Unverified").slice(0, 60),
         hidden_angle: String(analysis.hiddenAngle ?? "").slice(0, 600),
         summary: String(analysis.summary ?? "").slice(0, 1000),
+        pro_deep_dive: analysis.proDeepDive ?? null,
         submitted_by: userId,
       });
     } catch (e) {
