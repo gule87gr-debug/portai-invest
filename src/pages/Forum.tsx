@@ -43,6 +43,49 @@ const timeAgo = (iso: string): string => {
   return `${d}d ago`;
 };
 
+// Featured fallback so the feed never feels like a ghost town.
+const FEATURED_ARTICLES: AnalyzedArticle[] = [
+  {
+    id: "featured-tsla",
+    url: "https://www.cnbc.com/quotes/TSLA",
+    source: "CNBC",
+    title: "Tesla margin compression: bullish coverage skips price-cut math",
+    bias_score: 7,
+    red_flag: "Cherry-picked metrics",
+    hidden_angle: "Coverage emphasizes deliveries while omitting that gross margin has compressed for four consecutive quarters and that recent EU price cuts are not yet reflected in consensus EPS.",
+    summary: "Recent TSLA reporting frames record deliveries as unambiguous strength, but ignores margin trajectory and inventory build.",
+    vindicate_count: 42,
+    view_count: 1280,
+    created_at: new Date(Date.now() - 1000 * 60 * 35).toISOString(),
+  },
+  {
+    id: "featured-nvda",
+    url: "https://www.cnbc.com/quotes/NVDA",
+    source: "Yahoo Finance",
+    title: "NVDA 'AI demand infinite' narrative ignores hyperscaler capex guidance",
+    bias_score: 6,
+    red_flag: "Narrative framing",
+    hidden_angle: "Three of the top four hyperscalers have softened FY capex language in the last earnings cycle — a material signal absent from most bullish NVDA write-ups this week.",
+    summary: "Articles lean on supply-constraint quotes from sell-side desks while skipping the buy-side capex normalization signal.",
+    vindicate_count: 31,
+    view_count: 980,
+    created_at: new Date(Date.now() - 1000 * 60 * 90).toISOString(),
+  },
+  {
+    id: "featured-spx",
+    url: "https://www.bloomberg.com/quote/SPX:IND",
+    source: "Bloomberg",
+    title: "S&P 500 'broadening rally' claim contradicted by equal-weight performance",
+    bias_score: 5,
+    red_flag: "Selective benchmarking",
+    hidden_angle: "Equal-weight S&P (RSP) continues to lag the cap-weighted index by a wide margin YTD, undermining the 'broadening participation' thesis being recycled across major outlets.",
+    summary: "Headlines tout broadening leadership, but breadth indicators and equal-weight returns tell a different story.",
+    vindicate_count: 24,
+    view_count: 712,
+    created_at: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(),
+  },
+];
+
 const biasBucket = (score: number) => {
   if (score >= 7) return { label: "High Bias", tone: "loss" as const };
   if (score >= 4) return { label: "Moderate", tone: "warning" as const };
@@ -110,6 +153,13 @@ const Forum = () => {
     };
   }, []);
 
+  // Pull in featured fallback when the community feed is sparse in the last 24h.
+  const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
+  const recentCount = articles.filter((a) => new Date(a.created_at).getTime() >= dayAgo).length;
+  const showFeatured = !loading && recentCount < 5;
+  const missing = Math.max(0, 5 - recentCount);
+  const featured = showFeatured ? FEATURED_ARTICLES.slice(0, missing) : [];
+
   const filtered = useMemo(() => {
     if (filter === "all") return articles;
     return articles.filter((a) => {
@@ -119,6 +169,16 @@ const Forum = () => {
       return t === "gain";
     });
   }, [articles, filter]);
+
+  const filteredFeatured = useMemo(() => {
+    if (filter === "all") return featured;
+    return featured.filter((a) => {
+      const t = biasBucket(a.bias_score).tone;
+      if (filter === "high") return t === "loss";
+      if (filter === "moderate") return t === "warning";
+      return t === "gain";
+    });
+  }, [featured, filter]);
 
   const handleVindicate = async (a: AnalyzedArticle) => {
     if (vindicated.has(a.id) || vindicating === a.id) return;
@@ -165,6 +225,131 @@ const Forum = () => {
     { key: "moderate", label: "Moderate", tone: "warning" },
     { key: "objective", label: "Objective", tone: "gain" },
   ];
+
+  const renderArticleCard = (a: AnalyzedArticle, i: number, isFeatured: boolean) => {
+    const bucket = biasBucket(a.bias_score);
+    const tc = toneClasses[bucket.tone];
+    const pct = Math.max(6, Math.min(100, a.bias_score * 10));
+    const isVind = vindicated.has(a.id);
+    return (
+      <article
+        key={a.id}
+        className={cn(
+          "rounded-2xl border bg-card p-4 sm:p-5 animate-fade-in transition-shadow hover:shadow-lg",
+          isFeatured ? "border-primary/30" : "border-border",
+        )}
+        style={{ animationDelay: `${i * 35}ms` }}
+      >
+        <div className="mb-3 flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="font-bold text-foreground tracking-wide uppercase text-[11px] truncate">
+              {a.source || "Unknown"}
+            </span>
+            <span className="text-muted-foreground">•</span>
+            <span className="text-muted-foreground shrink-0">{timeAgo(a.created_at)}</span>
+            {isFeatured && (
+              <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary shrink-0">
+                <Sparkles className="h-2.5 w-2.5" /> Featured
+              </span>
+            )}
+          </div>
+          <a
+            href={a.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-muted-foreground hover:text-primary transition-colors shrink-0 ml-2"
+            aria-label="Open original article"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+          </a>
+        </div>
+
+        <h2 className="text-base sm:text-lg font-semibold leading-snug mb-3">{a.title}</h2>
+
+        {/* Bias heat-map bar — stacked layout for mobile readability */}
+        <div className="mb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Bias Score
+            </span>
+            <span className={cn("text-xs font-mono font-bold", `text-${bucket.tone}`)}>
+              {a.bias_score}/10 · {bucket.label}
+            </span>
+          </div>
+          <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+            <div className={cn("h-full rounded-full transition-all", tc.bar)} style={{ width: `${pct}%` }} />
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <span className={cn("inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[11px] font-semibold", tc.chip)}>
+            <Flame className="h-3 w-3" />
+            {a.red_flag}
+          </span>
+        </div>
+
+        <div className="mb-4 rounded-xl border border-border bg-background/50 p-3.5">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              <span className="text-xs font-bold uppercase tracking-wider text-foreground">AI Deep Dive</span>
+            </div>
+            {isPaid && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-bold text-primary">
+                <Crown className="h-2.5 w-2.5" /> {isPro ? "PRO" : "PLUS"}
+              </span>
+            )}
+          </div>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Hidden Angle</p>
+          {isPaid ? (
+            <p className="text-sm leading-relaxed text-foreground/90">
+              {a.hidden_angle || "No hidden angle detected for this article."}
+            </p>
+          ) : (
+            <div className="relative">
+              <p className="text-sm leading-relaxed text-foreground/80 select-none" style={{ filter: "blur(5px)" }} aria-hidden="true">
+                {a.hidden_angle ||
+                  "The article omits key context about insider transactions and recent regulatory developments that contradict the bullish narrative."}
+              </p>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <button
+                  onClick={() => setShowUpgrade(true)}
+                  className="flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
+                >
+                  <Lock className="h-3.5 w-3.5" />
+                  Unlock with Pro
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between border-t border-border pt-3">
+          <button
+            onClick={() => !isFeatured && handleVindicate(a)}
+            disabled={isFeatured || isVind || vindicating === a.id}
+            className={cn(
+              "flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors",
+              isVind ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-accent",
+              isFeatured && "opacity-60 cursor-not-allowed hover:bg-transparent",
+            )}
+            title={isFeatured ? "Vindicate available on community-submitted articles" : undefined}
+          >
+            <ThumbsUp className={cn("h-3.5 w-3.5", isVind && "fill-current")} />
+            Vindicate
+            <span className="font-mono">{a.vindicate_count}</span>
+          </button>
+          <button
+            onClick={() => handleShare(a)}
+            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          >
+            <Share2 className="h-3.5 w-3.5" />
+            Share
+          </button>
+        </div>
+      </article>
+    );
+  };
 
   return (
     <AppLayout>
@@ -215,7 +400,7 @@ const Forum = () => {
         <div className="flex items-center justify-center py-24">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
-      ) : filtered.length === 0 ? (
+      ) : filtered.length === 0 && filteredFeatured.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 animate-fade-in text-center">
           <div className="relative mb-5">
             <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/10 border-2 border-dashed border-primary/30">
@@ -231,150 +416,26 @@ const Forum = () => {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {filtered.map((a, i) => {
-            const bucket = biasBucket(a.bias_score);
-            const tc = toneClasses[bucket.tone];
-            const pct = Math.max(6, Math.min(100, a.bias_score * 10));
-            const isVind = vindicated.has(a.id);
-            return (
-              <article
-                key={a.id}
-                className={cn(
-                  "rounded-2xl border border-border bg-card p-4 sm:p-5 animate-fade-in transition-shadow hover:shadow-lg",
-                  bucket.tone === "loss" && "hover:" + tc.glow,
-                )}
-                style={{ animationDelay: `${i * 35}ms` }}
-              >
-                {/* Source + time */}
-                <div className="mb-3 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-foreground tracking-wide uppercase text-[11px]">
-                      {a.source || "Unknown"}
-                    </span>
-                    <span className="text-muted-foreground">•</span>
-                    <span className="text-muted-foreground">{timeAgo(a.created_at)}</span>
-                  </div>
-                  <a
-                    href={a.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-primary transition-colors"
-                    aria-label="Open original article"
-                  >
-                    <ExternalLink className="h-3.5 w-3.5" />
-                  </a>
-                </div>
-
-                {/* Headline */}
-                <h2 className="text-base sm:text-lg font-semibold leading-snug mb-3">
-                  {a.title}
-                </h2>
-
-                {/* Bias heat-map bar */}
-                <div className="mb-3">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                      Bias Score
-                    </span>
-                    <span className={cn("text-xs font-mono font-bold", `text-${bucket.tone}`)}>
-                      {a.bias_score}/10 · {bucket.label}
-                    </span>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-                    <div
-                      className={cn("h-full rounded-full transition-all", tc.bar)}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* Red flag */}
-                <div className="mb-4">
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[11px] font-semibold",
-                      tc.chip,
-                    )}
-                  >
-                    <Flame className="h-3 w-3" />
-                    {a.red_flag}
-                  </span>
-                </div>
-
-                {/* AI Deep Dive */}
-                <div className="mb-4 rounded-xl border border-border bg-background/50 p-3.5">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5 text-primary" />
-                      <span className="text-xs font-bold uppercase tracking-wider text-foreground">
-                        AI Deep Dive
-                      </span>
-                    </div>
-                    {isPaid && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-bold text-primary">
-                        <Crown className="h-2.5 w-2.5" /> {isPro ? "PRO" : "PLUS"}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                    Hidden Angle
-                  </p>
-                  {isPaid ? (
-                    <p className="text-sm leading-relaxed text-foreground/90">
-                      {a.hidden_angle || "No hidden angle detected for this article."}
-                    </p>
-                  ) : (
-                    <div className="relative">
-                      <p
-                        className="text-sm leading-relaxed text-foreground/80 select-none"
-                        style={{ filter: "blur(5px)" }}
-                        aria-hidden="true"
-                      >
-                        {a.hidden_angle ||
-                          "The article omits key context about insider transactions and recent regulatory developments that contradict the bullish narrative."}
-                      </p>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <button
-                          onClick={() => setShowUpgrade(true)}
-                          className="flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
-                        >
-                          <Lock className="h-3.5 w-3.5" />
-                          Unlock with Pro
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center justify-between border-t border-border pt-3">
-                  <button
-                    onClick={() => handleVindicate(a)}
-                    disabled={isVind || vindicating === a.id}
-                    className={cn(
-                      "flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors",
-                      isVind
-                        ? "text-primary"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent",
-                    )}
-                  >
-                    <ThumbsUp className={cn("h-3.5 w-3.5", isVind && "fill-current")} />
-                    Vindicate
-                    <span className="font-mono">{a.vindicate_count}</span>
-                  </button>
-                  <button
-                    onClick={() => handleShare(a)}
-                    className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-                  >
-                    <Share2 className="h-3.5 w-3.5" />
-                    Share
-                  </button>
-                </div>
-              </article>
-            );
-          })}
-        </div>
+        <>
+          {filteredFeatured.length > 0 && (
+            <section className="mb-6">
+              <div className="mb-3 flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 border border-primary/30 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
+                  <Sparkles className="h-3 w-3" /> Featured Analysis
+                </span>
+                <span className="text-[11px] text-muted-foreground">Hand-picked by PortAI · TSLA · NVDA · S&amp;P 500</span>
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {filteredFeatured.map((a, i) => renderArticleCard(a, i, true))}
+              </div>
+            </section>
+          )}
+          {filtered.length > 0 && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {filtered.map((a, i) => renderArticleCard(a, i, false))}
+            </div>
+          )}
+        </>
       )}
 
       <p className="mt-8 text-center text-[10px] text-muted-foreground/70">

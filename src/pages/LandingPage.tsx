@@ -313,7 +313,32 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </section>
       </RevealSection>
 
-      {/* Footer */}
+      {/* Trusted-by — outlets we analyze */}
+      <RevealSection>
+        <section className="px-6 py-10 border-t border-border bg-card/20">
+          <div className="max-w-5xl mx-auto text-center">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground mb-2">
+              Trusted by retail investors from 6+ countries
+            </p>
+            <p className="text-[11px] text-muted-foreground/80 mb-6">
+              We analyze bias across these outlets and more.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 opacity-60">
+              {["CNBC", "Yahoo Finance", "Bloomberg", "Reuters", "WSJ", "Financial Times", "MarketWatch"].map((src) => (
+                <span
+                  key={src}
+                  className="text-sm sm:text-base font-bold tracking-tight text-foreground/70 grayscale hover:opacity-100 hover:text-foreground transition-all"
+                  style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
+                >
+                  {src}
+                </span>
+              ))}
+            </div>
+          </div>
+        </section>
+      </RevealSection>
+
+
       <footer className="border-t border-border px-6 py-8">
         <div className="max-w-4xl mx-auto flex flex-col items-center gap-4">
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
