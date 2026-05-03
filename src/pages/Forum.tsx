@@ -224,8 +224,8 @@ const Forum = () => {
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [articles, setArticles] = useState<AnalyzedArticle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [vindicating, setVindicating] = useState<string | null>(null);
-  const [vindicated, setVindicated] = useState<Set<string>>(new Set());
+  const [liking, setLiking] = useState<string | null>(null);
+  const [liked, setLiked] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState<"all" | "high" | "moderate" | "objective">("all");
 
   const load = async () => {
