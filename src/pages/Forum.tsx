@@ -18,6 +18,12 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+type ProDeepDive = {
+  stakeholderMotives?: string;
+  omittedDataPoints?: string;
+  sentimentDivergence?: string;
+};
+
 type AnalyzedArticle = {
   id: string;
   url: string;
@@ -30,6 +36,7 @@ type AnalyzedArticle = {
   vindicate_count: number;
   view_count: number;
   created_at: string;
+  pro_deep_dive?: ProDeepDive | null;
 };
 
 const timeAgo = (iso: string): string => {
