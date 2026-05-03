@@ -526,8 +526,14 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       <RevealSection>
         <section id="why-portai" aria-labelledby="why-portai-heading" className="px-4 sm:px-6 py-14 max-w-3xl mx-auto">
           <h2 id="why-portai-heading" className="text-2xl sm:text-3xl font-bold text-foreground mb-6 text-center" style={{ textWrap: "balance" as any }}>
-            Why Modern Investors Need AI News Analysis
+            Why PortAI?
           </h2>
+          <h3 className="text-base sm:text-lg font-semibold text-primary mb-4 text-center">
+            Beyond price — the truth behind every move.
+          </h3>
+          <p className="mb-6 text-sm sm:text-base leading-relaxed text-foreground/90 text-center max-w-2xl mx-auto">
+            Traditional portfolio trackers only show you the price. PortAI uses AI sentiment analysis to reveal the truth behind financial news bias. Whether you are tracking the S&amp;P 500 or looking for crypto market insights, our AI ensures you never trade on hype.
+          </p>
           <div className="space-y-5 text-sm sm:text-base leading-relaxed text-muted-foreground">
             <p>
               Today&apos;s retail investor is drowning in financial reporting. Outlets like The Motley Fool, CNBC, Yahoo Finance, and Seeking Alpha publish thousands of articles every week — many of them written to chase clicks, push affiliate stocks, or amplify positions taken by sell-side desks. Without an objective filter, even disciplined investors end up rotating capital based on narrative rather than evidence, and biased financial reporting quietly becomes the largest hidden risk in their portfolio.
