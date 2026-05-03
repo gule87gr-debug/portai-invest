@@ -46,7 +46,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
   const [langOpen, setLangOpen] = useState(false);
 
   useEffect(() => {
-    document.title = "PortAI — Stop Trading on Biased News | AI Article Analyzer";
+    document.title = "PortAI | AI Financial News Bias Checker & Portfolio Tracker";
   }, []);
 
   const handleAnalyze = () => {
@@ -137,18 +137,30 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="px-4 sm:px-6 pt-12 sm:pt-16 pb-10 max-w-4xl mx-auto text-center relative gold-glow">
+      {/* Hero — Dual value proposition */}
+      <header className="px-4 sm:px-6 pt-12 sm:pt-16 pb-10 max-w-4xl mx-auto text-center relative gold-glow">
         <div className="inline-flex items-center gap-2 rounded-full border border-loss/30 bg-loss/10 px-4 py-1.5 text-xs font-bold text-loss mb-6 tracking-label uppercase">
-          <ShieldCheck className="h-3.5 w-3.5" /> {t("heroBadge")}
+          <ShieldCheck className="h-3.5 w-3.5" /> Stop Trading on Hype. Start Trading on Truth.
         </div>
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight relative z-10" style={{ lineHeight: "1.05" }}>
-          {t("heroTitleA")}
-          <br />
-          <span className="text-primary">{t("heroTitleB")}</span>
+
+        {/* SEO-optimized H1 — visually de-emphasized but crawlable */}
+        <h1 className="sr-only">
+          Master the Markets with AI-Powered Financial News Analysis and Professional Portfolio Tracking.
         </h1>
+
+        {/* Visual headline */}
+        <p
+          className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight relative z-10"
+          style={{ lineHeight: "1.05" }}
+          aria-hidden="true"
+        >
+          Stop Trading on Hype.
+          <br />
+          <span className="text-primary">Start Trading on Truth.</span>
+        </p>
+
         <p className="mt-5 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed relative z-10" style={{ textWrap: "pretty" as any }}>
-          {t("heroSubtitle")}
+          PortAI is the only retail investor platform that combines real-time stock market tracking with a sophisticated AI news bias checker. Shield your portfolio from media manipulation and track your assets in 6 languages.
         </p>
 
         {/* Prominent input box with pulse */}
@@ -164,25 +176,35 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
                   onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
                   placeholder={t("heroPlaceholder")}
                   className="h-12 w-full rounded-xl bg-transparent pl-11 pr-4 text-sm sm:text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
-                  aria-label="Article URL to analyze"
+                  aria-label="Article URL to analyze for financial news bias"
                 />
               </div>
               <button
                 onClick={handleAnalyze}
                 className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm sm:text-base font-bold text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97] shrink-0"
               >
-                {t("heroAnalyze")} <ArrowRight className="h-4 w-4" />
+                Analyze News Bias <ArrowRight className="h-4 w-4" />
               </button>
             </div>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">
-            {t("heroOr")}{" "}
-            <button onClick={onGetStarted} className="font-semibold text-primary hover:underline">
-              {t("heroCreate")}
+
+          {/* Dual CTA */}
+          <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button
+              onClick={onGetStarted}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-5 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/15 w-full sm:w-auto"
+            >
+              <Eye className="h-4 w-4" /> Build Your Watchlist
             </button>
-          </p>
+            <p className="text-xs text-muted-foreground">
+              {t("heroOr")}{" "}
+              <button onClick={onGetStarted} className="font-semibold text-primary hover:underline">
+                {t("heroCreate")}
+              </button>
+            </p>
+          </div>
         </div>
-      </section>
+      </header>
 
       {/* Three value cards — the "Wait, I need this" moment */}
       <section className="px-4 sm:px-6 pt-8 pb-16 max-w-5xl mx-auto">
