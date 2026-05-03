@@ -40,6 +40,19 @@ export const useSubscription = (): SubscriptionState => {
 
   const checkSubscription = useCallback(async () => {
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setTier("free");
+        setSubscriptionEnd(null);
+        setCancelAtPeriodEnd(false);
+        setSubscriptionId(null);
+        setSubscriptionStatus(null);
+        setScheduledTier(null);
+        setScheduledStart(null);
+        setScheduledChangesCount(0);
+        setLoading(false);
+        return;
+      }
       const { data, error } = await supabase.functions.invoke("check-subscription");
       if (error) throw error;
       const nextTier: SubscriptionTier = data?.tier ?? (data?.subscribed ? "pro" : "free");
