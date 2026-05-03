@@ -675,6 +675,10 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           </nav>
 
           <div className="border-t border-border pt-6 flex flex-col items-center gap-3">
+            <p className="inline-flex items-center gap-2 text-[11px] font-semibold text-foreground/80 text-center">
+              <Globe className="h-3.5 w-3.5 text-primary" />
+              Available in 6 Languages: English, Spanish, Portuguese, German, French, and Italian.
+            </p>
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/80 text-center">
               Powered by OpenAI · Secured by Supabase · Real-time Data via Financial APIs
             </p>
