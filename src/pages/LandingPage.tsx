@@ -46,7 +46,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
   const [langOpen, setLangOpen] = useState(false);
 
   useEffect(() => {
-    document.title = "PortAI | AI Financial News Bias Checker & Portfolio Tracker";
+    document.title = "PortAI | AI Financial News Bias Checker & Professional Portfolio Tracker";
   }, []);
 
   const handleAnalyze = () => {
@@ -140,12 +140,12 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       {/* Hero — Dual value proposition */}
       <header className="px-4 sm:px-6 pt-12 sm:pt-16 pb-10 max-w-4xl mx-auto text-center relative gold-glow">
         <div className="inline-flex items-center gap-2 rounded-full border border-loss/30 bg-loss/10 px-4 py-1.5 text-xs font-bold text-loss mb-6 tracking-label uppercase">
-          <ShieldCheck className="h-3.5 w-3.5" /> Stop Trading on Hype. Start Trading on Truth.
+          <ShieldCheck className="h-3.5 w-3.5" /> Stop Trading on Hype. Start Managing with Alpha.
         </div>
 
-        {/* SEO-optimized H1 — visually de-emphasized but crawlable */}
+        {/* SEO H1 — visually hidden but crawlable */}
         <h1 className="sr-only">
-          Master the Markets with AI-Powered Financial News Analysis and Professional Portfolio Tracking.
+          Invest with Clarity: The First AI-Powered Portfolio Command Center for Retail Investors.
         </h1>
 
         {/* Visual headline */}
@@ -156,11 +156,11 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         >
           Stop Trading on Hype.
           <br />
-          <span className="text-primary">Start Trading on Truth.</span>
+          <span className="text-primary">Start Managing with Alpha.</span>
         </p>
 
         <p className="mt-5 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed relative z-10" style={{ textWrap: "pretty" as any }}>
-          PortAI is the only retail investor platform that combines real-time stock market tracking with a sophisticated AI news bias checker. Shield your portfolio from media manipulation and track your assets in 6 languages.
+          Institutional-grade portfolio tracking meets advanced AI news analysis. PortAI shields your investments from media manipulation by revealing the &ldquo;Why&rdquo; behind every price move.
         </p>
 
         {/* Prominent input box with pulse */}
