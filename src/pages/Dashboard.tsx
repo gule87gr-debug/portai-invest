@@ -20,6 +20,11 @@ type AnalysisResult = {
   summary: string;
   biases: string[];
   strengths: string[];
+  proDeepDive?: {
+    stakeholderMotives?: string;
+    omittedDataPoints?: string;
+    sentimentDivergence?: string;
+  };
 };
 
 const FREE_DAILY_ANALYSES = 1;
@@ -195,9 +200,21 @@ const Dashboard = () => {
               <div className="relative">
                 <ul className={cn("space-y-2.5", !isPro && "select-none pointer-events-none")} aria-hidden={!isPro}>
                   {[
-                    { label: "Stakeholder Motives", body: "Identifies who benefits from this narrative — institutional positioning, recent insider trades, and analyst incentives." },
-                    { label: "Omitted Data Points", body: "Surfaces material context the article skips: contradicting filings, regulatory headlines, and historical baselines." },
-                    { label: "Sentiment Divergence", body: "Compares the article's tone to social, options-flow, and peer-coverage signals to flag manufactured consensus." },
+                    {
+                      label: "Stakeholder Motives",
+                      body: result.proDeepDive?.stakeholderMotives ||
+                        "Identifies who benefits from this narrative — institutional positioning, recent insider trades, and analyst incentives.",
+                    },
+                    {
+                      label: "Omitted Data Points",
+                      body: result.proDeepDive?.omittedDataPoints ||
+                        "Surfaces material context the article skips: contradicting filings, regulatory headlines, and historical baselines.",
+                    },
+                    {
+                      label: "Sentiment Divergence",
+                      body: result.proDeepDive?.sentimentDivergence ||
+                        "Compares the article's tone to social, options-flow, and peer-coverage signals to flag manufactured consensus.",
+                    },
                   ].map((it) => (
                     <li key={it.label} className="flex items-start gap-2.5 text-sm">
                       <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />

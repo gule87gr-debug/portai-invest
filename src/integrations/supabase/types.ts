@@ -80,6 +80,35 @@ export type Database = {
         }
         Relationships: []
       }
+      article_likes: {
+        Row: {
+          article_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          article_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          article_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_likes_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "analyzed_articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           content: string
@@ -540,6 +569,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      toggle_article_like: { Args: { _article_id: string }; Returns: boolean }
       vindicate_article: { Args: { _article_id: string }; Returns: undefined }
     }
     Enums: {

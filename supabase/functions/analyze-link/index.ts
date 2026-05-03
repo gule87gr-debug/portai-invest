@@ -217,8 +217,15 @@ Return this exact JSON structure:
   "biases": ["list", "of", "potential", "biases"],
   "strengths": ["list", "of", "credibility", "strengths"],
   "redFlag": "ONE short tag (2-4 words): Promotional Language | Conflict of Interest | One-Sided | Pump Pattern | Sensational Headline | Cherry-Picked Data | Unverified Claims | Objective Reporting",
-  "hiddenAngle": "2-3 sentence Pro insight describing what the article is hiding, omitting, or downplaying. Be concrete."
+  "hiddenAngle": "2-3 sentence Pro insight describing what the article is hiding, omitting, or downplaying. Be concrete.",
+  "proDeepDive": {
+    "stakeholderMotives": "2-3 sentences: who specifically benefits from THIS article's framing — name the institutions, insiders, analysts or funds whose positioning aligns with the narrative. Reference concrete incentives (recent insider trades, analyst price-target history, fund holdings) rather than generic 'institutions benefit' language.",
+    "omittedDataPoints": "2-3 sentences: name the specific data the article skips — contradicting filings, recent regulatory headlines, peer comparisons, historical baselines, or guidance revisions that would weaken the thesis. Cite numbers or filing types where plausible.",
+    "sentimentDivergence": "2-3 sentences: contrast the article's tone with concrete counter-signals — options-flow skew, short interest trend, analyst dispersion, peer-coverage tone, or social-sentiment direction. Indicate whether consensus is genuine or manufactured."
+  }
 }
+
+The proDeepDive MUST be specific to THIS article's subject (ticker, company, sector, event). Never produce generic boilerplate. Reference the actual entity by name in every field.
 
 Scoring guide:
 - 9-10: Major wire services (Reuters, AP), SEC filings, Fed publications
@@ -276,6 +283,13 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
     }
     if (!analysis.redFlag) analysis.redFlag = "Unverified Claims";
     if (!analysis.hiddenAngle) analysis.hiddenAngle = analysis.summary?.slice(0, 220) ?? "";
+    if (!analysis.proDeepDive || typeof analysis.proDeepDive !== "object") {
+      analysis.proDeepDive = {
+        stakeholderMotives: "Deep-dive parsing unavailable for this article. Re-run analysis to generate stakeholder context.",
+        omittedDataPoints: "Deep-dive parsing unavailable for this article. Re-run analysis to surface omitted data.",
+        sentimentDivergence: "Deep-dive parsing unavailable for this article. Re-run analysis to compare sentiment signals.",
+      };
+    }
 
     // Override AI score with deterministic score for known sources so the
     // analyzer always agrees with the news-feed trust badge.

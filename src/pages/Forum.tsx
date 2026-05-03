@@ -224,8 +224,8 @@ const Forum = () => {
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [articles, setArticles] = useState<AnalyzedArticle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [vindicating, setVindicating] = useState<string | null>(null);
-  const [vindicated, setVindicated] = useState<Set<string>>(new Set());
+  const [liking, setLiking] = useState<string | null>(null);
+  const [liked, setLiked] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState<"all" | "high" | "moderate" | "objective">("all");
 
   const load = async () => {
@@ -239,6 +239,15 @@ const Forum = () => {
       toast({ title: "Could not load Pulse", description: error.message, variant: "destructive" });
     } else {
       setArticles((data ?? []) as AnalyzedArticle[]);
+    }
+    // Load this user's existing likes so the heart state persists
+    const { data: userRes } = await supabase.auth.getUser();
+    if (userRes?.user) {
+      const { data: likes } = await supabase
+        .from("article_likes")
+        .select("article_id")
+        .eq("user_id", userRes.user.id);
+      if (likes) setLiked(new Set(likes.map((l: { article_id: string }) => l.article_id)));
     }
     setLoading(false);
   };
@@ -288,28 +297,41 @@ const Forum = () => {
     });
   }, [featured, filter]);
 
-  const handleVindicate = async (a: AnalyzedArticle) => {
-    if (vindicated.has(a.id) || vindicating === a.id) return;
-    setVindicating(a.id);
+  const handleLike = async (a: AnalyzedArticle) => {
+    if (liking === a.id) return;
+    setLiking(a.id);
+    const wasLiked = liked.has(a.id);
     // optimistic
     setArticles((prev) =>
-      prev.map((x) => (x.id === a.id ? { ...x, vindicate_count: x.vindicate_count + 1 } : x)),
+      prev.map((x) =>
+        x.id === a.id
+          ? { ...x, vindicate_count: Math.max(0, x.vindicate_count + (wasLiked ? -1 : 1)) }
+          : x,
+      ),
     );
-    setVindicated((prev) => new Set(prev).add(a.id));
-    const { error } = await supabase.rpc("vindicate_article", { _article_id: a.id });
+    setLiked((prev) => {
+      const n = new Set(prev);
+      if (wasLiked) n.delete(a.id); else n.add(a.id);
+      return n;
+    });
+    const { error } = await supabase.rpc("toggle_article_like", { _article_id: a.id });
     if (error) {
       // revert
       setArticles((prev) =>
-        prev.map((x) => (x.id === a.id ? { ...x, vindicate_count: Math.max(0, x.vindicate_count - 1) } : x)),
+        prev.map((x) =>
+          x.id === a.id
+            ? { ...x, vindicate_count: Math.max(0, x.vindicate_count + (wasLiked ? 1 : -1)) }
+            : x,
+        ),
       );
-      setVindicated((prev) => {
+      setLiked((prev) => {
         const n = new Set(prev);
-        n.delete(a.id);
+        if (wasLiked) n.add(a.id); else n.delete(a.id);
         return n;
       });
-      toast({ title: "Sign in to vindicate", variant: "destructive" });
+      toast({ title: "Sign in to like articles", variant: "destructive" });
     }
-    setVindicating(null);
+    setLiking(null);
   };
 
   const handleShare = async (a: AnalyzedArticle) => {
@@ -338,7 +360,7 @@ const Forum = () => {
     const bucket = trustBucket(a.bias_score);
     const tc = toneClasses[bucket.tone];
     const pct = Math.max(6, Math.min(100, a.bias_score * 10));
-    const isVind = vindicated.has(a.id);
+    const isLiked = liked.has(a.id);
     return (
       <article
         key={a.id}
@@ -434,17 +456,18 @@ const Forum = () => {
 
         <div className="flex items-center justify-between border-t border-border pt-3">
           <button
-            onClick={() => !isFeatured && handleVindicate(a)}
-            disabled={isFeatured || isVind || vindicating === a.id}
+            onClick={() => !isFeatured && handleLike(a)}
+            disabled={isFeatured || liking === a.id}
             className={cn(
               "flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors",
-              isVind ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-accent",
+              isLiked ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-accent",
               isFeatured && "opacity-60 cursor-not-allowed hover:bg-transparent",
             )}
-            title={isFeatured ? "Vindicate available on community-submitted articles" : undefined}
+            title={isFeatured ? "Likes available on community-submitted articles" : (isLiked ? "Unlike" : "Like")}
+            aria-pressed={isLiked}
           >
-            <ThumbsUp className={cn("h-3.5 w-3.5", isVind && "fill-current")} />
-            Vindicate
+            <ThumbsUp className={cn("h-3.5 w-3.5", isLiked && "fill-current")} />
+            {isLiked ? "Liked" : "Like"}
             <span className="font-mono">{a.vindicate_count}</span>
           </button>
           <button
