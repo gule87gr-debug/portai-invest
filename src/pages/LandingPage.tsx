@@ -144,20 +144,17 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           <ShieldCheck className="h-3.5 w-3.5" /> Stop Trading on Hype. Start Trading on Truth.
         </div>
 
-        {/* SEO H1 — visually hidden but crawlable */}
-        <h1 className="sr-only">
-          The AI Command Center for Smarter Investing — Portfolio Tracking & AI Financial News Bias Checker.
-        </h1>
-
-        {/* Visual headline */}
-        <p
+        {/* SEO H1 — visible, keyword-rich */}
+        <h1
           className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight relative z-10"
           style={{ lineHeight: "1.05" }}
-          aria-hidden="true"
         >
-          The AI Command Center
+          The AI Financial News Bias Checker
           <br />
-          <span className="text-primary">for Smarter Investing.</span>
+          <span className="text-primary">&amp; Portfolio Tracker.</span>
+        </h1>
+        <p className="sr-only">
+          The AI Command Center for Smarter Investing — Professional Investment Tracking and AI-Powered Sentiment Analysis.
         </p>
 
         <p className="mt-5 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed relative z-10" style={{ textWrap: "pretty" as any }}>
