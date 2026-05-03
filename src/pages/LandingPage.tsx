@@ -1,4 +1,4 @@
-import { Brain, BarChart3, MessageSquare, Eye, ArrowRight, Sparkles, LayoutDashboard, Shield, Globe, ChevronRight, Zap, ShieldCheck, Lock, Fingerprint, CheckCircle2, ChevronDown, Search, Activity, Database, CreditCard, Cpu } from "lucide-react";
+import { Brain, BarChart3, MessageSquare, Eye, ArrowRight, Sparkles, LayoutDashboard, Shield, Globe, ChevronRight, Zap, ShieldCheck, Lock, Fingerprint, CheckCircle2, ChevronDown, Search, Activity, Database, CreditCard, Cpu, AlertCircle, FileText } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLanguage, type Language } from "@/contexts/LanguageContext";
 
@@ -46,7 +46,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
   const [langOpen, setLangOpen] = useState(false);
 
   useEffect(() => {
-    document.title = "PortAI — Stop Trading on Biased News | AI Article Analyzer";
+    document.title = "PortAI | AI Financial News Bias Checker & Portfolio Tracker";
   }, []);
 
   const handleAnalyze = () => {
@@ -95,7 +95,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       {/* Nav */}
       <nav className="flex items-center justify-between px-4 sm:px-6 py-4 max-w-6xl mx-auto">
         <div className="flex items-center gap-2.5">
-          <img src="/logo.png" alt="PortAI" className="h-9 w-9 rounded-lg" />
+          <img src="/logo.png" alt="PortAI logo — AI Stock Bias Analysis Dashboard" width={36} height={36} className="h-9 w-9 rounded-lg" />
           <span className="text-lg font-bold text-foreground">PortAI</span>
         </div>
         <div className="flex items-center gap-2">
@@ -137,18 +137,30 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="px-4 sm:px-6 pt-12 sm:pt-16 pb-10 max-w-4xl mx-auto text-center relative gold-glow">
+      {/* Hero — Dual value proposition */}
+      <header className="px-4 sm:px-6 pt-12 sm:pt-16 pb-10 max-w-4xl mx-auto text-center relative gold-glow">
         <div className="inline-flex items-center gap-2 rounded-full border border-loss/30 bg-loss/10 px-4 py-1.5 text-xs font-bold text-loss mb-6 tracking-label uppercase">
-          <ShieldCheck className="h-3.5 w-3.5" /> {t("heroBadge")}
+          <ShieldCheck className="h-3.5 w-3.5" /> Stop Trading on Hype. Start Trading on Truth.
         </div>
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight relative z-10" style={{ lineHeight: "1.05" }}>
-          {t("heroTitleA")}
-          <br />
-          <span className="text-primary">{t("heroTitleB")}</span>
+
+        {/* SEO-optimized H1 — visually de-emphasized but crawlable */}
+        <h1 className="sr-only">
+          Master the Markets with AI-Powered Financial News Analysis and Professional Portfolio Tracking.
         </h1>
+
+        {/* Visual headline */}
+        <p
+          className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight relative z-10"
+          style={{ lineHeight: "1.05" }}
+          aria-hidden="true"
+        >
+          Stop Trading on Hype.
+          <br />
+          <span className="text-primary">Start Trading on Truth.</span>
+        </p>
+
         <p className="mt-5 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed relative z-10" style={{ textWrap: "pretty" as any }}>
-          {t("heroSubtitle")}
+          PortAI is the only retail investor platform that combines real-time stock market tracking with a sophisticated AI news bias checker. Shield your portfolio from media manipulation and track your assets in 6 languages.
         </p>
 
         {/* Prominent input box with pulse */}
@@ -164,25 +176,35 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
                   onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
                   placeholder={t("heroPlaceholder")}
                   className="h-12 w-full rounded-xl bg-transparent pl-11 pr-4 text-sm sm:text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
-                  aria-label="Article URL to analyze"
+                  aria-label="Article URL to analyze for financial news bias"
                 />
               </div>
               <button
                 onClick={handleAnalyze}
                 className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm sm:text-base font-bold text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97] shrink-0"
               >
-                {t("heroAnalyze")} <ArrowRight className="h-4 w-4" />
+                Analyze News Bias <ArrowRight className="h-4 w-4" />
               </button>
             </div>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">
-            {t("heroOr")}{" "}
-            <button onClick={onGetStarted} className="font-semibold text-primary hover:underline">
-              {t("heroCreate")}
+
+          {/* Dual CTA */}
+          <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button
+              onClick={onGetStarted}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-5 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/15 w-full sm:w-auto"
+            >
+              <Eye className="h-4 w-4" /> Build Your Watchlist
             </button>
-          </p>
+            <p className="text-xs text-muted-foreground">
+              {t("heroOr")}{" "}
+              <button onClick={onGetStarted} className="font-semibold text-primary hover:underline">
+                {t("heroCreate")}
+              </button>
+            </p>
+          </div>
         </div>
-      </section>
+      </header>
 
       {/* Three value cards — the "Wait, I need this" moment */}
       <section className="px-4 sm:px-6 pt-8 pb-16 max-w-5xl mx-auto">
@@ -254,6 +276,96 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
             ))}
           </div>
         </div>
+      </RevealSection>
+
+      {/* Section A — AI Media Intelligence (keyword-rich) */}
+      <RevealSection>
+        <section
+          id="ai-media-intelligence"
+          aria-labelledby="ai-media-intelligence-heading"
+          className="px-4 sm:px-6 py-14 max-w-5xl mx-auto"
+        >
+          <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-primary mb-2">Section A</p>
+          <h2 id="ai-media-intelligence-heading" className="text-center text-2xl sm:text-3xl font-bold text-foreground mb-3">
+            AI Media Intelligence
+          </h2>
+          <p className="text-center text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-10">
+            Turn every headline into a quantified signal. Our financial news trust score and bias detection report help you detect market manipulation before your portfolio reacts.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[
+              { icon: ShieldCheck, title: "Financial News Trust Score", body: "A 0-10 trust score for every article you paste, computed from source reputation, framing, and citation density." },
+              { icon: AlertCircle, title: "Detect Market Manipulation", body: "Spot pump-and-dump narratives, coordinated coverage, and sponsored takes that masquerade as journalism." },
+              { icon: CheckCircle2, title: "AI Fact-Checking for Stocks", body: "Cross-reference claims against filings, earnings transcripts, and price action so you never trade on a false premise." },
+              { icon: FileText, title: "Bias Detection Report", body: "Per-article report covering hidden angles, omitted data points, and sentiment divergence — readable in seconds." },
+            ].map((f, i) => (
+              <article key={f.title} className="glass-card rounded-2xl p-5 h-full card-hover" style={{ transitionDelay: `${i * 60}ms` }}>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 border border-primary/25">
+                    <f.icon className="h-5 w-5 text-primary" aria-hidden="true" />
+                  </div>
+                  <h3 className="text-base font-bold text-foreground">{f.title}</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">{f.body}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      </RevealSection>
+
+      {/* Section B — Institutional-Grade Tracking (keyword-rich) */}
+      <RevealSection>
+        <section
+          id="institutional-tracking"
+          aria-labelledby="institutional-tracking-heading"
+          className="px-4 sm:px-6 py-14 max-w-5xl mx-auto border-t border-border"
+        >
+          <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-primary mb-2">Section B</p>
+          <h2 id="institutional-tracking-heading" className="text-center text-2xl sm:text-3xl font-bold text-foreground mb-3">
+            Institutional-Grade Tracking
+          </h2>
+          <p className="text-center text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-10">
+            A real-time S&amp;P 500 heatmap, multi-asset watchlist, custom stock price alerts, and a unified crypto portfolio tracker — engineered for retail investors who want institutional clarity.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[
+              { icon: BarChart3, title: "Real-Time S&P 500 Heatmap", body: "Live sector and constituent heatmap powered by TradingView, refreshed throughout the trading session." },
+              { icon: Eye, title: "Multi-Asset Watchlist", body: "Track 10,000+ stocks, ETFs and crypto across 20+ countries in a single, sortable watchlist." },
+              { icon: Zap, title: "Stock Price Alerts", body: "Set custom price thresholds and get notified the moment your target is breached." },
+              { icon: Activity, title: "Crypto Portfolio Tracker", body: "Aggregate BTC, ETH, and altcoin positions alongside equities for a true total-portfolio view." },
+            ].map((f, i) => (
+              <article key={f.title} className="glass-card rounded-2xl p-5 h-full card-hover" style={{ transitionDelay: `${i * 60}ms` }}>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 border border-primary/25">
+                    <f.icon className="h-5 w-5 text-primary" aria-hidden="true" />
+                  </div>
+                  <h3 className="text-base font-bold text-foreground">{f.title}</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">{f.body}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      </RevealSection>
+
+      {/* Why Modern Investors Need AI News Analysis — SEO text block */}
+      <RevealSection>
+        <section id="why-portai" aria-labelledby="why-portai-heading" className="px-4 sm:px-6 py-14 max-w-3xl mx-auto">
+          <h2 id="why-portai-heading" className="text-2xl sm:text-3xl font-bold text-foreground mb-6 text-center" style={{ textWrap: "balance" as any }}>
+            Why Modern Investors Need AI News Analysis
+          </h2>
+          <div className="space-y-5 text-sm sm:text-base leading-relaxed text-muted-foreground">
+            <p>
+              Today&apos;s retail investor is drowning in financial reporting. Outlets like The Motley Fool, CNBC, Yahoo Finance, and Seeking Alpha publish thousands of articles every week — many of them written to chase clicks, push affiliate stocks, or amplify positions taken by sell-side desks. Without an objective filter, even disciplined investors end up rotating capital based on narrative rather than evidence, and biased financial reporting quietly becomes the largest hidden risk in their portfolio.
+            </p>
+            <p>
+              Traditional portfolio trackers were never designed to solve this. They show you what your assets are doing, but they cannot tell you <em>why</em> a stock just ran 8% on a Monday morning, whether the catalyst is durable, or whether the bullish coverage you are reading omits a regulatory filing, an insider sale, or a contradicting earnings transcript. That gap — between price action and the narrative driving it — is exactly where retail investors get hurt.
+            </p>
+            <p>
+              PortAI closes that gap. We use Large Language Models to read each article you paste, score its trust and bias, surface omitted data points, and compare its sentiment against social, options-flow, and peer-coverage signals. The result is an objective sentiment analysis layered on top of a real-time stock and crypto portfolio tracker — so you can verify the story before you trade the chart, in plain English, in 6 languages, every single day.
+            </p>
+          </div>
+        </section>
       </RevealSection>
 
       {/* Demoted Supporting Features — heatmap, watchlist, etc. */}
@@ -339,16 +451,53 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       </RevealSection>
 
 
-      <footer className="border-t border-border px-6 py-8">
-        <div className="max-w-4xl mx-auto flex flex-col items-center gap-4">
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-            <a href="/privacy-policy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a>
-            <a href="/terms-of-service" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Terms of Service</a>
-            <a href="/data-compliance" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Data & Compliance</a>
-            <a href="/ip-policy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">IP Policy</a>
+      <footer className="border-t border-border px-6 py-10">
+        <div className="max-w-5xl mx-auto flex flex-col gap-8">
+          {/* Stock Market News by Sector — internal linking for SEO */}
+          <nav aria-label="Stock market news by sector" className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-left">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-foreground mb-3">Stock Market News by Sector</p>
+              <ul className="space-y-1.5">
+                <li><a href="/dashboard?sector=technology" className="text-xs text-muted-foreground hover:text-primary transition-colors">Technology Stock News</a></li>
+                <li><a href="/dashboard?sector=finance" className="text-xs text-muted-foreground hover:text-primary transition-colors">Finance &amp; Banking News</a></li>
+                <li><a href="/dashboard?sector=crypto" className="text-xs text-muted-foreground hover:text-primary transition-colors">Crypto Market News</a></li>
+                <li><a href="/dashboard?sector=energy" className="text-xs text-muted-foreground hover:text-primary transition-colors">Energy &amp; Commodities</a></li>
+                <li><a href="/dashboard?sector=healthcare" className="text-xs text-muted-foreground hover:text-primary transition-colors">Healthcare &amp; Biotech</a></li>
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-foreground mb-3">AI Tools</p>
+              <ul className="space-y-1.5">
+                <li><a href="/dashboard#analyzer" className="text-xs text-muted-foreground hover:text-primary transition-colors">AI News Bias Checker</a></li>
+                <li><a href="/chat" className="text-xs text-muted-foreground hover:text-primary transition-colors">AI Financial Advisor</a></li>
+                <li><a href="/quiz" className="text-xs text-muted-foreground hover:text-primary transition-colors">Investor Profile Quiz</a></li>
+                <li><a href="/forum" className="text-xs text-muted-foreground hover:text-primary transition-colors">Media Bias Pulse</a></li>
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-foreground mb-3">Tracking</p>
+              <ul className="space-y-1.5">
+                <li><a href="/watchlists" className="text-xs text-muted-foreground hover:text-primary transition-colors">Multi-Asset Watchlist</a></li>
+                <li><a href="/dashboard#heatmap" className="text-xs text-muted-foreground hover:text-primary transition-colors">S&amp;P 500 Heatmap</a></li>
+                <li><a href="/watchlists#alerts" className="text-xs text-muted-foreground hover:text-primary transition-colors">Stock Price Alerts</a></li>
+                <li><a href="/watchlists?asset=crypto" className="text-xs text-muted-foreground hover:text-primary transition-colors">Crypto Portfolio Tracker</a></li>
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-foreground mb-3">Legal</p>
+              <ul className="space-y-1.5">
+                <li><a href="/privacy-policy" className="text-xs text-muted-foreground hover:text-primary transition-colors">Privacy Policy</a></li>
+                <li><a href="/terms-of-service" className="text-xs text-muted-foreground hover:text-primary transition-colors">Terms of Service</a></li>
+                <li><a href="/data-compliance" className="text-xs text-muted-foreground hover:text-primary transition-colors">Data &amp; Compliance</a></li>
+                <li><a href="/ip-policy" className="text-xs text-muted-foreground hover:text-primary transition-colors">IP Policy</a></li>
+              </ul>
+            </div>
+          </nav>
+
+          <div className="border-t border-border pt-6 flex flex-col items-center gap-3">
+            <p className="text-xs text-muted-foreground text-center max-w-lg">PortAI is not a financial advisor. All content is for informational purposes only. Always consult a qualified financial professional before making investment decisions.</p>
+            <p className="text-xs text-muted-foreground">© 2026 PortAI. All rights reserved.</p>
           </div>
-          <p className="text-xs text-muted-foreground text-center max-w-lg">PortAI is not a financial advisor. All content is for informational purposes only. Always consult a qualified financial professional before making investment decisions.</p>
-          <p className="text-xs text-muted-foreground">© 2026 PortAI. All rights reserved.</p>
         </div>
       </footer>
     </div>
