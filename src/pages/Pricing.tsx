@@ -243,7 +243,10 @@ const Pricing = () => {
           </div>
 
           {/* Pro Tier */}
-          <div className={cn("rounded-2xl border p-6 sm:p-8 relative", isPro ? "border-primary bg-primary/5" : "border-border bg-card")}>
+          <div className={cn("rounded-2xl border-2 p-6 sm:p-8 relative shadow-xl shadow-primary/10", isPro ? "border-primary bg-primary/5" : "border-primary bg-gradient-to-b from-primary/[0.08] to-card")}>
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-lg shadow-primary/40 whitespace-nowrap">
+              <Crown className="h-3 w-3" /> Most Popular · Best Value
+            </span>
             {isPro && !cancelAtPeriodEnd && <span className="inline-block rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary mb-4">Current Plan</span>}
             {isPro && cancelAtPeriodEnd && <span className="inline-block rounded-full bg-warning/20 px-3 py-1 text-xs font-semibold text-warning mb-4">Cancelling</span>}
             <div className="flex items-center gap-2 mb-1">
@@ -262,14 +265,19 @@ const Pricing = () => {
               ))}
             </ul>
             {!isPro && (
-              <button
-                onClick={() => beginUpgradeFlow("pro")}
-                disabled={checkoutLoading !== null || loading}
-                className="w-full rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {checkoutLoading === "pro" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
-                {checkoutLoading === "pro" ? "Redirecting..." : isPlus ? "Upgrade to Pro" : "Upgrade to Pro"}
-              </button>
+              <>
+                <button
+                  onClick={() => beginUpgradeFlow("pro")}
+                  disabled={checkoutLoading !== null || loading}
+                  className="w-full rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {checkoutLoading === "pro" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
+                  {checkoutLoading === "pro" ? "Redirecting..." : isPlus ? "Upgrade to Pro" : "Upgrade to Pro"}
+                </button>
+                <p className="mt-2 text-center text-[11px] text-muted-foreground flex items-center justify-center gap-1">
+                  <Check className="h-3 w-3 text-primary" /> Cancel anytime · No questions asked
+                </p>
+              </>
             )}
             {isPro && !cancelAtPeriodEnd && (
               <button disabled className="w-full rounded-xl border border-primary py-3 text-sm font-medium text-primary">
