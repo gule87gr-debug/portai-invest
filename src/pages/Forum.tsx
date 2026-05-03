@@ -269,7 +269,7 @@ const Forum = () => {
   const filtered = useMemo(() => {
     if (filter === "all") return articles;
     return articles.filter((a) => {
-      const t = biasBucket(a.bias_score).tone;
+      const t = trustBucket(a.bias_score).tone;
       if (filter === "high") return t === "loss";
       if (filter === "moderate") return t === "warning";
       return t === "gain";
@@ -279,7 +279,7 @@ const Forum = () => {
   const filteredFeatured = useMemo(() => {
     if (filter === "all") return featured;
     return featured.filter((a) => {
-      const t = biasBucket(a.bias_score).tone;
+      const t = trustBucket(a.bias_score).tone;
       if (filter === "high") return t === "loss";
       if (filter === "moderate") return t === "warning";
       return t === "gain";
@@ -333,7 +333,7 @@ const Forum = () => {
   ];
 
   const renderArticleCard = (a: AnalyzedArticle, i: number, isFeatured: boolean) => {
-    const bucket = biasBucket(a.bias_score);
+    const bucket = trustBucket(a.bias_score);
     const tc = toneClasses[bucket.tone];
     const pct = Math.max(6, Math.min(100, a.bias_score * 10));
     const isVind = vindicated.has(a.id);
