@@ -451,16 +451,53 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       </RevealSection>
 
 
-      <footer className="border-t border-border px-6 py-8">
-        <div className="max-w-4xl mx-auto flex flex-col items-center gap-4">
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-            <a href="/privacy-policy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a>
-            <a href="/terms-of-service" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Terms of Service</a>
-            <a href="/data-compliance" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Data & Compliance</a>
-            <a href="/ip-policy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">IP Policy</a>
+      <footer className="border-t border-border px-6 py-10">
+        <div className="max-w-5xl mx-auto flex flex-col gap-8">
+          {/* Stock Market News by Sector — internal linking for SEO */}
+          <nav aria-label="Stock market news by sector" className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-left">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-foreground mb-3">Stock Market News by Sector</p>
+              <ul className="space-y-1.5">
+                <li><a href="/dashboard?sector=technology" className="text-xs text-muted-foreground hover:text-primary transition-colors">Technology Stock News</a></li>
+                <li><a href="/dashboard?sector=finance" className="text-xs text-muted-foreground hover:text-primary transition-colors">Finance &amp; Banking News</a></li>
+                <li><a href="/dashboard?sector=crypto" className="text-xs text-muted-foreground hover:text-primary transition-colors">Crypto Market News</a></li>
+                <li><a href="/dashboard?sector=energy" className="text-xs text-muted-foreground hover:text-primary transition-colors">Energy &amp; Commodities</a></li>
+                <li><a href="/dashboard?sector=healthcare" className="text-xs text-muted-foreground hover:text-primary transition-colors">Healthcare &amp; Biotech</a></li>
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-foreground mb-3">AI Tools</p>
+              <ul className="space-y-1.5">
+                <li><a href="/dashboard#analyzer" className="text-xs text-muted-foreground hover:text-primary transition-colors">AI News Bias Checker</a></li>
+                <li><a href="/chat" className="text-xs text-muted-foreground hover:text-primary transition-colors">AI Financial Advisor</a></li>
+                <li><a href="/quiz" className="text-xs text-muted-foreground hover:text-primary transition-colors">Investor Profile Quiz</a></li>
+                <li><a href="/forum" className="text-xs text-muted-foreground hover:text-primary transition-colors">Media Bias Pulse</a></li>
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-foreground mb-3">Tracking</p>
+              <ul className="space-y-1.5">
+                <li><a href="/watchlists" className="text-xs text-muted-foreground hover:text-primary transition-colors">Multi-Asset Watchlist</a></li>
+                <li><a href="/dashboard#heatmap" className="text-xs text-muted-foreground hover:text-primary transition-colors">S&amp;P 500 Heatmap</a></li>
+                <li><a href="/watchlists#alerts" className="text-xs text-muted-foreground hover:text-primary transition-colors">Stock Price Alerts</a></li>
+                <li><a href="/watchlists?asset=crypto" className="text-xs text-muted-foreground hover:text-primary transition-colors">Crypto Portfolio Tracker</a></li>
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-foreground mb-3">Legal</p>
+              <ul className="space-y-1.5">
+                <li><a href="/privacy-policy" className="text-xs text-muted-foreground hover:text-primary transition-colors">Privacy Policy</a></li>
+                <li><a href="/terms-of-service" className="text-xs text-muted-foreground hover:text-primary transition-colors">Terms of Service</a></li>
+                <li><a href="/data-compliance" className="text-xs text-muted-foreground hover:text-primary transition-colors">Data &amp; Compliance</a></li>
+                <li><a href="/ip-policy" className="text-xs text-muted-foreground hover:text-primary transition-colors">IP Policy</a></li>
+              </ul>
+            </div>
+          </nav>
+
+          <div className="border-t border-border pt-6 flex flex-col items-center gap-3">
+            <p className="text-xs text-muted-foreground text-center max-w-lg">PortAI is not a financial advisor. All content is for informational purposes only. Always consult a qualified financial professional before making investment decisions.</p>
+            <p className="text-xs text-muted-foreground">© 2026 PortAI. All rights reserved.</p>
           </div>
-          <p className="text-xs text-muted-foreground text-center max-w-lg">PortAI is not a financial advisor. All content is for informational purposes only. Always consult a qualified financial professional before making investment decisions.</p>
-          <p className="text-xs text-muted-foreground">© 2026 PortAI. All rights reserved.</p>
         </div>
       </footer>
     </div>
