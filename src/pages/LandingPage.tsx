@@ -603,7 +603,10 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           </nav>
 
           <div className="border-t border-border pt-6 flex flex-col items-center gap-3">
-            <p className="text-xs text-muted-foreground text-center max-w-lg">PortAI is not a financial advisor. All content is for informational purposes only. Always consult a qualified financial professional before making investment decisions.</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/80 text-center">
+              Powered by OpenAI · Secured by Supabase · Real-time Data via Financial APIs
+            </p>
+            <p className="text-xs text-muted-foreground text-center max-w-lg"><span className="font-semibold text-warning">Not Financial Advice.</span> PortAI is not a financial advisor. All content is for informational purposes only. Always consult a qualified financial professional before making investment decisions.</p>
             <p className="text-xs text-muted-foreground">© 2026 PortAI. All rights reserved.</p>
           </div>
         </div>
