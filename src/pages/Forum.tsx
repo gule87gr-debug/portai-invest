@@ -262,8 +262,9 @@ const Forum = () => {
   // Pull in featured fallback when the community feed is sparse in the last 24h.
   const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
   const recentCount = articles.filter((a) => new Date(a.created_at).getTime() >= dayAgo).length;
-  const showFeatured = !loading && recentCount < 5;
-  const missing = Math.max(0, 5 - recentCount);
+  const TARGET_FEATURED = 8;
+  const showFeatured = !loading && recentCount < TARGET_FEATURED;
+  const missing = Math.max(0, TARGET_FEATURED - recentCount);
   const featured = showFeatured ? FEATURED_ARTICLES.slice(0, missing) : [];
 
   const filtered = useMemo(() => {
