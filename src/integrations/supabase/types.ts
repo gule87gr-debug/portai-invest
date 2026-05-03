@@ -41,6 +41,7 @@ export type Database = {
           created_at: string
           hidden_angle: string
           id: string
+          pro_deep_dive: Json | null
           red_flag: string
           source: string
           submitted_by: string | null
@@ -55,6 +56,7 @@ export type Database = {
           created_at?: string
           hidden_angle?: string
           id?: string
+          pro_deep_dive?: Json | null
           red_flag?: string
           source?: string
           submitted_by?: string | null
@@ -69,6 +71,7 @@ export type Database = {
           created_at?: string
           hidden_angle?: string
           id?: string
+          pro_deep_dive?: Json | null
           red_flag?: string
           source?: string
           submitted_by?: string | null
