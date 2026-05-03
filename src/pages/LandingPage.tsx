@@ -140,7 +140,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       {/* Hero — Dual value proposition */}
       <header className="px-4 sm:px-6 pt-12 sm:pt-16 pb-10 max-w-4xl mx-auto text-center relative gold-glow">
         <div className="inline-flex items-center gap-2 rounded-full border border-loss/30 bg-loss/10 px-4 py-1.5 text-xs font-bold text-loss mb-6 tracking-label uppercase">
-          <ShieldCheck className="h-3.5 w-3.5" /> Stop Trading on Hype. Start Managing with Alpha.
+          <ShieldCheck className="h-3.5 w-3.5" /> Stop Trading on Hype. Start Trading on Truth.
         </div>
 
         {/* SEO H1 — visually hidden but crawlable */}
@@ -156,7 +156,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         >
           Stop Trading on Hype.
           <br />
-          <span className="text-primary">Start Managing with Alpha.</span>
+          <span className="text-primary">Start Trading on Truth.</span>
         </p>
 
         <p className="mt-5 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed relative z-10" style={{ textWrap: "pretty" as any }}>
