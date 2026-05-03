@@ -630,6 +630,35 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </section>
       </RevealSection>
 
+      {/* How it Works — AI-Monitored Watchlist bridge */}
+      <RevealSection>
+        <section id="how-it-works" aria-labelledby="how-it-works-heading" className="px-4 sm:px-6 py-10 max-w-4xl mx-auto">
+          <p className="text-center text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-2">How it Works</p>
+          <h2 id="how-it-works-heading" className="text-center text-xl sm:text-2xl font-bold text-foreground mb-3" style={{ textWrap: "balance" as any }}>
+            Your Watchlist isn&rsquo;t static. It&rsquo;s <span className="text-primary">AI-Monitored.</span>
+          </h2>
+          <p className="text-center text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-8">
+            We monitor your assets 24/7. If the media starts pushing a biased narrative on a stock you own, you&rsquo;ll be the first to know.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[
+              { icon: Eye, step: "01", title: "You Track", body: "Add stocks, ETFs and crypto to your watchlist." },
+              { icon: Cpu, step: "02", title: "AI Watches", body: "Our models scan global news and price action 24/7." },
+              { icon: AlertCircle, step: "03", title: "You Get Alerted", body: "Bias spikes or volatility triggers ping you instantly." },
+            ].map((s) => (
+              <div key={s.step} className="glass-card rounded-xl p-4 text-center card-hover">
+                <p className="text-[10px] font-bold font-mono text-primary/70 mb-2">{s.step}</p>
+                <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-primary/15 border border-primary/25">
+                  <s.icon className="h-4 w-4 text-primary" />
+                </div>
+                <h3 className="text-sm font-bold text-foreground mb-1">{s.title}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">{s.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </RevealSection>
+
 
       <footer className="border-t border-border px-6 py-10">
         <div className="max-w-5xl mx-auto flex flex-col gap-8">
