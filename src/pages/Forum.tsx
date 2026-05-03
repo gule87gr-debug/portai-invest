@@ -288,28 +288,41 @@ const Forum = () => {
     });
   }, [featured, filter]);
 
-  const handleVindicate = async (a: AnalyzedArticle) => {
-    if (vindicated.has(a.id) || vindicating === a.id) return;
-    setVindicating(a.id);
+  const handleLike = async (a: AnalyzedArticle) => {
+    if (liking === a.id) return;
+    setLiking(a.id);
+    const wasLiked = liked.has(a.id);
     // optimistic
     setArticles((prev) =>
-      prev.map((x) => (x.id === a.id ? { ...x, vindicate_count: x.vindicate_count + 1 } : x)),
+      prev.map((x) =>
+        x.id === a.id
+          ? { ...x, vindicate_count: Math.max(0, x.vindicate_count + (wasLiked ? -1 : 1)) }
+          : x,
+      ),
     );
-    setVindicated((prev) => new Set(prev).add(a.id));
-    const { error } = await supabase.rpc("vindicate_article", { _article_id: a.id });
+    setLiked((prev) => {
+      const n = new Set(prev);
+      if (wasLiked) n.delete(a.id); else n.add(a.id);
+      return n;
+    });
+    const { error } = await supabase.rpc("toggle_article_like", { _article_id: a.id });
     if (error) {
       // revert
       setArticles((prev) =>
-        prev.map((x) => (x.id === a.id ? { ...x, vindicate_count: Math.max(0, x.vindicate_count - 1) } : x)),
+        prev.map((x) =>
+          x.id === a.id
+            ? { ...x, vindicate_count: Math.max(0, x.vindicate_count + (wasLiked ? 1 : -1)) }
+            : x,
+        ),
       );
-      setVindicated((prev) => {
+      setLiked((prev) => {
         const n = new Set(prev);
-        n.delete(a.id);
+        if (wasLiked) n.add(a.id); else n.delete(a.id);
         return n;
       });
-      toast({ title: "Sign in to vindicate", variant: "destructive" });
+      toast({ title: "Sign in to like articles", variant: "destructive" });
     }
-    setVindicating(null);
+    setLiking(null);
   };
 
   const handleShare = async (a: AnalyzedArticle) => {
