@@ -18,6 +18,12 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+type ProDeepDive = {
+  stakeholderMotives?: string;
+  omittedDataPoints?: string;
+  sentimentDivergence?: string;
+};
+
 type AnalyzedArticle = {
   id: string;
   url: string;
@@ -30,6 +36,7 @@ type AnalyzedArticle = {
   vindicate_count: number;
   view_count: number;
   created_at: string;
+  pro_deep_dive?: ProDeepDive | null;
 };
 
 const timeAgo = (iso: string): string => {
@@ -264,8 +271,22 @@ const Forum = () => {
         },
       )
       .subscribe();
+
+    // Auto-refresh every 3 minutes so the Pulse always feels live, even if
+    // the realtime channel drops or the tab was backgrounded.
+    const REFRESH_MS = 3 * 60 * 1000;
+    const poll = setInterval(() => {
+      if (document.visibilityState === "visible") void load();
+    }, REFRESH_MS);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void load();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(poll);
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, []);
 
@@ -430,13 +451,49 @@ const Forum = () => {
               </span>
             )}
           </div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Hidden Angle</p>
           {isPaid ? (
-            <p className="text-sm leading-relaxed text-foreground/90">
-              {a.hidden_angle || "No hidden angle detected for this article."}
-            </p>
+            <div className="space-y-3">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Hidden Angle</p>
+                <p className="text-sm leading-relaxed text-foreground/90">
+                  {a.hidden_angle || "No hidden angle detected for this article."}
+                </p>
+              </div>
+              {a.pro_deep_dive && (a.pro_deep_dive.stakeholderMotives || a.pro_deep_dive.omittedDataPoints || a.pro_deep_dive.sentimentDivergence) && (
+                <ul className="space-y-2.5 border-t border-border pt-3">
+                  {a.pro_deep_dive.stakeholderMotives && (
+                    <li className="flex items-start gap-2.5">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wider text-foreground">Stakeholder Motives</p>
+                        <p className="text-xs leading-relaxed text-muted-foreground mt-0.5">{a.pro_deep_dive.stakeholderMotives}</p>
+                      </div>
+                    </li>
+                  )}
+                  {a.pro_deep_dive.omittedDataPoints && (
+                    <li className="flex items-start gap-2.5">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wider text-foreground">Omitted Data Points</p>
+                        <p className="text-xs leading-relaxed text-muted-foreground mt-0.5">{a.pro_deep_dive.omittedDataPoints}</p>
+                      </div>
+                    </li>
+                  )}
+                  {a.pro_deep_dive.sentimentDivergence && (
+                    <li className="flex items-start gap-2.5">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wider text-foreground">Sentiment Divergence</p>
+                        <p className="text-xs leading-relaxed text-muted-foreground mt-0.5">{a.pro_deep_dive.sentimentDivergence}</p>
+                      </div>
+                    </li>
+                  )}
+                </ul>
+              )}
+            </div>
           ) : (
             <div className="relative">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Hidden Angle</p>
               <p className="text-sm leading-relaxed text-foreground/80 select-none" style={{ filter: "blur(5px)" }} aria-hidden="true">
                 {a.hidden_angle ||
                   "The article omits key context about insider transactions and recent regulatory developments that contradict the bullish narrative."}

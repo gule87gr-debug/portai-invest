@@ -225,7 +225,13 @@ Return this exact JSON structure:
   }
 }
 
-The proDeepDive MUST be specific to THIS article's subject (ticker, company, sector, event). Never produce generic boilerplate. Reference the actual entity by name in every field.
+CRITICAL — proDeepDive depth requirement:
+The proDeepDive is the PAID Pro tier insight and MUST go meaningfully deeper than 'summary', 'biases', 'strengths', and 'hiddenAngle'. It must NOT restate or paraphrase any of those fields. It must add NEW analytical layers a free reader cannot see in the standard analysis. Each proDeepDive field must:
+  - Be specific to THIS article's subject (name the ticker, company, sector, event, or person explicitly).
+  - Reference concrete second-order signals: filing types (10-K, 13F, 8-K, S-1), insider Form 4 activity, options skew/IV, short interest %, analyst dispersion, peer-comparison numbers, historical base rates, regulatory dockets, or capital-flow data.
+  - Avoid generic phrases like 'institutions benefit', 'investors should be cautious', 'context is missing'. Always specify WHICH institutions, WHICH context, WHICH numbers.
+  - Read like a buy-side note, not a retail summary.
+If you cannot supply that depth for a field, return a single sentence stating exactly which data you would need to deliver it — never pad with boilerplate.
 
 Scoring guide:
 - 9-10: Major wire services (Reuters, AP), SEC filings, Fed publications
@@ -316,6 +322,7 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
         red_flag: String(analysis.redFlag ?? "Unverified").slice(0, 60),
         hidden_angle: String(analysis.hiddenAngle ?? "").slice(0, 600),
         summary: String(analysis.summary ?? "").slice(0, 1000),
+        pro_deep_dive: analysis.proDeepDive ?? null,
         submitted_by: userId,
       });
     } catch (e) {
