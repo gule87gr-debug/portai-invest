@@ -283,6 +283,13 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
     }
     if (!analysis.redFlag) analysis.redFlag = "Unverified Claims";
     if (!analysis.hiddenAngle) analysis.hiddenAngle = analysis.summary?.slice(0, 220) ?? "";
+    if (!analysis.proDeepDive || typeof analysis.proDeepDive !== "object") {
+      analysis.proDeepDive = {
+        stakeholderMotives: "Deep-dive parsing unavailable for this article. Re-run analysis to generate stakeholder context.",
+        omittedDataPoints: "Deep-dive parsing unavailable for this article. Re-run analysis to surface omitted data.",
+        sentimentDivergence: "Deep-dive parsing unavailable for this article. Re-run analysis to compare sentiment signals.",
+      };
+    }
 
     // Override AI score with deterministic score for known sources so the
     // analyzer always agrees with the news-feed trust badge.
