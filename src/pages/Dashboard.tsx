@@ -20,6 +20,11 @@ type AnalysisResult = {
   summary: string;
   biases: string[];
   strengths: string[];
+  proDeepDive?: {
+    stakeholderMotives?: string;
+    omittedDataPoints?: string;
+    sentimentDivergence?: string;
+  };
 };
 
 const FREE_DAILY_ANALYSES = 1;
