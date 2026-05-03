@@ -386,7 +386,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         >
           <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-primary mb-2">Section B</p>
           <h2 id="institutional-tracking-heading" className="text-center text-2xl sm:text-3xl font-bold text-foreground mb-3">
-            Institutional-Grade Tracking
+            Professional Investment Tracking
           </h2>
           <p className="text-center text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-10">
             A real-time S&amp;P 500 heatmap, multi-asset watchlist, custom stock price alerts, and a unified crypto portfolio tracker — engineered for retail investors who want institutional clarity.
