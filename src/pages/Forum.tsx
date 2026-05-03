@@ -240,6 +240,15 @@ const Forum = () => {
     } else {
       setArticles((data ?? []) as AnalyzedArticle[]);
     }
+    // Load this user's existing likes so the heart state persists
+    const { data: userRes } = await supabase.auth.getUser();
+    if (userRes?.user) {
+      const { data: likes } = await supabase
+        .from("article_likes")
+        .select("article_id")
+        .eq("user_id", userRes.user.id);
+      if (likes) setLiked(new Set(likes.map((l: { article_id: string }) => l.article_id)));
+    }
     setLoading(false);
   };
 
