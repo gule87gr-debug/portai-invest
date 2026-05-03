@@ -44,6 +44,7 @@ const timeAgo = (iso: string): string => {
 };
 
 // Featured fallback so the feed never feels like a ghost town.
+// Scores below are TRUST scores (1-10, higher = more credible) — same scale as the analyzer.
 const FEATURED_ARTICLES: AnalyzedArticle[] = [
   {
     id: "featured-tsla",
@@ -51,45 +52,150 @@ const FEATURED_ARTICLES: AnalyzedArticle[] = [
     source: "CNBC",
     title: "Tesla margin compression: bullish coverage skips price-cut math",
     bias_score: 7,
-    red_flag: "Cherry-picked metrics",
+    red_flag: "Cherry-Picked Data",
     hidden_angle: "Coverage emphasizes deliveries while omitting that gross margin has compressed for four consecutive quarters and that recent EU price cuts are not yet reflected in consensus EPS.",
     summary: "Recent TSLA reporting frames record deliveries as unambiguous strength, but ignores margin trajectory and inventory build.",
     vindicate_count: 42,
     view_count: 1280,
-    created_at: new Date(Date.now() - 1000 * 60 * 35).toISOString(),
+    created_at: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
   },
   {
     id: "featured-nvda",
-    url: "https://www.cnbc.com/quotes/NVDA",
+    url: "https://finance.yahoo.com/quote/NVDA",
     source: "Yahoo Finance",
     title: "NVDA 'AI demand infinite' narrative ignores hyperscaler capex guidance",
     bias_score: 6,
-    red_flag: "Narrative framing",
+    red_flag: "One-Sided",
     hidden_angle: "Three of the top four hyperscalers have softened FY capex language in the last earnings cycle — a material signal absent from most bullish NVDA write-ups this week.",
     summary: "Articles lean on supply-constraint quotes from sell-side desks while skipping the buy-side capex normalization signal.",
     vindicate_count: 31,
     view_count: 980,
-    created_at: new Date(Date.now() - 1000 * 60 * 90).toISOString(),
+    created_at: new Date(Date.now() - 1000 * 60 * 38).toISOString(),
   },
   {
     id: "featured-spx",
     url: "https://www.bloomberg.com/quote/SPX:IND",
     source: "Bloomberg",
     title: "S&P 500 'broadening rally' claim contradicted by equal-weight performance",
-    bias_score: 5,
-    red_flag: "Selective benchmarking",
+    bias_score: 8,
+    red_flag: "Objective Reporting",
     hidden_angle: "Equal-weight S&P (RSP) continues to lag the cap-weighted index by a wide margin YTD, undermining the 'broadening participation' thesis being recycled across major outlets.",
     summary: "Headlines tout broadening leadership, but breadth indicators and equal-weight returns tell a different story.",
     vindicate_count: 24,
     view_count: 712,
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(),
+    created_at: new Date(Date.now() - 1000 * 60 * 64).toISOString(),
+  },
+  {
+    id: "featured-aapl",
+    url: "https://www.reuters.com/markets/companies/AAPL.OQ",
+    source: "Reuters",
+    title: "Apple services growth: wire copy sticks to filings, avoids the hype loop",
+    bias_score: 10,
+    red_flag: "Objective Reporting",
+    hidden_angle: "Reuters frames the print directly against the 10-Q without leaning on sell-side narratives — a useful baseline before reading downstream commentary.",
+    summary: "Straight read of services revenue, gross margin, and segment mix with minimal editorializing.",
+    vindicate_count: 58,
+    view_count: 1640,
+    created_at: new Date(Date.now() - 1000 * 60 * 95).toISOString(),
+  },
+  {
+    id: "featured-btc",
+    url: "https://seekingalpha.com/symbol/BTC-USD",
+    source: "Seeking Alpha",
+    title: "BTC 'institutional adoption' thesis recycled without fresh on-chain data",
+    bias_score: 5,
+    red_flag: "Promotional Language",
+    hidden_angle: "The piece reuses ETF inflow numbers from three weeks ago and omits the recent slowdown in net flows and the spike in long-term holder distribution.",
+    summary: "Bullish framing leans on stale flow data and skips contradicting on-chain signals.",
+    vindicate_count: 19,
+    view_count: 540,
+    created_at: new Date(Date.now() - 1000 * 60 * 140).toISOString(),
+  },
+  {
+    id: "featured-meta",
+    url: "https://www.wsj.com/market-data/quotes/META",
+    source: "WSJ",
+    title: "Meta Reality Labs losses: WSJ separates spend from forward guidance",
+    bias_score: 8,
+    red_flag: "Objective Reporting",
+    hidden_angle: "Cleanly separates GAAP segment losses from management's forward capex commentary — useful before reading derivative takes that conflate the two.",
+    summary: "Disciplined coverage of segment economics with explicit guidance vs. actuals comparison.",
+    vindicate_count: 27,
+    view_count: 820,
+    created_at: new Date(Date.now() - 1000 * 60 * 175).toISOString(),
+  },
+  {
+    id: "featured-amd",
+    url: "https://www.fool.com/quote/nasdaq/amd/",
+    source: "The Motley Fool",
+    title: "AMD MI300 ramp piece leans on selective customer quotes",
+    bias_score: 4,
+    red_flag: "Promotional Language",
+    hidden_angle: "Quotes only design-win wins; doesn't reconcile with the most recent data center segment guide-down or the supply allocation comments from competitors.",
+    summary: "Optimistic ramp narrative built on cherry-picked customer commentary.",
+    vindicate_count: 14,
+    view_count: 410,
+    created_at: new Date(Date.now() - 1000 * 60 * 210).toISOString(),
+  },
+  {
+    id: "featured-googl",
+    url: "https://www.ft.com/content/alphabet",
+    source: "Financial Times",
+    title: "Alphabet ad revenue: FT highlights search-share risk most pieces skip",
+    bias_score: 8,
+    red_flag: "Objective Reporting",
+    hidden_angle: "Surfaces the LLM-driven query-share question and quantifies the revenue exposure — a framing absent from most US-based coverage of the same print.",
+    summary: "Balanced view that names the structural risk while still acknowledging cloud and YouTube strength.",
+    vindicate_count: 36,
+    view_count: 1090,
+    created_at: new Date(Date.now() - 1000 * 60 * 245).toISOString(),
+  },
+  {
+    id: "featured-eth",
+    url: "https://www.coindesk.com/price/ethereum/",
+    source: "CoinDesk",
+    title: "ETH staking yield piece omits validator queue and slashing context",
+    bias_score: 5,
+    red_flag: "Cherry-Picked Data",
+    hidden_angle: "Headline yield ignores entry/exit queue dynamics and the recent uptick in slashing events that materially affect realized returns.",
+    summary: "Surface-level yield framing without the operational risk picture.",
+    vindicate_count: 11,
+    view_count: 380,
+    created_at: new Date(Date.now() - 1000 * 60 * 290).toISOString(),
+  },
+  {
+    id: "featured-xom",
+    url: "https://www.marketwatch.com/investing/stock/xom",
+    source: "MarketWatch",
+    title: "XOM buyback coverage skips capex re-acceleration signal",
+    bias_score: 6,
+    red_flag: "One-Sided",
+    hidden_angle: "Frames the buyback as pure shareholder return without flagging that capex guidance was raised — a tell for the next phase of the cycle.",
+    summary: "Capital-return framing without the offsetting investment guidance context.",
+    vindicate_count: 17,
+    view_count: 495,
+    created_at: new Date(Date.now() - 1000 * 60 * 330).toISOString(),
+  },
+  {
+    id: "featured-amzn",
+    url: "https://www.barrons.com/quote/STOCK/US/XNAS/AMZN",
+    source: "Barron's",
+    title: "Amazon AWS reaccel: Barron's calibrates against hyperscaler peer set",
+    bias_score: 7,
+    red_flag: "Objective Reporting",
+    hidden_angle: "Compares AWS growth to Azure and GCP on a constant-currency basis — context most single-name pieces skip.",
+    summary: "Peer-anchored analysis of cloud reacceleration with explicit FX adjustment.",
+    vindicate_count: 22,
+    view_count: 670,
+    created_at: new Date(Date.now() - 1000 * 60 * 380).toISOString(),
   },
 ];
 
-const biasBucket = (score: number) => {
-  if (score >= 7) return { label: "High Bias", tone: "loss" as const };
+// Higher trustScore = more credible. We display the same scale the analyzer returns.
+const trustBucket = (score: number) => {
+  if (score >= 7) return { label: "Trusted", tone: "gain" as const };
   if (score >= 4) return { label: "Moderate", tone: "warning" as const };
-  return { label: "Objective", tone: "gain" as const };
+  return { label: "Low Trust", tone: "loss" as const };
 };
 
 const toneClasses = {
@@ -156,27 +262,28 @@ const Forum = () => {
   // Pull in featured fallback when the community feed is sparse in the last 24h.
   const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
   const recentCount = articles.filter((a) => new Date(a.created_at).getTime() >= dayAgo).length;
-  const showFeatured = !loading && recentCount < 5;
-  const missing = Math.max(0, 5 - recentCount);
+  const TARGET_FEATURED = 8;
+  const showFeatured = !loading && recentCount < TARGET_FEATURED;
+  const missing = Math.max(0, TARGET_FEATURED - recentCount);
   const featured = showFeatured ? FEATURED_ARTICLES.slice(0, missing) : [];
 
   const filtered = useMemo(() => {
     if (filter === "all") return articles;
     return articles.filter((a) => {
-      const t = biasBucket(a.bias_score).tone;
-      if (filter === "high") return t === "loss";
+      const t = trustBucket(a.bias_score).tone;
+      if (filter === "high") return t === "gain";
       if (filter === "moderate") return t === "warning";
-      return t === "gain";
+      return t === "loss";
     });
   }, [articles, filter]);
 
   const filteredFeatured = useMemo(() => {
     if (filter === "all") return featured;
     return featured.filter((a) => {
-      const t = biasBucket(a.bias_score).tone;
-      if (filter === "high") return t === "loss";
+      const t = trustBucket(a.bias_score).tone;
+      if (filter === "high") return t === "gain";
       if (filter === "moderate") return t === "warning";
-      return t === "gain";
+      return t === "loss";
     });
   }, [featured, filter]);
 
@@ -206,7 +313,7 @@ const Forum = () => {
 
   const handleShare = async (a: AnalyzedArticle) => {
     const shareUrl = a.url;
-    const shareText = `${a.title} — bias score ${a.bias_score}/10 (${a.red_flag}) via PortAI Media Pulse`;
+    const shareText = `${a.title} — trust score ${a.bias_score}/10 (${a.red_flag}) via PortAI Media Pulse`;
     try {
       if (navigator.share) {
         await navigator.share({ title: a.title, text: shareText, url: shareUrl });
@@ -221,13 +328,13 @@ const Forum = () => {
 
   const filters: { key: typeof filter; label: string; tone?: "loss" | "warning" | "gain" }[] = [
     { key: "all", label: "All" },
-    { key: "high", label: "High Bias", tone: "loss" },
+    { key: "high", label: "Trusted", tone: "gain" },
     { key: "moderate", label: "Moderate", tone: "warning" },
-    { key: "objective", label: "Objective", tone: "gain" },
+    { key: "objective", label: "Low Trust", tone: "loss" },
   ];
 
   const renderArticleCard = (a: AnalyzedArticle, i: number, isFeatured: boolean) => {
-    const bucket = biasBucket(a.bias_score);
+    const bucket = trustBucket(a.bias_score);
     const tc = toneClasses[bucket.tone];
     const pct = Math.max(6, Math.min(100, a.bias_score * 10));
     const isVind = vindicated.has(a.id);
@@ -270,7 +377,7 @@ const Forum = () => {
         <div className="mb-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-1.5">
             <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Bias Score
+              Trust Score
             </span>
             <span className={cn("text-xs font-mono font-bold", `text-${bucket.tone}`)}>
               {a.bias_score}/10 · {bucket.label}
@@ -423,7 +530,7 @@ const Forum = () => {
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 border border-primary/30 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
                   <Sparkles className="h-3 w-3" /> Featured Analysis
                 </span>
-                <span className="text-[11px] text-muted-foreground">Hand-picked by PortAI · TSLA · NVDA · S&amp;P 500</span>
+                <span className="text-[11px] text-muted-foreground">Curated across Reuters, Bloomberg, FT, WSJ, CNBC, Yahoo &amp; more</span>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {filteredFeatured.map((a, i) => renderArticleCard(a, i, true))}
