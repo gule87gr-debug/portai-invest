@@ -447,17 +447,18 @@ const Forum = () => {
 
         <div className="flex items-center justify-between border-t border-border pt-3">
           <button
-            onClick={() => !isFeatured && handleVindicate(a)}
-            disabled={isFeatured || isVind || vindicating === a.id}
+            onClick={() => !isFeatured && handleLike(a)}
+            disabled={isFeatured || liking === a.id}
             className={cn(
               "flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors",
-              isVind ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-accent",
+              isLiked ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-accent",
               isFeatured && "opacity-60 cursor-not-allowed hover:bg-transparent",
             )}
-            title={isFeatured ? "Vindicate available on community-submitted articles" : undefined}
+            title={isFeatured ? "Likes available on community-submitted articles" : (isLiked ? "Unlike" : "Like")}
+            aria-pressed={isLiked}
           >
-            <ThumbsUp className={cn("h-3.5 w-3.5", isVind && "fill-current")} />
-            Vindicate
+            <ThumbsUp className={cn("h-3.5 w-3.5", isLiked && "fill-current")} />
+            {isLiked ? "Liked" : "Like"}
             <span className="font-mono">{a.vindicate_count}</span>
           </button>
           <button
