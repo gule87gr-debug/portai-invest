@@ -271,8 +271,22 @@ const Forum = () => {
         },
       )
       .subscribe();
+
+    // Auto-refresh every 3 minutes so the Pulse always feels live, even if
+    // the realtime channel drops or the tab was backgrounded.
+    const REFRESH_MS = 3 * 60 * 1000;
+    const poll = setInterval(() => {
+      if (document.visibilityState === "visible") void load();
+    }, REFRESH_MS);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void load();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(poll);
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, []);
 
