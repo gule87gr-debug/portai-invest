@@ -145,7 +145,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
 
         {/* SEO H1 — visually hidden but crawlable */}
         <h1 className="sr-only">
-          Invest with Clarity: The First AI-Powered Portfolio Command Center for Retail Investors.
+          The AI Command Center for Smarter Investing — Portfolio Tracking & AI Financial News Bias Checker.
         </h1>
 
         {/* Visual headline */}
@@ -154,13 +154,13 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           style={{ lineHeight: "1.05" }}
           aria-hidden="true"
         >
-          Stop Trading on Hype.
+          The AI Command Center
           <br />
-          <span className="text-primary">Start Trading on Truth.</span>
+          <span className="text-primary">for Smarter Investing.</span>
         </p>
 
         <p className="mt-5 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed relative z-10" style={{ textWrap: "pretty" as any }}>
-          Institutional-grade portfolio tracking meets advanced AI news analysis. PortAI shields your investments from media manipulation by revealing the &ldquo;Why&rdquo; behind every price move.
+          Track your portfolio with institutional-grade data and filter out market manipulation with the world&rsquo;s first AI Financial News Bias Checker.
         </p>
 
         {/* Prominent input box with pulse */}
@@ -203,6 +203,72 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
               </button>
             </p>
           </div>
+        </div>
+
+        {/* Dual Dashboard mockup — Watchlist + Bias Report */}
+        <div className="mt-12 max-w-5xl mx-auto relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-2xl border border-primary/20 bg-card/60 backdrop-blur-md p-3 shadow-2xl">
+            {/* Watchlist panel */}
+            <div className="rounded-xl border border-border bg-background/60 p-4 text-left">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Live Watchlist</p>
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-primary"><Activity className="h-3 w-3" /> LIVE</span>
+              </div>
+              <div className="space-y-2">
+                {[
+                  { sym: "AAPL", name: "Apple Inc.", price: "$232.18", chg: "+1.42%", up: true, pts: "M2,18 L10,14 L18,16 L26,10 L34,12 L42,7 L50,9 L58,5" },
+                  { sym: "NVDA", name: "NVIDIA", price: "$184.92", chg: "+3.08%", up: true, pts: "M2,20 L10,17 L18,15 L26,13 L34,11 L42,8 L50,6 L58,3" },
+                  { sym: "TSLA", name: "Tesla", price: "$298.40", chg: "-0.86%", up: false, pts: "M2,8 L10,10 L18,9 L26,13 L34,12 L42,15 L50,14 L58,17" },
+                  { sym: "BTC", name: "Bitcoin", price: "$108,420", chg: "+2.11%", up: true, pts: "M2,16 L10,14 L18,15 L26,11 L34,12 L42,8 L50,9 L58,5" },
+                ].map((r) => (
+                  <div key={r.sym} className="flex items-center gap-3 rounded-lg border border-border/60 bg-card/40 px-3 py-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-foreground font-mono">{r.sym}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">{r.name}</p>
+                    </div>
+                    <svg width="60" height="22" viewBox="0 0 60 22" className="shrink-0">
+                      <path d={r.pts} fill="none" stroke={r.up ? "hsl(var(--gain))" : "hsl(var(--loss))"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <div className="text-right shrink-0">
+                      <p className="text-xs font-bold text-foreground font-mono">{r.price}</p>
+                      <p className={`text-[10px] font-bold font-mono ${r.up ? "text-gain" : "text-loss"}`}>{r.chg}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Bias report panel */}
+            <div className="rounded-xl border border-border bg-background/60 p-4 text-left">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Bias Analysis Report</p>
+                <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 border border-primary/30 px-2 py-0.5 text-[10px] font-bold text-primary"><ShieldCheck className="h-3 w-3" /> Pro</span>
+              </div>
+              <div className="rounded-lg border border-border/60 bg-card/40 p-3 mb-3">
+                <p className="text-[10px] text-muted-foreground mb-1">CNBC · Tesla Q1 Earnings Beat</p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-3xl font-bold font-mono text-primary">6.4</p>
+                  <p className="text-[11px] text-muted-foreground">/ 10 Trust Score</p>
+                </div>
+                <div className="mt-2 h-1.5 w-full rounded-full bg-border overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-loss via-warning to-primary" style={{ width: "64%" }} />
+                </div>
+              </div>
+              <div className="space-y-2">
+                {[
+                  { icon: AlertCircle, label: "Cherry-picked EPS data", tone: "warning" as const },
+                  { icon: FileText, label: "Omits revenue miss vs consensus", tone: "loss" as const },
+                  { icon: CheckCircle2, label: "Cross-checked with 10-Q filing", tone: "primary" as const },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center gap-2 rounded-md border border-border/60 bg-card/30 px-2.5 py-1.5">
+                    <item.icon className={`h-3.5 w-3.5 shrink-0 ${item.tone === "warning" ? "text-warning" : item.tone === "loss" ? "text-loss" : "text-primary"}`} />
+                    <p className="text-[11px] text-foreground/90">{item.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <p className="mt-3 text-center text-[11px] text-muted-foreground">Sample preview — your real data appears once you sign in.</p>
         </div>
       </header>
 
@@ -392,16 +458,16 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
             {/* Pro */}
             <article className="rounded-2xl border-2 border-primary bg-gradient-to-b from-primary/[0.08] to-card p-6 flex flex-col relative shadow-xl shadow-primary/10">
               <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-lg shadow-primary/40 whitespace-nowrap">
-                <Crown className="h-3 w-3" /> Best Value
+                <Crown className="h-3 w-3" /> Most Popular
               </span>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-1">The Alpha Suite</p>
               <h3 className="text-2xl font-bold text-foreground mb-1 flex items-center gap-2"><Crown className="h-5 w-5 text-primary" /> Pro</h3>
               <div className="text-3xl font-bold font-mono text-foreground mb-4">€15.99<span className="text-sm text-muted-foreground font-normal">/mo</span></div>
               <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
                 <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Unlimited Watchlists</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Deep-Dive AI Bias Reports</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Priority AI Chatbot access</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Real-time Bias Alerts (browser & email)</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Deep-Dive Institutional Analysis</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Real-time Bias Alerts for your Portfolio</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Priority AI Speed</li>
               </ul>
               <button onClick={onGetStarted} className="w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground btn-glow hover:bg-primary/90 transition-colors">Go Pro</button>
               <p className="mt-2 text-center text-[11px] text-muted-foreground">Cancel anytime</p>
@@ -460,8 +526,14 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       <RevealSection>
         <section id="why-portai" aria-labelledby="why-portai-heading" className="px-4 sm:px-6 py-14 max-w-3xl mx-auto">
           <h2 id="why-portai-heading" className="text-2xl sm:text-3xl font-bold text-foreground mb-6 text-center" style={{ textWrap: "balance" as any }}>
-            Why Modern Investors Need AI News Analysis
+            Why PortAI?
           </h2>
+          <h3 className="text-base sm:text-lg font-semibold text-primary mb-4 text-center">
+            Beyond price — the truth behind every move.
+          </h3>
+          <p className="mb-6 text-sm sm:text-base leading-relaxed text-foreground/90 text-center max-w-2xl mx-auto">
+            Traditional portfolio trackers only show you the price. PortAI uses AI sentiment analysis to reveal the truth behind financial news bias. Whether you are tracking the S&amp;P 500 or looking for crypto market insights, our AI ensures you never trade on hype.
+          </p>
           <div className="space-y-5 text-sm sm:text-base leading-relaxed text-muted-foreground">
             <p>
               Today&apos;s retail investor is drowning in financial reporting. Outlets like The Motley Fool, CNBC, Yahoo Finance, and Seeking Alpha publish thousands of articles every week — many of them written to chase clicks, push affiliate stocks, or amplify positions taken by sell-side desks. Without an objective filter, even disciplined investors end up rotating capital based on narrative rather than evidence, and biased financial reporting quietly becomes the largest hidden risk in their portfolio.
@@ -558,6 +630,35 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </section>
       </RevealSection>
 
+      {/* How it Works — AI-Monitored Watchlist bridge */}
+      <RevealSection>
+        <section id="how-it-works" aria-labelledby="how-it-works-heading" className="px-4 sm:px-6 py-10 max-w-4xl mx-auto">
+          <p className="text-center text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-2">How it Works</p>
+          <h2 id="how-it-works-heading" className="text-center text-xl sm:text-2xl font-bold text-foreground mb-3" style={{ textWrap: "balance" as any }}>
+            Your Watchlist isn&rsquo;t static. It&rsquo;s <span className="text-primary">AI-Monitored.</span>
+          </h2>
+          <p className="text-center text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-8">
+            We monitor your assets 24/7. If the media starts pushing a biased narrative on a stock you own, you&rsquo;ll be the first to know.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[
+              { icon: Eye, step: "01", title: "You Track", body: "Add stocks, ETFs and crypto to your watchlist." },
+              { icon: Cpu, step: "02", title: "AI Watches", body: "Our models scan global news and price action 24/7." },
+              { icon: AlertCircle, step: "03", title: "You Get Alerted", body: "Bias spikes or volatility triggers ping you instantly." },
+            ].map((s) => (
+              <div key={s.step} className="glass-card rounded-xl p-4 text-center card-hover">
+                <p className="text-[10px] font-bold font-mono text-primary/70 mb-2">{s.step}</p>
+                <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-primary/15 border border-primary/25">
+                  <s.icon className="h-4 w-4 text-primary" />
+                </div>
+                <h3 className="text-sm font-bold text-foreground mb-1">{s.title}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">{s.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </RevealSection>
+
 
       <footer className="border-t border-border px-6 py-10">
         <div className="max-w-5xl mx-auto flex flex-col gap-8">
@@ -603,6 +704,10 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           </nav>
 
           <div className="border-t border-border pt-6 flex flex-col items-center gap-3">
+            <p className="inline-flex items-center gap-2 text-[11px] font-semibold text-foreground/80 text-center">
+              <Globe className="h-3.5 w-3.5 text-primary" />
+              Available in 6 Languages: English, Spanish, Portuguese, German, French, and Italian.
+            </p>
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/80 text-center">
               Powered by OpenAI · Secured by Supabase · Real-time Data via Financial APIs
             </p>
