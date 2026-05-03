@@ -351,7 +351,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         >
           <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-primary mb-2">Section A</p>
           <h2 id="ai-media-intelligence-heading" className="text-center text-2xl sm:text-3xl font-bold text-foreground mb-3">
-            AI Media Intelligence
+            Detect Market Manipulation
           </h2>
           <p className="text-center text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-10">
             Turn every headline into a quantified signal. Our financial news trust score and bias detection report help you detect market manipulation before your portfolio reacts.
