@@ -204,6 +204,72 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
             </p>
           </div>
         </div>
+
+        {/* Dual Dashboard mockup — Watchlist + Bias Report */}
+        <div className="mt-12 max-w-5xl mx-auto relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-2xl border border-primary/20 bg-card/60 backdrop-blur-md p-3 shadow-2xl">
+            {/* Watchlist panel */}
+            <div className="rounded-xl border border-border bg-background/60 p-4 text-left">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Live Watchlist</p>
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-primary"><Activity className="h-3 w-3" /> LIVE</span>
+              </div>
+              <div className="space-y-2">
+                {[
+                  { sym: "AAPL", name: "Apple Inc.", price: "$232.18", chg: "+1.42%", up: true, pts: "M2,18 L10,14 L18,16 L26,10 L34,12 L42,7 L50,9 L58,5" },
+                  { sym: "NVDA", name: "NVIDIA", price: "$184.92", chg: "+3.08%", up: true, pts: "M2,20 L10,17 L18,15 L26,13 L34,11 L42,8 L50,6 L58,3" },
+                  { sym: "TSLA", name: "Tesla", price: "$298.40", chg: "-0.86%", up: false, pts: "M2,8 L10,10 L18,9 L26,13 L34,12 L42,15 L50,14 L58,17" },
+                  { sym: "BTC", name: "Bitcoin", price: "$108,420", chg: "+2.11%", up: true, pts: "M2,16 L10,14 L18,15 L26,11 L34,12 L42,8 L50,9 L58,5" },
+                ].map((r) => (
+                  <div key={r.sym} className="flex items-center gap-3 rounded-lg border border-border/60 bg-card/40 px-3 py-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-foreground font-mono">{r.sym}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">{r.name}</p>
+                    </div>
+                    <svg width="60" height="22" viewBox="0 0 60 22" className="shrink-0">
+                      <path d={r.pts} fill="none" stroke={r.up ? "hsl(var(--gain))" : "hsl(var(--loss))"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <div className="text-right shrink-0">
+                      <p className="text-xs font-bold text-foreground font-mono">{r.price}</p>
+                      <p className={`text-[10px] font-bold font-mono ${r.up ? "text-gain" : "text-loss"}`}>{r.chg}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Bias report panel */}
+            <div className="rounded-xl border border-border bg-background/60 p-4 text-left">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Bias Analysis Report</p>
+                <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 border border-primary/30 px-2 py-0.5 text-[10px] font-bold text-primary"><ShieldCheck className="h-3 w-3" /> Pro</span>
+              </div>
+              <div className="rounded-lg border border-border/60 bg-card/40 p-3 mb-3">
+                <p className="text-[10px] text-muted-foreground mb-1">CNBC · Tesla Q1 Earnings Beat</p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-3xl font-bold font-mono text-primary">6.4</p>
+                  <p className="text-[11px] text-muted-foreground">/ 10 Trust Score</p>
+                </div>
+                <div className="mt-2 h-1.5 w-full rounded-full bg-border overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-loss via-warning to-primary" style={{ width: "64%" }} />
+                </div>
+              </div>
+              <div className="space-y-2">
+                {[
+                  { icon: AlertCircle, label: "Cherry-picked EPS data", tone: "warning" as const },
+                  { icon: FileText, label: "Omits revenue miss vs consensus", tone: "loss" as const },
+                  { icon: CheckCircle2, label: "Cross-checked with 10-Q filing", tone: "primary" as const },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center gap-2 rounded-md border border-border/60 bg-card/30 px-2.5 py-1.5">
+                    <item.icon className={`h-3.5 w-3.5 shrink-0 ${item.tone === "warning" ? "text-warning" : item.tone === "loss" ? "text-loss" : "text-primary"}`} />
+                    <p className="text-[11px] text-foreground/90">{item.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <p className="mt-3 text-center text-[11px] text-muted-foreground">Sample preview — your real data appears once you sign in.</p>
+        </div>
       </header>
 
       {/* Three value cards — the "Wait, I need this" moment */}
