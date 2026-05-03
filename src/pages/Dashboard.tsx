@@ -8,7 +8,7 @@ import { TrendingStocks } from "@/components/TrendingStocks";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSubscription, trackAnalysis } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
-import { Link as LinkIcon, Search, Globe, ShieldCheck, FileText, AlertCircle, Loader2, Crown } from "lucide-react";
+import { Link as LinkIcon, Search, Globe, ShieldCheck, FileText, AlertCircle, Loader2, Crown, Lock, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -102,7 +102,7 @@ const Dashboard = () => {
       </div>
 
       <div id="analyzer" className="mb-8 rounded-xl border border-border bg-card p-4 sm:p-6 scroll-mt-20" data-tour="analyze-link">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2 mb-2">
           <div className="flex items-center gap-2">
             <LinkIcon className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-semibold">{t("analyzeLink")}</h2>
@@ -125,7 +125,7 @@ const Dashboard = () => {
             <Globe className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input value={url} onChange={(e) => setUrl(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAnalyze()} placeholder={t("pasteArticleUrl")} className="h-11 w-full rounded-lg border border-border bg-accent/30 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
           </div>
-          <button onClick={handleAnalyze} disabled={isAnalyzing || !url.trim()} className="flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 shrink-0">
+          <button onClick={handleAnalyze} disabled={isAnalyzing || !url.trim()} className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 sm:py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 shrink-0">
             {isAnalyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
             {isAnalyzing ? t("analyzing") : t("analyze")}
           </button>
@@ -176,6 +176,49 @@ const Dashboard = () => {
                     {result.strengths.map((s, i) => <li key={i} className="text-xs text-muted-foreground">• {s}</li>)}
                   </ul>
                 </div>
+              </div>
+            </div>
+
+            {/* Pro-Level Deep Dive teaser */}
+            <div className="rounded-xl border border-primary/30 bg-gradient-to-br from-primary/5 to-transparent p-5">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">Pro-Level Deep Dive</h3>
+                </div>
+                {isPro && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">
+                    <Crown className="h-2.5 w-2.5" /> PRO
+                  </span>
+                )}
+              </div>
+              <div className="relative">
+                <ul className={cn("space-y-2.5", !isPro && "select-none pointer-events-none")} aria-hidden={!isPro}>
+                  {[
+                    { label: "Stakeholder Motives", body: "Identifies who benefits from this narrative — institutional positioning, recent insider trades, and analyst incentives." },
+                    { label: "Omitted Data Points", body: "Surfaces material context the article skips: contradicting filings, regulatory headlines, and historical baselines." },
+                    { label: "Sentiment Divergence", body: "Compares the article's tone to social, options-flow, and peer-coverage signals to flag manufactured consensus." },
+                  ].map((it) => (
+                    <li key={it.label} className="flex items-start gap-2.5 text-sm">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                      <div>
+                        <p className="font-semibold text-foreground">{it.label}</p>
+                        <p className={cn("text-xs leading-relaxed text-muted-foreground", !isPro && "blur-[5px]")}>{it.body}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                {!isPro && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <button
+                      onClick={() => setShowUpgrade(true)}
+                      className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors active:scale-[0.97]"
+                    >
+                      <Lock className="h-4 w-4" />
+                      Unlock Deep Dive with Pro
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
