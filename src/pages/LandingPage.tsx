@@ -278,6 +278,96 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </div>
       </RevealSection>
 
+      {/* Section A — AI Media Intelligence (keyword-rich) */}
+      <RevealSection>
+        <section
+          id="ai-media-intelligence"
+          aria-labelledby="ai-media-intelligence-heading"
+          className="px-4 sm:px-6 py-14 max-w-5xl mx-auto"
+        >
+          <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-primary mb-2">Section A</p>
+          <h2 id="ai-media-intelligence-heading" className="text-center text-2xl sm:text-3xl font-bold text-foreground mb-3">
+            AI Media Intelligence
+          </h2>
+          <p className="text-center text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-10">
+            Turn every headline into a quantified signal. Our financial news trust score and bias detection report help you detect market manipulation before your portfolio reacts.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[
+              { icon: ShieldCheck, title: "Financial News Trust Score", body: "A 0-10 trust score for every article you paste, computed from source reputation, framing, and citation density." },
+              { icon: AlertCircle, title: "Detect Market Manipulation", body: "Spot pump-and-dump narratives, coordinated coverage, and sponsored takes that masquerade as journalism." },
+              { icon: CheckCircle2, title: "AI Fact-Checking for Stocks", body: "Cross-reference claims against filings, earnings transcripts, and price action so you never trade on a false premise." },
+              { icon: FileText, title: "Bias Detection Report", body: "Per-article report covering hidden angles, omitted data points, and sentiment divergence — readable in seconds." },
+            ].map((f, i) => (
+              <article key={f.title} className="glass-card rounded-2xl p-5 h-full card-hover" style={{ transitionDelay: `${i * 60}ms` }}>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 border border-primary/25">
+                    <f.icon className="h-5 w-5 text-primary" aria-hidden="true" />
+                  </div>
+                  <h3 className="text-base font-bold text-foreground">{f.title}</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">{f.body}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      </RevealSection>
+
+      {/* Section B — Institutional-Grade Tracking (keyword-rich) */}
+      <RevealSection>
+        <section
+          id="institutional-tracking"
+          aria-labelledby="institutional-tracking-heading"
+          className="px-4 sm:px-6 py-14 max-w-5xl mx-auto border-t border-border"
+        >
+          <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-primary mb-2">Section B</p>
+          <h2 id="institutional-tracking-heading" className="text-center text-2xl sm:text-3xl font-bold text-foreground mb-3">
+            Institutional-Grade Tracking
+          </h2>
+          <p className="text-center text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-10">
+            A real-time S&amp;P 500 heatmap, multi-asset watchlist, custom stock price alerts, and a unified crypto portfolio tracker — engineered for retail investors who want institutional clarity.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[
+              { icon: BarChart3, title: "Real-Time S&P 500 Heatmap", body: "Live sector and constituent heatmap powered by TradingView, refreshed throughout the trading session." },
+              { icon: Eye, title: "Multi-Asset Watchlist", body: "Track 10,000+ stocks, ETFs and crypto across 20+ countries in a single, sortable watchlist." },
+              { icon: Zap, title: "Stock Price Alerts", body: "Set custom price thresholds and get notified the moment your target is breached." },
+              { icon: Activity, title: "Crypto Portfolio Tracker", body: "Aggregate BTC, ETH, and altcoin positions alongside equities for a true total-portfolio view." },
+            ].map((f, i) => (
+              <article key={f.title} className="glass-card rounded-2xl p-5 h-full card-hover" style={{ transitionDelay: `${i * 60}ms` }}>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 border border-primary/25">
+                    <f.icon className="h-5 w-5 text-primary" aria-hidden="true" />
+                  </div>
+                  <h3 className="text-base font-bold text-foreground">{f.title}</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">{f.body}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      </RevealSection>
+
+      {/* Why Modern Investors Need AI News Analysis — SEO text block */}
+      <RevealSection>
+        <section id="why-portai" aria-labelledby="why-portai-heading" className="px-4 sm:px-6 py-14 max-w-3xl mx-auto">
+          <h2 id="why-portai-heading" className="text-2xl sm:text-3xl font-bold text-foreground mb-6 text-center" style={{ textWrap: "balance" as any }}>
+            Why Modern Investors Need AI News Analysis
+          </h2>
+          <div className="space-y-5 text-sm sm:text-base leading-relaxed text-muted-foreground">
+            <p>
+              Today&apos;s retail investor is drowning in financial reporting. Outlets like The Motley Fool, CNBC, Yahoo Finance, and Seeking Alpha publish thousands of articles every week — many of them written to chase clicks, push affiliate stocks, or amplify positions taken by sell-side desks. Without an objective filter, even disciplined investors end up rotating capital based on narrative rather than evidence, and biased financial reporting quietly becomes the largest hidden risk in their portfolio.
+            </p>
+            <p>
+              Traditional portfolio trackers were never designed to solve this. They show you what your assets are doing, but they cannot tell you <em>why</em> a stock just ran 8% on a Monday morning, whether the catalyst is durable, or whether the bullish coverage you are reading omits a regulatory filing, an insider sale, or a contradicting earnings transcript. That gap — between price action and the narrative driving it — is exactly where retail investors get hurt.
+            </p>
+            <p>
+              PortAI closes that gap. We use Large Language Models to read each article you paste, score its trust and bias, surface omitted data points, and compare its sentiment against social, options-flow, and peer-coverage signals. The result is an objective sentiment analysis layered on top of a real-time stock and crypto portfolio tracker — so you can verify the story before you trade the chart, in plain English, in 6 languages, every single day.
+            </p>
+          </div>
+        </section>
+      </RevealSection>
+
       {/* Demoted Supporting Features — heatmap, watchlist, etc. */}
       <section id="features" className="px-4 sm:px-6 pt-12 pb-16 max-w-5xl mx-auto">
         <RevealSection>
