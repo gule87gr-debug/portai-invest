@@ -770,7 +770,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </section>
       </RevealSection>
 
-
+      <footer className="border-t border-border px-6 py-10">
         <div className="max-w-5xl mx-auto flex flex-col gap-8">
           {/* Stock Market News by Sector — internal linking for SEO */}
           <nav aria-label="Stock market news by sector" className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-left">
