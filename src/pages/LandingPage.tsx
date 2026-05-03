@@ -145,7 +145,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
 
         {/* SEO H1 — visually hidden but crawlable */}
         <h1 className="sr-only">
-          Invest with Clarity: The First AI-Powered Portfolio Command Center for Retail Investors.
+          The AI Command Center for Smarter Investing — Portfolio Tracking & AI Financial News Bias Checker.
         </h1>
 
         {/* Visual headline */}
@@ -154,13 +154,13 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           style={{ lineHeight: "1.05" }}
           aria-hidden="true"
         >
-          Stop Trading on Hype.
+          The AI Command Center
           <br />
-          <span className="text-primary">Start Trading on Truth.</span>
+          <span className="text-primary">for Smarter Investing.</span>
         </p>
 
         <p className="mt-5 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed relative z-10" style={{ textWrap: "pretty" as any }}>
-          Institutional-grade portfolio tracking meets advanced AI news analysis. PortAI shields your investments from media manipulation by revealing the &ldquo;Why&rdquo; behind every price move.
+          Track your portfolio with institutional-grade data and filter out market manipulation with the world&rsquo;s first AI Financial News Bias Checker.
         </p>
 
         {/* Prominent input box with pulse */}
