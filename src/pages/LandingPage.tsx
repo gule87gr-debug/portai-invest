@@ -348,7 +348,115 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </section>
       </RevealSection>
 
-      {/* Why Modern Investors Need AI News Analysis — SEO text block */}
+      {/* Tiered Pricing Preview */}
+      <RevealSection>
+        <section
+          id="pricing-preview"
+          aria-labelledby="pricing-preview-heading"
+          className="px-4 sm:px-6 py-14 max-w-5xl mx-auto border-t border-border"
+        >
+          <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-primary mb-2">Pricing</p>
+          <h2 id="pricing-preview-heading" className="text-center text-2xl sm:text-3xl font-bold text-foreground mb-3">
+            Choose Your Edge
+          </h2>
+          <p className="text-center text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-10">
+            Three tiers built for every level of conviction — from observer to active alpha hunter.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {/* Free */}
+            <article className="rounded-2xl border border-border bg-card p-6 flex flex-col">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-1">The Observer</p>
+              <h3 className="text-2xl font-bold text-foreground mb-1">Free</h3>
+              <div className="text-3xl font-bold font-mono text-foreground mb-4">€0<span className="text-sm text-muted-foreground font-normal">/mo</span></div>
+              <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary/70 mt-0.5 shrink-0" /> 1 Watchlist (5 assets)</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary/70 mt-0.5 shrink-0" /> 3 Basic AI Analyses / day</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary/70 mt-0.5 shrink-0" /> Community Media Pulse access</li>
+              </ul>
+              <button onClick={onGetStarted} className="w-full rounded-xl border border-border py-2.5 text-sm font-semibold text-foreground hover:bg-accent transition-colors">Start Free</button>
+            </article>
+
+            {/* Plus */}
+            <article className="rounded-2xl border border-border bg-card p-6 flex flex-col">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-1">The Shield</p>
+              <h3 className="text-2xl font-bold text-foreground mb-1 flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" /> Plus</h3>
+              <div className="text-3xl font-bold font-mono text-foreground mb-4">€8.99<span className="text-sm text-muted-foreground font-normal">/mo</span></div>
+              <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> 5 Watchlists</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Unlimited Basic Analyses</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Live Sentiment Heatmaps</li>
+              </ul>
+              <button onClick={onGetStarted} className="w-full rounded-xl bg-primary/10 border border-primary/40 text-primary py-2.5 text-sm font-semibold hover:bg-primary/15 transition-colors">Upgrade to Plus</button>
+            </article>
+
+            {/* Pro */}
+            <article className="rounded-2xl border-2 border-primary bg-gradient-to-b from-primary/[0.08] to-card p-6 flex flex-col relative shadow-xl shadow-primary/10">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-lg shadow-primary/40 whitespace-nowrap">
+                <Crown className="h-3 w-3" /> Best Value
+              </span>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-1">The Alpha Suite</p>
+              <h3 className="text-2xl font-bold text-foreground mb-1 flex items-center gap-2"><Crown className="h-5 w-5 text-primary" /> Pro</h3>
+              <div className="text-3xl font-bold font-mono text-foreground mb-4">€15.99<span className="text-sm text-muted-foreground font-normal">/mo</span></div>
+              <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Unlimited Watchlists</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Deep-Dive AI Bias Reports</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Priority AI Chatbot access</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Real-time Bias Alerts (browser & email)</li>
+              </ul>
+              <button onClick={onGetStarted} className="w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground btn-glow hover:bg-primary/90 transition-colors">Go Pro</button>
+              <p className="mt-2 text-center text-[11px] text-muted-foreground">Cancel anytime</p>
+            </article>
+          </div>
+        </section>
+      </RevealSection>
+
+      {/* Data Bridge Interactive Card */}
+      <RevealSection>
+        <section className="px-4 sm:px-6 py-14 max-w-5xl mx-auto">
+          <div className="rounded-3xl border-2 border-primary/30 bg-gradient-to-br from-primary/[0.08] via-card to-card p-6 sm:p-10 relative overflow-hidden">
+            <div className="absolute top-4 right-4 inline-flex items-center gap-1 rounded-full bg-primary/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
+              <Crown className="h-3 w-3" /> Pro Tier
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-2">The Data Bridge</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-3" style={{ textWrap: "balance" as any }}>
+                  Watchlist meets Newsroom — automatically.
+                </h2>
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-4">
+                  When a stock in your watchlist hits a volatility trigger, PortAI Pro instantly scans global media for bias, surfacing the narrative behind the price move before the crowd reacts.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {["English", "Español", "Français", "Deutsch", "Italiano", "Português"].map((lang) => (
+                    <span key={lang} className="inline-flex items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
+                      <Globe className="h-3 w-3" /> {lang}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-3">
+                {[
+                  { icon: Zap, title: "Volatility Trigger", body: "AAPL ▲ 4.2% in 15 min" },
+                  { icon: Search, title: "Auto Media Scan", body: "92 articles across 6 languages" },
+                  { icon: ShieldCheck, title: "Bias Report Ready", body: "Trust score 6.4 · 3 omitted angles" },
+                ].map((step, i) => (
+                  <div key={step.title} className="flex items-center gap-3 rounded-xl border border-border bg-card/70 backdrop-blur-sm p-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 border border-primary/25 text-primary font-bold text-xs">
+                      {i + 1}
+                    </div>
+                    <step.icon className="h-4 w-4 text-primary shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-foreground">{step.title}</p>
+                      <p className="text-[11px] text-muted-foreground font-mono truncate">{step.body}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      </RevealSection>
+
       <RevealSection>
         <section id="why-portai" aria-labelledby="why-portai-heading" className="px-4 sm:px-6 py-14 max-w-3xl mx-auto">
           <h2 id="why-portai-heading" className="text-2xl sm:text-3xl font-bold text-foreground mb-6 text-center" style={{ textWrap: "balance" as any }}>
