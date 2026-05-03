@@ -211,14 +211,19 @@ const Pricing = () => {
               ))}
             </ul>
             {!isPlus && !isPro && (
-              <button
-                onClick={() => beginUpgradeFlow("plus")}
-                disabled={checkoutLoading !== null || loading}
-                className="w-full rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {checkoutLoading === "plus" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                {checkoutLoading === "plus" ? "Redirecting..." : "Upgrade to Plus"}
-              </button>
+              <>
+                <button
+                  onClick={() => beginUpgradeFlow("plus")}
+                  disabled={checkoutLoading !== null || loading}
+                  className="w-full rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {checkoutLoading === "plus" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                  {checkoutLoading === "plus" ? "Redirecting..." : "Upgrade to Plus"}
+                </button>
+                <p className="mt-2 text-center text-[11px] text-muted-foreground flex items-center justify-center gap-1">
+                  <Check className="h-3 w-3 text-primary" /> Cancel anytime
+                </p>
+              </>
             )}
             {isPlus && !cancelAtPeriodEnd && (
               <button disabled className="w-full rounded-xl border border-primary py-3 text-sm font-medium text-primary">
