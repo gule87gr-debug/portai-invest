@@ -217,8 +217,15 @@ Return this exact JSON structure:
   "biases": ["list", "of", "potential", "biases"],
   "strengths": ["list", "of", "credibility", "strengths"],
   "redFlag": "ONE short tag (2-4 words): Promotional Language | Conflict of Interest | One-Sided | Pump Pattern | Sensational Headline | Cherry-Picked Data | Unverified Claims | Objective Reporting",
-  "hiddenAngle": "2-3 sentence Pro insight describing what the article is hiding, omitting, or downplaying. Be concrete."
+  "hiddenAngle": "2-3 sentence Pro insight describing what the article is hiding, omitting, or downplaying. Be concrete.",
+  "proDeepDive": {
+    "stakeholderMotives": "2-3 sentences: who specifically benefits from THIS article's framing — name the institutions, insiders, analysts or funds whose positioning aligns with the narrative. Reference concrete incentives (recent insider trades, analyst price-target history, fund holdings) rather than generic 'institutions benefit' language.",
+    "omittedDataPoints": "2-3 sentences: name the specific data the article skips — contradicting filings, recent regulatory headlines, peer comparisons, historical baselines, or guidance revisions that would weaken the thesis. Cite numbers or filing types where plausible.",
+    "sentimentDivergence": "2-3 sentences: contrast the article's tone with concrete counter-signals — options-flow skew, short interest trend, analyst dispersion, peer-coverage tone, or social-sentiment direction. Indicate whether consensus is genuine or manufactured."
+  }
 }
+
+The proDeepDive MUST be specific to THIS article's subject (ticker, company, sector, event). Never produce generic boilerplate. Reference the actual entity by name in every field.
 
 Scoring guide:
 - 9-10: Major wire services (Reuters, AP), SEC filings, Fed publications
