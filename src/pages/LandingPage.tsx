@@ -551,7 +551,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         <RevealSection>
           <p className="text-center text-xs font-semibold uppercase tracking-label text-muted-foreground mb-2">{t("supportingFeatures")}</p>
           <h2 className="text-center text-xl sm:text-2xl font-bold text-foreground mb-3" style={{ textWrap: "balance" as any }}>
-            {t("supportingFeaturesSub")}
+            AI-Powered Sentiment Analysis
           </h2>
         </RevealSection>
 
