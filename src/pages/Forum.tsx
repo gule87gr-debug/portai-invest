@@ -530,7 +530,7 @@ const Forum = () => {
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 border border-primary/30 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
                   <Sparkles className="h-3 w-3" /> Featured Analysis
                 </span>
-                <span className="text-[11px] text-muted-foreground">Hand-picked by PortAI · TSLA · NVDA · S&amp;P 500</span>
+                <span className="text-[11px] text-muted-foreground">Curated across Reuters, Bloomberg, FT, WSJ, CNBC, Yahoo &amp; more</span>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {filteredFeatured.map((a, i) => renderArticleCard(a, i, true))}
