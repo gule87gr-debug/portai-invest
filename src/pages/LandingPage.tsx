@@ -536,7 +536,18 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
                 <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Unlimited Watchlists</li>
                 <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Deep-Dive Institutional Analysis</li>
                 <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Real-time Bias Alerts for your Portfolio</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Priority AI Speed</li>
+               <li className="flex gap-2 items-center"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> <span className="inline-flex items-center gap-1">Priority AI Speed
+                 <Tooltip>
+                   <TooltipTrigger asChild>
+                     <button type="button" aria-label="What is Priority AI Speed?" className="inline-flex items-center text-primary/80 hover:text-primary transition-colors">
+                       <Info className="h-3.5 w-3.5" />
+                     </button>
+                   </TooltipTrigger>
+                   <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
+                     Uses high-compute models for deeper pattern recognition and zero-wait analysis.
+                   </TooltipContent>
+                 </Tooltip>
+               </span></li>
               </ul>
               <button onClick={onGetStarted} className="w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground btn-glow hover:bg-primary/90 transition-colors">Go Pro</button>
               <p className="mt-2 text-center text-[11px] text-muted-foreground">Cancel anytime</p>
