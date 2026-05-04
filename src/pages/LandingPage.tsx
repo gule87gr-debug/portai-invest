@@ -1,7 +1,8 @@
-import { Brain, BarChart3, MessageSquare, Eye, ArrowRight, Sparkles, LayoutDashboard, Shield, Globe, ChevronRight, Zap, ShieldCheck, Lock, Fingerprint, CheckCircle2, ChevronDown, Search, Activity, Database, CreditCard, Cpu, AlertCircle, FileText, Crown, HelpCircle } from "lucide-react";
+import { Brain, BarChart3, MessageSquare, Eye, ArrowRight, Sparkles, LayoutDashboard, Shield, Globe, ChevronRight, Zap, ShieldCheck, Lock, Fingerprint, CheckCircle2, ChevronDown, Search, Activity, Database, CreditCard, Cpu, AlertCircle, FileText, Crown, HelpCircle, Quote, Users, Info } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLanguage, type Language } from "@/contexts/LanguageContext";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const supportingFeatures = [
   { icon: LayoutDashboard, key: "marketIntelligence", desc: "Live S&P 500 heatmap and curated news feed." },
@@ -61,7 +62,8 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
   };
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden noise-overlay">
+    <TooltipProvider delayDuration={150}>
+    <div className="min-h-screen bg-background overflow-x-hidden noise-overlay pb-16 sm:pb-0">
       <style>{`
         .scroll-reveal {
           opacity: 0;
@@ -77,12 +79,20 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           filter: blur(0);
         }
         @keyframes hero-pulse {
-          0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.5), 0 0 0 0 hsl(var(--primary) / 0.25); }
-          50% { box-shadow: 0 0 0 10px hsl(var(--primary) / 0), 0 0 0 22px hsl(var(--primary) / 0); }
+          0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.55), 0 0 0 0 hsl(var(--primary) / 0.25); }
+          50% { box-shadow: 0 0 0 12px hsl(var(--primary) / 0), 0 0 0 24px hsl(var(--primary) / 0); }
         }
         .hero-input-pulse {
-          animation: hero-pulse 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          animation: hero-pulse 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .marquee-track {
+          animation: marquee 38s linear infinite;
+        }
+        .marquee-track:hover { animation-play-state: paused; }
       `}</style>
 
       {/* Top promo banner */}
@@ -162,8 +172,8 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </p>
 
         {/* Prominent input box with pulse */}
-        <div className="mt-9 max-w-2xl mx-auto relative z-10">
-          <div className="hero-input-pulse rounded-2xl">
+        <div id="hero-analyzer" className="mt-9 max-w-2xl mx-auto relative z-10 scroll-mt-24">
+          <div className="rounded-2xl">
             <div className="flex flex-col sm:flex-row items-stretch gap-2 rounded-2xl border-2 border-primary/40 bg-card p-2 shadow-2xl">
               <div className="relative flex-1">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -179,7 +189,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
               </div>
               <button
                 onClick={handleAnalyze}
-                className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm sm:text-base font-bold text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97] shrink-0"
+                className={`flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm sm:text-base font-bold text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97] shrink-0 ${url.trim().length > 8 ? "hero-input-pulse" : ""}`}
               >
                 Analyze News Bias <ArrowRight className="h-4 w-4" />
               </button>
@@ -192,7 +202,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
               onClick={onGetStarted}
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-5 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/15 w-full sm:w-auto"
             >
-              <Eye className="h-4 w-4" /> Build Your Watchlist
+              <Eye className="h-4 w-4" /> See Live Bias Detection
             </button>
             <p className="text-xs text-muted-foreground">
               {t("heroOr")}{" "}
@@ -317,6 +327,67 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
                   {t.label}
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+      </RevealSection>
+
+      {/* Community & Trust — testimonials marquee + market reach */}
+      <RevealSection>
+        <section aria-labelledby="community-trust-heading" className="px-4 sm:px-6 py-12 border-b border-border">
+          <div className="max-w-6xl mx-auto">
+            <p className="text-center text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-2">Community &amp; Trust</p>
+            <h2 id="community-trust-heading" className="text-center text-xl sm:text-2xl font-bold text-foreground mb-8" style={{ textWrap: "balance" as any }}>
+              Built with — and for — a global community of investors.
+            </h2>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch">
+              {/* Testimonials marquee */}
+              <div className="lg:col-span-2 rounded-2xl border border-border bg-card/40 backdrop-blur-md overflow-hidden relative">
+                <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-background to-transparent z-10" />
+                <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-background to-transparent z-10" />
+                <div className="flex marquee-track py-5" style={{ width: "max-content" }}>
+                  {[...Array(2)].flatMap((_, dup) => ([
+                    { quote: "PortAI caught a pump-and-dump narrative before I lost a cent.", who: "Verified Alpha User · DE" },
+                    { quote: "Finally a tool that tells me when CNBC is just chasing clicks.", who: "Retail Investor · ES" },
+                    { quote: "The bias score is now part of my pre-market routine.", who: "Day Trader · US" },
+                    { quote: "Saved me from buying into a hyped earnings beat that omitted a revenue miss.", who: "Long-term Holder · UK" },
+                    { quote: "Tracking my crypto and stocks in one watchlist with bias alerts is a game changer.", who: "Crypto Investor · PT" },
+                    { quote: "I use the trust score before any position over €5k. Period.", who: "Verified Alpha User · IT" },
+                  ].map((tst, i) => (
+                    <div key={`${dup}-${i}`} className="w-[320px] shrink-0 mx-3 rounded-xl border border-border/70 bg-background/40 p-4">
+                      <Quote className="h-4 w-4 text-primary/70 mb-2" />
+                      <p className="text-sm text-foreground/90 leading-relaxed mb-3">&ldquo;{tst.quote}&rdquo;</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{tst.who}</p>
+                    </div>
+                  ))))}
+                </div>
+              </div>
+
+              {/* Market Reach card */}
+              <div className="rounded-2xl border-2 border-primary/30 bg-gradient-to-br from-primary/[0.08] via-card to-card p-6 flex flex-col justify-center">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-3">Market Reach</p>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 border border-primary/25">
+                      <FileText className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold font-mono text-foreground tracking-tight">1M+</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">Headlines analyzed for bias</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 border border-primary/25">
+                      <Users className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold font-mono text-foreground tracking-tight">12+</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">Active countries worldwide</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -465,7 +536,18 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
                 <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Unlimited Watchlists</li>
                 <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Deep-Dive Institutional Analysis</li>
                 <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Real-time Bias Alerts for your Portfolio</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Priority AI Speed</li>
+               <li className="flex gap-2 items-center"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> <span className="inline-flex items-center gap-1">Priority AI Speed
+                 <Tooltip>
+                   <TooltipTrigger asChild>
+                     <button type="button" aria-label="What is Priority AI Speed?" className="inline-flex items-center text-primary/80 hover:text-primary transition-colors">
+                       <Info className="h-3.5 w-3.5" />
+                     </button>
+                   </TooltipTrigger>
+                   <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
+                     Uses high-compute models for deeper pattern recognition and zero-wait analysis.
+                   </TooltipContent>
+                 </Tooltip>
+               </span></li>
               </ul>
               <button onClick={onGetStarted} className="w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground btn-glow hover:bg-primary/90 transition-colors">Go Pro</button>
               <p className="mt-2 text-center text-[11px] text-muted-foreground">Cancel anytime</p>
@@ -826,7 +908,17 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           </div>
         </div>
       </footer>
+
+      {/* Mobile sticky analyzer anchor */}
+      <a
+        href="#hero-analyzer"
+        className="sm:hidden fixed bottom-4 right-4 z-40 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-xs font-bold text-primary-foreground shadow-2xl shadow-primary/40 btn-glow active:scale-95"
+        aria-label="Jump to bias analyzer"
+      >
+        <Search className="h-4 w-4" /> Analyze
+      </a>
     </div>
+    </TooltipProvider>
   );
 };
 
