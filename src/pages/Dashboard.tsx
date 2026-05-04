@@ -8,7 +8,7 @@ import { TrendingStocks } from "@/components/TrendingStocks";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSubscription, trackAnalysis } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
-import { Link as LinkIcon, Search, Globe, ShieldCheck, FileText, AlertCircle, Loader2, Crown, Lock, Sparkles } from "lucide-react";
+import { Link as LinkIcon, Search, Globe, ShieldCheck, FileText, AlertCircle, Loader2, Crown, Lock, Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -132,7 +132,17 @@ const Dashboard = () => {
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Globe className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input value={url} onChange={(e) => setUrl(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAnalyze()} placeholder={t("pasteArticleUrl")} className="h-11 w-full rounded-lg border border-border bg-accent/30 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+            <input value={url} onChange={(e) => setUrl(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAnalyze()} placeholder={t("pasteArticleUrl")} className={cn("h-11 w-full rounded-lg border border-border bg-accent/30 pl-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", url ? "pr-10" : "pr-4")} />
+            {url && (
+              <button
+                type="button"
+                onClick={() => { setUrl(""); setError(""); }}
+                aria-label="Clear link"
+                className="absolute right-2 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
           <button onClick={handleAnalyze} disabled={isAnalyzing || !url.trim()} className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 sm:py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 shrink-0">
             {isAnalyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
