@@ -62,7 +62,8 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
   };
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden noise-overlay">
+    <TooltipProvider delayDuration={150}>
+    <div className="min-h-screen bg-background overflow-x-hidden noise-overlay pb-16 sm:pb-0">
       <style>{`
         .scroll-reveal {
           opacity: 0;
