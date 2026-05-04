@@ -78,12 +78,20 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           filter: blur(0);
         }
         @keyframes hero-pulse {
-          0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.5), 0 0 0 0 hsl(var(--primary) / 0.25); }
-          50% { box-shadow: 0 0 0 10px hsl(var(--primary) / 0), 0 0 0 22px hsl(var(--primary) / 0); }
+          0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.55), 0 0 0 0 hsl(var(--primary) / 0.25); }
+          50% { box-shadow: 0 0 0 12px hsl(var(--primary) / 0), 0 0 0 24px hsl(var(--primary) / 0); }
         }
         .hero-input-pulse {
-          animation: hero-pulse 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          animation: hero-pulse 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .marquee-track {
+          animation: marquee 38s linear infinite;
+        }
+        .marquee-track:hover { animation-play-state: paused; }
       `}</style>
 
       {/* Top promo banner */}
