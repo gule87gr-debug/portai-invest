@@ -897,7 +897,17 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           </div>
         </div>
       </footer>
+
+      {/* Mobile sticky analyzer anchor */}
+      <a
+        href="#hero-analyzer"
+        className="sm:hidden fixed bottom-4 right-4 z-40 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-xs font-bold text-primary-foreground shadow-2xl shadow-primary/40 btn-glow active:scale-95"
+        aria-label="Jump to bias analyzer"
+      >
+        <Search className="h-4 w-4" /> Analyze
+      </a>
     </div>
+    </TooltipProvider>
   );
 };
 
