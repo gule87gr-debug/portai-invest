@@ -171,8 +171,8 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </p>
 
         {/* Prominent input box with pulse */}
-        <div className="mt-9 max-w-2xl mx-auto relative z-10">
-          <div className="hero-input-pulse rounded-2xl">
+        <div id="hero-analyzer" className="mt-9 max-w-2xl mx-auto relative z-10 scroll-mt-24">
+          <div className="rounded-2xl">
             <div className="flex flex-col sm:flex-row items-stretch gap-2 rounded-2xl border-2 border-primary/40 bg-card p-2 shadow-2xl">
               <div className="relative flex-1">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -188,7 +188,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
               </div>
               <button
                 onClick={handleAnalyze}
-                className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm sm:text-base font-bold text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97] shrink-0"
+                className={`flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm sm:text-base font-bold text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97] shrink-0 ${url.trim().length > 8 ? "hero-input-pulse" : ""}`}
               >
                 Analyze News Bias <ArrowRight className="h-4 w-4" />
               </button>
