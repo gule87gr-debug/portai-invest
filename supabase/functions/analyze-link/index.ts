@@ -206,10 +206,28 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are a financial article credibility analyst. Given a URL, analyze the source and provide a structured assessment. You must respond with valid JSON only, no markdown.
+            content: `You are a financial article credibility analyst. Given a URL, you must FIRST determine whether the URL points to an actual news/journalism article (or written analysis/opinion piece). You must respond with valid JSON only, no markdown.
 
-Return this exact JSON structure:
+STEP 1 — Classification (REQUIRED):
+Set "isArticle" to false when the URL clearly points to any of:
+- Homepages, section/category pages, tag/topic indexes, search results, author pages
+- Video/podcast/livestream pages with no written article body (YouTube, TikTok, Spotify, Twitch, etc.)
+- Social-media posts (Twitter/X, Reddit threads, Instagram, Facebook, LinkedIn, Stocktwits)
+- Product/marketing/landing pages, pricing pages, login/signup, checkout
+- Documentation, software repos (GitHub/GitLab), developer tools
+- Raw files (PDFs are OK only if they are clearly a written report/article — otherwise false)
+- Stock-quote/ticker pages with no editorial content, broker order tickets, charts
+- Wikipedia/encyclopedia entries (not journalism)
+- Forums, comment threads, message boards
+- Anything not in a language you can analyze, or anything ambiguous/empty
+
+If "isArticle" is false, respond with EXACTLY:
+{ "isArticle": false, "reason": "<one short sentence explaining what the URL actually is, e.g. 'This URL is a YouTube video, not a written article.'>" }
+Do NOT include any other fields when isArticle is false.
+
+STEP 2 — If and only if the URL clearly points to a written news/analysis/opinion article, return this exact JSON structure:
 {
+  "isArticle": true,
   "title": "descriptive title of the analysis",
   "source": "identified source name",
   "trustScore": <number 1-10>,
@@ -287,6 +305,20 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
         hiddenAngle: "Automated parsing failed; manual review recommended.",
       };
     }
+
+    // If the AI determined this URL is not an article, short-circuit before
+    // recording usage or persisting to the public Media Bias Pulse feed.
+    if (analysis.isArticle === false) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          notArticle: true,
+          reason: String(analysis.reason ?? "The link you provided does not appear to be a news article. Please paste a direct link to a written article.").slice(0, 280),
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     if (!analysis.redFlag) analysis.redFlag = "Unverified Claims";
     if (!analysis.hiddenAngle) analysis.hiddenAngle = analysis.summary?.slice(0, 220) ?? "";
     if (!analysis.proDeepDive || typeof analysis.proDeepDive !== "object") {
