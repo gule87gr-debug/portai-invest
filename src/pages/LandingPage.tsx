@@ -331,6 +331,67 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </section>
       </RevealSection>
 
+      {/* Community & Trust — testimonials marquee + market reach */}
+      <RevealSection>
+        <section aria-labelledby="community-trust-heading" className="px-4 sm:px-6 py-12 border-b border-border">
+          <div className="max-w-6xl mx-auto">
+            <p className="text-center text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-2">Community &amp; Trust</p>
+            <h2 id="community-trust-heading" className="text-center text-xl sm:text-2xl font-bold text-foreground mb-8" style={{ textWrap: "balance" as any }}>
+              Built with — and for — a global community of investors.
+            </h2>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch">
+              {/* Testimonials marquee */}
+              <div className="lg:col-span-2 rounded-2xl border border-border bg-card/40 backdrop-blur-md overflow-hidden relative">
+                <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-background to-transparent z-10" />
+                <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-background to-transparent z-10" />
+                <div className="flex marquee-track py-5" style={{ width: "max-content" }}>
+                  {[...Array(2)].flatMap((_, dup) => ([
+                    { quote: "PortAI caught a pump-and-dump narrative before I lost a cent.", who: "Verified Alpha User · DE" },
+                    { quote: "Finally a tool that tells me when CNBC is just chasing clicks.", who: "Retail Investor · ES" },
+                    { quote: "The bias score is now part of my pre-market routine.", who: "Day Trader · US" },
+                    { quote: "Saved me from buying into a hyped earnings beat that omitted a revenue miss.", who: "Long-term Holder · UK" },
+                    { quote: "Tracking my crypto and stocks in one watchlist with bias alerts is a game changer.", who: "Crypto Investor · PT" },
+                    { quote: "I use the trust score before any position over €5k. Period.", who: "Verified Alpha User · IT" },
+                  ].map((tst, i) => (
+                    <div key={`${dup}-${i}`} className="w-[320px] shrink-0 mx-3 rounded-xl border border-border/70 bg-background/40 p-4">
+                      <Quote className="h-4 w-4 text-primary/70 mb-2" />
+                      <p className="text-sm text-foreground/90 leading-relaxed mb-3">&ldquo;{tst.quote}&rdquo;</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{tst.who}</p>
+                    </div>
+                  ))))}
+                </div>
+              </div>
+
+              {/* Market Reach card */}
+              <div className="rounded-2xl border-2 border-primary/30 bg-gradient-to-br from-primary/[0.08] via-card to-card p-6 flex flex-col justify-center">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-3">Market Reach</p>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 border border-primary/25">
+                      <FileText className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold font-mono text-foreground tracking-tight">1M+</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">Headlines analyzed for bias</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 border border-primary/25">
+                      <Users className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold font-mono text-foreground tracking-tight">12+</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">Active countries worldwide</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </RevealSection>
+
       {/* Stats bar — moved below tech stack */}
       <RevealSection>
         <div className="py-10 px-6">
