@@ -77,6 +77,10 @@ const Dashboard = () => {
       const { data, error: fnError } = await supabase.functions.invoke("analyze-link", { body: { url: url.trim() } });
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
+      if (data?.notArticle) {
+        setError(data.reason || "The link you provided doesn't appear to be a news article. Please paste a direct link to a written article.");
+        return;
+      }
       if (data?.analysis) {
         setResult(data.analysis);
         await trackAnalysis();
