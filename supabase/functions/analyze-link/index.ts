@@ -305,6 +305,20 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
         hiddenAngle: "Automated parsing failed; manual review recommended.",
       };
     }
+
+    // If the AI determined this URL is not an article, short-circuit before
+    // recording usage or persisting to the public Media Bias Pulse feed.
+    if (analysis.isArticle === false) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          notArticle: true,
+          reason: String(analysis.reason ?? "The link you provided does not appear to be a news article. Please paste a direct link to a written article.").slice(0, 280),
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     if (!analysis.redFlag) analysis.redFlag = "Unverified Claims";
     if (!analysis.hiddenAngle) analysis.hiddenAngle = analysis.summary?.slice(0, 220) ?? "";
     if (!analysis.proDeepDive || typeof analysis.proDeepDive !== "object") {
