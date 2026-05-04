@@ -348,12 +348,12 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
                 <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-background to-transparent z-10" />
                 <div className="flex marquee-track py-5" style={{ width: "max-content" }}>
                   {[...Array(2)].flatMap((_, dup) => ([
-                    { quote: "PortAI caught a pump-and-dump narrative before I lost a cent.", who: "Verified Alpha User · DE" },
-                    { quote: "Finally a tool that tells me when CNBC is just chasing clicks.", who: "Retail Investor · ES" },
-                    { quote: "The bias score is now part of my pre-market routine.", who: "Day Trader · US" },
-                    { quote: "Saved me from buying into a hyped earnings beat that omitted a revenue miss.", who: "Long-term Holder · UK" },
-                    { quote: "Tracking my crypto and stocks in one watchlist with bias alerts is a game changer.", who: "Crypto Investor · PT" },
-                    { quote: "I use the trust score before any position over €5k. Period.", who: "Verified Alpha User · IT" },
+                    { quote: "PortAI caught a pump-and-dump narrative before I lost a cent.", who: "Lukas M. · Munich, DE" },
+                    { quote: "Finally a tool that tells me when CNBC is just chasing clicks.", who: "Sofía R. · Madrid, ES" },
+                    { quote: "The bias score is now part of my pre-market routine.", who: "Marcus T. · Chicago, US" },
+                    { quote: "Saved me from buying into a hyped earnings beat that omitted a revenue miss.", who: "James W. · London, UK" },
+                    { quote: "Tracking my crypto and stocks in one watchlist with bias alerts is a game changer.", who: "Tiago F. · Lisbon, PT" },
+                    { quote: "I use the trust score before any position over €5k. Period.", who: "Giulia C. · Milan, IT" },
                   ].map((tst, i) => (
                     <div key={`${dup}-${i}`} className="w-[320px] shrink-0 mx-3 rounded-xl border border-border/70 bg-background/40 p-4">
                       <Quote className="h-4 w-4 text-primary/70 mb-2" />
