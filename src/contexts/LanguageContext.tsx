@@ -7,7 +7,7 @@ const translations: Record<Language, Record<string, string>> = {
     // Nav
     home: "Home", dashboard: "Dashboard", aiChat: "AI Chat", quiz: "Quiz", forum: "Media Pulse", watchlists: "Watchlists", settings: "Settings", news: "News", articleAnalyzer: "News", new: "NEW",
     // Landing
-    landingBanner: "Soft Launch: Pro Tier 50% Off — limited time",
+    landingBanner: "Limited time: Plus 40% OFF (€8.99) · Pro 36% OFF (€15.99)",
     heroBadge: "AI-Powered Bias Shield",
     heroTitleA: "Stop Trading on", heroTitleB: "Biased News.",
     heroSubtitle: "The first AI-powered shield for retail investors. Get instant Trust Scores, Bias Detection, and hidden insights on any financial article.",
@@ -118,7 +118,7 @@ const translations: Record<Language, Record<string, string>> = {
   es: {
     home: "Inicio", dashboard: "Panel", aiChat: "Chat IA", quiz: "Cuestionario", forum: "Pulso Media", watchlists: "Listas", settings: "Ajustes", news: "Noticias", articleAnalyzer: "Noticias", new: "NUEVO",
     // Landing
-    landingBanner: "Lanzamiento: Plan Pro al 50% — tiempo limitado",
+    landingBanner: "Tiempo limitado: Plus 40% OFF (€8,99) · Pro 36% OFF (€15,99)",
     heroBadge: "Escudo IA contra el sesgo",
     heroTitleA: "Deja de operar con", heroTitleB: "noticias sesgadas.",
     heroSubtitle: "El primer escudo con IA para inversores minoristas. Obtén Puntuaciones de Confianza, detección de sesgo e información oculta de cualquier artículo financiero.",
@@ -216,7 +216,7 @@ const translations: Record<Language, Record<string, string>> = {
   fr: {
     home: "Accueil", dashboard: "Tableau de bord", aiChat: "Chat IA", quiz: "Quiz", forum: "Pulse Média", watchlists: "Listes", settings: "Paramètres", news: "Actualités", articleAnalyzer: "Actualités", new: "NOUVEAU",
     // Landing
-    landingBanner: "Lancement : Plan Pro à -50% — durée limitée",
+    landingBanner: "Durée limitée : Plus -40% (8,99 €) · Pro -36% (15,99 €)",
     heroBadge: "Bouclier IA contre les biais",
     heroTitleA: "Arrêtez de trader sur", heroTitleB: "des infos biaisées.",
     heroSubtitle: "Le premier bouclier IA pour les investisseurs particuliers. Obtenez des Scores de Confiance, une détection des biais et des insights cachés sur tout article financier.",
@@ -314,7 +314,7 @@ const translations: Record<Language, Record<string, string>> = {
   pt: {
     home: "Início", dashboard: "Painel", aiChat: "Chat IA", quiz: "Quiz", forum: "Pulso Media", watchlists: "Listas", settings: "Configurações", news: "Notícias", articleAnalyzer: "Notícias", new: "NOVO",
     // Landing
-    landingBanner: "Lançamento: Plano Pro com 50% OFF — por tempo limitado",
+    landingBanner: "Por tempo limitado: Plus 40% OFF (€8,99) · Pro 36% OFF (€15,99)",
     heroBadge: "Escudo IA contra o viés",
     heroTitleA: "Pare de negociar com", heroTitleB: "notícias enviesadas.",
     heroSubtitle: "O primeiro escudo com IA para investidores de varejo. Obtenha Pontuações de Confiança, detecção de viés e insights ocultos de qualquer artigo financeiro.",
@@ -412,7 +412,7 @@ const translations: Record<Language, Record<string, string>> = {
   de: {
     home: "Startseite", dashboard: "Dashboard", aiChat: "KI-Chat", quiz: "Quiz", forum: "Medien-Puls", watchlists: "Beobachtungslisten", settings: "Einstellungen", news: "Nachrichten", articleAnalyzer: "Nachrichten", new: "NEU",
     // Landing
-    landingBanner: "Soft-Launch: Pro-Tarif 50% günstiger — nur für kurze Zeit",
+    landingBanner: "Nur kurze Zeit: Plus 40% RABATT (8,99 €) · Pro 36% RABATT (15,99 €)",
     heroBadge: "KI-Schild gegen Voreingenommenheit",
     heroTitleA: "Schluss mit Trades auf", heroTitleB: "voreingenommenen News.",
     heroSubtitle: "Der erste KI-Schild für Privatanleger. Erhalten Sie sofortige Trust-Scores, Bias-Erkennung und versteckte Erkenntnisse zu jedem Finanzartikel.",
@@ -510,7 +510,7 @@ const translations: Record<Language, Record<string, string>> = {
   it: {
     home: "Home", dashboard: "Dashboard", aiChat: "Chat IA", quiz: "Quiz", forum: "Polso Media", watchlists: "Liste", settings: "Impostazioni", news: "Notizie", articleAnalyzer: "Notizie", new: "NUOVO",
     // Landing
-    landingBanner: "Soft Launch: Piano Pro al 50% — tempo limitato",
+    landingBanner: "Tempo limitato: Plus 40% OFF (€8,99) · Pro 36% OFF (€15,99)",
     heroBadge: "Scudo IA anti-bias",
     heroTitleA: "Smetti di operare su", heroTitleB: "notizie distorte.",
     heroSubtitle: "Il primo scudo IA per gli investitori al dettaglio. Ottieni Trust Score, rilevamento dei bias e insight nascosti su qualsiasi articolo finanziario.",
