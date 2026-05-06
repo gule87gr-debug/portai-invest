@@ -79,11 +79,11 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           filter: blur(0);
         }
         @keyframes hero-pulse {
-          0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.55), 0 0 0 0 hsl(var(--primary) / 0.25); }
-          50% { box-shadow: 0 0 0 12px hsl(var(--primary) / 0), 0 0 0 24px hsl(var(--primary) / 0); }
+          0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
+          50% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
         }
         .hero-input-pulse {
-          animation: hero-pulse 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          animation: none;
         }
         @keyframes marquee {
           0% { transform: translateX(0); }
