@@ -526,8 +526,8 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
             </article>
 
             {/* Pro */}
-            <article className="rounded-2xl border-2 border-primary bg-gradient-to-b from-primary/[0.08] to-card p-6 flex flex-col relative shadow-xl shadow-primary/10">
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-lg shadow-primary/40 whitespace-nowrap">
+            <article className="rounded-xl border border-primary/60 bg-card p-6 flex flex-col relative">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground whitespace-nowrap">
                 <Crown className="h-3 w-3" /> Most Popular
               </span>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-1">The Alpha Suite</p>
