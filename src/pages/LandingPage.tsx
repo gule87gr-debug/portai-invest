@@ -515,7 +515,8 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
             <article className="rounded-2xl border border-border bg-card p-6 flex flex-col">
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-1">The Shield</p>
               <h3 className="text-2xl font-bold text-foreground mb-1 flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" /> Plus</h3>
-              <div className="text-3xl font-bold font-mono text-foreground mb-4">€8.99<span className="text-sm text-muted-foreground font-normal">/mo</span></div>
+              <div className="mb-1"><span className="inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">40% OFF</span></div>
+              <div className="text-3xl font-bold font-mono text-foreground mb-4">€8.99<span className="text-base text-muted-foreground font-normal line-through ml-2">€14.99</span><span className="text-sm text-muted-foreground font-normal">/mo</span></div>
               <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
                 <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> 5 Watchlists</li>
                 <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Unlimited Basic Analyses</li>
@@ -531,7 +532,8 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
               </span>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-1">The Alpha Suite</p>
               <h3 className="text-2xl font-bold text-foreground mb-1 flex items-center gap-2"><Crown className="h-5 w-5 text-primary" /> Pro</h3>
-              <div className="text-3xl font-bold font-mono text-foreground mb-4">€15.99<span className="text-sm text-muted-foreground font-normal">/mo</span></div>
+              <div className="mb-1"><span className="inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">36% OFF</span></div>
+              <div className="text-3xl font-bold font-mono text-foreground mb-4">€15.99<span className="text-base text-muted-foreground font-normal line-through ml-2">€24.99</span><span className="text-sm text-muted-foreground font-normal">/mo</span></div>
               <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
                 <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Unlimited Watchlists</li>
                 <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Deep-Dive Institutional Analysis</li>
