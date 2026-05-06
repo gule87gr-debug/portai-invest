@@ -174,7 +174,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         {/* Prominent input box with pulse */}
         <div id="hero-analyzer" className="mt-9 max-w-2xl mx-auto relative z-10 scroll-mt-24">
           <div className="rounded-2xl">
-            <div className="flex flex-col sm:flex-row items-stretch gap-2 rounded-2xl border-2 border-primary/40 bg-card p-2 shadow-2xl">
+            <div className="flex flex-col sm:flex-row items-stretch gap-2 rounded-xl border border-border bg-card p-2">
               <div className="relative flex-1">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <input
