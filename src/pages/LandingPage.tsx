@@ -215,7 +215,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
 
         {/* Dual Dashboard mockup — Watchlist + Bias Report */}
         <div className="mt-12 max-w-5xl mx-auto relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-2xl border border-primary/20 bg-card/60 backdrop-blur-md p-3 shadow-2xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-xl border border-border bg-card p-3">
             {/* Watchlist panel */}
             <div className="rounded-xl border border-border bg-background/60 p-4 text-left">
               <div className="flex items-center justify-between mb-3">
