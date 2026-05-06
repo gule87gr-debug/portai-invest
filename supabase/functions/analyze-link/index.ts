@@ -98,6 +98,173 @@ function lookupKnownSource(urlStr: string): { source: string; score: number } | 
   return null;
 }
 
+// ---------- Stronger article validation ----------
+// Hosts that are essentially never article publishers
+const NON_ARTICLE_HOSTS = new Set<string>([
+  "youtube.com", "youtu.be", "m.youtube.com", "music.youtube.com",
+  "tiktok.com", "vm.tiktok.com",
+  "instagram.com",
+  "facebook.com", "m.facebook.com", "fb.watch",
+  "twitter.com", "x.com", "mobile.twitter.com",
+  "reddit.com", "old.reddit.com",
+  "linkedin.com",
+  "stocktwits.com",
+  "spotify.com", "open.spotify.com",
+  "soundcloud.com",
+  "twitch.tv",
+  "pinterest.com",
+  "github.com", "gitlab.com", "bitbucket.org",
+  "wikipedia.org", "en.wikipedia.org",
+  "amazon.com", "ebay.com", "etsy.com", "shopify.com",
+  "google.com", "www.google.com", "news.google.com",
+  "bing.com", "duckduckgo.com",
+  "discord.com", "discord.gg",
+  "t.me", "telegram.org",
+  "tradingview.com",
+]);
+
+// Path patterns that almost certainly are NOT articles
+const NON_ARTICLE_PATH_PATTERNS: RegExp[] = [
+  /\/(login|signup|signin|register|checkout|cart|pricing|account|settings)(\/|$)/i,
+  /\/(search|tag|tags|topic|topics|category|categories|author|authors)(\/|$)/i,
+  /\/(quote|symbol|ticker|chart|charts|portfolio|watchlist)(\/|$)/i,
+  /\/(video|videos|watch|live|stream|podcast|podcasts|gallery|photos)(\/|$)/i,
+  /\.(zip|exe|dmg|mp4|mp3|mov|webm|png|jpg|jpeg|gif|svg|ico|css|js|json|xml|csv)$/i,
+];
+
+// File extensions / paths that look like articles (paths containing dated slugs etc.)
+const ARTICLE_PATH_HINTS: RegExp[] = [
+  /\/\d{4}\/\d{1,2}\/\d{1,2}\//,        // /2024/03/15/
+  /\/(article|articles|news|story|stories|post|posts|opinion|analysis|insights|markets|business|finance)\//i,
+  /-[a-z0-9]{6,}$/i,                     // slug ending with id
+  /\/[a-z0-9-]{20,}/i,                   // long slugs
+];
+
+type PreCheck =
+  | { ok: true; metaTitle?: string; metaType?: string; metaDescription?: string }
+  | { ok: false; reason: string };
+
+async function preCheckArticle(urlStr: string): Promise<PreCheck> {
+  let parsed: URL;
+  try {
+    parsed = new URL(urlStr);
+  } catch {
+    return { ok: false, reason: "The link is not a valid URL." };
+  }
+
+  if (!/^https?:$/.test(parsed.protocol)) {
+    return { ok: false, reason: "Only http(s) links can be analyzed." };
+  }
+
+  const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
+  const path = parsed.pathname || "/";
+
+  // Hard block: known non-article hosts
+  for (const blocked of NON_ARTICLE_HOSTS) {
+    if (host === blocked || host.endsWith(`.${blocked}`)) {
+      return {
+        ok: false,
+        reason: `This link points to ${blocked}, which is not a written news article. Please paste a direct link to an article.`,
+      };
+    }
+  }
+
+  // Hard block: homepage / very short path (e.g. /, /markets)
+  if (path === "/" || path === "") {
+    return {
+      ok: false,
+      reason: "This link looks like a website homepage, not a specific article. Please paste a direct link to an article.",
+    };
+  }
+
+  // Hard block: obvious non-article paths
+  for (const pat of NON_ARTICLE_PATH_PATTERNS) {
+    if (pat.test(path)) {
+      return {
+        ok: false,
+        reason: "This link looks like a section, video, or product page rather than a written article.",
+      };
+    }
+  }
+
+  // Try to fetch metadata to confirm
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 6000);
+    const res = await fetch(parsed.toString(), {
+      method: "GET",
+      redirect: "follow",
+      signal: ctrl.signal,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; PortAI-Bot/1.0; +https://portai-invest.com)",
+        Accept: "text/html,application/xhtml+xml",
+      },
+    });
+    clearTimeout(timer);
+
+    const ctype = res.headers.get("content-type") || "";
+    if (!ctype.toLowerCase().includes("text/html")) {
+      return {
+        ok: false,
+        reason: "This link does not return a web page (it serves a file or non-HTML resource).",
+      };
+    }
+
+    // Read at most ~200KB of HTML head
+    const reader = res.body?.getReader();
+    let html = "";
+    if (reader) {
+      const decoder = new TextDecoder();
+      let total = 0;
+      while (total < 200_000) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        total += value.length;
+        html += decoder.decode(value, { stream: true });
+        if (html.includes("</head>")) break;
+      }
+      try { await reader.cancel(); } catch { /* noop */ }
+    }
+
+    const headHtml = html.split(/<\/head>/i)[0] || html;
+
+    const metaType = (headHtml.match(/<meta[^>]+property=["']og:type["'][^>]+content=["']([^"']+)["']/i)?.[1] || "").toLowerCase();
+    const metaTitle = headHtml.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i)?.[1]
+      ?? headHtml.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1]
+      ?? "";
+    const metaDescription = headHtml.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i)?.[1] ?? "";
+    const hasArticleSchema = /"@type"\s*:\s*"(NewsArticle|Article|ReportageNewsArticle|AnalysisNewsArticle|OpinionNewsArticle|BlogPosting)"/i.test(headHtml);
+    const hasArticlePublishedTime = /property=["']article:published_time["']/i.test(headHtml);
+
+    const looksLikeArticle =
+      metaType === "article" ||
+      hasArticleSchema ||
+      hasArticlePublishedTime ||
+      ARTICLE_PATH_HINTS.some((p) => p.test(path));
+
+    if (metaType && metaType !== "article" && !hasArticleSchema && !hasArticlePublishedTime) {
+      // og:type explicitly says it's not an article (e.g. video, profile, website)
+      return {
+        ok: false,
+        reason: `This page is marked as "${metaType}" by the site, not as a written article.`,
+      };
+    }
+
+    if (!looksLikeArticle) {
+      // No article signals at all and no path hint either — likely homepage/section
+      return {
+        ok: false,
+        reason: "We couldn't detect article metadata on this page. Please paste a direct link to a written article.",
+      };
+    }
+
+    return { ok: true, metaTitle: metaTitle?.slice(0, 300), metaType, metaDescription: metaDescription?.slice(0, 500) };
+  } catch (_e) {
+    // Network/timeout: don't hard-block — let the AI try, but flag as unknown
+    return { ok: true };
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -176,6 +343,18 @@ serve(async (req) => {
       }
     }
 
+    // ---- Pre-flight URL/metadata validation (does NOT count against quota) ----
+    const pre = await preCheckArticle(url);
+    if (!pre.ok) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          notArticle: true,
+          reason: pre.reason,
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
     // Enforce daily analysis limit for free users
     if (!isPro) {
       const today = new Date().toISOString().split("T")[0];
