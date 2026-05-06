@@ -343,6 +343,18 @@ serve(async (req) => {
       }
     }
 
+    // ---- Pre-flight URL/metadata validation (does NOT count against quota) ----
+    const pre = await preCheckArticle(url);
+    if (!pre.ok) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          notArticle: true,
+          reason: pre.reason,
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
     // Enforce daily analysis limit for free users
     if (!isPro) {
       const today = new Date().toISOString().split("T")[0];
