@@ -67,8 +67,9 @@ export const UpgradeModal = ({
                 <p className="text-xs text-muted-foreground mt-0.5">Essentials for serious investors</p>
               </div>
               <div className="text-right">
+                <div className="mb-0.5"><span className="inline-block rounded-full bg-green-500/20 px-1.5 py-0.5 text-[9px] font-bold text-green-500">40% OFF</span></div>
                 <div className="text-base font-bold text-foreground">
-                  €8.99<span className="text-xs font-normal text-muted-foreground">/mo</span>
+                  €8.99<span className="text-xs font-normal text-muted-foreground line-through ml-1">€14.99</span><span className="text-xs font-normal text-muted-foreground">/mo</span>
                 </div>
               </div>
             </div>
@@ -102,8 +103,9 @@ export const UpgradeModal = ({
                 <p className="text-xs text-muted-foreground mt-0.5">Everything in Plus, and more</p>
               </div>
               <div className="text-right">
+                <div className="mb-0.5"><span className="inline-block rounded-full bg-green-500/20 px-1.5 py-0.5 text-[9px] font-bold text-green-500">36% OFF</span></div>
                 <div className="text-base font-bold text-foreground">
-                  €15.99<span className="text-xs font-normal text-muted-foreground">/mo</span>
+                  €15.99<span className="text-xs font-normal text-muted-foreground line-through ml-1">€24.99</span><span className="text-xs font-normal text-muted-foreground">/mo</span>
                 </div>
               </div>
             </div>
