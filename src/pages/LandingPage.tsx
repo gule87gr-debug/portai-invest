@@ -79,11 +79,11 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           filter: blur(0);
         }
         @keyframes hero-pulse {
-          0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.55), 0 0 0 0 hsl(var(--primary) / 0.25); }
-          50% { box-shadow: 0 0 0 12px hsl(var(--primary) / 0), 0 0 0 24px hsl(var(--primary) / 0); }
+          0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
+          50% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
         }
         .hero-input-pulse {
-          animation: hero-pulse 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          animation: none;
         }
         @keyframes marquee {
           0% { transform: translateX(0); }
@@ -174,7 +174,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         {/* Prominent input box with pulse */}
         <div id="hero-analyzer" className="mt-9 max-w-2xl mx-auto relative z-10 scroll-mt-24">
           <div className="rounded-2xl">
-            <div className="flex flex-col sm:flex-row items-stretch gap-2 rounded-2xl border-2 border-primary/40 bg-card p-2 shadow-2xl">
+            <div className="flex flex-col sm:flex-row items-stretch gap-2 rounded-xl border border-border bg-card p-2">
               <div className="relative flex-1">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <input
@@ -215,7 +215,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
 
         {/* Dual Dashboard mockup — Watchlist + Bias Report */}
         <div className="mt-12 max-w-5xl mx-auto relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-2xl border border-primary/20 bg-card/60 backdrop-blur-md p-3 shadow-2xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-xl border border-border bg-card p-3">
             {/* Watchlist panel */}
             <div className="rounded-xl border border-border bg-background/60 p-4 text-left">
               <div className="flex items-center justify-between mb-3">
@@ -365,7 +365,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
               </div>
 
               {/* Market Reach card */}
-              <div className="rounded-2xl border-2 border-primary/30 bg-gradient-to-br from-primary/[0.08] via-card to-card p-6 flex flex-col justify-center">
+              <div className="rounded-xl border border-border bg-card p-6 flex flex-col justify-center">
                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-3">Market Reach</p>
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
@@ -526,8 +526,8 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
             </article>
 
             {/* Pro */}
-            <article className="rounded-2xl border-2 border-primary bg-gradient-to-b from-primary/[0.08] to-card p-6 flex flex-col relative shadow-xl shadow-primary/10">
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-lg shadow-primary/40 whitespace-nowrap">
+            <article className="rounded-xl border border-primary/60 bg-card p-6 flex flex-col relative">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground whitespace-nowrap">
                 <Crown className="h-3 w-3" /> Most Popular
               </span>
               <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-1">The Alpha Suite</p>
