@@ -164,7 +164,7 @@ const Dashboard = () => {
               <button
                 type="button"
                 onClick={() => { setUrl(""); setError(""); }}
-                aria-label="Clear link"
+                aria-label={t("clearLink")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
               >
                 <X className="h-4 w-4" />
