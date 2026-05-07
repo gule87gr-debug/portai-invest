@@ -204,7 +204,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
               onClick={onGetStarted}
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-5 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/15 w-full sm:w-auto"
             >
-              <Eye className="h-4 w-4" /> See Live Bias Detection
+              <Eye className="h-4 w-4" /> {lt("heroSeeLive")}
             </button>
             <p className="text-xs text-muted-foreground">
               {t("heroOr")}{" "}
