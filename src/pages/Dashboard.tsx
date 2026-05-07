@@ -49,10 +49,10 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (searchParams.get("upgrade") === "success") {
-      toast.success("Welcome to Pro! 🎉 All features are now unlocked.");
+      toast.success(t("welcomePro"));
       refresh();
     }
-  }, [searchParams, refresh]);
+  }, [searchParams, refresh, t]);
 
   // Consume any pending URL the user pasted on the landing page,
   // and scroll the Analyzer card into view when arriving via #analyzer.
