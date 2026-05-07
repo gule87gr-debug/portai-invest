@@ -425,19 +425,19 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           aria-labelledby="ai-media-intelligence-heading"
           className="px-4 sm:px-6 py-14 max-w-5xl mx-auto"
         >
-          <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-primary mb-2">Section A</p>
+          <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-primary mb-2">{lt("sectionA")}</p>
           <h2 id="ai-media-intelligence-heading" className="text-center editorial-heading text-3xl sm:text-4xl text-foreground mb-3">
-            Detect Market Manipulation
+            {lt("detectManipulation")}
           </h2>
           <p className="text-center text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-10">
-            Turn every headline into a quantified signal. Our financial news trust score and bias detection report help you detect market manipulation before your portfolio reacts.
+            {lt("detectManipulationDesc")}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
-              { icon: ShieldCheck, title: "Financial News Trust Score", body: "A 0-10 trust score for every article you paste, computed from source reputation, framing, and citation density." },
-              { icon: AlertCircle, title: "Detect Market Manipulation", body: "Spot pump-and-dump narratives, coordinated coverage, and sponsored takes that masquerade as journalism." },
-              { icon: CheckCircle2, title: "AI Fact-Checking for Stocks", body: "Cross-reference claims against filings, earnings transcripts, and price action so you never trade on a false premise." },
-              { icon: FileText, title: "Bias Detection Report", body: "Per-article report covering hidden angles, omitted data points, and sentiment divergence — readable in seconds." },
+              { icon: ShieldCheck, title: lt("featA1Title"), body: lt("featA1Body") },
+              { icon: AlertCircle, title: lt("featA2Title"), body: lt("featA2Body") },
+              { icon: CheckCircle2, title: lt("featA3Title"), body: lt("featA3Body") },
+              { icon: FileText, title: lt("featA4Title"), body: lt("featA4Body") },
             ].map((f, i) => (
               <article key={f.title} className="glass-card rounded-2xl p-5 h-full card-hover" style={{ transitionDelay: `${i * 60}ms` }}>
                 <div className="flex items-center gap-3 mb-2">
