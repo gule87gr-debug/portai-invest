@@ -370,6 +370,12 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
           </span>
         </div>
       )}
+      <UpgradeModal
+        open={showUpgrade}
+        onClose={() => setShowUpgrade(false)}
+        title="Compare is a Plus feature"
+        description="Upgrade to Plus or Pro to compare assets side by side."
+      />
     </div>
   );
 };
