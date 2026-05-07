@@ -378,7 +378,7 @@ const HeatmapSelector = ({
             Switch the heatmap to view a different global index.
           </DialogDescription>
         </DialogHeader>
-        <div className="mt-2 flex flex-col gap-2">
+        <div className="mt-2 flex max-h-[60vh] flex-col gap-2 overflow-y-auto pr-1">
           {HEATMAP_OPTIONS.map((opt) => {
             const active = opt.value === value;
             return (
