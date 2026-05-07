@@ -1,16 +1,17 @@
 import { Brain, BarChart3, MessageSquare, Eye, ArrowRight, Sparkles, LayoutDashboard, Shield, Globe, ChevronRight, Zap, ShieldCheck, Lock, Fingerprint, CheckCircle2, ChevronDown, Search, Activity, Database, CreditCard, Cpu, AlertCircle, FileText, Crown, HelpCircle, Quote, Users, Info } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLanguage, type Language } from "@/contexts/LanguageContext";
+import { useLandingT } from "@/lib/landingI18n";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const supportingFeatures = [
-  { icon: LayoutDashboard, key: "marketIntelligence", desc: "Live S&P 500 heatmap and curated news feed." },
-  { icon: Brain, key: "aiChat", desc: "Personal AI advisor for stocks, ETFs and strategy." },
-  { icon: Sparkles, key: "quiz", desc: "Personalized portfolio quiz in 5 questions." },
-  { icon: Eye, key: "watchlists", desc: "Track 10,000+ assets across 20+ countries." },
-  { icon: MessageSquare, key: "forum", desc: "Community media-bias dashboard, live." },
-  { icon: Globe, key: "settings", desc: "Available in 6 languages, instantly switchable." },
+  { icon: LayoutDashboard, key: "marketIntelligence", descKey: "supF1Desc" as const },
+  { icon: Brain, key: "aiChat", descKey: "supF2Desc" as const },
+  { icon: Sparkles, key: "quiz", descKey: "supF3Desc" as const },
+  { icon: Eye, key: "watchlists", descKey: "supF4Desc" as const },
+  { icon: MessageSquare, key: "forum", descKey: "supF5Desc" as const },
+  { icon: Globe, key: "settings", descKey: "supF6Desc" as const },
 ];
 
 function useScrollReveal() {
@@ -44,6 +45,7 @@ const RevealSection = ({ children, className = "" }: { children: React.ReactNode
 
 const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
   const { t, language, setLanguage, languageNames } = useLanguage();
+  const lt = useLandingT(language);
   const [url, setUrl] = useState("");
   const [langOpen, setLangOpen] = useState(false);
 
@@ -115,7 +117,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
             <button
               onClick={() => setLangOpen((o) => !o)}
               className="flex items-center gap-1.5 rounded-lg border border-border bg-card/60 px-3 py-2 text-xs font-medium text-foreground hover:bg-accent transition-colors"
-              aria-label="Change language"
+              aria-label={lt("changeLanguage")}
             >
               <Globe className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">{languageNames[language]}</span>
@@ -151,7 +153,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       {/* Hero — Dual value proposition */}
       <header className="px-4 sm:px-6 pt-12 sm:pt-16 pb-10 max-w-4xl mx-auto text-center relative gold-glow">
         <div className="inline-flex items-center gap-2 rounded-full border border-loss/30 bg-loss/10 px-4 py-1.5 text-xs font-bold text-loss mb-6 tracking-label uppercase">
-          <ShieldCheck className="h-3.5 w-3.5" /> Stop Trading on Hype. Start Trading on Truth.
+          <ShieldCheck className="h-3.5 w-3.5" /> {lt("heroTagline")}
         </div>
 
         {/* SEO H1 — visible, keyword-rich */}
@@ -159,16 +161,16 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           className="editorial-heading text-5xl sm:text-6xl lg:text-7xl relative z-10"
           style={{ lineHeight: "1.02" }}
         >
-          The AI Financial News Bias Checker
+          {lt("heroH1part1")}
           <br />
-          <span className="text-foreground">&amp; <span className="ink-underline text-primary">Portfolio Tracker.</span></span>
+          <span className="text-foreground">{lt("heroH1part2")} <span className="ink-underline text-primary">{lt("heroH1part3")}</span></span>
         </h1>
         <p className="sr-only">
-          The AI Command Center for Smarter Investing — Professional Investment Tracking and AI-Powered Sentiment Analysis.
+          {lt("heroSrDesc")}
         </p>
 
         <p className="mt-5 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed relative z-10" style={{ textWrap: "pretty" as any }}>
-          Track your portfolio with institutional-grade data and filter out market manipulation with the world&rsquo;s first AI Financial News Bias Checker.
+          {lt("heroDesc")}
         </p>
 
         {/* Prominent input box with pulse */}
@@ -184,14 +186,14 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
                   onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
                   placeholder={t("heroPlaceholder")}
                   className="h-12 w-full rounded-xl bg-transparent pl-11 pr-4 text-sm sm:text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
-                  aria-label="Article URL to analyze for financial news bias"
+                  aria-label={lt("heroUrlAria")}
                 />
               </div>
               <button
                 onClick={handleAnalyze}
                 className={`flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm sm:text-base font-bold text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97] shrink-0 ${url.trim().length > 8 ? "hero-input-pulse" : ""}`}
               >
-                Analyze News Bias <ArrowRight className="h-4 w-4" />
+                {lt("heroAnalyzeBtn")} <ArrowRight className="h-4 w-4" />
               </button>
             </div>
           </div>
@@ -202,7 +204,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
               onClick={onGetStarted}
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-5 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/15 w-full sm:w-auto"
             >
-              <Eye className="h-4 w-4" /> See Live Bias Detection
+              <Eye className="h-4 w-4" /> {lt("heroSeeLive")}
             </button>
             <p className="text-xs text-muted-foreground">
               {t("heroOr")}{" "}
@@ -219,10 +221,10 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
             {/* Watchlist panel */}
             <div className="rounded-md border border-border bg-background/60 p-4 text-left">
               <div className="flex items-center justify-between mb-3">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Live Watchlist</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{lt("mockLiveWatchlist")}</p>
                 <span className="inline-flex items-center gap-2 text-[10px] font-mono text-primary">
                   <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                  LIVE · UPDATED 2 MIN AGO
+                  {lt("mockUpdated")}
                 </span>
               </div>
               <div className="space-y-2">
@@ -252,14 +254,14 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
             {/* Bias report panel */}
             <div className="rounded-md border border-border bg-background/60 p-4 text-left">
               <div className="flex items-center justify-between mb-3">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Bias Analysis Report</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{lt("mockBiasReport")}</p>
                 <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 border border-primary/30 px-2 py-0.5 text-[10px] font-bold text-primary"><ShieldCheck className="h-3 w-3" /> Pro</span>
               </div>
               <div className="rounded-lg border border-border bg-card/40 p-3 mb-3">
-                <p className="text-[10px] text-muted-foreground mb-1 font-mono uppercase tracking-wider">CNBC · Tesla Q1 Earnings Beat</p>
+                <p className="text-[10px] text-muted-foreground mb-1 font-mono uppercase tracking-wider">{lt("mockCnbcTesla")}</p>
                 <div className="flex items-baseline gap-2">
                   <span className="ink-circle"><span className="text-3xl font-bold font-mono text-primary">6.4</span></span>
-                  <p className="text-[11px] text-muted-foreground">/ 10 Trust Score</p>
+                  <p className="text-[11px] text-muted-foreground">{lt("mockTrustScoreLabel")}</p>
                 </div>
                 <div className="mt-2 h-1.5 w-full rounded-full bg-border overflow-hidden">
                   <div className="h-full bg-gradient-to-r from-loss via-warning to-primary" style={{ width: "64%" }} />
@@ -267,9 +269,9 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
               </div>
               <div className="space-y-2">
                 {[
-                  { icon: AlertCircle, label: "Cherry-picked EPS data", tone: "warning" as const },
-                  { icon: FileText, label: "Omits revenue miss vs consensus", tone: "loss" as const },
-                  { icon: CheckCircle2, label: "Cross-checked with 10-Q filing", tone: "primary" as const },
+                  { icon: AlertCircle, label: lt("mockBias1"), tone: "warning" as const },
+                  { icon: FileText, label: lt("mockBias2"), tone: "loss" as const },
+                  { icon: CheckCircle2, label: lt("mockBias3"), tone: "primary" as const },
                 ].map((item) => (
                   <div key={item.label} className="flex items-center gap-2 rounded-md border border-border/60 bg-card/30 px-2.5 py-1.5">
                     <item.icon className={`h-3.5 w-3.5 shrink-0 ${item.tone === "warning" ? "text-warning" : item.tone === "loss" ? "text-loss" : "text-primary"}`} />
@@ -279,7 +281,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
               </div>
             </div>
           </div>
-          <p className="mt-3 text-center text-[11px] text-muted-foreground">Sample preview — your real data appears once you sign in.</p>
+          <p className="mt-3 text-center text-[11px] text-muted-foreground">{lt("mockSamplePreview")}</p>
         </div>
       </header>
 
@@ -339,9 +341,9 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       <RevealSection>
         <section aria-labelledby="community-trust-heading" className="px-4 sm:px-6 py-12 border-b border-border">
           <div className="max-w-6xl mx-auto">
-            <p className="text-center text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-2">Community &amp; Trust</p>
+            <p className="text-center text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-2">{lt("communityTrust")}</p>
             <h2 id="community-trust-heading" className="text-center editorial-heading text-2xl sm:text-3xl text-foreground mb-8" style={{ textWrap: "balance" as any }}>
-              Built with — and for — a global community of investors.
+              {lt("communityTrustHeading")}
             </h2>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch">
@@ -369,7 +371,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
 
               {/* Market Reach card */}
               <div className="rounded-xl border border-border bg-card p-6 flex flex-col justify-center">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-3">Market Reach</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-3">{lt("marketReach")}</p>
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 border border-primary/25">
@@ -377,7 +379,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
                     </div>
                     <div>
                       <p className="text-2xl font-bold font-mono text-foreground tracking-tight">1M+</p>
-                      <p className="text-xs text-muted-foreground leading-relaxed">Headlines analyzed for bias</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{lt("headlinesAnalyzed")}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
@@ -386,7 +388,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
                     </div>
                     <div>
                       <p className="text-2xl font-bold font-mono text-foreground tracking-tight">12+</p>
-                      <p className="text-xs text-muted-foreground leading-relaxed">Active countries worldwide</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{lt("activeCountries")}</p>
                     </div>
                   </div>
                 </div>
@@ -401,10 +403,10 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         <div className="py-10 px-6">
           <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
             {[
-              { value: "10,000+", label: "Global Stocks, ETFs & Crypto", icon: BarChart3 },
-              { value: "6", label: "Languages Supported", icon: Globe },
-              { value: "AI", label: "Bias & Fact Checking", icon: ShieldCheck },
-              { value: "24/7", label: "AI Financial Advisor", icon: Brain },
+              { value: "10,000+", label: lt("statGlobalAssets"), icon: BarChart3 },
+              { value: "6", label: lt("statLanguages"), icon: Globe },
+              { value: "AI", label: lt("statBiasFact"), icon: ShieldCheck },
+              { value: "24/7", label: lt("statAdvisor247"), icon: Brain },
             ].map((s) => (
               <div key={s.label} className="flex flex-col items-center gap-1.5">
                 <s.icon className="h-5 w-5 text-primary mb-0.5" />
@@ -423,19 +425,19 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           aria-labelledby="ai-media-intelligence-heading"
           className="px-4 sm:px-6 py-14 max-w-5xl mx-auto"
         >
-          <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-primary mb-2">Section A</p>
+          <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-primary mb-2">{lt("sectionA")}</p>
           <h2 id="ai-media-intelligence-heading" className="text-center editorial-heading text-3xl sm:text-4xl text-foreground mb-3">
-            Detect Market Manipulation
+            {lt("detectManipulation")}
           </h2>
           <p className="text-center text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-10">
-            Turn every headline into a quantified signal. Our financial news trust score and bias detection report help you detect market manipulation before your portfolio reacts.
+            {lt("detectManipulationDesc")}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
-              { icon: ShieldCheck, title: "Financial News Trust Score", body: "A 0-10 trust score for every article you paste, computed from source reputation, framing, and citation density." },
-              { icon: AlertCircle, title: "Detect Market Manipulation", body: "Spot pump-and-dump narratives, coordinated coverage, and sponsored takes that masquerade as journalism." },
-              { icon: CheckCircle2, title: "AI Fact-Checking for Stocks", body: "Cross-reference claims against filings, earnings transcripts, and price action so you never trade on a false premise." },
-              { icon: FileText, title: "Bias Detection Report", body: "Per-article report covering hidden angles, omitted data points, and sentiment divergence — readable in seconds." },
+              { icon: ShieldCheck, title: lt("featA1Title"), body: lt("featA1Body") },
+              { icon: AlertCircle, title: lt("featA2Title"), body: lt("featA2Body") },
+              { icon: CheckCircle2, title: lt("featA3Title"), body: lt("featA3Body") },
+              { icon: FileText, title: lt("featA4Title"), body: lt("featA4Body") },
             ].map((f, i) => (
               <article key={f.title} className="glass-card rounded-2xl p-5 h-full card-hover" style={{ transitionDelay: `${i * 60}ms` }}>
                 <div className="flex items-center gap-3 mb-2">
@@ -458,19 +460,19 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           aria-labelledby="institutional-tracking-heading"
           className="px-4 sm:px-6 py-14 max-w-5xl mx-auto border-t border-border"
         >
-          <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-primary mb-2">Section B</p>
+          <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-primary mb-2">{lt("sectionB")}</p>
           <h2 id="institutional-tracking-heading" className="text-center editorial-heading text-3xl sm:text-4xl text-foreground mb-3">
-            Professional Investment Tracking
+            {lt("proTracking")}
           </h2>
           <p className="text-center text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-10">
-            A real-time S&amp;P 500 heatmap, multi-asset watchlist, custom stock price alerts, and a unified crypto portfolio tracker — engineered for retail investors who want institutional clarity.
+            {lt("proTrackingDesc")}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
-              { icon: BarChart3, title: "Real-Time S&P 500 Heatmap", body: "Live sector and constituent heatmap powered by TradingView, refreshed throughout the trading session." },
-              { icon: Eye, title: "Multi-Asset Watchlist", body: "Track 10,000+ stocks, ETFs and crypto across 20+ countries in a single, sortable watchlist." },
-              { icon: Zap, title: "Stock Price Alerts", body: "Set custom price thresholds and get notified the moment your target is breached." },
-              { icon: Activity, title: "Crypto Portfolio Tracker", body: "Aggregate BTC, ETH, and altcoin positions alongside equities for a true total-portfolio view." },
+              { icon: BarChart3, title: lt("featB1Title"), body: lt("featB1Body") },
+              { icon: Eye, title: lt("featB2Title"), body: lt("featB2Body") },
+              { icon: Zap, title: lt("featB3Title"), body: lt("featB3Body") },
+              { icon: Activity, title: lt("featB4Title"), body: lt("featB4Body") },
             ].map((f, i) => (
               <article key={f.title} className="glass-card rounded-2xl p-5 h-full card-hover" style={{ transitionDelay: `${i * 60}ms` }}>
                 <div className="flex items-center gap-3 mb-2">
@@ -493,69 +495,69 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           aria-labelledby="pricing-preview-heading"
           className="px-4 sm:px-6 py-14 max-w-5xl mx-auto border-t border-border"
         >
-          <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-primary mb-2">Pricing</p>
+          <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-primary mb-2">{lt("pricingLabel")}</p>
           <h2 id="pricing-preview-heading" className="text-center editorial-heading text-3xl sm:text-4xl text-foreground mb-3">
-            Choose Your Edge
+            {lt("chooseEdge")}
           </h2>
           <p className="text-center text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-10">
-            Three tiers built for every level of conviction — from observer to active alpha hunter.
+            {lt("pricingDesc")}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {/* Free */}
             <article className="rounded-2xl border border-border bg-card p-6 flex flex-col">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-1">The Observer</p>
-              <h3 className="text-2xl font-bold text-foreground mb-1">Free</h3>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-1">{lt("observer")}</p>
+              <h3 className="text-2xl font-bold text-foreground mb-1">{lt("freeName")}</h3>
               <div className="text-3xl font-bold font-mono text-foreground mb-4">€0<span className="text-sm text-muted-foreground font-normal">/mo</span></div>
               <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary/70 mt-0.5 shrink-0" /> 1 Watchlist (5 assets)</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary/70 mt-0.5 shrink-0" /> 3 Basic AI Analyses / day</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary/70 mt-0.5 shrink-0" /> Community Media Pulse access</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary/70 mt-0.5 shrink-0" /> {lt("free1")}</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary/70 mt-0.5 shrink-0" /> {lt("free2")}</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary/70 mt-0.5 shrink-0" /> {lt("free3")}</li>
               </ul>
-              <button onClick={onGetStarted} className="w-full rounded-xl border border-border py-2.5 text-sm font-semibold text-foreground hover:bg-accent transition-colors">Start Free</button>
+              <button onClick={onGetStarted} className="w-full rounded-xl border border-border py-2.5 text-sm font-semibold text-foreground hover:bg-accent transition-colors">{lt("startFree")}</button>
             </article>
 
             {/* Plus */}
             <article className="rounded-2xl border border-border bg-card p-6 flex flex-col">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-1">The Shield</p>
-              <h3 className="text-2xl font-bold text-foreground mb-1 flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" /> Plus</h3>
-              <div className="mb-1"><span className="inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">40% OFF</span></div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-1">{lt("shield")}</p>
+              <h3 className="text-2xl font-bold text-foreground mb-1 flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" /> {lt("plusName")}</h3>
+              <div className="mb-1"><span className="inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">{lt("off40")}</span></div>
               <div className="text-3xl font-bold font-mono text-foreground mb-4">€8.99<span className="text-base text-muted-foreground font-normal line-through ml-2">€14.99</span><span className="text-sm text-muted-foreground font-normal">/mo</span></div>
               <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> 5 Watchlists</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Unlimited Basic Analyses</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Live Sentiment Heatmaps</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("plus1")}</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("plus2")}</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("plus3")}</li>
               </ul>
-              <button onClick={onGetStarted} className="w-full rounded-xl bg-primary/10 border border-primary/40 text-primary py-2.5 text-sm font-semibold hover:bg-primary/15 transition-colors">Upgrade to Plus</button>
+              <button onClick={onGetStarted} className="w-full rounded-xl bg-primary/10 border border-primary/40 text-primary py-2.5 text-sm font-semibold hover:bg-primary/15 transition-colors">{lt("upgradePlus")}</button>
             </article>
 
             {/* Pro */}
             <article className="rounded-xl border border-primary/60 bg-card p-6 flex flex-col relative">
               <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground whitespace-nowrap">
-                <Crown className="h-3 w-3" /> Most Popular
+                <Crown className="h-3 w-3" /> {lt("mostPopular")}
               </span>
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-1">The Alpha Suite</p>
-              <h3 className="text-2xl font-bold text-foreground mb-1 flex items-center gap-2"><Crown className="h-5 w-5 text-primary" /> Pro</h3>
-              <div className="mb-1"><span className="inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">36% OFF</span></div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-1">{lt("alphaSuite")}</p>
+              <h3 className="text-2xl font-bold text-foreground mb-1 flex items-center gap-2"><Crown className="h-5 w-5 text-primary" /> {lt("proName")}</h3>
+              <div className="mb-1"><span className="inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">{lt("off36")}</span></div>
               <div className="text-3xl font-bold font-mono text-foreground mb-4">€15.99<span className="text-base text-muted-foreground font-normal line-through ml-2">€24.99</span><span className="text-sm text-muted-foreground font-normal">/mo</span></div>
               <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Unlimited Watchlists</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Deep-Dive Institutional Analysis</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Real-time Bias Alerts for your Portfolio</li>
-               <li className="flex gap-2 items-center"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> <span className="inline-flex items-center gap-1">Priority AI Speed
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("pro1")}</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("pro2")}</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("pro3")}</li>
+               <li className="flex gap-2 items-center"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> <span className="inline-flex items-center gap-1">{lt("pro4Label")}
                  <Tooltip>
                    <TooltipTrigger asChild>
-                     <button type="button" aria-label="What is Priority AI Speed?" className="inline-flex items-center text-primary/80 hover:text-primary transition-colors">
+                     <button type="button" aria-label={lt("pro4AriaLabel")} className="inline-flex items-center text-primary/80 hover:text-primary transition-colors">
                        <Info className="h-3.5 w-3.5" />
                      </button>
                    </TooltipTrigger>
                    <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
-                     Uses high-compute models for deeper pattern recognition and zero-wait analysis.
+                     {lt("pro4Tooltip")}
                    </TooltipContent>
                  </Tooltip>
                </span></li>
               </ul>
-              <button onClick={onGetStarted} className="w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground btn-glow hover:bg-primary/90 transition-colors">Go Pro</button>
-              <p className="mt-2 text-center text-[11px] text-muted-foreground">Cancel anytime</p>
+              <button onClick={onGetStarted} className="w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground btn-glow hover:bg-primary/90 transition-colors">{lt("goPro")}</button>
+              <p className="mt-2 text-center text-[11px] text-muted-foreground">{lt("cancelAnytime")}</p>
             </article>
           </div>
         </section>
@@ -655,7 +657,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
                   </div>
                   <h3 className="text-sm font-semibold text-foreground">{t(f.key)}</h3>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">{lt(f.descKey)}</p>
               </div>
             </RevealSection>
           ))}
