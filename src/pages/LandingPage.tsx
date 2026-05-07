@@ -5,9 +5,14 @@ import { useLandingT } from "@/lib/landingI18n";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-const supportingFeatureIcons = [LayoutDashboard, Brain, Sparkles, Eye, MessageSquare, Globe] as const;
-const supportingFeatureKeys = ["marketIntelligence", "aiChat", "quiz", "watchlists", "forum", "settings"] as const;
-const supportingFeatureDescKeys = ["supF1Desc", "supF2Desc", "supF3Desc", "supF4Desc", "supF5Desc", "supF6Desc"] as const;
+const supportingFeatures = [
+  { icon: LayoutDashboard, key: "marketIntelligence", descKey: "supF1Desc" as const },
+  { icon: Brain, key: "aiChat", descKey: "supF2Desc" as const },
+  { icon: Sparkles, key: "quiz", descKey: "supF3Desc" as const },
+  { icon: Eye, key: "watchlists", descKey: "supF4Desc" as const },
+  { icon: MessageSquare, key: "forum", descKey: "supF5Desc" as const },
+  { icon: Globe, key: "settings", descKey: "supF6Desc" as const },
+];
 
 function useScrollReveal() {
   const ref = useRef<HTMLDivElement>(null);
