@@ -156,12 +156,12 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
 
         {/* SEO H1 — visible, keyword-rich */}
         <h1
-          className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight relative z-10"
-          style={{ lineHeight: "1.05" }}
+          className="editorial-heading text-5xl sm:text-6xl lg:text-7xl relative z-10"
+          style={{ lineHeight: "1.02" }}
         >
           The AI Financial News Bias Checker
           <br />
-          <span className="text-primary">&amp; Portfolio Tracker.</span>
+          <span className="text-foreground">&amp; <span className="ink-underline text-primary">Portfolio Tracker.</span></span>
         </h1>
         <p className="sr-only">
           The AI Command Center for Smarter Investing — Professional Investment Tracking and AI-Powered Sentiment Analysis.
