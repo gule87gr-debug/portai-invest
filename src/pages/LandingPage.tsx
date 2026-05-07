@@ -403,10 +403,10 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         <div className="py-10 px-6">
           <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
             {[
-              { value: "10,000+", label: "Global Stocks, ETFs & Crypto", icon: BarChart3 },
-              { value: "6", label: "Languages Supported", icon: Globe },
-              { value: "AI", label: "Bias & Fact Checking", icon: ShieldCheck },
-              { value: "24/7", label: "AI Financial Advisor", icon: Brain },
+              { value: "10,000+", label: lt("statGlobalAssets"), icon: BarChart3 },
+              { value: "6", label: lt("statLanguages"), icon: Globe },
+              { value: "AI", label: lt("statBiasFact"), icon: ShieldCheck },
+              { value: "24/7", label: lt("statAdvisor247"), icon: Brain },
             ].map((s) => (
               <div key={s.label} className="flex flex-col items-center gap-1.5">
                 <s.icon className="h-5 w-5 text-primary mb-0.5" />
