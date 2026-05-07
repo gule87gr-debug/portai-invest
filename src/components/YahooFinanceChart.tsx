@@ -53,7 +53,7 @@ async function fetchSeries(ticker: string, type: string | undefined, range: Char
 export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceChartProps) => {
   const [range, setRange] = useState<ChartRange>("1M");
   const { isPaid, loading: subLoading } = useSubscription();
-  const navigate = useNavigate();
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const [primary, setPrimary] = useState<HistoryResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
