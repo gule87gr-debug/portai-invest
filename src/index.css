@@ -64,10 +64,10 @@
     --chart-4: 40 90% 55%;
     --chart-5: 0 100% 65%;
 
-    --font-display: 'Playfair Display', 'Plus Jakarta Sans', Georgia, serif;
+    --font-display: 'Lora', Georgia, serif;
     --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
-    --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    --font-serif: 'Lora', Georgia, 'Times New Roman', serif;
   }
 
   .light {
