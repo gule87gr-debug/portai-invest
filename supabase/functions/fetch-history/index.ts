@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { checkRateLimit, getClientIP, rateLimitResponse } from "../_shared/rate-limiter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -32,6 +33,11 @@ function toYahooSymbol(ticker: string, type?: string): string {
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  // IP-based rate limit to prevent abuse as anonymous Yahoo Finance proxy
+  const ip = getClientIP(req);
+  const rl = checkRateLimit(`fetch-history:${ip}`, { maxRequests: 30, windowMs: 60_000 });
+  if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs, corsHeaders);
 
   try {
     const { ticker, type, range = "1M" } = await req.json();
