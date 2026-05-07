@@ -126,7 +126,7 @@ const Dashboard = () => {
 
   return (
     <AppLayout>
-      <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} title="Analysis Limit Reached" description="You've used all 3 free analyses today. Upgrade to Pro for unlimited analyses." />
+      <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} title={t("analysisLimitTitle")} description={t("analysisLimitDesc")} />
 
       <div className="mb-6">
         <h1 className="text-3xl font-bold">{t("marketIntelligence")}</h1>
