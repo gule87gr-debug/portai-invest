@@ -1,7 +1,8 @@
 import { useParams, Link } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { TradingViewChart, TradingViewTechnicalAnalysis } from "@/components/TradingViewWidgets";
+import { TradingViewTechnicalAnalysis } from "@/components/TradingViewWidgets";
+import { YahooFinanceChart } from "@/components/YahooFinanceChart";
 import { StockNews } from "@/components/StockNews";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { PriceAlertDialog } from "@/components/PriceAlertDialog";
@@ -105,18 +106,9 @@ const StockDetail = () => {
         )}
       </div>
 
-      {tvSymbol ? (
-        <div className="mb-6 rounded-xl border border-border bg-card p-1">
-          <TradingViewChart symbol={tvSymbol} height={450} />
-        </div>
-      ) : (
-        <div className="mb-6 rounded-xl border border-border bg-card p-8 text-center">
-          <AlertTriangle className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">
-            Live chart data is not available for this asset. It may be a synthetic index or unlisted instrument.
-          </p>
-        </div>
-      )}
+      <div className="mb-6 rounded-xl border border-border bg-card p-4">
+        <YahooFinanceChart ticker={symbol} type={assetEntry?.type} height={380} />
+      </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {tvSymbol && (
