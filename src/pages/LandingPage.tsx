@@ -156,12 +156,12 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
 
         {/* SEO H1 — visible, keyword-rich */}
         <h1
-          className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight relative z-10"
-          style={{ lineHeight: "1.05" }}
+          className="editorial-heading text-5xl sm:text-6xl lg:text-7xl relative z-10"
+          style={{ lineHeight: "1.02" }}
         >
           The AI Financial News Bias Checker
           <br />
-          <span className="text-primary">&amp; Portfolio Tracker.</span>
+          <span className="text-foreground">&amp; <span className="ink-underline text-primary">Portfolio Tracker.</span></span>
         </h1>
         <p className="sr-only">
           The AI Command Center for Smarter Investing — Professional Investment Tracking and AI-Powered Sentiment Analysis.
@@ -215,12 +215,15 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
 
         {/* Dual Dashboard mockup — Watchlist + Bias Report */}
         <div className="mt-12 max-w-5xl mx-auto relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-xl border border-border bg-card p-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-md border border-border bg-card p-3 shadow-brutal-lg">
             {/* Watchlist panel */}
-            <div className="rounded-xl border border-border bg-background/60 p-4 text-left">
+            <div className="rounded-md border border-border bg-background/60 p-4 text-left">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Live Watchlist</p>
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-primary"><Activity className="h-3 w-3" /> LIVE</span>
+                <span className="inline-flex items-center gap-2 text-[10px] font-mono text-primary">
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                  LIVE · UPDATED 2 MIN AGO
+                </span>
               </div>
               <div className="space-y-2">
                 {[
@@ -229,7 +232,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
                   { sym: "TSLA", name: "Tesla", price: "$298.40", chg: "-0.86%", up: false, pts: "M2,8 L10,10 L18,9 L26,13 L34,12 L42,15 L50,14 L58,17" },
                   { sym: "BTC", name: "Bitcoin", price: "$108,420", chg: "+2.11%", up: true, pts: "M2,16 L10,14 L18,15 L26,11 L34,12 L42,8 L50,9 L58,5" },
                 ].map((r) => (
-                  <div key={r.sym} className="flex items-center gap-3 rounded-lg border border-border/60 bg-card/40 px-3 py-2">
+                  <div key={r.sym} className="flex items-center gap-3 border-b border-border/50 px-1 py-2">
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold text-foreground font-mono">{r.sym}</p>
                       <p className="text-[10px] text-muted-foreground truncate">{r.name}</p>
@@ -247,15 +250,15 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
             </div>
 
             {/* Bias report panel */}
-            <div className="rounded-xl border border-border bg-background/60 p-4 text-left">
+            <div className="rounded-md border border-border bg-background/60 p-4 text-left">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Bias Analysis Report</p>
                 <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 border border-primary/30 px-2 py-0.5 text-[10px] font-bold text-primary"><ShieldCheck className="h-3 w-3" /> Pro</span>
               </div>
-              <div className="rounded-lg border border-border/60 bg-card/40 p-3 mb-3">
-                <p className="text-[10px] text-muted-foreground mb-1">CNBC · Tesla Q1 Earnings Beat</p>
+              <div className="rounded-lg border border-border bg-card/40 p-3 mb-3">
+                <p className="text-[10px] text-muted-foreground mb-1 font-mono uppercase tracking-wider">CNBC · Tesla Q1 Earnings Beat</p>
                 <div className="flex items-baseline gap-2">
-                  <p className="text-3xl font-bold font-mono text-primary">6.4</p>
+                  <span className="ink-circle"><span className="text-3xl font-bold font-mono text-primary">6.4</span></span>
                   <p className="text-[11px] text-muted-foreground">/ 10 Trust Score</p>
                 </div>
                 <div className="mt-2 h-1.5 w-full rounded-full bg-border overflow-hidden">
@@ -283,7 +286,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       {/* Three value cards — the "Wait, I need this" moment */}
       <section className="px-4 sm:px-6 pt-8 pb-16 max-w-5xl mx-auto">
         <RevealSection>
-          <h2 className="text-center text-xl sm:text-2xl font-bold text-foreground mb-10" style={{ textWrap: "balance" as any }}>
+          <h2 className="text-center editorial-heading text-2xl sm:text-3xl text-foreground mb-10" style={{ textWrap: "balance" as any }}>
             {t("valueCardsTitle")}
           </h2>
         </RevealSection>
@@ -337,7 +340,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         <section aria-labelledby="community-trust-heading" className="px-4 sm:px-6 py-12 border-b border-border">
           <div className="max-w-6xl mx-auto">
             <p className="text-center text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-2">Community &amp; Trust</p>
-            <h2 id="community-trust-heading" className="text-center text-xl sm:text-2xl font-bold text-foreground mb-8" style={{ textWrap: "balance" as any }}>
+            <h2 id="community-trust-heading" className="text-center editorial-heading text-2xl sm:text-3xl text-foreground mb-8" style={{ textWrap: "balance" as any }}>
               Built with — and for — a global community of investors.
             </h2>
 
@@ -421,7 +424,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           className="px-4 sm:px-6 py-14 max-w-5xl mx-auto"
         >
           <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-primary mb-2">Section A</p>
-          <h2 id="ai-media-intelligence-heading" className="text-center text-2xl sm:text-3xl font-bold text-foreground mb-3">
+          <h2 id="ai-media-intelligence-heading" className="text-center editorial-heading text-3xl sm:text-4xl text-foreground mb-3">
             Detect Market Manipulation
           </h2>
           <p className="text-center text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-10">
@@ -456,7 +459,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           className="px-4 sm:px-6 py-14 max-w-5xl mx-auto border-t border-border"
         >
           <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-primary mb-2">Section B</p>
-          <h2 id="institutional-tracking-heading" className="text-center text-2xl sm:text-3xl font-bold text-foreground mb-3">
+          <h2 id="institutional-tracking-heading" className="text-center editorial-heading text-3xl sm:text-4xl text-foreground mb-3">
             Professional Investment Tracking
           </h2>
           <p className="text-center text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-10">
@@ -491,7 +494,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           className="px-4 sm:px-6 py-14 max-w-5xl mx-auto border-t border-border"
         >
           <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-primary mb-2">Pricing</p>
-          <h2 id="pricing-preview-heading" className="text-center text-2xl sm:text-3xl font-bold text-foreground mb-3">
+          <h2 id="pricing-preview-heading" className="text-center editorial-heading text-3xl sm:text-4xl text-foreground mb-3">
             Choose Your Edge
           </h2>
           <p className="text-center text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-10">
@@ -568,7 +571,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-2">The Data Bridge</p>
-                <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-3" style={{ textWrap: "balance" as any }}>
+                <h2 className="editorial-heading text-3xl sm:text-4xl text-foreground mb-3" style={{ textWrap: "balance" as any }}>
                   Watchlist meets Newsroom — automatically.
                 </h2>
                 <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-4">
@@ -607,7 +610,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
 
       <RevealSection>
         <section id="why-portai" aria-labelledby="why-portai-heading" className="px-4 sm:px-6 py-14 max-w-3xl mx-auto">
-          <h2 id="why-portai-heading" className="text-2xl sm:text-3xl font-bold text-foreground mb-6 text-center" style={{ textWrap: "balance" as any }}>
+          <h2 id="why-portai-heading" className="editorial-heading text-3xl sm:text-4xl text-foreground mb-6 text-center" style={{ textWrap: "balance" as any }}>
             Why PortAI?
           </h2>
           <h3 className="text-base sm:text-lg font-semibold text-primary mb-4 text-center">
@@ -634,7 +637,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       <section id="features" className="px-4 sm:px-6 pt-12 pb-16 max-w-5xl mx-auto">
         <RevealSection>
           <p className="text-center text-xs font-semibold uppercase tracking-label text-muted-foreground mb-2">{t("supportingFeatures")}</p>
-          <h2 className="text-center text-xl sm:text-2xl font-bold text-foreground mb-3" style={{ textWrap: "balance" as any }}>
+          <h2 className="text-center editorial-heading text-2xl sm:text-3xl text-foreground mb-3" style={{ textWrap: "balance" as any }}>
             AI-Powered Sentiment Analysis
           </h2>
         </RevealSection>
@@ -716,7 +719,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       <RevealSection>
         <section id="how-it-works" aria-labelledby="how-it-works-heading" className="px-4 sm:px-6 py-10 max-w-4xl mx-auto">
           <p className="text-center text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-2">How it Works</p>
-          <h2 id="how-it-works-heading" className="text-center text-xl sm:text-2xl font-bold text-foreground mb-3" style={{ textWrap: "balance" as any }}>
+          <h2 id="how-it-works-heading" className="text-center editorial-heading text-2xl sm:text-3xl text-foreground mb-3" style={{ textWrap: "balance" as any }}>
             Your Watchlist isn&rsquo;t static. It&rsquo;s <span className="text-primary">AI-Monitored.</span>
           </h2>
           <p className="text-center text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-8">
@@ -745,7 +748,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       <RevealSection>
         <section id="faq" aria-labelledby="faq-heading" className="px-4 sm:px-6 py-14 max-w-3xl mx-auto border-t border-border">
           <p className="text-center text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-2">FAQ</p>
-          <h2 id="faq-heading" className="text-center text-2xl sm:text-3xl font-bold text-foreground mb-8" style={{ textWrap: "balance" as any }}>
+          <h2 id="faq-heading" className="text-center editorial-heading text-3xl sm:text-4xl text-foreground mb-8" style={{ textWrap: "balance" as any }}>
             Frequently Asked Questions
           </h2>
           <Accordion type="single" collapsible className="w-full">
