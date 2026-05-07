@@ -68,6 +68,7 @@
     --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
     --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  }
 
   .light {
     --background: 40 20% 97%;
