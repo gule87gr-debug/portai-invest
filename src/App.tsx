@@ -53,7 +53,7 @@ const AppWithLanguage = () => {
           navigate("/dashboard");
         }} />
       )}
-      <Suspense fallback={<RouteFallback />}>
+      <Suspense fallback={<RouteSkeleton />}>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
@@ -110,7 +110,7 @@ const AppRoutes = () => {
     return (
       <LanguageProvider initialLanguage="en">
         {showAuth ? (
-          <Suspense fallback={<RouteFallback />}>
+          <Suspense fallback={<RouteSkeleton />}>
             <AuthPage onAuth={() => {}} />
           </Suspense>
         ) : (
@@ -122,7 +122,7 @@ const AppRoutes = () => {
 
   if (passwordRecovery) {
     return (
-      <Suspense fallback={<RouteFallback />}>
+      <Suspense fallback={<RouteSkeleton />}>
         <ResetPassword onComplete={handlePasswordResetComplete} />
       </Suspense>
     );
@@ -143,7 +143,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Suspense fallback={<RouteFallback />}>
+        <Suspense fallback={<RouteSkeleton />}>
           <Routes>
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
