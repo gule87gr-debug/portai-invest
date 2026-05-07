@@ -49,10 +49,10 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (searchParams.get("upgrade") === "success") {
-      toast.success("Welcome to Pro! 🎉 All features are now unlocked.");
+      toast.success(t("welcomePro"));
       refresh();
     }
-  }, [searchParams, refresh]);
+  }, [searchParams, refresh, t]);
 
   // Consume any pending URL the user pasted on the landing page,
   // and scroll the Analyzer card into view when arriving via #analyzer.
@@ -102,7 +102,7 @@ const Dashboard = () => {
       }
       if (data?.notArticle) {
         // Non-article — does NOT consume a credit; keep the counter hidden
-        setError(data.reason || "The link you provided doesn't appear to be a news article. Please paste a direct link to a written article.");
+        setError(data.reason || t("notArticleDefault"));
         return;
       }
       if (data?.analysis) {
@@ -126,7 +126,7 @@ const Dashboard = () => {
 
   return (
     <AppLayout>
-      <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} title="Analysis Limit Reached" description="You've used all 3 free analyses today. Upgrade to Pro for unlimited analyses." />
+      <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} title={t("analysisLimitTitle")} description={t("analysisLimitDesc")} />
 
       <div className="mb-6">
         <h1 className="text-3xl font-bold">{t("marketIntelligence")}</h1>
@@ -145,12 +145,12 @@ const Dashboard = () => {
           </div>
           {!isPro && showRemaining && (
             <span className="text-xs text-muted-foreground">
-              {remaining > 0 ? `${remaining}/${FREE_DAILY_ANALYSES} analyses remaining today` : "No analyses remaining today"}
+              {remaining > 0 ? `${remaining}/${FREE_DAILY_ANALYSES} ${t("analysesRemainingToday")}` : t("noAnalysesRemainingToday")}
             </span>
           )}
           {isPro && (
             <span className="flex items-center gap-1 text-xs text-primary font-medium">
-              <Crown className="h-3.5 w-3.5" /> Unlimited
+              <Crown className="h-3.5 w-3.5" /> {t("unlimited")}
             </span>
           )}
         </div>
@@ -164,7 +164,7 @@ const Dashboard = () => {
               <button
                 type="button"
                 onClick={() => { setUrl(""); setError(""); }}
-                aria-label="Clear link"
+                aria-label={t("clearLink")}
                 className="absolute right-2 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
               >
                 <X className="h-4 w-4" />
@@ -182,16 +182,15 @@ const Dashboard = () => {
             <div className="flex items-start gap-2">
               <Lock className="h-4 w-4 text-primary mt-0.5 shrink-0" />
               <p className="text-sm text-foreground">
-                You've used your <span className="font-semibold">{FREE_DAILY_ANALYSES}</span> free
-                {FREE_DAILY_ANALYSES === 1 ? " analysis" : " analyses"} for today.
-                Your quota resets at midnight, or upgrade to Pro for unlimited analyses.
+                {FREE_DAILY_ANALYSES === 1 ? t("freeAnalysisUsedSingle") : t("freeAnalysesUsedMulti")}{" "}
+                {t("quotaResets")}
               </p>
             </div>
             <button
               onClick={() => setShowUpgrade(true)}
               className="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground hover:bg-primary/90 transition-colors"
             >
-              <Crown className="h-3.5 w-3.5" /> Upgrade to Pro
+              <Crown className="h-3.5 w-3.5" /> {t("upgradeToPro")}
             </button>
           </div>
         )}
@@ -213,10 +212,10 @@ const Dashboard = () => {
                       window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer,width=550,height=420");
                     }}
                     className="flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
-                    title="Share to X"
+                    title={t("shareToX")}
                   >
                     <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                    Share
+                    {t("share")}
                   </button>
                   <div className="text-center">
                     <p className={cn("text-3xl font-bold font-mono", trustColor(result.trustScore))}>{result.trustScore}<span className="text-sm text-muted-foreground">/10</span></p>
@@ -249,7 +248,7 @@ const Dashboard = () => {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-primary" />
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">Pro-Level Deep Dive</h3>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">{t("proDeepDive")}</h3>
                 </div>
                 {isPro && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">
@@ -261,19 +260,16 @@ const Dashboard = () => {
                 <ul className={cn("space-y-2.5", !isPro && "select-none pointer-events-none")} aria-hidden={!isPro}>
                   {[
                     {
-                      label: "Stakeholder Motives",
-                      body: result.proDeepDive?.stakeholderMotives ||
-                        "Identifies who benefits from this narrative — institutional positioning, recent insider trades, and analyst incentives.",
+                      label: t("stakeholderMotives"),
+                      body: result.proDeepDive?.stakeholderMotives || t("stakeholderMotivesDesc"),
                     },
                     {
-                      label: "Omitted Data Points",
-                      body: result.proDeepDive?.omittedDataPoints ||
-                        "Surfaces material context the article skips: contradicting filings, regulatory headlines, and historical baselines.",
+                      label: t("omittedDataPoints"),
+                      body: result.proDeepDive?.omittedDataPoints || t("omittedDataPointsDesc"),
                     },
                     {
-                      label: "Sentiment Divergence",
-                      body: result.proDeepDive?.sentimentDivergence ||
-                        "Compares the article's tone to social, options-flow, and peer-coverage signals to flag manufactured consensus.",
+                      label: t("sentimentDivergence"),
+                      body: result.proDeepDive?.sentimentDivergence || t("sentimentDivergenceDesc"),
                     },
                   ].map((it) => (
                     <li key={it.label} className="flex items-start gap-2.5 text-sm">
@@ -292,7 +288,7 @@ const Dashboard = () => {
                       className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors active:scale-[0.97]"
                     >
                       <Lock className="h-4 w-4" />
-                      Unlock Deep Dive with Pro
+                      {t("unlockDeepDive")}
                     </button>
                   </div>
                 )}
@@ -356,6 +352,7 @@ const HeatmapSelector = ({
   onChange,
 }: { value: string; onChange: (v: string) => void }) => {
   const [open, setOpen] = useState(false);
+  const { t } = useLanguage();
   const current = HEATMAP_OPTIONS.find((o) => o.value === value) ?? HEATMAP_OPTIONS[0];
 
   return (
@@ -373,9 +370,9 @@ const HeatmapSelector = ({
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Choose a market</DialogTitle>
+          <DialogTitle>{t("chooseMarket")}</DialogTitle>
           <DialogDescription>
-            Switch the heatmap to view a different global index.
+            {t("switchHeatmap")}
           </DialogDescription>
         </DialogHeader>
         <div className="mt-2 flex max-h-[60vh] flex-col gap-2 overflow-y-auto pr-1">
@@ -402,7 +399,7 @@ const HeatmapSelector = ({
                 </div>
                 {active && (
                   <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
-                    Active
+                    {t("active")}
                   </span>
                 )}
               </button>
