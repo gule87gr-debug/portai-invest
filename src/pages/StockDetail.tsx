@@ -11,7 +11,7 @@ import { getStockDescription } from "@/lib/stockDescriptions";
 import { getTradingViewSymbol } from "@/lib/tradingViewSymbol";
 import { assetDatabase } from "@/lib/stockDatabase";
 import { useQuotes } from "@/hooks/useQuotes";
-import { ArrowLeft, Building2, Newspaper, BarChart3, AlertTriangle, TrendingUp, TrendingDown, Minus, Bell } from "lucide-react";
+import { ArrowLeft, Building2, Newspaper, BarChart3, TrendingUp, TrendingDown, Minus, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useMemo } from "react";
 
