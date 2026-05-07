@@ -248,7 +248,7 @@ const Dashboard = () => {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-primary" />
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">Pro-Level Deep Dive</h3>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">{t("proDeepDive")}</h3>
                 </div>
                 {isPro && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">
@@ -260,19 +260,16 @@ const Dashboard = () => {
                 <ul className={cn("space-y-2.5", !isPro && "select-none pointer-events-none")} aria-hidden={!isPro}>
                   {[
                     {
-                      label: "Stakeholder Motives",
-                      body: result.proDeepDive?.stakeholderMotives ||
-                        "Identifies who benefits from this narrative — institutional positioning, recent insider trades, and analyst incentives.",
+                      label: t("stakeholderMotives"),
+                      body: result.proDeepDive?.stakeholderMotives || t("stakeholderMotivesDesc"),
                     },
                     {
-                      label: "Omitted Data Points",
-                      body: result.proDeepDive?.omittedDataPoints ||
-                        "Surfaces material context the article skips: contradicting filings, regulatory headlines, and historical baselines.",
+                      label: t("omittedDataPoints"),
+                      body: result.proDeepDive?.omittedDataPoints || t("omittedDataPointsDesc"),
                     },
                     {
-                      label: "Sentiment Divergence",
-                      body: result.proDeepDive?.sentimentDivergence ||
-                        "Compares the article's tone to social, options-flow, and peer-coverage signals to flag manufactured consensus.",
+                      label: t("sentimentDivergence"),
+                      body: result.proDeepDive?.sentimentDivergence || t("sentimentDivergenceDesc"),
                     },
                   ].map((it) => (
                     <li key={it.label} className="flex items-start gap-2.5 text-sm">
@@ -291,7 +288,7 @@ const Dashboard = () => {
                       className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors active:scale-[0.97]"
                     >
                       <Lock className="h-4 w-4" />
-                      Unlock Deep Dive with Pro
+                      {t("unlockDeepDive")}
                     </button>
                   </div>
                 )}
