@@ -254,14 +254,14 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
             {/* Bias report panel */}
             <div className="rounded-md border border-border bg-background/60 p-4 text-left">
               <div className="flex items-center justify-between mb-3">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Bias Analysis Report</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{lt("mockBiasReport")}</p>
                 <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 border border-primary/30 px-2 py-0.5 text-[10px] font-bold text-primary"><ShieldCheck className="h-3 w-3" /> Pro</span>
               </div>
               <div className="rounded-lg border border-border bg-card/40 p-3 mb-3">
-                <p className="text-[10px] text-muted-foreground mb-1 font-mono uppercase tracking-wider">CNBC · Tesla Q1 Earnings Beat</p>
+                <p className="text-[10px] text-muted-foreground mb-1 font-mono uppercase tracking-wider">{lt("mockCnbcTesla")}</p>
                 <div className="flex items-baseline gap-2">
                   <span className="ink-circle"><span className="text-3xl font-bold font-mono text-primary">6.4</span></span>
-                  <p className="text-[11px] text-muted-foreground">/ 10 Trust Score</p>
+                  <p className="text-[11px] text-muted-foreground">{lt("mockTrustScoreLabel")}</p>
                 </div>
                 <div className="mt-2 h-1.5 w-full rounded-full bg-border overflow-hidden">
                   <div className="h-full bg-gradient-to-r from-loss via-warning to-primary" style={{ width: "64%" }} />
@@ -269,9 +269,9 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
               </div>
               <div className="space-y-2">
                 {[
-                  { icon: AlertCircle, label: "Cherry-picked EPS data", tone: "warning" as const },
-                  { icon: FileText, label: "Omits revenue miss vs consensus", tone: "loss" as const },
-                  { icon: CheckCircle2, label: "Cross-checked with 10-Q filing", tone: "primary" as const },
+                  { icon: AlertCircle, label: lt("mockBias1"), tone: "warning" as const },
+                  { icon: FileText, label: lt("mockBias2"), tone: "loss" as const },
+                  { icon: CheckCircle2, label: lt("mockBias3"), tone: "primary" as const },
                 ].map((item) => (
                   <div key={item.label} className="flex items-center gap-2 rounded-md border border-border/60 bg-card/30 px-2.5 py-1.5">
                     <item.icon className={`h-3.5 w-3.5 shrink-0 ${item.tone === "warning" ? "text-warning" : item.tone === "loss" ? "text-loss" : "text-primary"}`} />
@@ -281,7 +281,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
               </div>
             </div>
           </div>
-          <p className="mt-3 text-center text-[11px] text-muted-foreground">Sample preview — your real data appears once you sign in.</p>
+          <p className="mt-3 text-center text-[11px] text-muted-foreground">{lt("mockSamplePreview")}</p>
         </div>
       </header>
 
