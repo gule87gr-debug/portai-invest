@@ -8,7 +8,9 @@ import { TrendingStocks } from "@/components/TrendingStocks";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSubscription, trackAnalysis } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
-import { Link as LinkIcon, Search, Globe, ShieldCheck, FileText, AlertCircle, Loader2, Crown, Lock, Sparkles, X } from "lucide-react";
+import { Link as LinkIcon, Search, Globe, ShieldCheck, FileText, AlertCircle, Loader2, Crown, Lock, Sparkles, X, ChevronDown } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -36,6 +38,7 @@ const Dashboard = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState("");
+  const [heatmapSource, setHeatmapSource] = useState("SPX500");
   const [limitReached, setLimitReached] = useState(false);
   // Only reveal the remaining-analyses counter after we've confirmed an article
   // was actually accepted (so a "not an article" reply never makes the badge tick down)
@@ -320,11 +323,86 @@ const Dashboard = () => {
       </div>
 
       <div className="rounded-xl border border-border bg-card p-4">
-        <h2 className="mb-3 text-lg font-semibold">{t("stockHeatmap")}</h2>
-        <TradingViewHeatmap height={550} />
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold">{t("stockHeatmap")}</h2>
+          <HeatmapSelector value={heatmapSource} onChange={setHeatmapSource} />
+        </div>
+        <TradingViewHeatmap height={550} dataSource={heatmapSource} />
       </div>
     </AppLayout>
   );
 };
+
+const HEATMAP_OPTIONS: { value: string; label: string; flag: string; description: string }[] = [
+  { value: "SPX500", label: "S&P 500", flag: "🇺🇸", description: "Top 500 US large-cap stocks" },
+  { value: "NASDAQ100", label: "Nasdaq 100", flag: "🇺🇸", description: "Largest US tech & growth names" },
+  { value: "FTSE100", label: "FTSE 100", flag: "🇬🇧", description: "Top UK companies on the LSE" },
+  { value: "DAX40", label: "DAX 40", flag: "🇩🇪", description: "Largest German blue chips" },
+  { value: "NIKKEI225", label: "Nikkei 225", flag: "🇯🇵", description: "Leading companies on the Tokyo exchange" },
+];
+
+const HeatmapSelector = ({
+  value,
+  onChange,
+}: { value: string; onChange: (v: string) => void }) => {
+  const [open, setOpen] = useState(false);
+  const current = HEATMAP_OPTIONS.find((o) => o.value === value) ?? HEATMAP_OPTIONS[0];
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-2 border-border/60 bg-background/40 hover:bg-background/80"
+        >
+          <span className="text-base leading-none">{current.flag}</span>
+          <span className="font-medium">{current.label}</span>
+          <ChevronDown className="h-4 w-4 opacity-60" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Choose a market</DialogTitle>
+          <DialogDescription>
+            Switch the heatmap to view a different global index.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="mt-2 flex flex-col gap-2">
+          {HEATMAP_OPTIONS.map((opt) => {
+            const active = opt.value === value;
+            return (
+              <button
+                key={opt.value}
+                onClick={() => {
+                  onChange(opt.value);
+                  setOpen(false);
+                }}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg border p-3 text-left transition-all",
+                  active
+                    ? "border-primary bg-primary/10 ring-1 ring-primary/40"
+                    : "border-border/60 bg-card/50 hover:border-primary/50 hover:bg-card"
+                )}
+              >
+                <span className="text-2xl leading-none">{opt.flag}</span>
+                <div className="flex-1">
+                  <div className="font-semibold">{opt.label}</div>
+                  <div className="text-xs text-muted-foreground">{opt.description}</div>
+                </div>
+                {active && (
+                  <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
+                    Active
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 
 export default Dashboard;

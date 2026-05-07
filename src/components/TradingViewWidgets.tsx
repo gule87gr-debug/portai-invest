@@ -213,7 +213,10 @@ export const TradingViewTickerTape = () => {
   return <div ref={containerRef} className="overflow-hidden" />;
 };
 
-export const TradingViewHeatmap = ({ height = 500 }: { height?: number }) => {
+export const TradingViewHeatmap = ({
+  height = 500,
+  dataSource = "SPX500",
+}: { height?: number; dataSource?: string }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -226,7 +229,7 @@ export const TradingViewHeatmap = ({ height = 500 }: { height?: number }) => {
     script.async = true;
     script.innerHTML = JSON.stringify({
       exchanges: [],
-      dataSource: "SPX500",
+      dataSource,
       grouping: "sector",
       blockSize: "market_cap_basic",
       blockColor: "change",
@@ -255,7 +258,8 @@ export const TradingViewHeatmap = ({ height = 500 }: { height?: number }) => {
     containerRef.current.appendChild(wrapper);
 
     return () => { if (containerRef.current) containerRef.current.innerHTML = ""; };
-  }, [height]);
+  }, [height, dataSource]);
 
   return <div ref={containerRef} style={{ height: `${height}px` }} className="rounded-xl overflow-hidden" />;
 };
+
