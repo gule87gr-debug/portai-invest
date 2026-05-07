@@ -371,7 +371,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
 
               {/* Market Reach card */}
               <div className="rounded-xl border border-border bg-card p-6 flex flex-col justify-center">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-3">Market Reach</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-3">{lt("marketReach")}</p>
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 border border-primary/25">
