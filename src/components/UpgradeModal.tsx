@@ -9,20 +9,22 @@ interface UpgradeModalProps {
 }
 
 const plusFeatures = [
-  "Full investor quiz results",
+  "Full investor quiz results & portfolio plan",
   "Unlimited AI chat & image analysis",
   "Unlimited watchlists & stocks",
+  "Asset comparison charts (up to 4)",
+  "Live sentiment heatmaps",
   "AI Deep Dive (Hidden Angles)",
+  "Custom price alerts",
 ];
 
 const proFeatures = [
-  "Full investor quiz results",
-  "Unlimited AI chat & image analysis",
-  "Unlimited watchlists & stocks",
-  "AI Deep Dive (Hidden Angles)",
-  "Unlimited article analyses",
-  "AI price alerts",
-  "Priority AI chat (faster, better)",
+  "Everything in Plus",
+  "Unlimited article & link analyses",
+  "AI Fact Check on market claims",
+  "Deep-Dive institutional analysis",
+  "Real-time bias alerts for your portfolio",
+  "Priority AI speed (high-compute models)",
 ];
 
 export const UpgradeModal = ({
