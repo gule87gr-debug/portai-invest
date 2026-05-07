@@ -215,12 +215,15 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
 
         {/* Dual Dashboard mockup — Watchlist + Bias Report */}
         <div className="mt-12 max-w-5xl mx-auto relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-xl border border-border bg-card p-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-md border border-border bg-card p-3 shadow-brutal-lg">
             {/* Watchlist panel */}
-            <div className="rounded-xl border border-border bg-background/60 p-4 text-left">
+            <div className="rounded-md border border-border bg-background/60 p-4 text-left">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Live Watchlist</p>
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-primary"><Activity className="h-3 w-3" /> LIVE</span>
+                <span className="inline-flex items-center gap-2 text-[10px] font-mono text-primary">
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                  LIVE · UPDATED 2 MIN AGO
+                </span>
               </div>
               <div className="space-y-2">
                 {[
