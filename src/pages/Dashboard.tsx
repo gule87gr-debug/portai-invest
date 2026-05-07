@@ -174,7 +174,26 @@ const Dashboard = () => {
           </button>
         </div>
 
-        {error && <p className="mt-3 text-sm text-loss">{error}</p>}
+        {limitReached && !isPro && (
+          <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3">
+            <div className="flex items-start gap-2">
+              <Lock className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+              <p className="text-sm text-foreground">
+                You've used your <span className="font-semibold">{FREE_DAILY_ANALYSES}</span> free
+                {FREE_DAILY_ANALYSES === 1 ? " analysis" : " analyses"} for today.
+                Your quota resets at midnight, or upgrade to Pro for unlimited analyses.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowUpgrade(true)}
+              className="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
+              <Crown className="h-3.5 w-3.5" /> Upgrade to Pro
+            </button>
+          </div>
+        )}
+
+        {error && !limitReached && <p className="mt-3 text-sm text-loss">{error}</p>}
 
         {result && (
           <div className="mt-6 space-y-4 animate-fade-in">
