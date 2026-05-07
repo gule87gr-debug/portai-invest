@@ -186,7 +186,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
                   onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
                   placeholder={t("heroPlaceholder")}
                   className="h-12 w-full rounded-xl bg-transparent pl-11 pr-4 text-sm sm:text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
-                  aria-label="Article URL to analyze for financial news bias"
+                  aria-label={lt("heroUrlAria")}
                 />
               </div>
               <button
