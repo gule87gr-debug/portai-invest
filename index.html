@@ -18,7 +18,54 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Lora:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+
+    <!-- Preload critical font CSS so the browser fetches it ASAP -->
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Lora:wght@600;700&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Lora:wght@600;700&display=swap"
+    />
+
+    <!-- Preload the actual woff2 files for instant first paint -->
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="https://fonts.gstatic.com/s/plusjakartasans/v8/LDIbaomQNQcsA88c7O9yZ4KMCoOg4IA6-91aHEjcWuA_qU79TguTFw.woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="https://fonts.gstatic.com/s/lora/v35/0QI6MX1D_JOuGQbT0gvTJPa787weuxJBkqg.woff2"
+      crossorigin
+    />
+
+    <!-- Fallback fonts tuned with size-adjust to closely match Lora & Plus Jakarta Sans, eliminating CLS -->
+    <style>
+      @font-face {
+        font-family: "Plus Jakarta Sans Fallback";
+        src: local("Segoe UI"), local("Helvetica Neue"), local("Arial");
+        size-adjust: 100%;
+        ascent-override: 95%;
+        descent-override: 28%;
+        line-gap-override: 0%;
+      }
+      @font-face {
+        font-family: "Lora Fallback";
+        src: local("Georgia"), local("Times New Roman"), local("Times");
+        size-adjust: 105%;
+        ascent-override: 92%;
+        descent-override: 24%;
+        line-gap-override: 0%;
+      }
+    </style>
 
     <!-- Open Graph -->
     <meta property="og:title" content="PortAI | AI Financial News Bias Checker & Professional Portfolio Tracker" />
