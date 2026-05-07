@@ -11,6 +11,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import LandingPage from "./pages/LandingPage";
 import { CookieConsent } from "./components/CookieConsent";
+import { RouteSkeleton } from "./components/RouteSkeleton";
 
 // Lazy-load every authenticated/secondary route to keep the initial bundle small
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -52,7 +53,7 @@ const AppWithLanguage = () => {
           navigate("/dashboard");
         }} />
       )}
-      <Suspense fallback={<RouteFallback />}>
+      <Suspense fallback={<RouteSkeleton />}>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
@@ -109,7 +110,7 @@ const AppRoutes = () => {
     return (
       <LanguageProvider initialLanguage="en">
         {showAuth ? (
-          <Suspense fallback={<RouteFallback />}>
+          <Suspense fallback={<RouteSkeleton />}>
             <AuthPage onAuth={() => {}} />
           </Suspense>
         ) : (
@@ -121,7 +122,7 @@ const AppRoutes = () => {
 
   if (passwordRecovery) {
     return (
-      <Suspense fallback={<RouteFallback />}>
+      <Suspense fallback={<RouteSkeleton />}>
         <ResetPassword onComplete={handlePasswordResetComplete} />
       </Suspense>
     );
@@ -142,7 +143,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Suspense fallback={<RouteFallback />}>
+        <Suspense fallback={<RouteSkeleton />}>
           <Routes>
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
