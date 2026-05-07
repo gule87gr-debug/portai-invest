@@ -125,20 +125,68 @@ const NON_ARTICLE_HOSTS = new Set<string>([
 
 // Path patterns that almost certainly are NOT articles
 const NON_ARTICLE_PATH_PATTERNS: RegExp[] = [
-  /\/(login|signup|signin|register|checkout|cart|pricing|account|settings)(\/|$)/i,
-  /\/(search|tag|tags|topic|topics|category|categories|author|authors)(\/|$)/i,
-  /\/(quote|symbol|ticker|chart|charts|portfolio|watchlist)(\/|$)/i,
-  /\/(video|videos|watch|live|stream|podcast|podcasts|gallery|photos)(\/|$)/i,
+  /\/(login|signup|signin|register|checkout|cart|pricing|account|settings|subscribe|newsletter)(\/|$)/i,
+  /\/(search|tag|tags|topic|topics|category|categories|author|authors|sitemap|index)(\/|$)/i,
+  /\/(quote|symbol|ticker|chart|charts|portfolio|watchlist|screener)(\/|$)/i,
+  /\/(video|videos|watch|live|stream|podcast|podcasts|gallery|photos|slideshow)(\/|$)/i,
   /\.(zip|exe|dmg|mp4|mp3|mov|webm|png|jpg|jpeg|gif|svg|ico|css|js|json|xml|csv)$/i,
 ];
 
-// File extensions / paths that look like articles (paths containing dated slugs etc.)
+// File extensions / paths that look like articles. We're permissive here so
+// common news URL variants (AMP, mobile, dated slugs, /news/, /story/) are
+// recognized as articles even when og:type metadata is missing or blocked.
 const ARTICLE_PATH_HINTS: RegExp[] = [
-  /\/\d{4}\/\d{1,2}\/\d{1,2}\//,        // /2024/03/15/
-  /\/(article|articles|news|story|stories|post|posts|opinion|analysis|insights|markets|business|finance)\//i,
-  /-[a-z0-9]{6,}$/i,                     // slug ending with id
-  /\/[a-z0-9-]{20,}/i,                   // long slugs
+  /\/\d{4}\/\d{1,2}\/\d{1,2}\//,                                // /2024/03/15/
+  /\/\d{4}-\d{1,2}-\d{1,2}\//,                                  // /2024-03-15/
+  /\/(article|articles|news|story|stories|post|posts|opinion|analysis|insights|markets|business|finance|economy|world|tech|technology|investing|companies|features|reports|read|press-release|pr|wire|blog|column|columns|editorial|commentary)\//i,
+  /\/amp\//i,                                                    // AMP path segment
+  /\.amp(\.html?)?$/i,                                           // .amp / .amp.html
+  /-[a-z0-9]{6,}$/i,                                             // slug ending with id
+  /\/[a-z0-9-]{20,}/i,                                           // long slugs
+  /\/[a-z0-9-]+-(idUSKB|idUSL|id[A-Z]{2,3})\d/i,                // Reuters legacy IDs
 ];
+
+// Known financial / mainstream news publishers — if the host is on this list AND
+// the path is not obviously a homepage/section, we always treat it as an article.
+// This prevents false negatives when sites block our metadata fetch with 403.
+const KNOWN_PUBLISHER_DOMAINS = new Set<string>([
+  "reuters.com", "apnews.com", "ap.org", "bloomberg.com", "ft.com",
+  "wsj.com", "economist.com", "nytimes.com", "washingtonpost.com",
+  "cnbc.com", "barrons.com", "marketwatch.com", "bbc.com", "bbc.co.uk",
+  "theguardian.com", "axios.com", "morningstar.com", "forbes.com",
+  "fortune.com", "businessinsider.com", "finance.yahoo.com",
+  "investopedia.com", "cnn.com", "edition.cnn.com", "zacks.com",
+  "kiplinger.com", "seekingalpha.com", "fool.com", "benzinga.com",
+  "investorplace.com", "foxbusiness.com", "thestreet.com",
+  // Additional widely-cited financial publishers
+  "ftadviser.com", "investing.com", "coindesk.com", "cointelegraph.com",
+  "decrypt.co", "theblock.co", "theinformation.com", "techcrunch.com",
+  "arstechnica.com", "theverge.com", "engadget.com", "wired.com",
+  "npr.org", "pbs.org", "abcnews.go.com", "nbcnews.com", "cbsnews.com",
+  "politico.com", "thehill.com", "semafor.com", "vox.com",
+  "businesswire.com", "prnewswire.com", "globenewswire.com",
+  "handelsblatt.com", "lesechos.fr", "elpais.com", "elmundo.es",
+  "expansion.com", "cincodias.elpais.com", "ilsole24ore.com",
+  "nikkei.com", "scmp.com", "japantimes.co.jp",
+]);
+
+function isKnownPublisherHost(host: string): boolean {
+  for (const dom of KNOWN_PUBLISHER_DOMAINS) {
+    if (host === dom || host.endsWith(`.${dom}`)) return true;
+  }
+  return false;
+}
+
+// Normalize host: drop common mobile/AMP subdomain prefixes so we don't
+// reject "m.cnbc.com" or "amp.theguardian.com" etc.
+function normalizeHost(host: string): string {
+  return host
+    .toLowerCase()
+    .replace(/^www\./, "")
+    .replace(/^m\./, "")
+    .replace(/^amp\./, "")
+    .replace(/^mobile\./, "");
+}
 
 type PreCheck =
   | { ok: true; metaTitle?: string; metaType?: string; metaDescription?: string }
@@ -156,8 +204,10 @@ async function preCheckArticle(urlStr: string): Promise<PreCheck> {
     return { ok: false, reason: "Only http(s) links can be analyzed." };
   }
 
-  const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
-  const path = parsed.pathname || "/";
+  const host = normalizeHost(parsed.hostname);
+  let path = parsed.pathname || "/";
+  // Strip trailing /amp or /amp.html so the path checks match the canonical article
+  path = path.replace(/\/amp\/?$/i, "/").replace(/\.amp(\.html?)?$/i, "");
 
   // Hard block: known non-article hosts
   for (const blocked of NON_ARTICLE_HOSTS) {
@@ -170,10 +220,10 @@ async function preCheckArticle(urlStr: string): Promise<PreCheck> {
   }
 
   // Hard block: homepage / very short path (e.g. /, /markets)
-  if (path === "/" || path === "") {
+  if (path === "/" || path === "" || /^\/[a-z-]{1,12}\/?$/i.test(path)) {
     return {
       ok: false,
-      reason: "This link looks like a website homepage, not a specific article. Please paste a direct link to an article.",
+      reason: "This link looks like a website homepage or section page, not a specific article. Please paste a direct link to an article.",
     };
   }
 
@@ -187,6 +237,14 @@ async function preCheckArticle(urlStr: string): Promise<PreCheck> {
     }
   }
 
+  // Fast accept: known publisher with a non-trivial path → treat as article
+  // without requiring a successful metadata fetch (many publishers 403 bots).
+  const isKnownPublisher = isKnownPublisherHost(host);
+  const hasPathHint = ARTICLE_PATH_HINTS.some((p) => p.test(path));
+  if (isKnownPublisher && (hasPathHint || path.length > 25)) {
+    return { ok: true };
+  }
+
   // Try to fetch metadata to confirm
   try {
     const ctrl = new AbortController();
@@ -196,11 +254,22 @@ async function preCheckArticle(urlStr: string): Promise<PreCheck> {
       redirect: "follow",
       signal: ctrl.signal,
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; PortAI-Bot/1.0; +https://portai-invest.com)",
-        Accept: "text/html,application/xhtml+xml",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
       },
     });
     clearTimeout(timer);
+
+    // If the publisher blocks the bot (403/429/503), don't penalize the user —
+    // fall back to path heuristics.
+    if (!res.ok) {
+      if (hasPathHint || isKnownPublisher) return { ok: true };
+      return {
+        ok: false,
+        reason: "We couldn't reach this page to verify it's an article. Please paste a different link or try again later.",
+      };
+    }
 
     const ctype = res.headers.get("content-type") || "";
     if (!ctype.toLowerCase().includes("text/html")) {
@@ -233,17 +302,42 @@ async function preCheckArticle(urlStr: string): Promise<PreCheck> {
       ?? headHtml.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1]
       ?? "";
     const metaDescription = headHtml.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i)?.[1] ?? "";
-    const hasArticleSchema = /"@type"\s*:\s*"(NewsArticle|Article|ReportageNewsArticle|AnalysisNewsArticle|OpinionNewsArticle|BlogPosting)"/i.test(headHtml);
-    const hasArticlePublishedTime = /property=["']article:published_time["']/i.test(headHtml);
+    const hasArticleSchema = /"@type"\s*:\s*"(NewsArticle|Article|ReportageNewsArticle|AnalysisNewsArticle|OpinionNewsArticle|BlogPosting|LiveBlogPosting|BackgroundNewsArticle)"/i.test(headHtml);
+    const hasArticlePublishedTime =
+      /property=["']article:published_time["']/i.test(headHtml) ||
+      /name=["']pubdate["']/i.test(headHtml) ||
+      /name=["']publishdate["']/i.test(headHtml) ||
+      /name=["']article\.published["']/i.test(headHtml) ||
+      /itemprop=["']datePublished["']/i.test(headHtml);
+    const hasArticleAuthor =
+      /property=["']article:author["']/i.test(headHtml) ||
+      /name=["']author["']/i.test(headHtml) ||
+      /itemprop=["']author["']/i.test(headHtml);
+    const hasAmpHtml = /rel=["']amphtml["']/i.test(headHtml);
 
     const looksLikeArticle =
       metaType === "article" ||
+      metaType.startsWith("article:") ||
       hasArticleSchema ||
       hasArticlePublishedTime ||
-      ARTICLE_PATH_HINTS.some((p) => p.test(path));
+      (hasArticleAuthor && hasPathHint) ||
+      hasAmpHtml ||
+      hasPathHint ||
+      isKnownPublisher;
 
-    if (metaType && metaType !== "article" && !hasArticleSchema && !hasArticlePublishedTime) {
-      // og:type explicitly says it's not an article (e.g. video, profile, website)
+    // Only hard-reject if og:type is explicitly something non-article AND we
+    // have no other article signals (avoids rejecting articles that just tag
+    // og:type as "website" by mistake).
+    if (
+      metaType &&
+      metaType !== "article" &&
+      !metaType.startsWith("article:") &&
+      !hasArticleSchema &&
+      !hasArticlePublishedTime &&
+      !hasArticleAuthor &&
+      !hasPathHint &&
+      !isKnownPublisher
+    ) {
       return {
         ok: false,
         reason: `This page is marked as "${metaType}" by the site, not as a written article.`,
@@ -251,7 +345,6 @@ async function preCheckArticle(urlStr: string): Promise<PreCheck> {
     }
 
     if (!looksLikeArticle) {
-      // No article signals at all and no path hint either — likely homepage/section
       return {
         ok: false,
         reason: "We couldn't detect article metadata on this page. Please paste a direct link to a written article.",
