@@ -140,9 +140,9 @@ const Dashboard = () => {
             <LinkIcon className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-semibold">{t("analyzeLink")}</h2>
           </div>
-          {!isPro && (
+          {!isPro && showRemaining && (
             <span className="text-xs text-muted-foreground">
-              {remaining > 0 ? `${remaining}/${FREE_DAILY_ANALYSES} analyses remaining` : "No analyses remaining"}
+              {remaining > 0 ? `${remaining}/${FREE_DAILY_ANALYSES} analyses remaining today` : "No analyses remaining today"}
             </span>
           )}
           {isPro && (
