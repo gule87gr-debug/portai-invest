@@ -495,69 +495,69 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           aria-labelledby="pricing-preview-heading"
           className="px-4 sm:px-6 py-14 max-w-5xl mx-auto border-t border-border"
         >
-          <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-primary mb-2">Pricing</p>
+          <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-primary mb-2">{lt("pricingLabel")}</p>
           <h2 id="pricing-preview-heading" className="text-center editorial-heading text-3xl sm:text-4xl text-foreground mb-3">
-            Choose Your Edge
+            {lt("chooseEdge")}
           </h2>
           <p className="text-center text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-10">
-            Three tiers built for every level of conviction — from observer to active alpha hunter.
+            {lt("pricingDesc")}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {/* Free */}
             <article className="rounded-2xl border border-border bg-card p-6 flex flex-col">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-1">The Observer</p>
-              <h3 className="text-2xl font-bold text-foreground mb-1">Free</h3>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-1">{lt("observer")}</p>
+              <h3 className="text-2xl font-bold text-foreground mb-1">{lt("freeName")}</h3>
               <div className="text-3xl font-bold font-mono text-foreground mb-4">€0<span className="text-sm text-muted-foreground font-normal">/mo</span></div>
               <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary/70 mt-0.5 shrink-0" /> 1 Watchlist (5 assets)</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary/70 mt-0.5 shrink-0" /> 3 Basic AI Analyses / day</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary/70 mt-0.5 shrink-0" /> Community Media Pulse access</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary/70 mt-0.5 shrink-0" /> {lt("free1")}</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary/70 mt-0.5 shrink-0" /> {lt("free2")}</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary/70 mt-0.5 shrink-0" /> {lt("free3")}</li>
               </ul>
-              <button onClick={onGetStarted} className="w-full rounded-xl border border-border py-2.5 text-sm font-semibold text-foreground hover:bg-accent transition-colors">Start Free</button>
+              <button onClick={onGetStarted} className="w-full rounded-xl border border-border py-2.5 text-sm font-semibold text-foreground hover:bg-accent transition-colors">{lt("startFree")}</button>
             </article>
 
             {/* Plus */}
             <article className="rounded-2xl border border-border bg-card p-6 flex flex-col">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-1">The Shield</p>
-              <h3 className="text-2xl font-bold text-foreground mb-1 flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" /> Plus</h3>
-              <div className="mb-1"><span className="inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">40% OFF</span></div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-1">{lt("shield")}</p>
+              <h3 className="text-2xl font-bold text-foreground mb-1 flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" /> {lt("plusName")}</h3>
+              <div className="mb-1"><span className="inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">{lt("off40")}</span></div>
               <div className="text-3xl font-bold font-mono text-foreground mb-4">€8.99<span className="text-base text-muted-foreground font-normal line-through ml-2">€14.99</span><span className="text-sm text-muted-foreground font-normal">/mo</span></div>
               <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> 5 Watchlists</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Unlimited Basic Analyses</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Live Sentiment Heatmaps</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("plus1")}</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("plus2")}</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("plus3")}</li>
               </ul>
-              <button onClick={onGetStarted} className="w-full rounded-xl bg-primary/10 border border-primary/40 text-primary py-2.5 text-sm font-semibold hover:bg-primary/15 transition-colors">Upgrade to Plus</button>
+              <button onClick={onGetStarted} className="w-full rounded-xl bg-primary/10 border border-primary/40 text-primary py-2.5 text-sm font-semibold hover:bg-primary/15 transition-colors">{lt("upgradePlus")}</button>
             </article>
 
             {/* Pro */}
             <article className="rounded-xl border border-primary/60 bg-card p-6 flex flex-col relative">
               <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground whitespace-nowrap">
-                <Crown className="h-3 w-3" /> Most Popular
+                <Crown className="h-3 w-3" /> {lt("mostPopular")}
               </span>
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-1">The Alpha Suite</p>
-              <h3 className="text-2xl font-bold text-foreground mb-1 flex items-center gap-2"><Crown className="h-5 w-5 text-primary" /> Pro</h3>
-              <div className="mb-1"><span className="inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">36% OFF</span></div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-1">{lt("alphaSuite")}</p>
+              <h3 className="text-2xl font-bold text-foreground mb-1 flex items-center gap-2"><Crown className="h-5 w-5 text-primary" /> {lt("proName")}</h3>
+              <div className="mb-1"><span className="inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">{lt("off36")}</span></div>
               <div className="text-3xl font-bold font-mono text-foreground mb-4">€15.99<span className="text-base text-muted-foreground font-normal line-through ml-2">€24.99</span><span className="text-sm text-muted-foreground font-normal">/mo</span></div>
               <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Unlimited Watchlists</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Deep-Dive Institutional Analysis</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> Real-time Bias Alerts for your Portfolio</li>
-               <li className="flex gap-2 items-center"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> <span className="inline-flex items-center gap-1">Priority AI Speed
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("pro1")}</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("pro2")}</li>
+                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("pro3")}</li>
+               <li className="flex gap-2 items-center"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> <span className="inline-flex items-center gap-1">{lt("pro4Label")}
                  <Tooltip>
                    <TooltipTrigger asChild>
-                     <button type="button" aria-label="What is Priority AI Speed?" className="inline-flex items-center text-primary/80 hover:text-primary transition-colors">
+                     <button type="button" aria-label={lt("pro4AriaLabel")} className="inline-flex items-center text-primary/80 hover:text-primary transition-colors">
                        <Info className="h-3.5 w-3.5" />
                      </button>
                    </TooltipTrigger>
                    <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
-                     Uses high-compute models for deeper pattern recognition and zero-wait analysis.
+                     {lt("pro4Tooltip")}
                    </TooltipContent>
                  </Tooltip>
                </span></li>
               </ul>
-              <button onClick={onGetStarted} className="w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground btn-glow hover:bg-primary/90 transition-colors">Go Pro</button>
-              <p className="mt-2 text-center text-[11px] text-muted-foreground">Cancel anytime</p>
+              <button onClick={onGetStarted} className="w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground btn-glow hover:bg-primary/90 transition-colors">{lt("goPro")}</button>
+              <p className="mt-2 text-center text-[11px] text-muted-foreground">{lt("cancelAnytime")}</p>
             </article>
           </div>
         </section>
