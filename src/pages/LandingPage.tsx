@@ -232,7 +232,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
                   { sym: "TSLA", name: "Tesla", price: "$298.40", chg: "-0.86%", up: false, pts: "M2,8 L10,10 L18,9 L26,13 L34,12 L42,15 L50,14 L58,17" },
                   { sym: "BTC", name: "Bitcoin", price: "$108,420", chg: "+2.11%", up: true, pts: "M2,16 L10,14 L18,15 L26,11 L34,12 L42,8 L50,9 L58,5" },
                 ].map((r) => (
-                  <div key={r.sym} className="flex items-center gap-3 rounded-lg border border-border/60 bg-card/40 px-3 py-2">
+                  <div key={r.sym} className="flex items-center gap-3 border-b border-border/50 px-1 py-2">
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold text-foreground font-mono">{r.sym}</p>
                       <p className="text-[10px] text-muted-foreground truncate">{r.name}</p>
@@ -250,7 +250,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
             </div>
 
             {/* Bias report panel */}
-            <div className="rounded-xl border border-border bg-background/60 p-4 text-left">
+            <div className="rounded-md border border-border bg-background/60 p-4 text-left">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Bias Analysis Report</p>
                 <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 border border-primary/30 px-2 py-0.5 text-[10px] font-bold text-primary"><ShieldCheck className="h-3 w-3" /> Pro</span>
