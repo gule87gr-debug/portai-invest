@@ -102,7 +102,7 @@ const Dashboard = () => {
       }
       if (data?.notArticle) {
         // Non-article — does NOT consume a credit; keep the counter hidden
-        setError(data.reason || "The link you provided doesn't appear to be a news article. Please paste a direct link to a written article.");
+        setError(data.reason || t("notArticleDefault"));
         return;
       }
       if (data?.analysis) {
