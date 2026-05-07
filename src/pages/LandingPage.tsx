@@ -379,7 +379,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
                     </div>
                     <div>
                       <p className="text-2xl font-bold font-mono text-foreground tracking-tight">1M+</p>
-                      <p className="text-xs text-muted-foreground leading-relaxed">Headlines analyzed for bias</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{lt("headlinesAnalyzed")}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
@@ -388,7 +388,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
                     </div>
                     <div>
                       <p className="text-2xl font-bold font-mono text-foreground tracking-tight">12+</p>
-                      <p className="text-xs text-muted-foreground leading-relaxed">Active countries worldwide</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{lt("activeCountries")}</p>
                     </div>
                   </div>
                 </div>
