@@ -153,7 +153,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       {/* Hero — Dual value proposition */}
       <header className="px-4 sm:px-6 pt-12 sm:pt-16 pb-10 max-w-4xl mx-auto text-center relative gold-glow">
         <div className="inline-flex items-center gap-2 rounded-full border border-loss/30 bg-loss/10 px-4 py-1.5 text-xs font-bold text-loss mb-6 tracking-label uppercase">
-          <ShieldCheck className="h-3.5 w-3.5" /> Stop Trading on Hype. Start Trading on Truth.
+          <ShieldCheck className="h-3.5 w-3.5" /> {lt("heroTagline")}
         </div>
 
         {/* SEO H1 — visible, keyword-rich */}
@@ -161,16 +161,16 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           className="editorial-heading text-5xl sm:text-6xl lg:text-7xl relative z-10"
           style={{ lineHeight: "1.02" }}
         >
-          The AI Financial News Bias Checker
+          {lt("heroH1part1")}
           <br />
-          <span className="text-foreground">&amp; <span className="ink-underline text-primary">Portfolio Tracker.</span></span>
+          <span className="text-foreground">{lt("heroH1part2")} <span className="ink-underline text-primary">{lt("heroH1part3")}</span></span>
         </h1>
         <p className="sr-only">
-          The AI Command Center for Smarter Investing — Professional Investment Tracking and AI-Powered Sentiment Analysis.
+          {lt("heroSrDesc")}
         </p>
 
         <p className="mt-5 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed relative z-10" style={{ textWrap: "pretty" as any }}>
-          Track your portfolio with institutional-grade data and filter out market manipulation with the world&rsquo;s first AI Financial News Bias Checker.
+          {lt("heroDesc")}
         </p>
 
         {/* Prominent input box with pulse */}
