@@ -178,7 +178,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
 
   const addCompare = (a: AssetEntry) => {
     if (!isPaid) {
-      navigate("/upgrade");
+      setShowUpgrade(true);
       return;
     }
     if (extras.length >= 4) return;
@@ -252,7 +252,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
               <button
                 type="button"
                 onClick={() => {
-                  if (!subLoading && !isPaid) { navigate("/upgrade"); return; }
+                  if (!subLoading && !isPaid) { setShowUpgrade(true); return; }
                   setSearchOpen(true);
                 }}
                 className="inline-flex items-center gap-1.5 rounded-md border border-primary/60 bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary shadow-sm hover:bg-primary/25 hover:border-primary transition-colors"
