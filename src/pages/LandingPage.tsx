@@ -341,9 +341,9 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       <RevealSection>
         <section aria-labelledby="community-trust-heading" className="px-4 sm:px-6 py-12 border-b border-border">
           <div className="max-w-6xl mx-auto">
-            <p className="text-center text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-2">Community &amp; Trust</p>
+            <p className="text-center text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-2">{lt("communityTrust")}</p>
             <h2 id="community-trust-heading" className="text-center editorial-heading text-2xl sm:text-3xl text-foreground mb-8" style={{ textWrap: "balance" as any }}>
-              Built with — and for — a global community of investors.
+              {lt("communityTrustHeading")}
             </h2>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch">
