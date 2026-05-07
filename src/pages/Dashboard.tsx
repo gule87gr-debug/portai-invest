@@ -145,12 +145,12 @@ const Dashboard = () => {
           </div>
           {!isPro && showRemaining && (
             <span className="text-xs text-muted-foreground">
-              {remaining > 0 ? `${remaining}/${FREE_DAILY_ANALYSES} analyses remaining today` : "No analyses remaining today"}
+              {remaining > 0 ? `${remaining}/${FREE_DAILY_ANALYSES} ${t("analysesRemainingToday")}` : t("noAnalysesRemainingToday")}
             </span>
           )}
           {isPro && (
             <span className="flex items-center gap-1 text-xs text-primary font-medium">
-              <Crown className="h-3.5 w-3.5" /> Unlimited
+              <Crown className="h-3.5 w-3.5" /> {t("unlimited")}
             </span>
           )}
         </div>
