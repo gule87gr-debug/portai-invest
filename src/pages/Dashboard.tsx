@@ -363,6 +363,52 @@ const HeatmapSelector = ({
   const [open, setOpen] = useState(false);
   const { t } = useLanguage();
   const current = HEATMAP_OPTIONS.find((o) => o.value === value) ?? HEATMAP_OPTIONS[0];
+  const initialIndex = Math.max(0, HEATMAP_OPTIONS.findIndex((o) => o.value === value));
+  const [focusIndex, setFocusIndex] = useState(initialIndex);
+  const itemRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
+  const listboxId = "heatmap-listbox";
+
+  // When the dialog opens, sync focus to the currently selected option
+  // and scroll it into view so users with keyboards/screen readers land in the right place.
+  useEffect(() => {
+    if (!open) return;
+    const idx = Math.max(0, HEATMAP_OPTIONS.findIndex((o) => o.value === value));
+    setFocusIndex(idx);
+    const id = window.setTimeout(() => {
+      const el = itemRefs.current[idx];
+      el?.focus();
+      el?.scrollIntoView({ block: "nearest" });
+    }, 50);
+    return () => window.clearTimeout(id);
+  }, [open, value]);
+
+  const moveFocus = (next: number) => {
+    const max = HEATMAP_OPTIONS.length - 1;
+    const clamped = next < 0 ? max : next > max ? 0 : next;
+    setFocusIndex(clamped);
+    const el = itemRefs.current[clamped];
+    el?.focus();
+    el?.scrollIntoView({ block: "nearest" });
+  };
+
+  const handleListKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault(); moveFocus(focusIndex + 1); break;
+      case "ArrowUp":
+        e.preventDefault(); moveFocus(focusIndex - 1); break;
+      case "Home":
+        e.preventDefault(); moveFocus(0); break;
+      case "End":
+        e.preventDefault(); moveFocus(HEATMAP_OPTIONS.length - 1); break;
+      case "Enter":
+      case " ":
+        e.preventDefault();
+        onChange(HEATMAP_OPTIONS[focusIndex].value);
+        setOpen(false);
+        break;
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -370,11 +416,14 @@ const HeatmapSelector = ({
         <Button
           variant="outline"
           size="sm"
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-label={`${t("chooseMarket")}: ${current.label}`}
           className="gap-2 border-border/60 bg-background/40 hover:bg-background/80"
         >
-          <span className="text-base leading-none">{current.flag}</span>
+          <span className="text-base leading-none" aria-hidden="true">{current.flag}</span>
           <span className="font-medium">{current.label}</span>
-          <ChevronDown className="h-4 w-4 opacity-60" />
+          <ChevronDown className="h-4 w-4 opacity-60" aria-hidden="true" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
@@ -384,24 +433,41 @@ const HeatmapSelector = ({
             {t("switchHeatmap")}
           </DialogDescription>
         </DialogHeader>
-        <div className="mt-2 flex max-h-[60vh] flex-col gap-2 overflow-y-auto pr-1">
-          {HEATMAP_OPTIONS.map((opt) => {
+        <div
+          id={listboxId}
+          role="listbox"
+          aria-label={t("chooseMarket")}
+          aria-activedescendant={`heatmap-opt-${HEATMAP_OPTIONS[focusIndex]?.value}`}
+          tabIndex={-1}
+          onKeyDown={handleListKeyDown}
+          className="mt-2 flex max-h-[60vh] flex-col gap-2 overflow-y-auto pr-1 focus:outline-none"
+        >
+          {HEATMAP_OPTIONS.map((opt, i) => {
             const active = opt.value === value;
+            const focused = i === focusIndex;
             return (
               <button
                 key={opt.value}
+                id={`heatmap-opt-${opt.value}`}
+                ref={(el) => { itemRefs.current[i] = el; }}
+                role="option"
+                aria-selected={active}
+                tabIndex={focused ? 0 : -1}
                 onClick={() => {
                   onChange(opt.value);
                   setOpen(false);
                 }}
+                onFocus={() => setFocusIndex(i)}
                 className={cn(
                   "flex items-center gap-3 rounded-lg border p-3 text-left transition-all",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                   active
                     ? "border-primary bg-primary/10 ring-1 ring-primary/40"
-                    : "border-border/60 bg-card/50 hover:border-primary/50 hover:bg-card"
+                    : "border-border/60 bg-card/50 hover:border-primary/50 hover:bg-card",
+                  focused && !active && "border-primary/60"
                 )}
               >
-                <span className="text-2xl leading-none">{opt.flag}</span>
+                <span className="text-2xl leading-none" aria-hidden="true">{opt.flag}</span>
                 <div className="flex-1">
                   <div className="font-semibold">{opt.label}</div>
                   <div className="text-xs text-muted-foreground">{opt.description}</div>
