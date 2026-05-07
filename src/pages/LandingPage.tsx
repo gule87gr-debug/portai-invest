@@ -657,7 +657,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
                   </div>
                   <h3 className="text-sm font-semibold text-foreground">{t(f.key)}</h3>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">{lt(f.descKey)}</p>
               </div>
             </RevealSection>
           ))}
