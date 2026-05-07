@@ -704,11 +704,26 @@ type LanguageState = {
 
 const LanguageContext = createContext<LanguageState | null>(null);
 
-export const LanguageProvider = ({ children, initialLanguage = "en" }: { children: ReactNode; initialLanguage?: Language }) => {
-  const [language, setLanguageState] = useState<Language>(initialLanguage);
-  const [hasUserChanged, setHasUserChanged] = useState(false);
+const LANG_STORAGE_KEY = "portai.language";
+const isValidLanguage = (v: unknown): v is Language =>
+  typeof v === "string" && ["en", "es", "fr", "pt", "de", "it"].includes(v);
 
-  // Sync from DB on load, but don't override manual user changes
+export const LanguageProvider = ({ children, initialLanguage = "en" }: { children: ReactNode; initialLanguage?: Language }) => {
+  const [language, setLanguageState] = useState<Language>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem(LANG_STORAGE_KEY);
+      if (isValidLanguage(stored)) return stored;
+    }
+    return initialLanguage;
+  });
+  const [hasUserChanged, setHasUserChanged] = useState(() => {
+    if (typeof window !== "undefined") {
+      return isValidLanguage(localStorage.getItem(LANG_STORAGE_KEY));
+    }
+    return false;
+  });
+
+  // Sync from DB on load, but don't override manual/stored user choice
   React.useEffect(() => {
     if (!hasUserChanged) {
       setLanguageState(initialLanguage as Language);
@@ -718,7 +733,9 @@ export const LanguageProvider = ({ children, initialLanguage = "en" }: { childre
   const setLanguage = (lang: Language) => {
     setHasUserChanged(true);
     setLanguageState(lang);
+    try { localStorage.setItem(LANG_STORAGE_KEY, lang); } catch {}
   };
+
 
   const t = (key: string): string => {
     return translations[language]?.[key] || translations.en[key] || key;
