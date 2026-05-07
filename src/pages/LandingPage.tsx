@@ -1,17 +1,13 @@
 import { Brain, BarChart3, MessageSquare, Eye, ArrowRight, Sparkles, LayoutDashboard, Shield, Globe, ChevronRight, Zap, ShieldCheck, Lock, Fingerprint, CheckCircle2, ChevronDown, Search, Activity, Database, CreditCard, Cpu, AlertCircle, FileText, Crown, HelpCircle, Quote, Users, Info } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLanguage, type Language } from "@/contexts/LanguageContext";
+import { useLandingT } from "@/lib/landingI18n";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-const supportingFeatures = [
-  { icon: LayoutDashboard, key: "marketIntelligence", desc: "Live S&P 500 heatmap and curated news feed." },
-  { icon: Brain, key: "aiChat", desc: "Personal AI advisor for stocks, ETFs and strategy." },
-  { icon: Sparkles, key: "quiz", desc: "Personalized portfolio quiz in 5 questions." },
-  { icon: Eye, key: "watchlists", desc: "Track 10,000+ assets across 20+ countries." },
-  { icon: MessageSquare, key: "forum", desc: "Community media-bias dashboard, live." },
-  { icon: Globe, key: "settings", desc: "Available in 6 languages, instantly switchable." },
-];
+const supportingFeatureIcons = [LayoutDashboard, Brain, Sparkles, Eye, MessageSquare, Globe] as const;
+const supportingFeatureKeys = ["marketIntelligence", "aiChat", "quiz", "watchlists", "forum", "settings"] as const;
+const supportingFeatureDescKeys = ["supF1Desc", "supF2Desc", "supF3Desc", "supF4Desc", "supF5Desc", "supF6Desc"] as const;
 
 function useScrollReveal() {
   const ref = useRef<HTMLDivElement>(null);
