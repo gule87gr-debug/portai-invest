@@ -460,19 +460,19 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           aria-labelledby="institutional-tracking-heading"
           className="px-4 sm:px-6 py-14 max-w-5xl mx-auto border-t border-border"
         >
-          <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-primary mb-2">Section B</p>
+          <p className="text-center text-xs font-bold uppercase tracking-[0.18em] text-primary mb-2">{lt("sectionB")}</p>
           <h2 id="institutional-tracking-heading" className="text-center editorial-heading text-3xl sm:text-4xl text-foreground mb-3">
-            Professional Investment Tracking
+            {lt("proTracking")}
           </h2>
           <p className="text-center text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-10">
-            A real-time S&amp;P 500 heatmap, multi-asset watchlist, custom stock price alerts, and a unified crypto portfolio tracker — engineered for retail investors who want institutional clarity.
+            {lt("proTrackingDesc")}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
-              { icon: BarChart3, title: "Real-Time S&P 500 Heatmap", body: "Live sector and constituent heatmap powered by TradingView, refreshed throughout the trading session." },
-              { icon: Eye, title: "Multi-Asset Watchlist", body: "Track 10,000+ stocks, ETFs and crypto across 20+ countries in a single, sortable watchlist." },
-              { icon: Zap, title: "Stock Price Alerts", body: "Set custom price thresholds and get notified the moment your target is breached." },
-              { icon: Activity, title: "Crypto Portfolio Tracker", body: "Aggregate BTC, ETH, and altcoin positions alongside equities for a true total-portfolio view." },
+              { icon: BarChart3, title: lt("featB1Title"), body: lt("featB1Body") },
+              { icon: Eye, title: lt("featB2Title"), body: lt("featB2Body") },
+              { icon: Zap, title: lt("featB3Title"), body: lt("featB3Body") },
+              { icon: Activity, title: lt("featB4Title"), body: lt("featB4Body") },
             ].map((f, i) => (
               <article key={f.title} className="glass-card rounded-2xl p-5 h-full card-hover" style={{ transitionDelay: `${i * 60}ms` }}>
                 <div className="flex items-center gap-3 mb-2">
