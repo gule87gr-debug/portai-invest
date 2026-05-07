@@ -11,6 +11,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import LandingPage from "./pages/LandingPage";
 import { CookieConsent } from "./components/CookieConsent";
+import { RouteSkeleton } from "./components/RouteSkeleton";
 
 // Lazy-load every authenticated/secondary route to keep the initial bundle small
 const Dashboard = lazy(() => import("./pages/Dashboard"));
