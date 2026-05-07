@@ -4,9 +4,11 @@ import {
   AreaChart, Area, LineChart, Line, XAxis, YAxis, Tooltip, Legend,
   ResponsiveContainer, ReferenceLine,
 } from "recharts";
-import { Loader2, AlertTriangle, Plus, X, Search } from "lucide-react";
+import { Loader2, AlertTriangle, Plus, X, Search, Lock, GitCompareArrows } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { searchAssets, type AssetEntry } from "@/lib/stockDatabase";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useNavigate } from "react-router-dom";
 
 export type ChartRange = "1D" | "1W" | "1M" | "3M" | "1Y" | "ALL";
 
@@ -50,6 +52,8 @@ async function fetchSeries(ticker: string, type: string | undefined, range: Char
 
 export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceChartProps) => {
   const [range, setRange] = useState<ChartRange>("1M");
+  const { isPaid, loading: subLoading } = useSubscription();
+  const navigate = useNavigate();
   const [primary, setPrimary] = useState<HistoryResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -173,6 +177,10 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
   }, [query, extras, primaryUpper]);
 
   const addCompare = (a: AssetEntry) => {
+    if (!isPaid) {
+      navigate("/upgrade");
+      return;
+    }
     if (extras.length >= 4) return;
     const usedColors = new Set(extras.map((e) => e.color));
     const color = COMPARE_COLORS.find((c) => !usedColors.has(c)) || COMPARE_COLORS[0];
@@ -243,10 +251,15 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
             {!searchOpen ? (
               <button
                 type="button"
-                onClick={() => setSearchOpen(true)}
-                className="inline-flex items-center gap-1 rounded-md border border-dashed border-border px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:border-primary/60 transition-colors"
+                onClick={() => {
+                  if (!subLoading && !isPaid) { navigate("/upgrade"); return; }
+                  setSearchOpen(true);
+                }}
+                className="inline-flex items-center gap-1.5 rounded-md border border-primary/60 bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary shadow-sm hover:bg-primary/25 hover:border-primary transition-colors"
               >
-                <Plus className="h-3 w-3" /> Compare
+                <GitCompareArrows className="h-3.5 w-3.5" />
+                Compare
+                {!subLoading && !isPaid && <Lock className="h-3 w-3 opacity-80" />}
               </button>
             ) : (
               <div className="flex items-center gap-1.5 rounded-md border border-border bg-background px-2 py-1">
