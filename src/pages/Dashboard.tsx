@@ -36,6 +36,10 @@ const Dashboard = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState("");
+  const [limitReached, setLimitReached] = useState(false);
+  // Only reveal the remaining-analyses counter after we've confirmed an article
+  // was actually accepted (so a "not an article" reply never makes the badge tick down)
+  const [showRemaining, setShowRemaining] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const { isPro, dailyAnalysesUsed, canAnalyze, refresh } = useSubscription();
   const [searchParams] = useSearchParams();
@@ -67,17 +71,34 @@ const Dashboard = () => {
   const handleAnalyze = async () => {
     if (!url.trim()) return;
     if (!canAnalyze) {
+      setLimitReached(true);
       setShowUpgrade(true);
       return;
     }
     setIsAnalyzing(true);
     setResult(null);
     setError("");
+    setLimitReached(false);
     try {
       const { data, error: fnError } = await supabase.functions.invoke("analyze-link", { body: { url: url.trim() } });
-      if (fnError) throw new Error(fnError.message);
-      if (data?.error) throw new Error(data.error);
+      if (fnError) {
+        // Edge function returned non-2xx — surface limit-reached specifically
+        const msg = String(fnError.message || "");
+        if (/limit/i.test(msg) || /429/.test(msg)) {
+          setLimitReached(true);
+          return;
+        }
+        throw new Error(fnError.message);
+      }
+      if (data?.error) {
+        if (/limit/i.test(String(data.error))) {
+          setLimitReached(true);
+          return;
+        }
+        throw new Error(data.error);
+      }
       if (data?.notArticle) {
+        // Non-article — does NOT consume a credit; keep the counter hidden
         setError(data.reason || "The link you provided doesn't appear to be a news article. Please paste a direct link to a written article.");
         return;
       }
@@ -85,6 +106,8 @@ const Dashboard = () => {
         setResult(data.analysis);
         await trackAnalysis();
         await refresh();
+        // Now that a credit was actually used, reveal the remaining counter
+        setShowRemaining(true);
       } else throw new Error("No analysis returned");
     } catch (e: any) {
       setError(e.message || "Analysis failed");
@@ -95,7 +118,8 @@ const Dashboard = () => {
 
   const trustColor = (score: number) => score >= 7 ? "text-gain" : score >= 5 ? "text-warning" : "text-loss";
   const trustBorder = (score: number) => score >= 7 ? "border-gain/40" : score >= 5 ? "border-warning/40" : "border-loss/40";
-  const remaining = FREE_DAILY_ANALYSES - dailyAnalysesUsed;
+  const remaining = Math.max(0, FREE_DAILY_ANALYSES - dailyAnalysesUsed);
+
 
   return (
     <AppLayout>
