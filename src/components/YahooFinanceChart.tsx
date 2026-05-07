@@ -251,10 +251,15 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
             {!searchOpen ? (
               <button
                 type="button"
-                onClick={() => setSearchOpen(true)}
-                className="inline-flex items-center gap-1 rounded-md border border-dashed border-border px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:border-primary/60 transition-colors"
+                onClick={() => {
+                  if (!subLoading && !isPaid) { navigate("/upgrade"); return; }
+                  setSearchOpen(true);
+                }}
+                className="inline-flex items-center gap-1.5 rounded-md border border-primary/60 bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary shadow-sm hover:bg-primary/25 hover:border-primary transition-colors"
               >
-                <Plus className="h-3 w-3" /> Compare
+                <GitCompareArrows className="h-3.5 w-3.5" />
+                Compare
+                {!subLoading && !isPaid && <Lock className="h-3 w-3 opacity-80" />}
               </button>
             ) : (
               <div className="flex items-center gap-1.5 rounded-md border border-border bg-background px-2 py-1">
