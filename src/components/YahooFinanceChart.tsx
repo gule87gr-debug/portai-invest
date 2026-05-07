@@ -8,7 +8,7 @@ import { Loader2, AlertTriangle, Plus, X, Search, Lock, GitCompareArrows } from 
 import { cn } from "@/lib/utils";
 import { searchAssets, type AssetEntry } from "@/lib/stockDatabase";
 import { useSubscription } from "@/hooks/useSubscription";
-import { useNavigate } from "react-router-dom";
+import { UpgradeModal } from "@/components/UpgradeModal";
 
 export type ChartRange = "1D" | "1W" | "1M" | "3M" | "1Y" | "ALL";
 
