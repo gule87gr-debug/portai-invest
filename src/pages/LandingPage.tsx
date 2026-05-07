@@ -193,7 +193,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
                 onClick={handleAnalyze}
                 className={`flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm sm:text-base font-bold text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97] shrink-0 ${url.trim().length > 8 ? "hero-input-pulse" : ""}`}
               >
-                Analyze News Bias <ArrowRight className="h-4 w-4" />
+                {lt("heroAnalyzeBtn")} <ArrowRight className="h-4 w-4" />
               </button>
             </div>
           </div>
