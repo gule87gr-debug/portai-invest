@@ -252,10 +252,10 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Bias Analysis Report</p>
                 <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 border border-primary/30 px-2 py-0.5 text-[10px] font-bold text-primary"><ShieldCheck className="h-3 w-3" /> Pro</span>
               </div>
-              <div className="rounded-lg border border-border/60 bg-card/40 p-3 mb-3">
-                <p className="text-[10px] text-muted-foreground mb-1">CNBC · Tesla Q1 Earnings Beat</p>
+              <div className="rounded-lg border border-border bg-card/40 p-3 mb-3">
+                <p className="text-[10px] text-muted-foreground mb-1 font-mono uppercase tracking-wider">CNBC · Tesla Q1 Earnings Beat</p>
                 <div className="flex items-baseline gap-2">
-                  <p className="text-3xl font-bold font-mono text-primary">6.4</p>
+                  <span className="ink-circle"><span className="text-3xl font-bold font-mono text-primary">6.4</span></span>
                   <p className="text-[11px] text-muted-foreground">/ 10 Trust Score</p>
                 </div>
                 <div className="mt-2 h-1.5 w-full rounded-full bg-border overflow-hidden">
