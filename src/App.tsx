@@ -7,30 +7,38 @@ import { AppProvider, useApp } from "@/contexts/AppContext";
 import { LanguageProvider, Language } from "@/contexts/LanguageContext";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { OnboardingTutorial } from "@/components/OnboardingTutorial";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import Dashboard from "./pages/Dashboard";
-import AIChat from "./pages/AIChat";
-import Quiz from "./pages/Quiz";
-import Forum from "./pages/Forum";
-import Watchlists from "./pages/Watchlists";
-import StockDetail from "./pages/StockDetail";
-import SettingsPage from "./pages/SettingsPage";
-import AuthPage from "./pages/AuthPage";
 import LandingPage from "./pages/LandingPage";
-import ResetPassword from "./pages/ResetPassword";
-import NotFound from "./pages/NotFound";
-import Pricing from "./pages/Pricing";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsOfService from "./pages/TermsOfService";
-import Unsubscribe from "./pages/Unsubscribe";
-import UpgradeSuccess from "./pages/UpgradeSuccess";
-import BillingConsents from "./pages/BillingConsents";
-import DataCompliance from "./pages/DataCompliance";
-import IPPolicy from "./pages/IPPolicy";
 import { CookieConsent } from "./components/CookieConsent";
 
+// Lazy-load every authenticated/secondary route to keep the initial bundle small
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const AIChat = lazy(() => import("./pages/AIChat"));
+const Quiz = lazy(() => import("./pages/Quiz"));
+const Forum = lazy(() => import("./pages/Forum"));
+const Watchlists = lazy(() => import("./pages/Watchlists"));
+const StockDetail = lazy(() => import("./pages/StockDetail"));
+const SettingsPage = lazy(() => import("./pages/SettingsPage"));
+const AuthPage = lazy(() => import("./pages/AuthPage"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Pricing = lazy(() => import("./pages/Pricing"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
+const UpgradeSuccess = lazy(() => import("./pages/UpgradeSuccess"));
+const BillingConsents = lazy(() => import("./pages/BillingConsents"));
+const DataCompliance = lazy(() => import("./pages/DataCompliance"));
+const IPPolicy = lazy(() => import("./pages/IPPolicy"));
+
 const queryClient = new QueryClient();
+
+const RouteFallback = () => (
+  <div className="flex min-h-screen items-center justify-center bg-background">
+    <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+  </div>
+);
 
 const AppWithLanguage = () => {
   const { initialLanguage, showTutorial, setShowTutorial } = useApp();
@@ -44,21 +52,22 @@ const AppWithLanguage = () => {
           navigate("/dashboard");
         }} />
       )}
-      <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/chat" element={<AIChat />} />
-        <Route path="/quiz" element={<Quiz />} />
-        <Route path="/forum" element={<Forum />} />
-        <Route path="/watchlists" element={<Watchlists />} />
-        <Route path="/stock/:ticker" element={<StockDetail />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/pricing" element={<Pricing />} />
-        <Route path="/upgrade-success" element={<UpgradeSuccess />} />
-        <Route path="/billing-consents" element={<BillingConsents />} />
-        <Route path="*" element={<NotFound />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/chat" element={<AIChat />} />
+          <Route path="/quiz" element={<Quiz />} />
+          <Route path="/forum" element={<Forum />} />
+          <Route path="/watchlists" element={<Watchlists />} />
+          <Route path="/stock/:ticker" element={<StockDetail />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/upgrade-success" element={<UpgradeSuccess />} />
+          <Route path="/billing-consents" element={<BillingConsents />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </LanguageProvider>
   );
 };
@@ -93,24 +102,29 @@ const AppRoutes = () => {
   };
 
   if (session === undefined) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-      </div>
-    );
+    return <RouteFallback />;
   }
 
   if (!session) {
     return (
       <LanguageProvider initialLanguage="en">
-        {showAuth ? <AuthPage onAuth={() => {}} /> : <LandingPage onGetStarted={handleGetStarted} />}
+        {showAuth ? (
+          <Suspense fallback={<RouteFallback />}>
+            <AuthPage onAuth={() => {}} />
+          </Suspense>
+        ) : (
+          <LandingPage onGetStarted={handleGetStarted} />
+        )}
       </LanguageProvider>
     );
   }
 
-  // If user arrived via password recovery, force them to set a new password
   if (passwordRecovery) {
-    return <ResetPassword onComplete={handlePasswordResetComplete} />;
+    return (
+      <Suspense fallback={<RouteFallback />}>
+        <ResetPassword onComplete={handlePasswordResetComplete} />
+      </Suspense>
+    );
   }
 
   return (
@@ -128,14 +142,16 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/terms-of-service" element={<TermsOfService />} />
-          <Route path="/data-compliance" element={<DataCompliance />} />
-          <Route path="/ip-policy" element={<IPPolicy />} />
-          <Route path="/unsubscribe" element={<Unsubscribe />} />
-          <Route path="*" element={<AppRoutes />} />
-        </Routes>
+        <Suspense fallback={<RouteFallback />}>
+          <Routes>
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
+            <Route path="/data-compliance" element={<DataCompliance />} />
+            <Route path="/ip-policy" element={<IPPolicy />} />
+            <Route path="/unsubscribe" element={<Unsubscribe />} />
+            <Route path="*" element={<AppRoutes />} />
+          </Routes>
+        </Suspense>
         <CookieConsent />
       </BrowserRouter>
     </TooltipProvider>
