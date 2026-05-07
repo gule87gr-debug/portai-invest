@@ -117,7 +117,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
             <button
               onClick={() => setLangOpen((o) => !o)}
               className="flex items-center gap-1.5 rounded-lg border border-border bg-card/60 px-3 py-2 text-xs font-medium text-foreground hover:bg-accent transition-colors"
-              aria-label="Change language"
+              aria-label={lt("changeLanguage")}
             >
               <Globe className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">{languageNames[language]}</span>
