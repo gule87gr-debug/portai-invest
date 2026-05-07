@@ -38,7 +38,16 @@ const Dashboard = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState("");
-  const [heatmapSource, setHeatmapSource] = useState("SPX500");
+  const [heatmapSource, setHeatmapSource] = useState<string>(() => {
+    try {
+      return localStorage.getItem("portai.heatmapSource") || "SPX500";
+    } catch {
+      return "SPX500";
+    }
+  });
+  useEffect(() => {
+    try { localStorage.setItem("portai.heatmapSource", heatmapSource); } catch { /* ignore */ }
+  }, [heatmapSource]);
   const [limitReached, setLimitReached] = useState(false);
   // Only reveal the remaining-analyses counter after we've confirmed an article
   // was actually accepted (so a "not an article" reply never makes the badge tick down)
