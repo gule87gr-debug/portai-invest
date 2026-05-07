@@ -177,6 +177,10 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
   }, [query, extras, primaryUpper]);
 
   const addCompare = (a: AssetEntry) => {
+    if (!isPaid) {
+      navigate("/upgrade");
+      return;
+    }
     if (extras.length >= 4) return;
     const usedColors = new Set(extras.map((e) => e.color));
     const color = COMPARE_COLORS.find((c) => !usedColors.has(c)) || COMPARE_COLORS[0];
