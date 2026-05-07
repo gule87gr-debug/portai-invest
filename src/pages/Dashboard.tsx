@@ -182,16 +182,15 @@ const Dashboard = () => {
             <div className="flex items-start gap-2">
               <Lock className="h-4 w-4 text-primary mt-0.5 shrink-0" />
               <p className="text-sm text-foreground">
-                You've used your <span className="font-semibold">{FREE_DAILY_ANALYSES}</span> free
-                {FREE_DAILY_ANALYSES === 1 ? " analysis" : " analyses"} for today.
-                Your quota resets at midnight, or upgrade to Pro for unlimited analyses.
+                {FREE_DAILY_ANALYSES === 1 ? t("freeAnalysisUsedSingle") : t("freeAnalysesUsedMulti")}{" "}
+                {t("quotaResets")}
               </p>
             </div>
             <button
               onClick={() => setShowUpgrade(true)}
               className="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground hover:bg-primary/90 transition-colors"
             >
-              <Crown className="h-3.5 w-3.5" /> Upgrade to Pro
+              <Crown className="h-3.5 w-3.5" /> {t("upgradeToPro")}
             </button>
           </div>
         )}
