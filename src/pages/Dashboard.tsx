@@ -365,7 +365,7 @@ const HeatmapSelector = ({
   const current = HEATMAP_OPTIONS.find((o) => o.value === value) ?? HEATMAP_OPTIONS[0];
   const initialIndex = Math.max(0, HEATMAP_OPTIONS.findIndex((o) => o.value === value));
   const [focusIndex, setFocusIndex] = useState(initialIndex);
-  const itemRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
+  const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const listboxId = "heatmap-listbox";
 
   // When the dialog opens, sync focus to the currently selected option
