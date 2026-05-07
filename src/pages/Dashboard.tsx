@@ -336,9 +336,19 @@ const Dashboard = () => {
 const HEATMAP_OPTIONS: { value: string; label: string; flag: string; description: string }[] = [
   { value: "SPX500", label: "S&P 500", flag: "🇺🇸", description: "Top 500 US large-cap stocks" },
   { value: "NASDAQ100", label: "Nasdaq 100", flag: "🇺🇸", description: "Largest US tech & growth names" },
+  { value: "DJI", label: "Dow Jones 30", flag: "🇺🇸", description: "30 major US blue-chip companies" },
+  { value: "NYSE", label: "NYSE Composite", flag: "🇺🇸", description: "All stocks listed on the NYSE" },
   { value: "FTSE100", label: "FTSE 100", flag: "🇬🇧", description: "Top UK companies on the LSE" },
   { value: "DAX40", label: "DAX 40", flag: "🇩🇪", description: "Largest German blue chips" },
+  { value: "CAC40", label: "CAC 40", flag: "🇫🇷", description: "Top French companies on Euronext Paris" },
+  { value: "IBEX35", label: "IBEX 35", flag: "🇪🇸", description: "Leading Spanish stocks (BME)" },
+  { value: "SMI20", label: "Swiss SMI 20", flag: "🇨🇭", description: "Largest Swiss blue chips" },
   { value: "NIKKEI225", label: "Nikkei 225", flag: "🇯🇵", description: "Leading companies on the Tokyo exchange" },
+  { value: "HSI", label: "Hang Seng", flag: "🇭🇰", description: "Top Hong Kong listed companies" },
+  { value: "KOSPI", label: "KOSPI", flag: "🇰🇷", description: "Largest South Korean stocks" },
+  { value: "SENSEX", label: "BSE Sensex", flag: "🇮🇳", description: "Top 30 Indian stocks on BSE" },
+  { value: "ASX200", label: "ASX 200", flag: "🇦🇺", description: "Top 200 Australian companies" },
+  { value: "BOVESPA", label: "Bovespa", flag: "🇧🇷", description: "Leading Brazilian stocks (B3)" },
 ];
 
 const HeatmapSelector = ({
@@ -368,7 +378,7 @@ const HeatmapSelector = ({
             Switch the heatmap to view a different global index.
           </DialogDescription>
         </DialogHeader>
-        <div className="mt-2 flex flex-col gap-2">
+        <div className="mt-2 flex max-h-[60vh] flex-col gap-2 overflow-y-auto pr-1">
           {HEATMAP_OPTIONS.map((opt) => {
             const active = opt.value === value;
             return (
