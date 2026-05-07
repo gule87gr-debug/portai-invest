@@ -352,6 +352,7 @@ const HeatmapSelector = ({
   onChange,
 }: { value: string; onChange: (v: string) => void }) => {
   const [open, setOpen] = useState(false);
+  const { t } = useLanguage();
   const current = HEATMAP_OPTIONS.find((o) => o.value === value) ?? HEATMAP_OPTIONS[0];
 
   return (
@@ -369,9 +370,9 @@ const HeatmapSelector = ({
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Choose a market</DialogTitle>
+          <DialogTitle>{t("chooseMarket")}</DialogTitle>
           <DialogDescription>
-            Switch the heatmap to view a different global index.
+            {t("switchHeatmap")}
           </DialogDescription>
         </DialogHeader>
         <div className="mt-2 flex max-h-[60vh] flex-col gap-2 overflow-y-auto pr-1">
@@ -398,7 +399,7 @@ const HeatmapSelector = ({
                 </div>
                 {active && (
                   <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
-                    Active
+                    {t("active")}
                   </span>
                 )}
               </button>
