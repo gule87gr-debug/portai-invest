@@ -71,7 +71,7 @@ export const TrendingStocks = () => {
       <div className="rounded-xl border border-border bg-card p-4">
         <div className="flex items-center gap-2 mb-4">
           <Flame className="h-5 w-5 text-warning" />
-          <h2 className="text-lg font-semibold">Trending on PortAI</h2>
+          <h2 className="text-lg font-semibold">{t("trendingOnPortai")}</h2>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -91,7 +91,7 @@ export const TrendingStocks = () => {
       <div className="rounded-xl border border-border bg-card p-4">
         <div className="flex items-center gap-2 mb-3">
           <Flame className="h-5 w-5 text-warning" />
-          <h2 className="text-lg font-semibold">Trending on PortAI</h2>
+          <h2 className="text-lg font-semibold">{t("trendingOnPortai")}</h2>
         </div>
         <p className="text-sm text-muted-foreground">
           No trending stocks yet this week. Add stocks to your watchlists to see what's popular!
@@ -104,8 +104,8 @@ export const TrendingStocks = () => {
     <div className="rounded-xl border border-border bg-card p-4">
       <div className="flex items-center gap-2 mb-4">
         <Flame className="h-5 w-5 text-warning" />
-        <h2 className="text-lg font-semibold">Trending on PortAI</h2>
-        <span className="ml-auto text-[10px] text-muted-foreground uppercase tracking-wider">This week</span>
+        <h2 className="text-lg font-semibold">{t("trendingOnPortai")}</h2>
+        <span className="ml-auto text-[10px] text-muted-foreground uppercase tracking-wider">{t("thisWeek")}</span>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {trending.map((stock, i) => {
