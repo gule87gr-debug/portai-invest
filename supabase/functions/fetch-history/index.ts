@@ -35,9 +35,27 @@ function toYahooSymbol(ticker: string, type?: string): string {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  // IP-based rate limit to prevent abuse as anonymous Yahoo Finance proxy
-  const ip = getClientIP(req);
-  const rl = checkRateLimit(`fetch-history:${ip}`, { maxRequests: 30, windowMs: 60_000 });
+  // Require authenticated user
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) {
+    return new Response(JSON.stringify({ error: "Authentication required" }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  const supabaseAdmin = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    { auth: { persistSession: false } }
+  );
+  const { data: userData } = await supabaseAdmin.auth.getUser(authHeader.replace("Bearer ", ""));
+  if (!userData?.user) {
+    return new Response(JSON.stringify({ error: "Invalid or expired token" }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // Per-user rate limit (defence-in-depth)
+  const rl = checkRateLimit(`fetch-history:${userData.user.id}`, { maxRequests: 60, windowMs: 60_000 });
   if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs, corsHeaders);
 
   try {
