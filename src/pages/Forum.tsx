@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Activity,
   ThumbsUp,
@@ -227,6 +228,7 @@ const toneClasses = {
 const Forum = () => {
   usePageTitle("AI Media Bias Pulse | PortAI");
   const { toast } = useToast();
+  const { t } = useLanguage();
   const { isPro, isPaid } = useSubscription();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [articles, setArticles] = useState<AnalyzedArticle[]>([]);
