@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { checkRateLimit, getClientIP, rateLimitResponse } from "../_shared/rate-limiter.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { checkRateLimit, rateLimitResponse } from "../_shared/rate-limiter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -33,8 +34,26 @@ interface Body {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const ip = getClientIP(req);
-  const rl = checkRateLimit(`describe-asset:${ip}`, { maxRequests: 30, windowMs: 60_000 });
+  // Require authenticated user (prevents AI credit abuse)
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) {
+    return new Response(JSON.stringify({ error: "Authentication required" }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  const supabaseAdmin = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    { auth: { persistSession: false } }
+  );
+  const { data: userData } = await supabaseAdmin.auth.getUser(authHeader.replace("Bearer ", ""));
+  if (!userData?.user) {
+    return new Response(JSON.stringify({ error: "Invalid or expired token" }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  const rl = checkRateLimit(`describe-asset:${userData.user.id}`, { maxRequests: 30, windowMs: 60_000 });
   if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs, corsHeaders);
 
   try {

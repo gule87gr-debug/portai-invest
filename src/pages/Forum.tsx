@@ -239,13 +239,23 @@ const Forum = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("analyzed_articles")
-      .select("*")
+      .select("id, url, source, title, bias_score, red_flag, summary, vindicate_count, view_count, created_at")
       .order("created_at", { ascending: false })
       .limit(50);
     if (error) {
       toast({ title: "Could not load Pulse", description: error.message, variant: "destructive" });
     } else {
-      setArticles((data ?? []) as AnalyzedArticle[]);
+      let rows = (data ?? []).map((r: any) => ({ ...r, hidden_angle: "", pro_deep_dive: null })) as AnalyzedArticle[];
+      // For Pro/Plus subscribers, fetch premium fields via authenticated edge function
+      if (isPaid && rows.length) {
+        const { data: prem } = await supabase.functions.invoke("get-premium-articles", {
+          body: { ids: rows.map((r) => r.id) },
+        });
+        const map = new Map<string, { hidden_angle: string; pro_deep_dive: ProDeepDive | null }>();
+        for (const a of (prem as any)?.articles ?? []) map.set(a.id, { hidden_angle: a.hidden_angle ?? "", pro_deep_dive: a.pro_deep_dive ?? null });
+        rows = rows.map((r) => ({ ...r, ...(map.get(r.id) ?? {}) }));
+      }
+      setArticles(rows);
     }
     // Load this user's existing likes so the heart state persists
     const { data: userRes } = await supabase.auth.getUser();
@@ -267,7 +277,10 @@ const Forum = () => {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "analyzed_articles" },
         (payload) => {
-          setArticles((prev) => [payload.new as AnalyzedArticle, ...prev].slice(0, 50));
+          const row = payload.new as AnalyzedArticle;
+          // Strip premium fields from realtime payload; Pro fetch happens via edge function
+          const safe: AnalyzedArticle = { ...row, hidden_angle: "", pro_deep_dive: null };
+          setArticles((prev) => [safe, ...prev].slice(0, 50));
         },
       )
       .subscribe();
