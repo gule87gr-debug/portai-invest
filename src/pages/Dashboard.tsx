@@ -351,10 +351,10 @@ const HEATMAP_OPTIONS: { value: string; label: string; flag: string; descKey: st
   { value: "CAC40", label: "CAC 40", flag: "🇫🇷", descKey: "hmDesc_CAC40" },
   { value: "IBEX35", label: "IBEX 35", flag: "🇪🇸", descKey: "hmDesc_IBEX35" },
   { value: "SMI20", label: "Swiss SMI 20", flag: "🇨🇭", descKey: "hmDesc_SMI20" },
-  { value: "NIKKEI225", label: "Nikkei 225", flag: "🇯🇵", descKey: "hmDesc_NIKKEI225" },
+  { value: "Nikkei225", label: "Nikkei 225", flag: "🇯🇵", descKey: "hmDesc_NIKKEI225" },
   { value: "HSI", label: "Hang Seng", flag: "🇭🇰", descKey: "hmDesc_HSI" },
   { value: "KOSPI", label: "KOSPI", flag: "🇰🇷", descKey: "hmDesc_KOSPI" },
-  { value: "SENSEX", label: "BSE Sensex", flag: "🇮🇳", descKey: "hmDesc_SENSEX" },
+  { value: "BSESENSEX", label: "BSE Sensex", flag: "🇮🇳", descKey: "hmDesc_SENSEX" },
   { value: "ASX200", label: "ASX 200", flag: "🇦🇺", descKey: "hmDesc_ASX200" },
   { value: "BOVESPA", label: "Bovespa", flag: "🇧🇷", descKey: "hmDesc_BOVESPA" },
 ];
