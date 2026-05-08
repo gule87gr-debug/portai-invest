@@ -78,15 +78,15 @@ export const CookieConsent = () => {
 
               {showDetails && (
                 <div className="mt-3 space-y-2 rounded-lg border border-border bg-background/50 p-3">
-                  <label className="flex items-center justify-between">
-                    <div>
+                  <label className="flex items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
                       <span className="text-xs font-medium text-foreground">{t("cookieEssential")}</span>
                       <p className="text-[10px] text-muted-foreground">{t("cookieEssentialDesc")}</p>
                     </div>
-                    <input type="checkbox" checked disabled className="accent-primary h-4 w-4 rounded" />
+                    <input type="checkbox" checked disabled className="accent-primary h-4 w-4 shrink-0 rounded" />
                   </label>
-                  <label className="flex items-center justify-between cursor-pointer">
-                    <div>
+                  <label className="flex items-center justify-between gap-3 cursor-pointer">
+                    <div className="min-w-0 flex-1">
                       <span className="text-xs font-medium text-foreground">{t("cookieAnalytics")}</span>
                       <p className="text-[10px] text-muted-foreground">{t("cookieAnalyticsDesc")}</p>
                     </div>
@@ -94,11 +94,11 @@ export const CookieConsent = () => {
                       type="checkbox"
                       checked={prefs.analytics}
                       onChange={(e) => setPrefs({ ...prefs, analytics: e.target.checked })}
-                      className="accent-primary h-4 w-4 rounded"
+                      className="accent-primary h-4 w-4 shrink-0 rounded"
                     />
                   </label>
-                  <label className="flex items-center justify-between cursor-pointer">
-                    <div>
+                  <label className="flex items-center justify-between gap-3 cursor-pointer">
+                    <div className="min-w-0 flex-1">
                       <span className="text-xs font-medium text-foreground">{t("cookieFunctional")}</span>
                       <p className="text-[10px] text-muted-foreground">{t("cookieFunctionalDesc")}</p>
                     </div>
@@ -106,7 +106,7 @@ export const CookieConsent = () => {
                       type="checkbox"
                       checked={prefs.functional}
                       onChange={(e) => setPrefs({ ...prefs, functional: e.target.checked })}
-                      className="accent-primary h-4 w-4 rounded"
+                      className="accent-primary h-4 w-4 shrink-0 rounded"
                     />
                   </label>
                   <button
@@ -118,16 +118,16 @@ export const CookieConsent = () => {
                 </div>
               )}
 
-              <div className="mt-3 flex items-center gap-2">
+              <div className="mt-3 flex flex-wrap items-center gap-2">
                 <button
                   onClick={handleAcceptAll}
-                  className="rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground transition-all hover:bg-primary/90 active:scale-[0.97]"
+                  className="flex-1 min-w-[120px] rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground transition-all hover:bg-primary/90 active:scale-[0.97]"
                 >
                   {t("acceptAll")}
                 </button>
                 <button
                   onClick={handleRejectAll}
-                  className="rounded-lg border border-border bg-secondary px-4 py-2 text-xs font-medium text-secondary-foreground transition-all hover:bg-secondary/80 active:scale-[0.97]"
+                  className="flex-1 min-w-[120px] rounded-lg border border-border bg-secondary px-4 py-2 text-xs font-medium text-secondary-foreground transition-all hover:bg-secondary/80 active:scale-[0.97]"
                 >
                   {t("rejectAll")}
                 </button>
