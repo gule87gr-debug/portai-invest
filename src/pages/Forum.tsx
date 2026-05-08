@@ -277,7 +277,10 @@ const Forum = () => {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "analyzed_articles" },
         (payload) => {
-          setArticles((prev) => [payload.new as AnalyzedArticle, ...prev].slice(0, 50));
+          const row = payload.new as AnalyzedArticle;
+          // Strip premium fields from realtime payload; Pro fetch happens via edge function
+          const safe: AnalyzedArticle = { ...row, hidden_angle: "", pro_deep_dive: null };
+          setArticles((prev) => [safe, ...prev].slice(0, 50));
         },
       )
       .subscribe();
