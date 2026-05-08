@@ -2,13 +2,19 @@ import { Stock } from "@/contexts/AppContext";
 
 type QuizAnswers = Record<number, string[]>;
 
-type Allocation = { ticker: string; name: string; pct: number; desc: string };
+type Allocation = { ticker: string; name: string; pct: number; desc: string; descKey?: string };
 
 type PortfolioResult = {
   allocations: Allocation[];
   rationale: string;
   expectedReturn: string;
   riskLevel: string;
+  riskLevelKey: string;
+  riskKey: "C" | "M" | "A";
+  timeKey: "S" | "M" | "L";
+  profitKey: "S" | "G" | "A";
+  experienceKey: string;
+  sectors: string[];
   bearCase: string;
   baseCase: string;
   bullCase: string;
