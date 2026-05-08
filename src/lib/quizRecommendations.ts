@@ -167,7 +167,7 @@ function applySectorSwaps(allocs: Allocation[], sectors: string[]): Allocation[]
     const replaceIdx = result.findIndex(a => swap.replacePreference.includes(a.ticker));
     if (replaceIdx >= 0) {
       const target = ASSETS[swap.ticker];
-      result[replaceIdx] = { ...target, pct: result[replaceIdx].pct };
+      result[replaceIdx] = { ...target, pct: result[replaceIdx].pct, descKey: `assetDesc_${target.ticker}` };
     }
   }
 
