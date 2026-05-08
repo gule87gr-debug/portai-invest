@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback, useRef, useLayoutEffect } from "react";
+import { useState, useEffect, useCallback, useRef, useLayoutEffect, useMemo } from "react";
 import { TrendingUp, ArrowRight, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type TutorialStep = {
   selector?: string;
@@ -12,62 +13,6 @@ type TutorialStep = {
   requiresSidebar?: boolean;
 };
 
-const steps: TutorialStep[] = [
-  {
-    type: "modal",
-    title: "Welcome to PortAI 👋",
-    text: "Your AI shield against biased financial news. Let's show you around in 60 seconds.",
-    buttonText: "Start Tour",
-  },
-  {
-    type: "tooltip",
-    selector: "[data-tour='nav-news']",
-    title: "News — Your Command Center",
-    text: "This is where you live. Browse curated financial news and paste any article URL to get an instant AI Trust Score, bias detection and smart summary.",
-    requiresSidebar: true,
-  },
-  {
-    type: "tooltip",
-    selector: "[data-tour='analyze-link']",
-    title: "Detect Bias in Any Article",
-    text: "Paste a financial article URL here. Our AI scores its trustworthiness, summarizes it and flags hidden agendas — in seconds.",
-  },
-  {
-    type: "tooltip",
-    selector: "[data-tour='nav-forum']",
-    title: "Live Media Bias Pulse",
-    text: "See what the community is analyzing right now. Trending articles, red flags and hidden angles — all AI-validated.",
-    requiresSidebar: true,
-  },
-  {
-    type: "tooltip",
-    selector: "[data-tour='nav-chat']",
-    title: "Your Personal AI Advisor",
-    text: "Ask anything about stocks, ETFs, portfolio strategy or market trends. Available 24/7.",
-    requiresSidebar: true,
-  },
-  {
-    type: "tooltip",
-    selector: "[data-tour='nav-watchlists']",
-    title: "Track Your Stocks",
-    text: "Build custom watchlists for 10000+ stocks, ETFs and crypto with live prices and charts.",
-    requiresSidebar: true,
-  },
-  {
-    type: "tooltip",
-    selector: "[data-tour='nav-quiz']",
-    title: "Find Your Investor Profile",
-    text: "5 quick questions and you'll get a personalized investor profile with stock picks tailored to your goals.",
-    requiresSidebar: true,
-  },
-  {
-    type: "modal",
-    title: "You're all set! 🚀",
-    text: "Start by pasting an article link to see the AI Trust Score in action.",
-    buttonText: "Go to News",
-  },
-];
-
 type Rect = { top: number; left: number; width: number; height: number };
 
 export const OnboardingTutorial = ({ onComplete }: { onComplete: () => void }) => {
@@ -76,6 +21,19 @@ export const OnboardingTutorial = ({ onComplete }: { onComplete: () => void }) =
   const [tooltipPos, setTooltipPos] = useState<React.CSSProperties>({});
   const [animKey, setAnimKey] = useState(0);
   const tooltipRef = useRef<HTMLDivElement>(null);
+  let t: (k: string) => string;
+  try { t = useLanguage().t; } catch { t = (k) => k; }
+
+  const steps: TutorialStep[] = useMemo(() => [
+    { type: "modal", title: t("tourWelcomeTitle"), text: t("tourWelcomeText"), buttonText: t("tourStart") },
+    { type: "tooltip", selector: "[data-tour='nav-news']", title: t("tourNewsTitle"), text: t("tourNewsText"), requiresSidebar: true },
+    { type: "tooltip", selector: "[data-tour='analyze-link']", title: t("tourAnalyzeTitle"), text: t("tourAnalyzeText") },
+    { type: "tooltip", selector: "[data-tour='nav-forum']", title: t("tourForumTitle"), text: t("tourForumText"), requiresSidebar: true },
+    { type: "tooltip", selector: "[data-tour='nav-chat']", title: t("tourChatTitle"), text: t("tourChatText"), requiresSidebar: true },
+    { type: "tooltip", selector: "[data-tour='nav-watchlists']", title: t("tourWatchTitle"), text: t("tourWatchText"), requiresSidebar: true },
+    { type: "tooltip", selector: "[data-tour='nav-quiz']", title: t("tourQuizTitle"), text: t("tourQuizText"), requiresSidebar: true },
+    { type: "modal", title: t("tourDoneTitle"), text: t("tourDoneText"), buttonText: t("tourGoToNews") },
+  ], [t]);
 
   const step = steps[current];
   const isNavStep = !!step.requiresSidebar;
@@ -232,7 +190,7 @@ export const OnboardingTutorial = ({ onComplete }: { onComplete: () => void }) =
           </button>
           {current === 0 && (
             <button onClick={skip} className="mt-3 block w-full text-xs text-muted-foreground hover:text-foreground transition-colors">
-              Skip Tour
+              {t("tourSkip")}
             </button>
           )}
         </div>
@@ -296,10 +254,10 @@ export const OnboardingTutorial = ({ onComplete }: { onComplete: () => void }) =
           {/* Progress */}
           <div className="flex items-center justify-between mb-2 sm:mb-3">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">
-              Step {currentTooltipIndex} of {totalTooltipSteps}
+              {t("step")} {currentTooltipIndex} {t("of")} {totalTooltipSteps}
             </span>
             <button onClick={skip} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-              Skip Tour
+              {t("tourSkip")}
             </button>
           </div>
           {/* Progress bar */}
@@ -315,7 +273,7 @@ export const OnboardingTutorial = ({ onComplete }: { onComplete: () => void }) =
             onClick={next}
             className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 active:scale-[0.97]"
           >
-            {current === steps.length - 2 ? "Finish" : "Next"} <ChevronRight className="h-3.5 w-3.5" />
+            {current === steps.length - 2 ? t("tourFinish") : t("tourNext")} <ChevronRight className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>

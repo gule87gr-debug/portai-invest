@@ -9,6 +9,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type Alert = {
   id: string;
@@ -37,6 +38,8 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
   const [userId, setUserId] = useState<string | null>(null);
   const { isPro, loading: subLoading } = useSubscription();
   const navigate = useNavigate();
+  let t: (k: string) => string;
+  try { t = useLanguage().t; } catch { t = (k) => k; }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -72,15 +75,15 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
   const handleCreate = async () => {
     const target = parseFloat(price);
     if (!userId) {
-      toast.error("Please sign in to set price alerts");
+      toast.error(t("signInForAlertsToast"));
       return;
     }
     if (!isPro) {
-      toast.error("Price alerts are a Pro feature. Upgrade to unlock.");
+      toast.error(t("alertsProToast"));
       return;
     }
     if (isNaN(target) || target <= 0) {
-      toast.error("Enter a valid price greater than 0");
+      toast.error(t("enterValidPrice"));
       return;
     }
     setSaving(true);
@@ -94,10 +97,10 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
     });
     setSaving(false);
     if (error) {
-      toast.error("Failed to create alert");
+      toast.error(t("alertCreateFailed"));
       return;
     }
-    toast.success(`Alert set for ${ticker} ${direction} $${target}`);
+    toast.success(`${ticker} ${direction === "above" ? t("risesAbove") : t("fallsBelow")} $${target}`);
     setPrice("");
     loadAlerts();
   };
@@ -105,12 +108,12 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
   const handleDelete = async (id: string) => {
     await supabase.from("price_alerts").delete().eq("id", id);
     setAlerts((prev) => prev.filter((a) => a.id !== id));
-    toast.success("Alert removed");
+    toast.success(t("alertRemovedToast"));
   };
 
   const defaultTrigger = (
     <Button variant="outline" size="sm" className="gap-2">
-      <Bell className="h-4 w-4" /> Price Alert
+      <Bell className="h-4 w-4" /> {t("priceAlert")}
     </Button>
   );
 
@@ -121,13 +124,13 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <BellRing className="h-5 w-5 text-primary" />
-            Price Alerts for {ticker.toUpperCase()}
+            {t("priceAlertsFor")} {ticker.toUpperCase()}
           </DialogTitle>
         </DialogHeader>
 
         {!userId ? (
           <div className="py-6 text-center text-sm text-muted-foreground">
-            Please sign in to set price alerts.
+            {t("signInForAlertsBody")}
           </div>
         ) : !subLoading && !isPro ? (
           <div className="py-6 px-2 text-center space-y-4">
@@ -135,16 +138,16 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
               <Lock className="h-6 w-6 text-primary" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-base font-semibold text-foreground">Pro Feature</h3>
+              <h3 className="text-base font-semibold text-foreground">{t("proFeatureTitle")}</h3>
               <p className="text-sm text-muted-foreground">
-                Price alerts are available exclusively to Pro members. Upgrade to get notified the moment any asset hits your target price.
+                {t("proFeatureBody")}
               </p>
             </div>
             <Button
               onClick={() => { setOpen(false); navigate("/pricing"); }}
               className="w-full gap-2"
             >
-              <Sparkles className="h-4 w-4" /> Upgrade to Pro
+              <Sparkles className="h-4 w-4" /> {t("upgradeToPro")}
             </Button>
           </div>
         ) : (
@@ -152,17 +155,17 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
             <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
               {currentPrice !== undefined && (
                 <p className="text-xs text-muted-foreground">
-                  Current price: <span className="font-mono font-semibold text-foreground">${currentPrice.toFixed(2)}</span>
+                  {t("currentPriceLabel")}: <span className="font-mono font-semibold text-foreground">${currentPrice.toFixed(2)}</span>
                 </p>
               )}
               <div className="space-y-2">
-                <Label htmlFor="alert-price" className="text-xs">Target price ($)</Label>
+                <Label htmlFor="alert-price" className="text-xs">{t("targetPriceLabel")}</Label>
                 <Input
                   id="alert-price"
                   type="number"
                   step="0.01"
                   min="0"
-                  placeholder="e.g. 250.00"
+                  placeholder={t("targetPricePh")}
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                 />
@@ -176,7 +179,7 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
                     direction === "above" ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400" : "border-border text-muted-foreground hover:bg-accent"
                   )}
                 >
-                  <TrendingUp className="h-3.5 w-3.5" /> Rises above
+                  <TrendingUp className="h-3.5 w-3.5" /> {t("risesAbove")}
                 </button>
                 <button
                   type="button"
@@ -186,20 +189,20 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
                     direction === "below" ? "border-red-500/50 bg-red-500/10 text-red-400" : "border-border text-muted-foreground hover:bg-accent"
                   )}
                 >
-                  <TrendingDown className="h-3.5 w-3.5" /> Falls below
+                  <TrendingDown className="h-3.5 w-3.5" /> {t("fallsBelow")}
                 </button>
               </div>
               <Button onClick={handleCreate} disabled={saving} className="w-full" size="sm">
-                {saving ? "Setting..." : "Set Alert"}
+                {saving ? t("settingDots") : t("setAlert")}
               </Button>
             </div>
 
             <div className="mt-2">
-              <h4 className="mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Active Alerts</h4>
+              <h4 className="mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t("activeAlerts")}</h4>
               {loading ? (
-                <p className="text-xs text-muted-foreground">Loading...</p>
+                <p className="text-xs text-muted-foreground">{t("loadingDots")}</p>
               ) : alerts.length === 0 ? (
-                <p className="text-xs text-muted-foreground py-2">No alerts set yet.</p>
+                <p className="text-xs text-muted-foreground py-2">{t("noAlertsYet")}</p>
               ) : (
                 <div className="space-y-2 max-h-48 overflow-y-auto">
                   {alerts.map((a) => (
@@ -211,16 +214,16 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
                           <TrendingDown className="h-3.5 w-3.5 text-red-400" />
                         )}
                         <span className="text-sm font-mono">
-                          {a.direction} ${Number(a.target_price).toFixed(2)}
+                          {a.direction === "above" ? t("risesAbove") : t("fallsBelow")} ${Number(a.target_price).toFixed(2)}
                         </span>
                         {a.triggered && (
-                          <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary">Triggered</span>
+                          <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary">{t("alertTriggered")}</span>
                         )}
                       </div>
                       <button
                         onClick={() => handleDelete(a.id)}
                         className="text-muted-foreground hover:text-red-400"
-                        aria-label="Delete alert"
+                        aria-label={t("deleteAlertLabel")}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -233,7 +236,7 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
         )}
 
         <DialogFooter className="text-[10px] text-muted-foreground">
-          Alerts are checked roughly every 5 minutes during market activity.
+          {t("alertsCheckNote")}
         </DialogFooter>
       </DialogContent>
     </Dialog>
