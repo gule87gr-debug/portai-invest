@@ -67,11 +67,54 @@ export const stockDescriptions: Record<string, { name: string; sector: string; d
   DOGEUSD: { name: "Dogecoin", sector: "Crypto", description: "Dogecoin started as a joke cryptocurrency in 2013 but has grown into one of the largest by market cap. It uses a proof-of-work consensus mechanism and has an unlimited supply, making it inflationary by design." },
 };
 
+import { assetDatabase, getAssetRegion, REGION_LABELS } from "./stockDatabase";
+
+const REGION_NAMES: Record<string, string> = {
+  us: "the United States",
+  europe: "Europe",
+  asia: "Asia",
+  americas: "the Americas",
+  africa: "Africa",
+  middle_east: "the Middle East",
+  oceania: "Oceania",
+  all: "global markets",
+};
+
+function buildDescription(entry: { ticker: string; name: string; sector: string; type: string }): string {
+  const { ticker, name, sector, type } = entry;
+  const region = getAssetRegion(ticker);
+  const regionName = REGION_NAMES[region] ?? "global markets";
+
+  if (type === "crypto") {
+    return `${name} (${ticker}) is a cryptocurrency in the ${sector || "digital asset"} category. Its price reflects 24/7 global trading and is influenced by network adoption, on-chain activity, and broader crypto market sentiment.`;
+  }
+  if (type === "etf") {
+    return `${name} (${ticker}) is an exchange-traded fund providing diversified exposure to the ${sector || "broad market"} segment. It trades on public exchanges and bundles many underlying holdings into a single security.`;
+  }
+  if (type === "index") {
+    return `${name} (${ticker}) is a market index tracking a basket of securities in the ${sector || "broad market"} segment. It is used as a benchmark for performance and risk in ${regionName}.`;
+  }
+  // stock (default)
+  return `${name} (${ticker}) is a publicly traded company in the ${sector || "diversified"} sector, listed in ${regionName}. Refer to the chart and news above for current price action and recent developments.`;
+}
+
 export function getStockDescription(ticker: string) {
   const upper = ticker.toUpperCase();
-  return stockDescriptions[upper] || {
+  const curated = stockDescriptions[upper];
+  if (curated) return curated;
+
+  const entry = assetDatabase.find((a) => a.ticker.toUpperCase() === upper);
+  if (entry) {
+    return {
+      name: entry.name,
+      sector: entry.sector,
+      description: buildDescription({ ...entry, ticker: upper }),
+    };
+  }
+  return {
     name: upper,
     sector: "Various",
     description: `${upper} is a publicly traded security. Visit the chart above for real-time price data and technical analysis.`,
   };
 }
+
