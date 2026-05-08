@@ -21,6 +21,19 @@ export const OnboardingTutorial = ({ onComplete }: { onComplete: () => void }) =
   const [tooltipPos, setTooltipPos] = useState<React.CSSProperties>({});
   const [animKey, setAnimKey] = useState(0);
   const tooltipRef = useRef<HTMLDivElement>(null);
+  let t: (k: string) => string;
+  try { t = useLanguage().t; } catch { t = (k) => k; }
+
+  const steps: TutorialStep[] = useMemo(() => [
+    { type: "modal", title: t("tourWelcomeTitle"), text: t("tourWelcomeText"), buttonText: t("tourStart") },
+    { type: "tooltip", selector: "[data-tour='nav-news']", title: t("tourNewsTitle"), text: t("tourNewsText"), requiresSidebar: true },
+    { type: "tooltip", selector: "[data-tour='analyze-link']", title: t("tourAnalyzeTitle"), text: t("tourAnalyzeText") },
+    { type: "tooltip", selector: "[data-tour='nav-forum']", title: t("tourForumTitle"), text: t("tourForumText"), requiresSidebar: true },
+    { type: "tooltip", selector: "[data-tour='nav-chat']", title: t("tourChatTitle"), text: t("tourChatText"), requiresSidebar: true },
+    { type: "tooltip", selector: "[data-tour='nav-watchlists']", title: t("tourWatchTitle"), text: t("tourWatchText"), requiresSidebar: true },
+    { type: "tooltip", selector: "[data-tour='nav-quiz']", title: t("tourQuizTitle"), text: t("tourQuizText"), requiresSidebar: true },
+    { type: "modal", title: t("tourDoneTitle"), text: t("tourDoneText"), buttonText: t("tourGoToNews") },
+  ], [t]);
 
   const step = steps[current];
   const isNavStep = !!step.requiresSidebar;
