@@ -7,7 +7,7 @@ import { StockNews } from "@/components/StockNews";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { PriceAlertDialog } from "@/components/PriceAlertDialog";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { getStockDescription } from "@/lib/stockDescriptions";
+import { useAssetDescription } from "@/hooks/useAssetDescription";
 import { getTradingViewSymbol } from "@/lib/tradingViewSymbol";
 import { assetDatabase } from "@/lib/stockDatabase";
 import { useQuotes } from "@/hooks/useQuotes";
@@ -19,7 +19,7 @@ const StockDetail = () => {
   const { ticker } = useParams<{ ticker: string }>();
   const symbol = ticker?.toUpperCase() || "SPY";
   usePageTitle(`${symbol} Stock Detail | PortAI`);
-  const info = getStockDescription(symbol);
+  const info = useAssetDescription(symbol);
   const assetEntry = assetDatabase.find((a) => a.ticker.toUpperCase() === symbol);
   const tvSymbol = getTradingViewSymbol(symbol, assetEntry?.type);
 
@@ -127,7 +127,15 @@ const StockDetail = () => {
               <Building2 className="h-4 w-4 text-primary" />
               <h2 className="text-lg font-semibold">{t("about")}</h2>
             </div>
-            <p className="text-sm leading-relaxed text-muted-foreground">{info.description}</p>
+            {info.loading && !info.isCurated ? (
+              <div className="space-y-2">
+                <div className="h-3 w-full animate-pulse rounded bg-muted" />
+                <div className="h-3 w-11/12 animate-pulse rounded bg-muted" />
+                <div className="h-3 w-9/12 animate-pulse rounded bg-muted" />
+              </div>
+            ) : (
+              <p className="text-sm leading-relaxed text-muted-foreground">{info.description}</p>
+            )}
           </div>
 
           <div className="rounded-xl border border-border bg-card p-5">
