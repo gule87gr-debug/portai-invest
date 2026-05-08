@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { searchAssets, type AssetEntry } from "@/lib/stockDatabase";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export type ChartRange = "1D" | "1W" | "1M" | "3M" | "1Y" | "ALL";
 
