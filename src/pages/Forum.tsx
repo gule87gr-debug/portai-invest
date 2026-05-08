@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Activity,
   ThumbsUp,
@@ -227,6 +228,7 @@ const toneClasses = {
 const Forum = () => {
   usePageTitle("AI Media Bias Pulse | PortAI");
   const { toast } = useToast();
+  const { t } = useLanguage();
   const { isPro, isPaid } = useSubscription();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [articles, setArticles] = useState<AnalyzedArticle[]>([]);
@@ -640,7 +642,7 @@ const Forum = () => {
       )}
 
       <p className="mt-8 text-center text-[10px] text-muted-foreground/70">
-        Not financial advice. Bias scores are AI-generated estimates for informational purposes only.
+        {t("footerForumDisclaimer")}
       </p>
 
       <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} />
