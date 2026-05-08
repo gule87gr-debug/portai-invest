@@ -62,7 +62,7 @@ const StockDetail = () => {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-3xl font-bold">{symbol}</h1>
-              <span className="rounded-md bg-muted px-2.5 py-1 text-xs text-muted-foreground">{info.sector}</span>
+              <span className="rounded-md bg-muted px-2.5 py-1 text-xs text-muted-foreground">{t(`sec_${(info.sector || "").replace(/\s+/g, "")}`) !== `sec_${(info.sector || "").replace(/\s+/g, "")}` ? t(`sec_${(info.sector || "").replace(/\s+/g, "")}`) : info.sector}</span>
             </div>
             <p className="mt-1 text-muted-foreground">{info.name}</p>
           </div>
@@ -90,7 +90,7 @@ const StockDetail = () => {
                 </div>
               </>
             ) : (
-              <span className="text-sm text-muted-foreground">Price unavailable</span>
+              <span className="text-sm text-muted-foreground">{t("priceUnavailable")}</span>
             )}
           </div>
         </div>
@@ -98,10 +98,10 @@ const StockDetail = () => {
         {/* OHLC bar */}
         {quote && (
           <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground font-mono tabular-nums">
-            <span>Open <strong className="text-foreground">${quote.open.toFixed(2)}</strong></span>
-            <span>High <strong className="text-foreground">${quote.high.toFixed(2)}</strong></span>
-            <span>Low <strong className="text-foreground">${quote.low.toFixed(2)}</strong></span>
-            <span>Prev Close <strong className="text-foreground">${quote.prevClose.toFixed(2)}</strong></span>
+            <span>{t("openPx")} <strong className="text-foreground">${quote.open.toFixed(2)}</strong></span>
+            <span>{t("highPx")} <strong className="text-foreground">${quote.high.toFixed(2)}</strong></span>
+            <span>{t("lowPx")} <strong className="text-foreground">${quote.low.toFixed(2)}</strong></span>
+            <span>{t("prevClosePx")} <strong className="text-foreground">${quote.prevClose.toFixed(2)}</strong></span>
           </div>
         )}
       </div>
