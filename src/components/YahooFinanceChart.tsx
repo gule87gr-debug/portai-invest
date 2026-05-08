@@ -219,20 +219,27 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
     setExtras((prev) => prev.filter((e) => e.ticker !== t));
   };
 
+  const rangeLabel = (r: ChartRange) => {
+    if (r === "ALL") return t("tfAll");
+    const num = r.replace(/[A-Z]/g, "");
+    const letter = r.endsWith("D") ? t("tfD") : r.endsWith("W") ? t("tfW") : r.endsWith("M") ? t("tfM") : r.endsWith("Y") ? t("tfY") : "";
+    return `${num}${letter}`;
+  };
+
   return (
     <div className="w-full">
       {/* Top bar: powered + range */}
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>Powered by Yahoo Finance</span>
+          <span>{t("powByYahoo")}</span>
           {primary?.currency && !isCompare && (
             <span className="rounded-md bg-muted px-2 py-0.5">{primary.currency}</span>
           )}
           {isCompare && (
-            <span className="rounded-md bg-muted px-2 py-0.5">% change</span>
+            <span className="rounded-md bg-muted px-2 py-0.5">{t("pctChangeLbl")}</span>
           )}
         </div>
-        <div className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5" role="tablist" aria-label="Chart timeframe">
+        <div className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5" role="tablist" aria-label={t("chartTimeframe")}>
           {RANGES.map((r) => (
             <button
               key={r}
@@ -246,7 +253,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              {r}
+              {rangeLabel(r)}
             </button>
           ))}
         </div>
@@ -266,7 +273,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
               type="button"
               onClick={() => removeCompare(ex.ticker)}
               className="ml-0.5 text-muted-foreground hover:text-foreground"
-              aria-label={`Remove ${ex.ticker} from comparison`}
+            aria-label={`${t("removeFromCompare")}: ${ex.ticker}`}
             >
               <X className="h-3 w-3" />
             </button>
@@ -284,7 +291,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
                 className="inline-flex items-center gap-1.5 rounded-md border border-primary/60 bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary shadow-sm hover:bg-primary/25 hover:border-primary transition-colors"
               >
                 <GitCompareArrows className="h-3.5 w-3.5" />
-                Compare
+                {t("compareBtnLbl")}
                 {!subLoading && !isPaid && <Lock className="h-3 w-3 opacity-80" />}
               </button>
             ) : (
@@ -301,7 +308,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
                   type="button"
                   onClick={() => { setSearchOpen(false); setQuery(""); }}
                   className="text-muted-foreground hover:text-foreground"
-                  aria-label="Close search"
+                  aria-label={t("closeSearchAria")}
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -324,7 +331,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
             )}
             {searchOpen && query.trim() && results.length === 0 && (
               <div className="absolute left-0 top-full z-20 mt-1 w-64 rounded-md border border-border bg-popover px-3 py-2 text-xs text-muted-foreground shadow-lg">
-                No matches.
+                {t("noMatchesLbl")}
               </div>
             )}
           </div>
@@ -390,7 +397,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
 
       {stats && !loading && !error && !isCompare && (
         <div className="mt-3 flex items-center gap-3 text-xs font-mono">
-          <span className="text-muted-foreground">{range} change</span>
+          <span className="text-muted-foreground">{rangeLabel(range)} {t("rangeChange")}</span>
           <span className={cn("font-semibold", stats.isUp ? "text-emerald-400" : "text-red-400")}>
             {stats.diff >= 0 ? "+" : ""}{stats.diff.toFixed(2)} ({stats.pct >= 0 ? "+" : ""}{stats.pct.toFixed(2)}%)
           </span>
@@ -399,8 +406,8 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
       <UpgradeModal
         open={showUpgrade}
         onClose={() => setShowUpgrade(false)}
-        title="Compare is a Plus feature"
-        description="Upgrade to Plus or Pro to compare assets side by side."
+        title={t("compareUpgradeTitle")}
+        description={t("compareUpgradeDesc")}
       />
     </div>
   );

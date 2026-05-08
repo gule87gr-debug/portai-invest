@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { REGION_LABELS, AssetRegion } from "@/lib/stockDatabase";
+import { REGION_LABELS, REGION_FLAGS, REGION_LABEL_KEYS, AssetRegion } from "@/lib/stockDatabase";
 import { getTrustScore } from "@/lib/trustScore";
 
 const categories = [
@@ -278,7 +278,7 @@ export const StockNewsFeed = () => {
                             : "bg-accent/30 text-muted-foreground border-transparent hover:text-foreground"
                         )}
                       >
-                        {REGION_LABELS[region]}
+                        {`${REGION_FLAGS[region]} ${t(REGION_LABEL_KEYS[region])}`.trim()}
                       </button>
                     );
                   })}
@@ -322,7 +322,7 @@ export const StockNewsFeed = () => {
               key={region}
               className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] text-foreground"
             >
-              {REGION_LABELS[region]}
+              {`${REGION_FLAGS[region]} ${t(REGION_LABEL_KEYS[region])}`.trim()}
               <button onClick={() => toggleRegion(region)} aria-label={`Remove ${region}`}>
                 <X className="h-3 w-3" />
               </button>

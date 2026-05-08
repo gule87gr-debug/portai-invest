@@ -83,6 +83,29 @@ export const REGION_LABELS: Record<AssetRegion, string> = {
   oceania: "🌊 Oceania",
 };
 
+// Translation key + emoji prefix used by consumers via t(REGION_LABEL_KEYS[r])
+export const REGION_FLAGS: Record<AssetRegion, string> = {
+  all: "",
+  us: "🇺🇸",
+  europe: "🇪🇺",
+  asia: "🌏",
+  americas: "🌎",
+  africa: "🌍",
+  middle_east: "🕌",
+  oceania: "🌊",
+};
+
+export const REGION_LABEL_KEYS: Record<AssetRegion, string> = {
+  all: "regionAll",
+  us: "regionUS",
+  europe: "regionEurope",
+  asia: "regionAsia",
+  americas: "regionAmericas",
+  africa: "regionAfrica",
+  middle_east: "regionMiddleEast",
+  oceania: "regionOceania",
+};
+
 export function searchAssets(query: string, region?: AssetRegion) {
   if (!query.trim()) return [];
   const q = query.toLowerCase();
