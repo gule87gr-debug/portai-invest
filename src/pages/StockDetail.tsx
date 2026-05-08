@@ -19,7 +19,7 @@ const StockDetail = () => {
   const { ticker } = useParams<{ ticker: string }>();
   const symbol = ticker?.toUpperCase() || "SPY";
   usePageTitle(`${symbol} Stock Detail | PortAI`);
-  const info = getStockDescription(symbol);
+  const info = useAssetDescription(symbol);
   const assetEntry = assetDatabase.find((a) => a.ticker.toUpperCase() === symbol);
   const tvSymbol = getTradingViewSymbol(symbol, assetEntry?.type);
 
