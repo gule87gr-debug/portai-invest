@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { REGION_LABELS, AssetRegion } from "@/lib/stockDatabase";
+import { REGION_LABELS, REGION_FLAGS, REGION_LABEL_KEYS, AssetRegion } from "@/lib/stockDatabase";
 import { getTrustScore } from "@/lib/trustScore";
 
 const categories = [
