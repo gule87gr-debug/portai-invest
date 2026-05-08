@@ -219,20 +219,27 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
     setExtras((prev) => prev.filter((e) => e.ticker !== t));
   };
 
+  const rangeLabel = (r: ChartRange) => {
+    if (r === "ALL") return t("tfAll");
+    const num = r.replace(/[A-Z]/g, "");
+    const letter = r.endsWith("D") ? t("tfD") : r.endsWith("W") ? t("tfW") : r.endsWith("M") ? t("tfM") : r.endsWith("Y") ? t("tfY") : "";
+    return `${num}${letter}`;
+  };
+
   return (
     <div className="w-full">
       {/* Top bar: powered + range */}
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>Powered by Yahoo Finance</span>
+          <span>{t("powByYahoo")}</span>
           {primary?.currency && !isCompare && (
             <span className="rounded-md bg-muted px-2 py-0.5">{primary.currency}</span>
           )}
           {isCompare && (
-            <span className="rounded-md bg-muted px-2 py-0.5">% change</span>
+            <span className="rounded-md bg-muted px-2 py-0.5">{t("pctChangeLbl")}</span>
           )}
         </div>
-        <div className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5" role="tablist" aria-label="Chart timeframe">
+        <div className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5" role="tablist" aria-label={t("chartTimeframe")}>
           {RANGES.map((r) => (
             <button
               key={r}
@@ -246,7 +253,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              {r}
+              {rangeLabel(r)}
             </button>
           ))}
         </div>
