@@ -38,6 +38,8 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
   const [userId, setUserId] = useState<string | null>(null);
   const { isPro, loading: subLoading } = useSubscription();
   const navigate = useNavigate();
+  let t: (k: string) => string;
+  try { t = useLanguage().t; } catch { t = (k) => k; }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
