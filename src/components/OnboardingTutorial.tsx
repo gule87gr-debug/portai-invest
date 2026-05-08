@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback, useRef, useLayoutEffect } from "react";
+import { useState, useEffect, useCallback, useRef, useLayoutEffect, useMemo } from "react";
 import { TrendingUp, ArrowRight, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type TutorialStep = {
   selector?: string;
@@ -11,62 +12,6 @@ type TutorialStep = {
   buttonText?: string;
   requiresSidebar?: boolean;
 };
-
-const steps: TutorialStep[] = [
-  {
-    type: "modal",
-    title: "Welcome to PortAI 👋",
-    text: "Your AI shield against biased financial news. Let's show you around in 60 seconds.",
-    buttonText: "Start Tour",
-  },
-  {
-    type: "tooltip",
-    selector: "[data-tour='nav-news']",
-    title: "News — Your Command Center",
-    text: "This is where you live. Browse curated financial news and paste any article URL to get an instant AI Trust Score, bias detection and smart summary.",
-    requiresSidebar: true,
-  },
-  {
-    type: "tooltip",
-    selector: "[data-tour='analyze-link']",
-    title: "Detect Bias in Any Article",
-    text: "Paste a financial article URL here. Our AI scores its trustworthiness, summarizes it and flags hidden agendas — in seconds.",
-  },
-  {
-    type: "tooltip",
-    selector: "[data-tour='nav-forum']",
-    title: "Live Media Bias Pulse",
-    text: "See what the community is analyzing right now. Trending articles, red flags and hidden angles — all AI-validated.",
-    requiresSidebar: true,
-  },
-  {
-    type: "tooltip",
-    selector: "[data-tour='nav-chat']",
-    title: "Your Personal AI Advisor",
-    text: "Ask anything about stocks, ETFs, portfolio strategy or market trends. Available 24/7.",
-    requiresSidebar: true,
-  },
-  {
-    type: "tooltip",
-    selector: "[data-tour='nav-watchlists']",
-    title: "Track Your Stocks",
-    text: "Build custom watchlists for 10000+ stocks, ETFs and crypto with live prices and charts.",
-    requiresSidebar: true,
-  },
-  {
-    type: "tooltip",
-    selector: "[data-tour='nav-quiz']",
-    title: "Find Your Investor Profile",
-    text: "5 quick questions and you'll get a personalized investor profile with stock picks tailored to your goals.",
-    requiresSidebar: true,
-  },
-  {
-    type: "modal",
-    title: "You're all set! 🚀",
-    text: "Start by pasting an article link to see the AI Trust Score in action.",
-    buttonText: "Go to News",
-  },
-];
 
 type Rect = { top: number; left: number; width: number; height: number };
 
