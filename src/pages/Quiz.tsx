@@ -152,7 +152,6 @@ const Quiz = () => {
                 </div>
               </div>
             </div>
-            </div>
 
             <div className="mt-8 flex gap-4">
               <button onClick={() => { setShowResults(false); setStep(0); setAnswers({}); }} className="flex-1 rounded-xl border border-border bg-card py-3 text-sm font-medium transition-colors hover:bg-accent">
