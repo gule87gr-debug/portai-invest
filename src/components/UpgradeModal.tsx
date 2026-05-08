@@ -12,7 +12,7 @@ const plusFeatures = [
   "Full investor quiz results & portfolio plan",
   "Unlimited AI chat & image analysis",
   "Unlimited watchlists & stocks",
-  "Asset comparison charts (up to 4)",
+  "Asset comparison charts (up to 12 simultaneously)",
   "Live sentiment heatmaps",
   "AI Deep Dive (Hidden Angles)",
   "Custom price alerts",
