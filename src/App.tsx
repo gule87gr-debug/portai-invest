@@ -145,11 +145,11 @@ const App = () => (
       <BrowserRouter>
         <Suspense fallback={<RouteSkeleton />}>
           <Routes>
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/terms-of-service" element={<TermsOfService />} />
-            <Route path="/data-compliance" element={<DataCompliance />} />
-            <Route path="/ip-policy" element={<IPPolicy />} />
-            <Route path="/unsubscribe" element={<Unsubscribe />} />
+            <Route path="/privacy-policy" element={<LanguageProvider initialLanguage="en"><PrivacyPolicy /></LanguageProvider>} />
+            <Route path="/terms-of-service" element={<LanguageProvider initialLanguage="en"><TermsOfService /></LanguageProvider>} />
+            <Route path="/data-compliance" element={<LanguageProvider initialLanguage="en"><DataCompliance /></LanguageProvider>} />
+            <Route path="/ip-policy" element={<LanguageProvider initialLanguage="en"><IPPolicy /></LanguageProvider>} />
+            <Route path="/unsubscribe" element={<LanguageProvider initialLanguage="en"><Unsubscribe /></LanguageProvider>} />
             <Route path="*" element={<AppRoutes />} />
           </Routes>
         </Suspense>
