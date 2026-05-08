@@ -53,7 +53,7 @@ const StockDetail = () => {
             currentPrice={quote?.price}
             trigger={
               <Button variant="outline" size="sm" className="gap-2">
-                <Bell className="h-4 w-4" /> Set Price Alert
+                <Bell className="h-4 w-4" /> {t("setPriceAlert")}
               </Button>
             }
           />
