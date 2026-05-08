@@ -63,7 +63,7 @@ const ASSETS: Record<string, Omit<Allocation, "pct">> = {
   IWM:   { ticker: "IWM",   name: "iShares Russell 2000 ETF",         desc: "Small-cap US stocks for higher growth potential." },
 };
 
-const A = (ticker: string, pct: number): Allocation => ({ ...ASSETS[ticker], pct });
+const A = (ticker: string, pct: number): Allocation => ({ ...ASSETS[ticker], pct, descKey: `assetDesc_${ticker}` });
 
 // ── Template portfolios keyed by [risk][timeframe][profit] ──────────
 // risk: Conservative(C) / Moderate(M) / Aggressive(A)
