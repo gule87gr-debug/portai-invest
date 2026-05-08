@@ -205,9 +205,19 @@ const FEATURED_ARTICLES: AnalyzedArticle[] = [
 
 // Higher trustScore = more credible. We display the same scale the analyzer returns.
 const trustBucket = (score: number) => {
-  if (score >= 7) return { label: "Trusted", tone: "gain" as const };
-  if (score >= 4) return { label: "Moderate", tone: "warning" as const };
-  return { label: "Low Trust", tone: "loss" as const };
+  if (score >= 7) return { labelKey: "trust_trusted", tone: "gain" as const };
+  if (score >= 4) return { labelKey: "trust_moderate", tone: "warning" as const };
+  return { labelKey: "trust_lowTrust", tone: "loss" as const };
+};
+
+const translateRedFlag = (flag: string, t: (k: string) => string): string => {
+  const m: Record<string, string> = {
+    "Objective Reporting": "redFlag_objective",
+    "Cherry-Picked Data": "redFlag_cherry",
+    "Promotional Language": "redFlag_promotional",
+    "One-Sided": "redFlag_oneSided",
+  };
+  return m[flag] ? t(m[flag]) : flag;
 };
 
 const toneClasses = {
@@ -419,7 +429,7 @@ const Forum = () => {
             <span className="text-muted-foreground shrink-0">{timeAgo(a.created_at)}</span>
             {isFeatured && (
               <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary shrink-0">
-                <Sparkles className="h-2.5 w-2.5" /> Featured
+                <Sparkles className="h-2.5 w-2.5" /> {t("featuredBadgeLbl")}
               </span>
             )}
           </div>
@@ -428,7 +438,7 @@ const Forum = () => {
             target="_blank"
             rel="noopener noreferrer"
             className="text-muted-foreground hover:text-primary transition-colors shrink-0 ml-2"
-            aria-label="Open original article"
+            aria-label={t("openOriginalAria")}
           >
             <ExternalLink className="h-3.5 w-3.5" />
           </a>
@@ -440,10 +450,10 @@ const Forum = () => {
         <div className="mb-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-1.5">
             <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Trust Score
+              {t("trustScoreHdr")}
             </span>
             <span className={cn("text-xs font-mono font-bold", `text-${bucket.tone}`)}>
-              {a.bias_score}/10 · {bucket.label}
+              {a.bias_score}/10 · {t(bucket.labelKey)}
             </span>
           </div>
           <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
@@ -454,7 +464,7 @@ const Forum = () => {
         <div className="mb-4">
           <span className={cn("inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[11px] font-semibold", tc.chip)}>
             <Flame className="h-3 w-3" />
-            {a.red_flag}
+            {translateRedFlag(a.red_flag, t)}
           </span>
         </div>
 
@@ -627,9 +637,9 @@ const Forum = () => {
             <section className="mb-6">
               <div className="mb-3 flex items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 border border-primary/30 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
-                  <Sparkles className="h-3 w-3" /> Featured Analysis
+                  <Sparkles className="h-3 w-3" /> {t("featuredAnalysisLbl")}
                 </span>
-                <span className="text-[11px] text-muted-foreground">Curated across Reuters, Bloomberg, FT, WSJ, CNBC, Yahoo &amp; more</span>
+                <span className="text-[11px] text-muted-foreground">{t("curatedAcrossLbl")}</span>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {filteredFeatured.map((a, i) => renderArticleCard(a, i, true))}
