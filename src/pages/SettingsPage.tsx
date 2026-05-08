@@ -255,9 +255,9 @@ const SettingsPage = () => {
                 </div>
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
-                {nameStatus === "taken" && <span className="text-loss">This name is already taken by another user</span>}
-                {nameStatus === "available" && <span className="text-gain">Name is available — click away to save</span>}
-                {nameStatus === "checking" && "Checking availability..."}
+                {nameStatus === "taken" && <span className="text-loss">{t("displayNameTaken")}</span>}
+                {nameStatus === "available" && <span className="text-gain">{t("displayNameAvailable")}</span>}
+                {nameStatus === "checking" && t("checkingAvailability")}
                 {nameStatus === "idle" && t("changesSaveAuto")}
               </p>
             </div>
@@ -274,14 +274,14 @@ const SettingsPage = () => {
           <div className="flex items-center gap-3 mb-4">
             <Crown className="h-5 w-5 text-primary" />
             <div>
-              <h3 className="font-semibold">Subscription</h3>
-              <p className="text-xs text-muted-foreground">Manage your plan and billing</p>
+              <h3 className="font-semibold">{t("subscriptionH")}</h3>
+              <p className="text-xs text-muted-foreground">{t("managePlanBilling")}</p>
             </div>
           </div>
 
           {subLoading ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" /> Loading subscription...
+              <Loader2 className="h-4 w-4 animate-spin" /> {t("loadingSubscription")}
             </div>
           ) : isPaid ? (
             <div className="space-y-4">
@@ -289,7 +289,7 @@ const SettingsPage = () => {
                 <span className="rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary">
                   {isPro ? "Pro Plan · €15.99/mo" : "Plus Plan · €8.99/mo"}
                 </span>
-                {cancelAtPeriodEnd && <span className="rounded-full bg-warning/20 px-3 py-1 text-xs font-semibold text-warning">Cancelling</span>}
+                {cancelAtPeriodEnd && <span className="rounded-full bg-warning/20 px-3 py-1 text-xs font-semibold text-warning">{t("cancellingBadge")}</span>}
               </div>
 
               {/* Expiration / renewal banner */}
@@ -298,22 +298,22 @@ const SettingsPage = () => {
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="h-5 w-5 text-warning mt-0.5 shrink-0" />
                     <div>
-                      <p className="text-sm font-semibold text-foreground">Your subscription expires on {formattedEnd}</p>
-                      <p className="text-xs text-muted-foreground mt-1">You'll retain full {isPro ? "Pro" : "Plus"} access until then. After that you'll be downgraded to the Free plan.</p>
+                      <p className="text-sm font-semibold text-foreground">{t("subExpiresOn")} {formattedEnd}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{t("expiresUntilThen1")} {isPro ? "Pro" : "Plus"} {t("expiresUntilThen2")}</p>
                     </div>
                   </div>
                   <button
                     onClick={() => setShowReactivateModal(true)}
                     className="flex items-center justify-center gap-2 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                   >
-                    <Crown className="h-4 w-4" /> Re-subscribe
+                    <Crown className="h-4 w-4" /> {t("resubscribeBtn")}
                   </button>
                 </div>
               )}
 
               {!cancelAtPeriodEnd && formattedEnd && !scheduledTier && (
                 <p className="text-sm text-muted-foreground">
-                  Next billing: <span className="font-medium text-foreground">{formattedEnd}</span> · {isPro ? "€15.99" : "€8.99"}/mo
+                  {t("nextBillingLbl")}: <span className="font-medium text-foreground">{formattedEnd}</span> · {isPro ? "€15.99" : "€8.99"}/mo
                 </p>
               )}
 
@@ -342,7 +342,7 @@ const SettingsPage = () => {
               {/* Plan switcher */}
               {!cancelAtPeriodEnd && (
                 <div className="rounded-lg border border-border bg-background/50 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Change plan</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">{t("changePlanLbl")}</p>nge plan</p>
                   {isPlus && scheduledTier !== "pro" && (
                     <button
                       onClick={() => setPendingPlanChange("pro")}
