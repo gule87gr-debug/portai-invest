@@ -749,41 +749,41 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       {/* FAQ — SEO crawlable */}
       <RevealSection>
         <section id="faq" aria-labelledby="faq-heading" className="px-4 sm:px-6 py-14 max-w-3xl mx-auto border-t border-border">
-          <p className="text-center text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-2">FAQ</p>
+          <p className="text-center text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-2">{lt("faqLabel")}</p>
           <h2 id="faq-heading" className="text-center editorial-heading text-3xl sm:text-4xl text-foreground mb-8" style={{ textWrap: "balance" as any }}>
-            Frequently Asked Questions
+            {lt("faqHeading")}
           </h2>
           <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="q1" className="border-border">
               <AccordionTrigger className="text-left text-sm sm:text-base font-semibold text-foreground hover:no-underline">
-                <span className="flex items-center gap-2"><HelpCircle className="h-4 w-4 text-primary shrink-0" /> How does PortAI detect bias in financial news?</span>
+                <span className="flex items-center gap-2"><HelpCircle className="h-4 w-4 text-primary shrink-0" /> {lt("faq1Q")}</span>
               </AccordionTrigger>
               <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
-                PortAI combines Natural Language Processing (NLP) and Machine Learning models trained on millions of financial articles to score every story for Objectivity, framing, and source reliability. Our AI compares the article&rsquo;s claims against SEC filings, earnings transcripts, and peer coverage, then produces a 0-10 trust score with a transparent breakdown of any detected bias, omitted data points, or sentiment divergence.
+                {lt("faq1A")}
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="q2" className="border-border">
               <AccordionTrigger className="text-left text-sm sm:text-base font-semibold text-foreground hover:no-underline">
-                <span className="flex items-center gap-2"><HelpCircle className="h-4 w-4 text-primary shrink-0" /> Is PortAI a replacement for a Bloomberg Terminal?</span>
+                <span className="flex items-center gap-2"><HelpCircle className="h-4 w-4 text-primary shrink-0" /> {lt("faq2Q")}</span>
               </AccordionTrigger>
               <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
-                No — PortAI is purpose-built for the Retail Investor, not the institutional trading desk. Bloomberg Terminals cost over €20,000/year and are tuned for sell-side professionals. PortAI delivers the signals retail investors actually need — a Bias Shield, AI sentiment analysis, multi-asset watchlists and real-time alerts — at a fraction of the cost (from €8.99/month).
+                {lt("faq2A")}
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="q3" className="border-border">
               <AccordionTrigger className="text-left text-sm sm:text-base font-semibold text-foreground hover:no-underline">
-                <span className="flex items-center gap-2"><HelpCircle className="h-4 w-4 text-primary shrink-0" /> What assets and markets can I track?</span>
+                <span className="flex items-center gap-2"><HelpCircle className="h-4 w-4 text-primary shrink-0" /> {lt("faq3Q")}</span>
               </AccordionTrigger>
               <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
-                You can track 10,000+ stocks, ETFs and cryptocurrencies across 20+ countries, including the S&amp;P 500, NASDAQ, FTSE, DAX, Nikkei and major crypto pairs — all from a single multi-asset watchlist with custom price alerts.
+                {lt("faq3A")}
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="q4" className="border-border">
               <AccordionTrigger className="text-left text-sm sm:text-base font-semibold text-foreground hover:no-underline">
-                <span className="flex items-center gap-2"><HelpCircle className="h-4 w-4 text-primary shrink-0" /> Is PortAI financial advice?</span>
+                <span className="flex items-center gap-2"><HelpCircle className="h-4 w-4 text-primary shrink-0" /> {lt("faq4Q")}</span>
               </AccordionTrigger>
               <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
-                No. PortAI is an analytical and informational tool. We do not provide personalized financial advice. Always consult a qualified financial professional before making investment decisions.
+                {lt("faq4A")}
               </AccordionContent>
             </AccordionItem>
           </Accordion>
