@@ -138,21 +138,34 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
       if (s?.points?.length) series.push({ key: ex.ticker.toUpperCase(), points: s.points });
     });
 
-    // Normalize each series to % change from its first close
+    // Normalize each series to % change from its first close, keep sorted points
     const normalized = series.map((s) => {
-      const base = s.points[0].c;
+      const sorted = [...s.points].sort((a, b) => a.t - b.t);
+      const base = sorted[0].c;
       return {
         key: s.key,
-        map: new Map(s.points.map((p) => [p.t, base ? ((p.c - base) / base) * 100 : 0])),
+        points: sorted.map((p) => ({ t: p.t, v: base ? ((p.c - base) / base) * 100 : 0 })),
       };
     });
 
-    // Use union of all timestamps from primary (most relevant)
-    return primary.points.map((p) => {
-      const row: Record<string, number | string> = { t: p.t };
+    // Union of all timestamps across all series
+    const timeSet = new Set<number>();
+    normalized.forEach((n) => n.points.forEach((p) => timeSet.add(p.t)));
+    const timestamps = Array.from(timeSet).sort((a, b) => a - b);
+
+    // For each series build a value lookup by nearest previous timestamp (step-forward)
+    return timestamps.map((t) => {
+      const row: Record<string, number | string> = { t };
       normalized.forEach((n) => {
-        const v = n.map.get(p.t);
-        if (v !== undefined) row[n.key] = v;
+        // binary search for the latest point with time <= t
+        let lo = 0, hi = n.points.length - 1, idx = -1;
+        while (lo <= hi) {
+          const mid = (lo + hi) >> 1;
+          if (n.points[mid].t <= t) { idx = mid; lo = mid + 1; } else { hi = mid - 1; }
+        }
+        // Fall back to first point if t precedes the series start
+        if (idx === -1 && n.points.length) idx = 0;
+        if (idx >= 0) row[n.key] = n.points[idx].v;
       });
       return row;
     });
