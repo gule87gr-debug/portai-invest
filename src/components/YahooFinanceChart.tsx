@@ -308,7 +308,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
                   type="button"
                   onClick={() => { setSearchOpen(false); setQuery(""); }}
                   className="text-muted-foreground hover:text-foreground"
-                  aria-label="Close search"
+                  aria-label={t("closeSearchAria")}
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -331,7 +331,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
             )}
             {searchOpen && query.trim() && results.length === 0 && (
               <div className="absolute left-0 top-full z-20 mt-1 w-64 rounded-md border border-border bg-popover px-3 py-2 text-xs text-muted-foreground shadow-lg">
-                No matches.
+                {t("noMatchesLbl")}
               </div>
             )}
           </div>
@@ -406,8 +406,8 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
       <UpgradeModal
         open={showUpgrade}
         onClose={() => setShowUpgrade(false)}
-        title="Compare is a Plus feature"
-        description="Upgrade to Plus or Pro to compare assets side by side."
+        title={t("compareUpgradeTitle")}
+        description={t("compareUpgradeDesc")}
       />
     </div>
   );
