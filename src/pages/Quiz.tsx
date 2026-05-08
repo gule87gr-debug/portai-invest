@@ -86,17 +86,24 @@ const Quiz = () => {
             </div>
             <h2 className="text-center text-2xl font-bold">{t("yourPersonalizedPortfolio")}</h2>
             <p className="mx-auto mt-3 max-w-lg text-center text-sm leading-relaxed text-muted-foreground">
-              {hasFullQuiz ? portfolio.rationale : "Your personalized portfolio is ready! Upgrade to Plus or Pro to unlock your full results."}
+              {hasFullQuiz
+                ? t("rationaleTpl")
+                    .replace("{risk}", t(`risk_${portfolio.riskKey}`))
+                    .replace("{profit}", t(`profit_${portfolio.profitKey}`))
+                    .replace("{time}", t(`time_${portfolio.timeKey}`))
+                    .replace("{exp}", t(portfolio.experienceKey))
+                    .replace("{ret}", portfolio.expectedReturn)
+                : t("resultsLockedDesc")}
             </p>
 
             <div className="relative">
               {!hasFullQuiz && (
                 <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-xl bg-background/80 backdrop-blur-sm">
                   <Lock className="h-8 w-8 text-primary mb-3" />
-                  <h3 className="text-lg font-bold mb-1">Results Locked</h3>
-                  <p className="text-sm text-muted-foreground mb-4 text-center max-w-xs">Upgrade to Pro to see your personalized portfolio allocations and projections.</p>
+                  <h3 className="text-lg font-bold mb-1">{t("resultsLocked")}</h3>
+                  <p className="text-sm text-muted-foreground mb-4 text-center max-w-xs">{t("resultsLockedDesc")}</p>
                   <button onClick={() => setShowUpgrade(true)} className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-                    <Crown className="h-4 w-4" /> Unlock Results
+                    <Crown className="h-4 w-4" /> {t("unlockResultsBtn")}
                   </button>
                 </div>
               )}
@@ -104,15 +111,19 @@ const Quiz = () => {
               <div className={cn(!hasFullQuiz && "blur-md select-none pointer-events-none")}>
                 <h3 className="mb-4 mt-8 text-lg font-semibold">{t("recommendedAllocations")}</h3>
                 <div className="space-y-4">
-                  {portfolio.allocations.map((a, i) => (
-                    <div key={a.ticker} className="flex gap-4 rounded-xl border border-border bg-accent/30 p-4 animate-fade-in" style={{ animationDelay: `${i * 100}ms` }}>
-                      <span className="flex h-10 min-w-[3rem] items-center justify-center rounded-lg bg-primary/20 text-sm font-bold text-primary font-mono">{a.pct}%</span>
-                      <div>
-                        <p className="font-semibold">{a.ticker} <span className="font-normal text-muted-foreground">· {a.name}</span></p>
-                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{a.desc}</p>
+                  {portfolio.allocations.map((a, i) => {
+                    const localized = a.descKey ? t(a.descKey) : a.desc;
+                    const desc = localized && localized !== a.descKey ? localized : a.desc;
+                    return (
+                      <div key={a.ticker} className="flex gap-4 rounded-xl border border-border bg-accent/30 p-4 animate-fade-in" style={{ animationDelay: `${i * 100}ms` }}>
+                        <span className="flex h-10 min-w-[3rem] items-center justify-center rounded-lg bg-primary/20 text-sm font-bold text-primary font-mono">{a.pct}%</span>
+                        <div>
+                          <p className="font-semibold">{a.ticker} <span className="font-normal text-muted-foreground">· {a.name}</span></p>
+                          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{desc}</p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 <div className="mt-8 grid grid-cols-3 gap-4">
@@ -136,7 +147,7 @@ const Quiz = () => {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">{t("riskLevel")}</p>
-                    <p className="text-lg font-bold">{portfolio.riskLevel}</p>
+                    <p className="text-lg font-bold">{t(portfolio.riskLevelKey)}</p>
                   </div>
                 </div>
               </div>

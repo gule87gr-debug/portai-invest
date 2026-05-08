@@ -2,13 +2,19 @@ import { Stock } from "@/contexts/AppContext";
 
 type QuizAnswers = Record<number, string[]>;
 
-type Allocation = { ticker: string; name: string; pct: number; desc: string };
+type Allocation = { ticker: string; name: string; pct: number; desc: string; descKey?: string };
 
 type PortfolioResult = {
   allocations: Allocation[];
   rationale: string;
   expectedReturn: string;
   riskLevel: string;
+  riskLevelKey: string;
+  riskKey: "C" | "M" | "A";
+  timeKey: "S" | "M" | "L";
+  profitKey: "S" | "G" | "A";
+  experienceKey: string;
+  sectors: string[];
   bearCase: string;
   baseCase: string;
   bullCase: string;
@@ -57,7 +63,7 @@ const ASSETS: Record<string, Omit<Allocation, "pct">> = {
   IWM:   { ticker: "IWM",   name: "iShares Russell 2000 ETF",         desc: "Small-cap US stocks for higher growth potential." },
 };
 
-const A = (ticker: string, pct: number): Allocation => ({ ...ASSETS[ticker], pct });
+const A = (ticker: string, pct: number): Allocation => ({ ...ASSETS[ticker], pct, descKey: `assetDesc_${ticker}` });
 
 // ── Template portfolios keyed by [risk][timeframe][profit] ──────────
 // risk: Conservative(C) / Moderate(M) / Aggressive(A)
@@ -127,6 +133,7 @@ function applyExperienceModifier(allocs: Allocation[], experience: string): Allo
         a.ticker = replacement.ticker;
         a.name = replacement.name;
         a.desc = replacement.desc;
+        a.descKey = `assetDesc_${replacement.ticker}`;
       }
     }
   }
@@ -140,6 +147,7 @@ function applyExperienceModifier(allocs: Allocation[], experience: string): Allo
         a.ticker = replacement.ticker;
         a.name = replacement.name;
         a.desc = replacement.desc;
+        a.descKey = `assetDesc_${replacement.ticker}`;
       }
     }
   }
@@ -159,7 +167,7 @@ function applySectorSwaps(allocs: Allocation[], sectors: string[]): Allocation[]
     const replaceIdx = result.findIndex(a => swap.replacePreference.includes(a.ticker));
     if (replaceIdx >= 0) {
       const target = ASSETS[swap.ticker];
-      result[replaceIdx] = { ...target, pct: result[replaceIdx].pct };
+      result[replaceIdx] = { ...target, pct: result[replaceIdx].pct, descKey: `assetDesc_${target.ticker}` };
     }
   }
 
@@ -283,9 +291,22 @@ export function generatePortfolio(answers: QuizAnswers): PortfolioResult {
     `Tailored for ${experience.toLowerCase()} investors${sectors.length > 0 ? ` with interest in ${sectors.join(", ")}` : ""}. ` +
     `This allocation balances risk and reward to target ${metrics.expectedReturn} annual returns.`;
 
+  const RISK_LEVEL_KEY: Record<string, string> = {
+    "Very Low": "rl_veryLow", "Low": "rl_low", "Low-Medium": "rl_lowMedium",
+    "Medium-Low": "rl_mediumLow", "Medium": "rl_medium", "Medium-High": "rl_mediumHigh",
+    "High": "rl_high", "Very High": "rl_veryHigh",
+  };
+  const expKey = experience === "Beginner" ? "exp_Beginner" : experience === "Advanced" ? "exp_Advanced" : "exp_Intermediate";
+
   return {
     allocations: allocs,
     rationale,
+    riskLevelKey: RISK_LEVEL_KEY[metrics.riskLevel] || "rl_medium",
+    riskKey: rk,
+    timeKey: tk,
+    profitKey: pk,
+    experienceKey: expKey,
+    sectors,
     ...metrics,
   };
 }
