@@ -640,7 +640,7 @@ const Forum = () => {
       )}
 
       <p className="mt-8 text-center text-[10px] text-muted-foreground/70">
-        Not financial advice. Bias scores are AI-generated estimates for informational purposes only.
+        {t("footerForumDisclaimer")}
       </p>
 
       <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} />

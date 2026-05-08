@@ -1,7 +1,9 @@
 import { AppSidebar } from "./AppSidebar";
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const AppLayout = ({ children }: { children: React.ReactNode }) => {
+  const { t } = useLanguage();
   return (
     <div className="flex min-h-screen bg-background overflow-x-hidden max-w-[100vw] noise-overlay">
       <AppSidebar />
@@ -14,13 +16,13 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
         <footer className="border-t border-border px-4 py-4 mt-auto">
           <div className="mx-auto max-w-6xl flex flex-col items-center gap-2">
             <p className="text-[11px] text-muted-foreground text-center max-w-lg leading-relaxed">
-              PortAI is not a financial advisor. All content is for informational purposes only. Always consult a qualified financial professional before making investment decisions.
+              {t("footerDisclaimer")}
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-              <Link to="/privacy-policy" className="text-[11px] text-muted-foreground/70 hover:text-foreground transition-colors">Privacy</Link>
-              <Link to="/terms-of-service" className="text-[11px] text-muted-foreground/70 hover:text-foreground transition-colors">Terms</Link>
-              <Link to="/data-compliance" className="text-[11px] text-muted-foreground/70 hover:text-foreground transition-colors">Compliance</Link>
-              <Link to="/ip-policy" className="text-[11px] text-muted-foreground/70 hover:text-foreground transition-colors">IP Policy</Link>
+              <Link to="/privacy-policy" className="text-[11px] text-muted-foreground/70 hover:text-foreground transition-colors">{t("privacy")}</Link>
+              <Link to="/terms-of-service" className="text-[11px] text-muted-foreground/70 hover:text-foreground transition-colors">{t("terms")}</Link>
+              <Link to="/data-compliance" className="text-[11px] text-muted-foreground/70 hover:text-foreground transition-colors">{t("compliance")}</Link>
+              <Link to="/ip-policy" className="text-[11px] text-muted-foreground/70 hover:text-foreground transition-colors">{t("ipPolicy")}</Link>
             </div>
           </div>
         </footer>
