@@ -720,18 +720,18 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       {/* How it Works — AI-Monitored Watchlist bridge */}
       <RevealSection>
         <section id="how-it-works" aria-labelledby="how-it-works-heading" className="px-4 sm:px-6 py-10 max-w-4xl mx-auto">
-          <p className="text-center text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-2">How it Works</p>
+          <p className="text-center text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-2">{lt("howItWorks")}</p>
           <h2 id="how-it-works-heading" className="text-center editorial-heading text-2xl sm:text-3xl text-foreground mb-3" style={{ textWrap: "balance" as any }}>
-            Your Watchlist isn&rsquo;t static. It&rsquo;s <span className="text-primary">AI-Monitored.</span>
+            {lt("howHeadingA")} <span className="text-primary">{lt("howHeadingB")}</span>
           </h2>
           <p className="text-center text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-8">
-            We monitor your assets 24/7. If the media starts pushing a biased narrative on a stock you own, you&rsquo;ll be the first to know.
+            {lt("howSub")}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
-              { icon: Eye, step: "01", title: "You Track", body: "Add stocks, ETFs and crypto to your watchlist." },
-              { icon: Cpu, step: "02", title: "AI Watches", body: "Our models scan global news and price action 24/7." },
-              { icon: AlertCircle, step: "03", title: "You Get Alerted", body: "Bias spikes or volatility triggers ping you instantly." },
+              { icon: Eye, step: "01", title: lt("how1Title"), body: lt("how1Body") },
+              { icon: Cpu, step: "02", title: lt("how2Title"), body: lt("how2Body") },
+              { icon: AlertCircle, step: "03", title: lt("how3Title"), body: lt("how3Body") },
             ].map((s) => (
               <div key={s.step} className="glass-card rounded-xl p-4 text-center card-hover">
                 <p className="text-[10px] font-bold font-mono text-primary/70 mb-2">{s.step}</p>
