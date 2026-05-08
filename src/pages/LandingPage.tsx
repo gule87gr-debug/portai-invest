@@ -678,10 +678,10 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         <section className="px-6 py-10 max-w-4xl mx-auto">
           <div className="flex flex-wrap items-center justify-center gap-3">
             {[
-              { icon: ShieldCheck, label: "GDPR Compliant" },
-              { icon: Lock, label: "SSL Encrypted" },
-              { icon: Fingerprint, label: "Data Protected" },
-              { icon: Shield, label: "Not Financial Advice" },
+              { icon: ShieldCheck, label: lt("badgeGdpr") },
+              { icon: Lock, label: lt("badgeSsl") },
+              { icon: Fingerprint, label: lt("badgeData") },
+              { icon: Shield, label: lt("badgeNFA") },
             ].map((badge) => (
               <div key={badge.label} className="flex items-center gap-2 rounded-full border border-border bg-card/60 backdrop-blur-sm px-4 py-2" style={{ borderColor: "rgba(46, 204, 143, 0.08)" }}>
                 <badge.icon className="h-4 w-4 text-primary" />
@@ -697,10 +697,10 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         <section className="px-6 py-10 border-t border-border bg-card/20">
           <div className="max-w-5xl mx-auto text-center">
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground mb-2">
-              Trusted by retail investors from 6+ countries
+              {lt("trustedByOutlets")}
             </p>
             <p className="text-[11px] text-muted-foreground/80 mb-6">
-              We analyze bias across these outlets and more.
+              {lt("trustedByOutletsSub")}
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 opacity-60">
               {["CNBC", "Yahoo Finance", "Bloomberg", "Reuters", "WSJ", "Financial Times", "MarketWatch"].map((src) => (
