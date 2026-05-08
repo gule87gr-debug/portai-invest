@@ -291,9 +291,22 @@ export function generatePortfolio(answers: QuizAnswers): PortfolioResult {
     `Tailored for ${experience.toLowerCase()} investors${sectors.length > 0 ? ` with interest in ${sectors.join(", ")}` : ""}. ` +
     `This allocation balances risk and reward to target ${metrics.expectedReturn} annual returns.`;
 
+  const RISK_LEVEL_KEY: Record<string, string> = {
+    "Very Low": "rl_veryLow", "Low": "rl_low", "Low-Medium": "rl_lowMedium",
+    "Medium-Low": "rl_mediumLow", "Medium": "rl_medium", "Medium-High": "rl_mediumHigh",
+    "High": "rl_high", "Very High": "rl_veryHigh",
+  };
+  const expKey = experience === "Beginner" ? "exp_Beginner" : experience === "Advanced" ? "exp_Advanced" : "exp_Intermediate";
+
   return {
     allocations: allocs,
     rationale,
+    riskLevelKey: RISK_LEVEL_KEY[metrics.riskLevel] || "rl_medium",
+    riskKey: rk,
+    timeKey: tk,
+    profitKey: pk,
+    experienceKey: expKey,
+    sectors,
     ...metrics,
   };
 }
