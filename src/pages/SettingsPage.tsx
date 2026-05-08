@@ -370,21 +370,21 @@ const SettingsPage = () => {
                     </button>
                   )}
                   {scheduledTier && (
-                    <p className="text-xs text-muted-foreground text-center">A plan change is already scheduled. Manage it via Manage Billing below.</p>
+                    <p className="text-xs text-muted-foreground text-center">{t("planChangeScheduledShort")}</p>
                   )}
                 </div>
               )}
 
               <div className="flex flex-wrap gap-3">
                 <button onClick={handleManageBilling} className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-accent">
-                  <CreditCard className="h-4 w-4" /> Manage Billing
+                  <CreditCard className="h-4 w-4" /> {t("manageBillingBtn")}
                 </button>
                 <button onClick={() => navigate("/billing-consents")} className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-accent">
-                  <ShieldCheck className="h-4 w-4" /> My Billing Consents
+                  <ShieldCheck className="h-4 w-4" /> {t("myBillingConsentsBtn")}
                 </button>
                 {!cancelAtPeriodEnd && (
                   <button onClick={() => setShowCancelModal(true)} className="flex items-center gap-2 rounded-lg border border-loss/30 px-4 py-2 text-sm font-medium text-loss hover:bg-loss/10">
-                    Cancel Subscription
+                    {t("cancelSubBtn")}
                   </button>
                 )}
               </div>
@@ -794,7 +794,7 @@ const SettingsPage = () => {
                       onClick={async () => { setPendingPlanChange(null); await handleManageBilling(); }}
                       className="flex-1 rounded-xl bg-primary py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 flex items-center justify-center gap-2"
                     >
-                      <CreditCard className="h-4 w-4" /> Manage Billing
+                      <CreditCard className="h-4 w-4" /> {t("manageBillingBtn")}
                     </button>
                   )}
                 </div>
@@ -825,8 +825,8 @@ const SettingsPage = () => {
             <div className="flex items-center gap-3">
               {isDark ? <Moon className="h-5 w-5 text-primary" /> : <Sun className="h-5 w-5 text-warning" />}
               <div>
-                <h3 className="font-semibold">{isDark ? "Dark Mode" : "Light Mode"}</h3>
-                <p className="text-xs text-muted-foreground">Switch between dark and light appearance</p>
+                <h3 className="font-semibold">{isDark ? t("darkModeLbl") : t("lightModeLbl")}</h3>
+                <p className="text-xs text-muted-foreground">{t("themeSwitchDesc")}</p>
               </div>
             </div>
             <button onClick={toggleTheme} className={cn("relative h-6 w-11 rounded-full transition-colors", isDark ? "bg-primary" : "bg-muted")}>
@@ -857,8 +857,8 @@ const SettingsPage = () => {
             <div className="flex items-center gap-3">
               <GraduationCap className="h-5 w-5 text-primary" />
               <div>
-                <h3 className="font-semibold">Take the Tour</h3>
-                <p className="text-xs text-muted-foreground">Replay the onboarding walkthrough</p>
+                <h3 className="font-semibold">{t("takeTourTitle")}</h3>
+                <p className="text-xs text-muted-foreground">{t("takeTourDesc")}</p>
               </div>
             </div>
             <button
@@ -872,7 +872,7 @@ const SettingsPage = () => {
               }}
               className="rounded-lg border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
             >
-              Start Tour
+              {t("startTourBtn")}
             </button>
           </div>
         </div>
