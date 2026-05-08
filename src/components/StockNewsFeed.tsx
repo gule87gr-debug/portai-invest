@@ -178,7 +178,7 @@ export const StockNewsFeed = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search articles, tickers, topics..."
+            placeholder={t("searchArticlesPh")}
             className="h-10 w-full rounded-lg border border-border bg-accent/30 pl-9 pr-9 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />
           {searchQuery && (
@@ -186,7 +186,7 @@ export const StockNewsFeed = () => {
               type="button"
               onClick={clearSearch}
               className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
-              aria-label="Clear search"
+              aria-label={t("clearSearch")}
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -198,9 +198,9 @@ export const StockNewsFeed = () => {
             <SelectValue />
           </SelectTrigger>
           <SelectContent align="end">
-            <SelectItem value="newest">Newest first</SelectItem>
-            <SelectItem value="relevant">Most relevant</SelectItem>
-            <SelectItem value="trust">Highest trust</SelectItem>
+            <SelectItem value="newest">{t("newestFirst")}</SelectItem>
+            <SelectItem value="relevant">{t("mostRelevant")}</SelectItem>
+            <SelectItem value="trust">{t("highestTrust")}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -212,7 +212,7 @@ export const StockNewsFeed = () => {
               type="button"
             >
               <SlidersHorizontal className="h-4 w-4" />
-              <span>Filters</span>
+              <span>{t("filters")}</span>
               {activeFilterCount > 0 && (
                 <span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
                   {activeFilterCount}
@@ -222,13 +222,13 @@ export const StockNewsFeed = () => {
           </PopoverTrigger>
           <PopoverContent align="end" className="w-80 p-0">
             <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
-              <p className="text-sm font-semibold">Filter news</p>
+              <p className="text-sm font-semibold">{t("filterNews")}</p>
               {activeFilterCount > 0 && (
                 <button
                   onClick={clearFilters}
                   className="text-[11px] text-muted-foreground hover:text-foreground"
                 >
-                  Clear all
+                  {t("clearAll")}
                 </button>
               )}
             </div>
@@ -236,7 +236,7 @@ export const StockNewsFeed = () => {
             <div className="max-h-[60vh] overflow-y-auto scrollbar-thin">
               <div className="px-4 py-3">
                 <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  Categories
+                  {t("categories")}
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {categories.map((cat) => {
@@ -262,7 +262,7 @@ export const StockNewsFeed = () => {
 
               <div className="border-t border-border px-4 py-3">
                 <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  Regions
+                  {t("regions")}
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {regions.map((region) => {
@@ -288,7 +288,7 @@ export const StockNewsFeed = () => {
 
             <div className="flex items-center justify-end gap-2 border-t border-border px-4 py-2.5">
               <Button size="sm" onClick={() => setFilterOpen(false)}>
-                Done
+                {t("done")}
               </Button>
             </div>
           </PopoverContent>
@@ -301,7 +301,7 @@ export const StockNewsFeed = () => {
           {searchQuery && (
             <span className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[11px] text-primary">
               "{searchQuery}"
-              <button onClick={clearSearch} aria-label="Remove search">
+              <button onClick={clearSearch} aria-label={t("removeSearch")}>
                 <X className="h-3 w-3" />
               </button>
             </span>
@@ -354,7 +354,7 @@ export const StockNewsFeed = () => {
             </div>
           ) : sortedNews.length === 0 ? (
             <div className="flex items-center justify-center h-full text-muted-foreground">
-              <span className="text-sm">No news found</span>
+              <span className="text-sm">{t("noNewsFound")}</span>
             </div>
           ) : (
             sortedNews.map((item, i) => {
