@@ -633,6 +633,12 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
       console.error("Failed to persist analyzed_article:", e);
     }
 
+    // Strip premium fields for non-Pro users to prevent client-side bypass
+    if (!isPro) {
+      analysis.hiddenAngle = null;
+      analysis.proDeepDive = null;
+    }
+
     return new Response(JSON.stringify({ success: true, analysis }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
