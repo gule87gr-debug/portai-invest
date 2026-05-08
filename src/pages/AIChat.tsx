@@ -292,10 +292,10 @@ const AIChat = () => {
       {!hasUnlimitedChat && (
         <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
           <span className={cn(msgLimitReached && "text-destructive font-semibold")}>
-            Messages: {msgUsage}/{FREE_MSG_LIMIT} (resets every {FREE_MSG_WINDOW_HOURS}h)
+            {t("messagesCounter")}: {msgUsage}/{FREE_MSG_LIMIT} ({t("resetsEvery")} {FREE_MSG_WINDOW_HOURS}h)
           </span>
           <span className={cn(imgLimitReached && "text-destructive font-semibold")}>
-            Image analyses: {imgUsage}/{FREE_IMG_LIMIT} (resets every {FREE_IMG_WINDOW_HOURS}h)
+            {t("imageAnalysesCounter")}: {imgUsage}/{FREE_IMG_LIMIT} ({t("resetsEvery")} {FREE_IMG_WINDOW_HOURS}h)
           </span>
         </div>
       )}
@@ -303,14 +303,14 @@ const AIChat = () => {
       {msgLimitReached && (
         <div className="mt-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3 flex items-center gap-2 text-sm">
           <Crown className="h-4 w-4 text-primary shrink-0" />
-          <span>You've reached your free message limit ({FREE_MSG_LIMIT} every {FREE_MSG_WINDOW_HOURS}h). <a href="/pricing" className="text-primary font-semibold hover:underline">Upgrade to Plus or Pro</a> for unlimited messages.</span>
+          <span>{t("freeMsgLimitReached")} ({FREE_MSG_LIMIT} / {FREE_MSG_WINDOW_HOURS}h). <a href="/pricing" className="text-primary font-semibold hover:underline">{t("upgradeToPlusOrPro")}</a> {t("forUnlimitedMsgs")}</span>
         </div>
       )}
 
       {imgLimitReached && !msgLimitReached && (
         <div className="mt-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3 flex items-center gap-2 text-sm">
           <Crown className="h-4 w-4 text-primary shrink-0" />
-          <span>You've used all {FREE_IMG_LIMIT} free image analyses today. <a href="/pricing" className="text-primary font-semibold hover:underline">Upgrade to Plus or Pro</a> for unlimited analyses.</span>
+          <span>{t("freeImgLimitReached")} {FREE_IMG_LIMIT} {t("freeImgAnalysesToday")}. <a href="/pricing" className="text-primary font-semibold hover:underline">{t("upgradeToPlusOrPro")}</a> {t("forUnlimitedAnalyses")}</span>
         </div>
       )}
 
