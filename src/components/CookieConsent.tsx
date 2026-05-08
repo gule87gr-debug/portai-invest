@@ -28,8 +28,33 @@ export const CookieConsent = () => {
   const [visible, setVisible] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [prefs, setPrefs] = useState<CookiePreferences>({ essential: true, analytics: true, functional: true });
-  let t: (k: string) => string;
-  try { t = useLanguage().t; } catch { t = (k) => k; }
+
+  // Safe English fallbacks so the banner never renders raw i18n keys
+  const FALLBACKS: Record<string, string> = {
+    cookieTitle: "We use cookies",
+    cookieBody:
+      "We use essential cookies to keep the platform running and optional cookies to improve your experience. You can customize your preferences below. Read our",
+    privacyPolicyLink: "Privacy Policy",
+    forDetails: "for details.",
+    managePrefs: "Manage preferences",
+    cookieEssential: "Essential",
+    cookieEssentialDesc: "Required for the platform to function",
+    cookieAnalytics: "Analytics",
+    cookieAnalyticsDesc: "Help us understand how you use the platform",
+    cookieFunctional: "Functional",
+    cookieFunctionalDesc: "Remember your preferences and settings",
+    savePrefs: "Save Preferences",
+    acceptAll: "Accept All",
+    rejectAll: "Reject All",
+  };
+
+  let translate: (k: string) => string = (k) => k;
+  try { translate = useLanguage().t; } catch { /* outside provider */ }
+  const t = (k: string): string => {
+    const value = translate(k);
+    if (!value || value === k) return FALLBACKS[k] ?? k;
+    return value;
+  };
 
   useEffect(() => {
     const consent = localStorage.getItem(COOKIE_KEY);
