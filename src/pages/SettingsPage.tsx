@@ -342,7 +342,7 @@ const SettingsPage = () => {
               {/* Plan switcher */}
               {!cancelAtPeriodEnd && (
                 <div className="rounded-lg border border-border bg-background/50 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">{t("changePlanLbl")}</p>nge plan</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">{t("changePlanLbl")}</p>
                   {isPlus && scheduledTier !== "pro" && (
                     <button
                       onClick={() => setPendingPlanChange("pro")}
