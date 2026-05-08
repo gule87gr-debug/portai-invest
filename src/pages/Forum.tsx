@@ -232,6 +232,7 @@ const Forum = () => {
   usePageTitle("AI Media Bias Pulse | PortAI");
   const { toast } = useToast();
   const { t } = useLanguage();
+  const timeAgo = useTimeAgo();
   const { isPro, isPaid } = useSubscription();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [articles, setArticles] = useState<AnalyzedArticle[]>([]);
