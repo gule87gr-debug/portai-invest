@@ -256,7 +256,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
             </button>
           </span>
         ))}
-        {extras.length < 4 && (
+        {extras.length < MAX_COMPARE && (
           <div ref={searchRef} className="relative">
             {!searchOpen ? (
               <button
