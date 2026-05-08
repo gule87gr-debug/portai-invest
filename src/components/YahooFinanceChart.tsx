@@ -19,7 +19,17 @@ const COMPARE_COLORS = [
   "hsl(45 90% 55%)",
   "hsl(290 70% 65%)",
   "hsl(15 80% 60%)",
+  "hsl(160 70% 50%)",
+  "hsl(340 80% 60%)",
+  "hsl(190 85% 55%)",
+  "hsl(70 75% 50%)",
+  "hsl(255 75% 65%)",
+  "hsl(25 85% 55%)",
+  "hsl(130 65% 50%)",
+  "hsl(310 75% 60%)",
 ];
+
+const MAX_COMPARE = COMPARE_COLORS.length;
 
 interface Point { t: number; c: number; }
 interface HistoryResponse {
@@ -181,7 +191,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
       setShowUpgrade(true);
       return;
     }
-    if (extras.length >= 4) return;
+    if (extras.length >= MAX_COMPARE) return;
     const usedColors = new Set(extras.map((e) => e.color));
     const color = COMPARE_COLORS.find((c) => !usedColors.has(c)) || COMPARE_COLORS[0];
     setExtras((prev) => [...prev, { ticker: a.ticker.toUpperCase(), type: a.type, color }]);
@@ -246,7 +256,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
             </button>
           </span>
         ))}
-        {extras.length < 4 && (
+        {extras.length < MAX_COMPARE && (
           <div ref={searchRef} className="relative">
             {!searchOpen ? (
               <button
