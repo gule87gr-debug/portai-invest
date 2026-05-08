@@ -59,14 +59,13 @@ export const CookieConsent = () => {
               <Cookie className="h-4.5 w-4.5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground mb-1">We use cookies</p>
+              <p className="text-sm font-medium text-foreground mb-1">{t("cookieTitle")}</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                We use essential cookies to keep the platform running and optional cookies to improve your experience.
-                You can customize your preferences below. Read our{" "}
+                {t("cookieBody")}{" "}
                 <Link to="/privacy-policy" className="text-primary hover:underline">
-                  Privacy Policy
+                  {t("privacyPolicyLink")}
                 </Link>{" "}
-                for details.
+                {t("forDetails")}
               </p>
 
               {/* Expandable preferences */}
@@ -74,22 +73,22 @@ export const CookieConsent = () => {
                 onClick={() => setShowDetails(!showDetails)}
                 className="mt-2 flex items-center gap-1 text-xs text-primary hover:underline"
               >
-                Manage preferences {showDetails ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                {t("managePrefs")} {showDetails ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
               </button>
 
               {showDetails && (
                 <div className="mt-3 space-y-2 rounded-lg border border-border bg-background/50 p-3">
                   <label className="flex items-center justify-between">
                     <div>
-                      <span className="text-xs font-medium text-foreground">Essential</span>
-                      <p className="text-[10px] text-muted-foreground">Required for the platform to function</p>
+                      <span className="text-xs font-medium text-foreground">{t("cookieEssential")}</span>
+                      <p className="text-[10px] text-muted-foreground">{t("cookieEssentialDesc")}</p>
                     </div>
                     <input type="checkbox" checked disabled className="accent-primary h-4 w-4 rounded" />
                   </label>
                   <label className="flex items-center justify-between cursor-pointer">
                     <div>
-                      <span className="text-xs font-medium text-foreground">Analytics</span>
-                      <p className="text-[10px] text-muted-foreground">Help us understand how you use the platform</p>
+                      <span className="text-xs font-medium text-foreground">{t("cookieAnalytics")}</span>
+                      <p className="text-[10px] text-muted-foreground">{t("cookieAnalyticsDesc")}</p>
                     </div>
                     <input
                       type="checkbox"
@@ -100,8 +99,8 @@ export const CookieConsent = () => {
                   </label>
                   <label className="flex items-center justify-between cursor-pointer">
                     <div>
-                      <span className="text-xs font-medium text-foreground">Functional</span>
-                      <p className="text-[10px] text-muted-foreground">Remember your preferences and settings</p>
+                      <span className="text-xs font-medium text-foreground">{t("cookieFunctional")}</span>
+                      <p className="text-[10px] text-muted-foreground">{t("cookieFunctionalDesc")}</p>
                     </div>
                     <input
                       type="checkbox"
@@ -114,7 +113,7 @@ export const CookieConsent = () => {
                     onClick={handleSavePreferences}
                     className="mt-1 w-full rounded-lg border border-primary bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary transition-all hover:bg-primary/20 active:scale-[0.97]"
                   >
-                    Save Preferences
+                    {t("savePrefs")}
                   </button>
                 </div>
               )}
@@ -124,13 +123,13 @@ export const CookieConsent = () => {
                   onClick={handleAcceptAll}
                   className="rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground transition-all hover:bg-primary/90 active:scale-[0.97]"
                 >
-                  Accept All
+                  {t("acceptAll")}
                 </button>
                 <button
                   onClick={handleRejectAll}
                   className="rounded-lg border border-border bg-secondary px-4 py-2 text-xs font-medium text-secondary-foreground transition-all hover:bg-secondary/80 active:scale-[0.97]"
                 >
-                  Reject All
+                  {t("rejectAll")}
                 </button>
               </div>
             </div>
