@@ -709,7 +709,7 @@ const translations: Record<Language, Record<string, string>> = {
     // === Bulk i18n additions ===
     choosePlan: "Elige tu plan",
     pricingSubtitle: "Invierte de forma más inteligente con las herramientas e ideas que coinciden con tu ambición.",
-    currentPlan: "Plan actual",
+    
     yourCurrentPlan: "Tu plan actual",
     cancellingBadge: "Cancelando",
     tierFree: "Gratis",
@@ -720,7 +720,7 @@ const translations: Record<Language, Record<string, string>> = {
     tierProDesc: "Acceso completo a todas las funciones premium",
     mostPopular: "Más popular · Mejor valor",
     redirecting: "Redirigiendo...",
-    upgradeToProBtn: "Pasar a Pro",
+    
     includedInPro: "Incluido en Pro",
     reactivateNoCharge: "Reactivar (sin cargo adicional)",
     cancelAnytimeShort: "Cancela cuando quieras",
@@ -1133,7 +1133,7 @@ const translations: Record<Language, Record<string, string>> = {
     // === Bulk i18n additions ===
     choosePlan: "Choisissez votre forfait",
     pricingSubtitle: "Investissez plus intelligemment avec les outils et les analyses à la hauteur de votre ambition.",
-    currentPlan: "Forfait actuel",
+    
     yourCurrentPlan: "Votre forfait actuel",
     cancellingBadge: "En annulation",
     tierFree: "Gratuit",
@@ -1144,7 +1144,7 @@ const translations: Record<Language, Record<string, string>> = {
     tierProDesc: "Accès complet à toutes les fonctionnalités premium",
     mostPopular: "Le plus populaire · Meilleur rapport",
     redirecting: "Redirection...",
-    upgradeToProBtn: "Passer à Pro",
+    
     includedInPro: "Inclus dans Pro",
     reactivateNoCharge: "Réactiver (sans frais)",
     cancelAnytimeShort: "Annulez à tout moment",
@@ -1557,7 +1557,7 @@ const translations: Record<Language, Record<string, string>> = {
     // === Bulk i18n additions ===
     choosePlan: "Escolha seu plano",
     pricingSubtitle: "Invista de forma mais inteligente com as ferramentas e insights à altura da sua ambição.",
-    currentPlan: "Plano atual",
+    
     yourCurrentPlan: "Seu plano atual",
     cancellingBadge: "Cancelando",
     tierFree: "Grátis",
@@ -1568,7 +1568,7 @@ const translations: Record<Language, Record<string, string>> = {
     tierProDesc: "Acesso total a todas as funcionalidades premium",
     mostPopular: "Mais popular · Melhor valor",
     redirecting: "Redirecionando...",
-    upgradeToProBtn: "Atualizar para Pro",
+    
     includedInPro: "Incluído no Pro",
     reactivateNoCharge: "Reativar (sem cobrança extra)",
     cancelAnytimeShort: "Cancele quando quiser",
@@ -1981,7 +1981,7 @@ const translations: Record<Language, Record<string, string>> = {
     // === Bulk i18n additions ===
     choosePlan: "Wählen Sie Ihren Plan",
     pricingSubtitle: "Investieren Sie klüger mit den Werkzeugen und Erkenntnissen, die Ihrem Anspruch entsprechen.",
-    currentPlan: "Aktueller Plan",
+    
     yourCurrentPlan: "Ihr aktueller Plan",
     cancellingBadge: "Wird gekündigt",
     tierFree: "Kostenlos",
@@ -1992,7 +1992,7 @@ const translations: Record<Language, Record<string, string>> = {
     tierProDesc: "Voller Zugriff auf alle Premium-Funktionen",
     mostPopular: "Beliebteste · Bestes Angebot",
     redirecting: "Weiterleitung...",
-    upgradeToProBtn: "Auf Pro upgraden",
+    
     includedInPro: "In Pro enthalten",
     reactivateNoCharge: "Reaktivieren (ohne Aufpreis)",
     cancelAnytimeShort: "Jederzeit kündbar",
@@ -2405,7 +2405,7 @@ const translations: Record<Language, Record<string, string>> = {
     // === Bulk i18n additions ===
     choosePlan: "Scegli il tuo piano",
     pricingSubtitle: "Investi in modo più intelligente con strumenti e analisi all'altezza della tua ambizione.",
-    currentPlan: "Piano attuale",
+    
     yourCurrentPlan: "Il tuo piano attuale",
     cancellingBadge: "In cancellazione",
     tierFree: "Gratuito",
@@ -2416,7 +2416,7 @@ const translations: Record<Language, Record<string, string>> = {
     tierProDesc: "Accesso completo a tutte le funzionalità premium",
     mostPopular: "Più popolare · Miglior valore",
     redirecting: "Reindirizzamento...",
-    upgradeToProBtn: "Passa a Pro",
+    
     includedInPro: "Incluso in Pro",
     reactivateNoCharge: "Riattiva (senza costi extra)",
     cancelAnytimeShort: "Annulla quando vuoi",
