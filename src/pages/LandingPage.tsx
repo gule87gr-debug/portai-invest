@@ -864,40 +864,40 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           {/* Stock Market News by Sector — internal linking for SEO */}
           <nav aria-label="Stock market news by sector" className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-left">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-foreground mb-3">Stock Market News by Sector</p>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-foreground mb-3">{lt("footSector")}</p>
               <ul className="space-y-1.5">
-                <li><a href="/dashboard?sector=technology" className="text-xs text-muted-foreground hover:text-primary transition-colors">Technology Stock News</a></li>
-                <li><a href="/dashboard?sector=finance" className="text-xs text-muted-foreground hover:text-primary transition-colors">Finance &amp; Banking News</a></li>
-                <li><a href="/dashboard?sector=crypto" className="text-xs text-muted-foreground hover:text-primary transition-colors">Crypto Market News</a></li>
-                <li><a href="/dashboard?sector=energy" className="text-xs text-muted-foreground hover:text-primary transition-colors">Energy &amp; Commodities</a></li>
-                <li><a href="/dashboard?sector=healthcare" className="text-xs text-muted-foreground hover:text-primary transition-colors">Healthcare &amp; Biotech</a></li>
+                <li><a href="/dashboard?sector=technology" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footSec1")}</a></li>
+                <li><a href="/dashboard?sector=finance" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footSec2")}</a></li>
+                <li><a href="/dashboard?sector=crypto" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footSec3")}</a></li>
+                <li><a href="/dashboard?sector=energy" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footSec4")}</a></li>
+                <li><a href="/dashboard?sector=healthcare" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footSec5")}</a></li>
               </ul>
             </div>
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-foreground mb-3">AI Tools</p>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-foreground mb-3">{lt("footAi")}</p>
               <ul className="space-y-1.5">
-                <li><a href="/dashboard#analyzer" className="text-xs text-muted-foreground hover:text-primary transition-colors">AI News Bias Checker</a></li>
-                <li><a href="/chat" className="text-xs text-muted-foreground hover:text-primary transition-colors">AI Financial Advisor</a></li>
-                <li><a href="/quiz" className="text-xs text-muted-foreground hover:text-primary transition-colors">Investor Profile Quiz</a></li>
-                <li><a href="/forum" className="text-xs text-muted-foreground hover:text-primary transition-colors">Media Bias Pulse</a></li>
+                <li><a href="/dashboard#analyzer" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footAi1")}</a></li>
+                <li><a href="/chat" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footAi2")}</a></li>
+                <li><a href="/quiz" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footAi3")}</a></li>
+                <li><a href="/forum" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footAi4")}</a></li>
               </ul>
             </div>
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-foreground mb-3">Tracking</p>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-foreground mb-3">{lt("footTrack")}</p>
               <ul className="space-y-1.5">
-                <li><a href="/watchlists" className="text-xs text-muted-foreground hover:text-primary transition-colors">Multi-Asset Watchlist</a></li>
-                <li><a href="/dashboard#heatmap" className="text-xs text-muted-foreground hover:text-primary transition-colors">S&amp;P 500 Heatmap</a></li>
-                <li><a href="/watchlists#alerts" className="text-xs text-muted-foreground hover:text-primary transition-colors">Stock Price Alerts</a></li>
-                <li><a href="/watchlists?asset=crypto" className="text-xs text-muted-foreground hover:text-primary transition-colors">Crypto Portfolio Tracker</a></li>
+                <li><a href="/watchlists" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footTr1")}</a></li>
+                <li><a href="/dashboard#heatmap" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footTr2")}</a></li>
+                <li><a href="/watchlists#alerts" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footTr3")}</a></li>
+                <li><a href="/watchlists?asset=crypto" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footTr4")}</a></li>
               </ul>
             </div>
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-foreground mb-3">Legal</p>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-foreground mb-3">{lt("footLegal")}</p>
               <ul className="space-y-1.5">
-                <li><a href="/privacy-policy" className="text-xs text-muted-foreground hover:text-primary transition-colors">Privacy Policy</a></li>
-                <li><a href="/terms-of-service" className="text-xs text-muted-foreground hover:text-primary transition-colors">Terms of Service</a></li>
-                <li><a href="/data-compliance" className="text-xs text-muted-foreground hover:text-primary transition-colors">Data &amp; Compliance</a></li>
-                <li><a href="/ip-policy" className="text-xs text-muted-foreground hover:text-primary transition-colors">IP Policy</a></li>
+                <li><a href="/privacy-policy" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footL1")}</a></li>
+                <li><a href="/terms-of-service" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footL2")}</a></li>
+                <li><a href="/data-compliance" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footL3")}</a></li>
+                <li><a href="/ip-policy" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footL4")}</a></li>
               </ul>
             </div>
           </nav>
@@ -905,13 +905,13 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           <div className="border-t border-border pt-6 flex flex-col items-center gap-3">
             <p className="inline-flex items-center gap-2 text-[11px] font-semibold text-foreground/80 text-center">
               <Globe className="h-3.5 w-3.5 text-primary" />
-              Available in 6 Languages: English, Spanish, Portuguese, German, French, and Italian.
+              {lt("footAvailable")}
             </p>
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/80 text-center">
-              Powered by OpenAI · Secured by Supabase · Real-time Data via Financial APIs
+              {lt("footPowered")}
             </p>
-            <p className="text-xs text-muted-foreground text-center max-w-lg"><span className="font-semibold text-warning">Not Financial Advice.</span> PortAI is not a financial advisor. All content is for informational purposes only. Always consult a qualified financial professional before making investment decisions.</p>
-            <p className="text-xs text-muted-foreground">© 2026 PortAI. All rights reserved.</p>
+            <p className="text-xs text-muted-foreground text-center max-w-lg"><span className="font-semibold text-warning">{lt("badgeNFA")}.</span> {lt("footNFA")}</p>
+            <p className="text-xs text-muted-foreground">{lt("footCopyright")}</p>
           </div>
         </div>
       </footer>
