@@ -190,7 +190,7 @@ export const OnboardingTutorial = ({ onComplete }: { onComplete: () => void }) =
           </button>
           {current === 0 && (
             <button onClick={skip} className="mt-3 block w-full text-xs text-muted-foreground hover:text-foreground transition-colors">
-              Skip Tour
+              {t("tourSkip")}
             </button>
           )}
         </div>
@@ -254,10 +254,10 @@ export const OnboardingTutorial = ({ onComplete }: { onComplete: () => void }) =
           {/* Progress */}
           <div className="flex items-center justify-between mb-2 sm:mb-3">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">
-              Step {currentTooltipIndex} of {totalTooltipSteps}
+              {t("step")} {currentTooltipIndex} {t("of")} {totalTooltipSteps}
             </span>
             <button onClick={skip} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-              Skip Tour
+              {t("tourSkip")}
             </button>
           </div>
           {/* Progress bar */}
@@ -273,7 +273,7 @@ export const OnboardingTutorial = ({ onComplete }: { onComplete: () => void }) =
             onClick={next}
             className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 active:scale-[0.97]"
           >
-            {current === steps.length - 2 ? "Finish" : "Next"} <ChevronRight className="h-3.5 w-3.5" />
+            {current === steps.length - 2 ? t("tourFinish") : t("tourNext")} <ChevronRight className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>
