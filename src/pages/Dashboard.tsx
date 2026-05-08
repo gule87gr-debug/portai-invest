@@ -329,10 +329,13 @@ const Dashboard = () => {
 
       <div className="rounded-xl border border-border bg-card p-4">
         <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold">{t("stockHeatmap")}</h2>
+          <h2 className="text-lg font-semibold">
+            {(HEATMAP_OPTIONS.find((o) => o.value === heatmapSource)?.flag) ?? "🌐"}{" "}
+            {(HEATMAP_OPTIONS.find((o) => o.value === heatmapSource)?.label) ?? ""} {t("stockHeatmap")}
+          </h2>
           <HeatmapSelector value={heatmapSource} onChange={setHeatmapSource} />
         </div>
-        <TradingViewHeatmap height={550} dataSource={heatmapSource} />
+        <TradingViewHeatmap key={heatmapSource} height={550} dataSource={heatmapSource} />
       </div>
     </AppLayout>
   );
@@ -348,10 +351,10 @@ const HEATMAP_OPTIONS: { value: string; label: string; flag: string; descKey: st
   { value: "CAC40", label: "CAC 40", flag: "🇫🇷", descKey: "hmDesc_CAC40" },
   { value: "IBEX35", label: "IBEX 35", flag: "🇪🇸", descKey: "hmDesc_IBEX35" },
   { value: "SMI20", label: "Swiss SMI 20", flag: "🇨🇭", descKey: "hmDesc_SMI20" },
-  { value: "NIKKEI225", label: "Nikkei 225", flag: "🇯🇵", descKey: "hmDesc_NIKKEI225" },
+  { value: "Nikkei225", label: "Nikkei 225", flag: "🇯🇵", descKey: "hmDesc_NIKKEI225" },
   { value: "HSI", label: "Hang Seng", flag: "🇭🇰", descKey: "hmDesc_HSI" },
   { value: "KOSPI", label: "KOSPI", flag: "🇰🇷", descKey: "hmDesc_KOSPI" },
-  { value: "SENSEX", label: "BSE Sensex", flag: "🇮🇳", descKey: "hmDesc_SENSEX" },
+  { value: "BSESENSEX", label: "BSE Sensex", flag: "🇮🇳", descKey: "hmDesc_SENSEX" },
   { value: "ASX200", label: "ASX 200", flag: "🇦🇺", descKey: "hmDesc_ASX200" },
   { value: "BOVESPA", label: "Bovespa", flag: "🇧🇷", descKey: "hmDesc_BOVESPA" },
 ];
