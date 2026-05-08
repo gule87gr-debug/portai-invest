@@ -127,7 +127,15 @@ const StockDetail = () => {
               <Building2 className="h-4 w-4 text-primary" />
               <h2 className="text-lg font-semibold">{t("about")}</h2>
             </div>
-            <p className="text-sm leading-relaxed text-muted-foreground">{info.description}</p>
+            {info.loading && !info.isCurated ? (
+              <div className="space-y-2">
+                <div className="h-3 w-full animate-pulse rounded bg-muted" />
+                <div className="h-3 w-11/12 animate-pulse rounded bg-muted" />
+                <div className="h-3 w-9/12 animate-pulse rounded bg-muted" />
+              </div>
+            ) : (
+              <p className="text-sm leading-relaxed text-muted-foreground">{info.description}</p>
+            )}
           </div>
 
           <div className="rounded-xl border border-border bg-card p-5">
