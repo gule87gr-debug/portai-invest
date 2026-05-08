@@ -56,7 +56,7 @@ const UpgradeSuccess = () => {
             <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 mb-6">
               <div className="flex items-center justify-center gap-2 text-primary font-semibold mb-2">
                 <Crown className="h-5 w-5" />
-                <span>Pro Plan Active</span>
+                <span>{t("proPlanActive")}</span>
               </div>
               <ul className="text-sm text-muted-foreground space-y-1">
                 <li>✓ Unlimited article analyses</li>
