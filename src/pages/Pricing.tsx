@@ -6,32 +6,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-
-const freeTierFeatures = [
-  "3 article analyses per day",
-  "10 AI chat messages / 12h",
-  "3 image analyses / 24h",
-  "1 watchlist · 5 stocks",
-  "Locked quiz results",
-  "Forum access (read & post)",
-];
-
-const plusTierFeatures = [
-  "Full quiz results & investor profile",
-  "Unlimited AI chat messages",
-  "Unlimited image analyses",
-  "Unlimited watchlists & stocks",
-  "AI Deep Dive (Hidden Angles)",
-  "Forum access (read & post)",
-];
-
-const proTierFeatures = [
-  "Everything in Plus",
-  "Unlimited article analyses",
-  "AI price alerts",
-  "Priority AI chat (faster, better)",
-  "Forum access (read & post)",
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const TIER_PRICE: Record<"plus" | "pro", string> = {
   plus: "€8.99",
@@ -41,15 +16,25 @@ const TIER_PRICE: Record<"plus" | "pro", string> = {
 const Pricing = () => {
   const { tier, loading, cancelAtPeriodEnd, refresh } = useSubscription();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [checkoutLoading, setCheckoutLoading] = useState<SubscriptionTier | null>(null);
   const [pendingTarget, setPendingTarget] = useState<"plus" | "pro" | null>(null);
-  // LEGAL: terms acceptance is mandatory.
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-  // LEGAL (EU Art. 16(m)): the 14-day right of withdrawal is only lost if the user
-  // EXPRESSLY waives it. We default to false so users keep the refund right unless
-  // they tick this box. We allow checkout either way — the box is informational, not blocking.
   const [euWaiver, setEuWaiver] = useState(false);
   const [reactivating, setReactivating] = useState(false);
+
+  const freeTierFeatures = [
+    t("featFreeAnalyses"), t("featFreeChat"), t("featFreeImg"),
+    t("featFreeWatch"), t("featFreeQuiz"), t("featForumAccess"),
+  ];
+  const plusTierFeatures = [
+    t("featPlusQuiz"), t("featPlusChat"), t("featPlusImg"),
+    t("featPlusWatch"), t("featPlusDeepDive"), t("featForumAccess"),
+  ];
+  const proTierFeatures = [
+    t("featProEverything"), t("featProAnalyses"), t("featProAlerts"),
+    t("featProPriority"), t("featForumAccess"),
+  ];
 
   const beginUpgradeFlow = (target: "plus" | "pro") => {
     setAcceptedTerms(false);
@@ -66,7 +51,6 @@ const Pricing = () => {
     const target = pendingTarget;
     const targetLabel = target === "pro" ? "Pro" : "Plus";
     const price = TIER_PRICE[target];
-    // Verbatim consent text recorded server-side as legal proof.
     const consentText = [
       `I subscribe to PortAI ${targetLabel} at ${price}/month, billed monthly via Stripe.`,
       `I have read and accept the Terms of Service and Privacy Policy.`,
@@ -77,22 +61,14 @@ const Pricing = () => {
     setCheckoutLoading(target);
     try {
       const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: {
-          tier: target,
-          accepted_terms: acceptedTerms,
-          eu_withdrawal_waiver: euWaiver,
-          consent_text: consentText,
-        },
+        body: { tier: target, accepted_terms: acceptedTerms, eu_withdrawal_waiver: euWaiver, consent_text: consentText },
       });
       if (error) throw error;
 
-      // Server may detect duplicate / pending-cancel / past-due states and respond accordingly.
       if (data?.action === "manage" && data?.url) {
-        toast.info(
-          data.reason === "already_subscribed"
-            ? "You're already on this plan — opening your billing portal."
-            : "Opening your billing portal."
-        );
+        toast.info(data.reason === "already_subscribed"
+          ? "You're already on this plan — opening your billing portal."
+          : "Opening your billing portal.");
         window.location.href = data.url;
         return;
       }
@@ -108,26 +84,17 @@ const Pricing = () => {
         navigate("/settings");
         return;
       }
-      if (data?.url) {
-        window.location.href = data.url;
-        return;
-      }
-      console.error("Unexpected checkout response:", data);
+      if (data?.url) { window.location.href = data.url; return; }
       toast.error("Couldn't start checkout — please try again.");
     } catch (e: any) {
-      console.error("Checkout error:", e);
       const ctx = e?.context;
       const code = ctx?.code ?? e?.code;
       const msg =
-        code === "subscription_past_due"
-          ? "Your subscription has an unpaid invoice. Please update your payment method first."
-          : code === "schedule_already_pending"
-          ? "A plan change is already scheduled. Manage it from Settings before changing again."
-          : code === "subscription_pending_cancel"
-          ? "Your subscription is set to cancel. Reactivate it from Settings before changing plans."
-          : code === "terms_not_accepted"
-          ? "You must accept the Terms of Service and Privacy Policy to subscribe."
-          : e?.message || "Checkout failed — please try again.";
+        code === "subscription_past_due" ? "Your subscription has an unpaid invoice. Please update your payment method first."
+        : code === "schedule_already_pending" ? "A plan change is already scheduled. Manage it from Settings before changing again."
+        : code === "subscription_pending_cancel" ? "Your subscription is set to cancel. Reactivate it from Settings before changing plans."
+        : code === "terms_not_accepted" ? "You must accept the Terms of Service and Privacy Policy to subscribe."
+        : e?.message || "Checkout failed — please try again.";
       toast.error(msg);
     } finally {
       setCheckoutLoading(null);
@@ -159,22 +126,22 @@ const Pricing = () => {
         <button
           onClick={() => navigate(-1)}
           className="absolute top-8 right-0 rounded-full p-2 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-          title="Close"
-          aria-label="Close pricing page"
+          title={t("cancelBtn")}
+          aria-label={t("closeAria")}
         >
           <X className="h-5 w-5" />
         </button>
         <div className="text-center mb-10">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-3">Choose Your Plan</h1>
-          <p className="text-muted-foreground max-w-lg mx-auto">Invest smarter with the tools and insights that match your ambition.</p>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-3">{t("choosePlan")}</h1>
+          <p className="text-muted-foreground max-w-lg mx-auto">{t("pricingSubtitle")}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Free Tier */}
+          {/* Free */}
           <div className={cn("rounded-2xl border p-6 sm:p-8", isFree ? "border-primary bg-primary/5" : "border-border bg-card")}>
-            {isFree && <span className="inline-block rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary mb-4">Current Plan</span>}
-            <h2 className="text-2xl font-bold mb-1">Free</h2>
-            <p className="text-muted-foreground text-sm mb-6">Get started with the essentials</p>
+            {isFree && <span className="inline-block rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary mb-4">{t("currentPlan")}</span>}
+            <h2 className="text-2xl font-bold mb-1">{t("tierFree")}</h2>
+            <p className="text-muted-foreground text-sm mb-6">{t("tierFreeDesc")}</p>
             <div className="text-4xl font-bold font-mono mb-6">€0<span className="text-lg text-muted-foreground font-normal">/mo</span></div>
             <ul className="space-y-3 mb-8">
               {freeTierFeatures.map((f, i) => (
@@ -186,20 +153,20 @@ const Pricing = () => {
             </ul>
             {isFree && (
               <button disabled className="w-full rounded-xl border border-border py-3 text-sm font-medium text-muted-foreground">
-                Your Current Plan
+                {t("yourCurrentPlan")}
               </button>
             )}
           </div>
 
-          {/* Plus Tier */}
+          {/* Plus */}
           <div className={cn("rounded-2xl border p-6 sm:p-8 relative", isPlus ? "border-primary bg-primary/5" : "border-border bg-card")}>
-            {isPlus && !cancelAtPeriodEnd && <span className="inline-block rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary mb-4">Current Plan</span>}
-            {isPlus && cancelAtPeriodEnd && <span className="inline-block rounded-full bg-warning/20 px-3 py-1 text-xs font-semibold text-warning mb-4">Cancelling</span>}
+            {isPlus && !cancelAtPeriodEnd && <span className="inline-block rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary mb-4">{t("currentPlan")}</span>}
+            {isPlus && cancelAtPeriodEnd && <span className="inline-block rounded-full bg-warning/20 px-3 py-1 text-xs font-semibold text-warning mb-4">{t("cancellingBadge")}</span>}
             <div className="flex items-center gap-2 mb-1">
               <Sparkles className="h-5 w-5 text-primary" />
-              <h2 className="text-2xl font-bold">Plus</h2>
+              <h2 className="text-2xl font-bold">{t("tierPlus")}</h2>
             </div>
-            <p className="text-muted-foreground text-sm mb-6">Quiz, unlimited chat & watchlists</p>
+            <p className="text-muted-foreground text-sm mb-6">{t("tierPlusDesc")}</p>
             <div className="mb-1"><span className="inline-block rounded-full bg-green-500/20 px-2.5 py-0.5 text-xs font-semibold text-green-500">40% OFF</span></div>
             <div className="text-4xl font-bold font-mono mb-6">€8.99<span className="text-lg text-muted-foreground font-normal line-through ml-2">€14.99</span><span className="text-lg text-muted-foreground font-normal">/mo</span></div>
             <ul className="space-y-3 mb-8">
@@ -218,47 +185,43 @@ const Pricing = () => {
                   className="w-full rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {checkoutLoading === "plus" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                  {checkoutLoading === "plus" ? "Redirecting..." : "Upgrade to Plus"}
+                  {checkoutLoading === "plus" ? t("redirecting") : t("upgradeToPlusBtn")}
                 </button>
                 <p className="mt-2 text-center text-[11px] text-muted-foreground flex items-center justify-center gap-1">
-                  <Check className="h-3 w-3 text-primary" /> Cancel anytime
+                  <Check className="h-3 w-3 text-primary" /> {t("cancelAnytimeShort")}
                 </p>
               </>
             )}
             {isPlus && !cancelAtPeriodEnd && (
               <button disabled className="w-full rounded-xl border border-primary py-3 text-sm font-medium text-primary">
-                Your Current Plan
+                {t("yourCurrentPlan")}
               </button>
             )}
             {isPlus && cancelAtPeriodEnd && (
-              <button
-                onClick={handleReactivate}
-                disabled={reactivating}
-                className="w-full rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
-              >
+              <button onClick={handleReactivate} disabled={reactivating} className="w-full rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2">
                 {reactivating ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                Reactivate (no extra charge)
+                {t("reactivateNoCharge")}
               </button>
             )}
             {isPro && (
               <button disabled className="w-full rounded-xl border border-border py-3 text-sm font-medium text-muted-foreground">
-                Included in Pro
+                {t("includedInPro")}
               </button>
             )}
           </div>
 
-          {/* Pro Tier */}
+          {/* Pro */}
           <div className={cn("rounded-2xl border-2 p-6 sm:p-8 relative shadow-xl shadow-primary/10", isPro ? "border-primary bg-primary/5" : "border-primary bg-gradient-to-b from-primary/[0.08] to-card")}>
             <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-lg shadow-primary/40 whitespace-nowrap">
-              <Crown className="h-3 w-3" /> Most Popular · Best Value
+              <Crown className="h-3 w-3" /> {t("mostPopular")}
             </span>
-            {isPro && !cancelAtPeriodEnd && <span className="inline-block rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary mb-4">Current Plan</span>}
-            {isPro && cancelAtPeriodEnd && <span className="inline-block rounded-full bg-warning/20 px-3 py-1 text-xs font-semibold text-warning mb-4">Cancelling</span>}
+            {isPro && !cancelAtPeriodEnd && <span className="inline-block rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary mb-4">{t("currentPlan")}</span>}
+            {isPro && cancelAtPeriodEnd && <span className="inline-block rounded-full bg-warning/20 px-3 py-1 text-xs font-semibold text-warning mb-4">{t("cancellingBadge")}</span>}
             <div className="flex items-center gap-2 mb-1">
               <Crown className="h-5 w-5 text-primary" />
-              <h2 className="text-2xl font-bold">Pro</h2>
+              <h2 className="text-2xl font-bold">{t("tierPro")}</h2>
             </div>
-            <p className="text-muted-foreground text-sm mb-6">Full access to all premium features</p>
+            <p className="text-muted-foreground text-sm mb-6">{t("tierProDesc")}</p>
             <div className="mb-1"><span className="inline-block rounded-full bg-green-500/20 px-2.5 py-0.5 text-xs font-semibold text-green-500">36% OFF</span></div>
             <div className="text-4xl font-bold font-mono mb-6">€15.99<span className="text-lg text-muted-foreground font-normal line-through ml-2">€24.99</span><span className="text-lg text-muted-foreground font-normal">/mo</span></div>
             <ul className="space-y-3 mb-8">
@@ -277,159 +240,125 @@ const Pricing = () => {
                   className="w-full rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {checkoutLoading === "pro" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
-                  {checkoutLoading === "pro" ? "Redirecting..." : isPlus ? "Upgrade to Pro" : "Upgrade to Pro"}
+                  {checkoutLoading === "pro" ? t("redirecting") : t("upgradeToProBtn")}
                 </button>
                 <p className="mt-2 text-center text-[11px] text-muted-foreground flex items-center justify-center gap-1">
-                  <Check className="h-3 w-3 text-primary" /> Cancel anytime · No questions asked
+                  <Check className="h-3 w-3 text-primary" /> {t("cancelAnytimeNQA")}
                 </p>
               </>
             )}
             {isPro && !cancelAtPeriodEnd && (
               <button disabled className="w-full rounded-xl border border-primary py-3 text-sm font-medium text-primary">
-                Your Current Plan
+                {t("yourCurrentPlan")}
               </button>
             )}
             {isPro && cancelAtPeriodEnd && (
-              <button
-                onClick={handleReactivate}
-                disabled={reactivating}
-                className="w-full rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
-              >
+              <button onClick={handleReactivate} disabled={reactivating} className="w-full rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2">
                 {reactivating ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                Reactivate (no extra charge)
+                {t("reactivateNoCharge")}
               </button>
             )}
           </div>
         </div>
 
-        {/* Trust footer */}
         <div className="mt-10 grid sm:grid-cols-3 gap-4 text-xs text-muted-foreground">
           <div className="rounded-lg border border-border bg-card/50 p-3 flex items-start gap-2">
             <ShieldCheck className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-            <span>Secure checkout via Stripe. We never store your card details.</span>
+            <span>{t("secureCheckoutNote")}</span>
           </div>
           <div className="rounded-lg border border-border bg-card/50 p-3 flex items-start gap-2">
             <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-            <span>Cancel anytime from Settings — access continues until the end of your billing period.</span>
+            <span>{t("cancelFromSettingsNote")}</span>
           </div>
           <div className="rounded-lg border border-border bg-card/50 p-3 flex items-start gap-2">
             <AlertTriangle className="h-4 w-4 text-warning mt-0.5 shrink-0" />
-            <span>EU customers retain a 14-day right of withdrawal where applicable. See <Link to="/terms-of-service" className="underline">Terms</Link>.</span>
+            <span>{t("euWithdrawalNote")} <Link to="/terms-of-service" className="underline">{t("terms")}</Link>.</span>
           </div>
         </div>
       </div>
 
-      {/* Confirmation modal — required before any new charge */}
       {pendingTarget && (() => {
         const target = pendingTarget;
         const targetLabel = target === "pro" ? "Pro" : "Plus";
         const price = TIER_PRICE[target];
         const inFlight = checkoutLoading === target;
         return (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in p-4"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="confirm-upgrade-title"
-          >
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in p-4" role="dialog" aria-modal="true">
             <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20">
                   {target === "pro" ? <Crown className="h-5 w-5 text-primary" /> : <Sparkles className="h-5 w-5 text-primary" />}
                 </div>
-                <h2 id="confirm-upgrade-title" className="text-lg font-bold">Subscribe to {targetLabel}?</h2>
+                <h2 className="text-lg font-bold">{t("subscribeToTitle")} {targetLabel}?</h2>
               </div>
 
               <div className="rounded-lg bg-muted/50 p-3 text-sm space-y-1 mb-4">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Plan</span>
+                  <span className="text-muted-foreground">{t("planLabel")}</span>
                   <span className="font-semibold text-foreground">{targetLabel}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Price</span>
-                  <span className="font-semibold text-foreground">{price}/month, billed monthly</span>
+                  <span className="text-muted-foreground">{t("priceLabel")}</span>
+                  <span className="font-semibold text-foreground">{price}/month, {t("billedMonthly")}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">First charge</span>
-                  <span className="text-foreground">Today</span>
+                  <span className="text-muted-foreground">{t("firstCharge")}</span>
+                  <span className="text-foreground">{t("todayLabel")}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Renews</span>
-                  <span className="text-foreground">Automatically each month</span>
+                  <span className="text-muted-foreground">{t("renewsLabel")}</span>
+                  <span className="text-foreground">{t("renewsAuto")}</span>
                 </div>
               </div>
 
               <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-xs text-muted-foreground mb-4 space-y-2">
                 <p>
-                  You will be redirected to <span className="font-medium text-foreground">Stripe</span> to complete payment.
-                  Your subscription renews automatically each month at {price} until you cancel.
+                  {t("redirectStripeNotice1")} <span className="font-medium text-foreground">Stripe</span> {t("redirectStripeNotice2")} {price} {t("untilYouCancel")}
                 </p>
                 <p>
-                  You can cancel anytime from Settings — your access continues until the end of the current billing period.
-                  Cancelling does <span className="font-medium text-foreground">not</span> refund the current period.
+                  {t("cancelAnytimeInfo")} <span className="font-medium text-foreground">{t("notLabel")}</span> {t("refundCurrentPeriod")}
                 </p>
               </div>
 
-              {/* Mandatory: Terms acceptance */}
               <label className="flex items-start gap-2 text-xs text-muted-foreground mb-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={acceptedTerms}
-                  onChange={(e) => setAcceptedTerms(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 accent-primary"
-                  aria-required="true"
-                />
+                <input type="checkbox" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} className="mt-0.5 h-4 w-4 accent-primary" aria-required="true" />
                 <span>
-                  <span className="font-medium text-foreground">Required.</span> I will be charged {price} today and every month until I cancel. I have read and accept the{" "}
-                  <Link to="/terms-of-service" target="_blank" className="underline">Terms of Service</Link> and{" "}
-                  <Link to="/privacy-policy" target="_blank" className="underline">Privacy Policy</Link>.
+                  <span className="font-medium text-foreground">{t("requiredLabel")}</span> {t("termsAcceptText1")} {price} {t("termsAcceptText2")}{" "}
+                  <Link to="/terms-of-service" target="_blank" className="underline">{t("termsOfService")}</Link> {t("andLabel")}{" "}
+                  <Link to="/privacy-policy" target="_blank" className="underline">{t("privacyPolicy")}</Link>.
                 </span>
               </label>
 
-              {/* EU Art. 16(m) waiver — explicit informed choice */}
               <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 mb-4 space-y-2.5">
                 <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
                   <AlertTriangle className="h-3.5 w-3.5 text-primary" />
-                  EU consumers — your 14-day right of withdrawal
+                  {t("euConsumersTitle")}
                 </div>
                 <p className="text-[11px] leading-relaxed text-muted-foreground">
-                  Under EU law (Directive 2011/83/EU, Art. 16(m)), digital services normally come with a <span className="font-medium text-foreground">14-day right to cancel and get a refund</span>. You must choose one of the two options below before paying:
+                  {t("euLegalNotice")} <span className="font-medium text-foreground">{t("euLegal14day")}</span>{t("euLegalChoose")}
                 </p>
 
                 <label className="flex items-start gap-2 text-xs cursor-pointer rounded-md border border-border bg-background/60 p-2.5 hover:border-primary/40 transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={euWaiver}
-                    onChange={(e) => setEuWaiver(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 accent-primary"
-                  />
+                  <input type="checkbox" checked={euWaiver} onChange={(e) => setEuWaiver(e.target.checked)} className="mt-0.5 h-4 w-4 accent-primary" />
                   <span className="text-muted-foreground">
-                    <span className="block font-medium text-foreground mb-0.5">✓ Tick to start using {targetLabel} immediately</span>
-                    I expressly request that the service begins right now and I understand that, by doing so, I <span className="font-medium text-foreground">waive my 14-day right of withdrawal</span> as soon as performance has fully begun. No refund will be available after that point.
+                    <span className="block font-medium text-foreground mb-0.5">{t("euTickStartImmediately")} {targetLabel} {t("euTickStartImmediately2")}</span>
+                    {t("euWaiveRefund")} <span className="font-medium text-foreground">{t("euWaiveRefundB")}</span> {t("euWaiveRefundC")}
                   </span>
                 </label>
 
                 <div className="rounded-md border border-dashed border-border/70 bg-background/30 p-2.5 text-[11px] text-muted-foreground">
-                  <span className="block font-medium text-foreground mb-0.5">☐ Leave unticked to keep your refund right</span>
-                  You will still be charged {price} today and access starts immediately, but you may request a refund within <span className="font-medium text-foreground">14 days</span>. The refund will be reduced in proportion to the service already used during that period.
+                  <span className="block font-medium text-foreground mb-0.5">{t("euLeaveUnticked")}</span>
+                  {t("euKeepRefund1")} {price} {t("euKeepRefund2")} <span className="font-medium text-foreground">{t("euKeepRefund3")}</span>{t("euKeepRefund4")}
                 </div>
               </div>
 
               <div className="flex gap-3">
-                <button
-                  onClick={() => setPendingTarget(null)}
-                  disabled={inFlight}
-                  className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium hover:bg-accent disabled:opacity-50"
-                >
-                  Cancel
+                <button onClick={() => setPendingTarget(null)} disabled={inFlight} className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium hover:bg-accent disabled:opacity-50">
+                  {t("cancelBtn")}
                 </button>
-                <button
-                  onClick={confirmUpgrade}
-                  disabled={inFlight || !acceptedTerms}
-                  className="flex-1 rounded-xl bg-primary py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
-                >
+                <button onClick={confirmUpgrade} disabled={inFlight || !acceptedTerms} className="flex-1 rounded-xl bg-primary py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2">
                   {inFlight && <Loader2 className="h-4 w-4 animate-spin" />}
-                  Continue to secure checkout
+                  {t("continueToCheckout")}
                 </button>
               </div>
             </div>

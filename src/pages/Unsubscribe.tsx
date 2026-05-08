@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { TrendingUp, CheckCircle, XCircle, Loader2, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type Status = "loading" | "valid" | "already" | "invalid" | "success" | "error";
 
 const Unsubscribe = () => {
+  const { t } = useLanguage();
   const [params] = useSearchParams();
   const token = params.get("token");
   const [status, setStatus] = useState<Status>("loading");
@@ -53,7 +55,7 @@ const Unsubscribe = () => {
         {status === "loading" && (
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Processing...</p>
+            <p className="text-sm text-muted-foreground">{t("processingTxt")}</p>
           </div>
         )}
 
@@ -77,7 +79,7 @@ const Unsubscribe = () => {
         {status === "already" && (
           <div className="space-y-3">
             <CheckCircle className="h-10 w-10 text-muted-foreground mx-auto" />
-            <p className="text-sm text-muted-foreground">You're already unsubscribed.</p>
+            <p className="text-sm text-muted-foreground">{t("alreadyUnsubscribed")}</p>
           </div>
         )}
 
@@ -90,7 +92,7 @@ const Unsubscribe = () => {
           </div>
         )}
 
-        <a href="/" className="inline-block text-xs text-primary hover:underline">Back to PortAI</a>
+        <a href="/" className="inline-block text-xs text-primary hover:underline">{t("backToPortAI")}</a>
       </div>
     </div>
   );

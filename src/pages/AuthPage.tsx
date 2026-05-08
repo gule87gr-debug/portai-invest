@@ -4,12 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { cn } from "@/lib/utils";
 import { KeyRound } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type AuthMode = "login" | "signup" | "forgot" | "otp";
 
 const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
+  const { t } = useLanguage();
   const [mode, setMode] = useState<AuthMode>("signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -261,7 +263,7 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
         {mode === "otp" && (
           <>
             <div className="space-y-3">
-              <p className="text-sm text-muted-foreground text-center">Enter the recovery code sent to <span className="text-foreground font-medium">{email}</span></p>
+              <p className="text-sm text-muted-foreground text-center">{t("enterRecoveryCodeSent")} <span className="text-foreground font-medium">{email}</span></p>
               <div className="relative">
                 <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
@@ -330,8 +332,8 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
                       {usernameStatus === "taken" && <XIcon className="h-4 w-4 text-loss" />}
                     </div>
                   </div>
-                  {usernameStatus === "taken" && <p className="mt-1 text-xs text-loss">This display name is already taken</p>}
-                  {usernameStatus === "available" && <p className="mt-1 text-xs text-gain">Display name is available!</p>}
+                  {usernameStatus === "taken" && <p className="mt-1 text-xs text-loss">{t("displayNameTaken")}</p>}
+                  {usernameStatus === "available" && <p className="mt-1 text-xs text-gain">{t("displayNameAvailable")}</p>}
                 </div>
               )}
 
