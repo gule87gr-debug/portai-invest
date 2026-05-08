@@ -182,7 +182,7 @@ const Watchlists = () => {
                       : "bg-accent/30 text-muted-foreground border-border hover:bg-accent/60"
                   )}
                 >
-                  {f === "all" ? "All" : f === "stock" ? "Stocks" : f === "etf" ? "ETFs" : f === "index" ? "Index Funds" : "Crypto"}
+                  {f === "all" ? t("filterAllAssets") : f === "stock" ? t("filterStocks") : f === "etf" ? t("filterETFs") : f === "index" ? t("filterIndexFunds") : t("filterCrypto")}
                 </button>
               ))}
             </div>
