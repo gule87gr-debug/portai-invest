@@ -273,7 +273,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
               type="button"
               onClick={() => removeCompare(ex.ticker)}
               className="ml-0.5 text-muted-foreground hover:text-foreground"
-              aria-label={`Remove ${ex.ticker} from comparison`}
+            aria-label={`${t("removeFromCompare")}: ${ex.ticker}`}
             >
               <X className="h-3 w-3" />
             </button>
@@ -291,7 +291,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
                 className="inline-flex items-center gap-1.5 rounded-md border border-primary/60 bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary shadow-sm hover:bg-primary/25 hover:border-primary transition-colors"
               >
                 <GitCompareArrows className="h-3.5 w-3.5" />
-                Compare
+                {t("compareBtnLbl")}
                 {!subLoading && !isPaid && <Lock className="h-3 w-3 opacity-80" />}
               </button>
             ) : (
