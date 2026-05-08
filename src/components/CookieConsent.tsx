@@ -28,6 +28,8 @@ export const CookieConsent = () => {
   const [visible, setVisible] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [prefs, setPrefs] = useState<CookiePreferences>({ essential: true, analytics: true, functional: true });
+  let t: (k: string) => string;
+  try { t = useLanguage().t; } catch { t = (k) => k; }
 
   useEffect(() => {
     const consent = localStorage.getItem(COOKIE_KEY);
