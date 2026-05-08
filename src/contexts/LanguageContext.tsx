@@ -3315,10 +3315,30 @@ export const LanguageProvider = ({ children, initialLanguage = "en" }: { childre
     }
   }, [initialLanguage]);
 
+  // Sync language across nested providers (e.g. cookie banner outside the inner provider)
+  React.useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (isValidLanguage(detail)) setLanguageState(detail);
+    };
+    const storageHandler = (e: StorageEvent) => {
+      if (e.key === LANG_STORAGE_KEY && isValidLanguage(e.newValue)) {
+        setLanguageState(e.newValue);
+      }
+    };
+    window.addEventListener("portai:language-changed", handler);
+    window.addEventListener("storage", storageHandler);
+    return () => {
+      window.removeEventListener("portai:language-changed", handler);
+      window.removeEventListener("storage", storageHandler);
+    };
+  }, []);
+
   const setLanguage = (lang: Language) => {
     setHasUserChanged(true);
     setLanguageState(lang);
     try { localStorage.setItem(LANG_STORAGE_KEY, lang); } catch {}
+    try { window.dispatchEvent(new CustomEvent("portai:language-changed", { detail: lang })); } catch {}
   };
 
 
