@@ -133,6 +133,7 @@ function applyExperienceModifier(allocs: Allocation[], experience: string): Allo
         a.ticker = replacement.ticker;
         a.name = replacement.name;
         a.desc = replacement.desc;
+        a.descKey = `assetDesc_${replacement.ticker}`;
       }
     }
   }
@@ -146,6 +147,7 @@ function applyExperienceModifier(allocs: Allocation[], experience: string): Allo
         a.ticker = replacement.ticker;
         a.name = replacement.name;
         a.desc = replacement.desc;
+        a.descKey = `assetDesc_${replacement.ticker}`;
       }
     }
   }
