@@ -338,22 +338,22 @@ const Dashboard = () => {
   );
 };
 
-const HEATMAP_OPTIONS: { value: string; label: string; flag: string; description: string }[] = [
-  { value: "SPX500", label: "S&P 500", flag: "🇺🇸", description: "Top 500 US large-cap stocks" },
-  { value: "NASDAQ100", label: "Nasdaq 100", flag: "🇺🇸", description: "Largest US tech & growth names" },
-  { value: "DJI", label: "Dow Jones 30", flag: "🇺🇸", description: "30 major US blue-chip companies" },
-  { value: "NYSE", label: "NYSE Composite", flag: "🇺🇸", description: "All stocks listed on the NYSE" },
-  { value: "FTSE100", label: "FTSE 100", flag: "🇬🇧", description: "Top UK companies on the LSE" },
-  { value: "DAX40", label: "DAX 40", flag: "🇩🇪", description: "Largest German blue chips" },
-  { value: "CAC40", label: "CAC 40", flag: "🇫🇷", description: "Top French companies on Euronext Paris" },
-  { value: "IBEX35", label: "IBEX 35", flag: "🇪🇸", description: "Leading Spanish stocks (BME)" },
-  { value: "SMI20", label: "Swiss SMI 20", flag: "🇨🇭", description: "Largest Swiss blue chips" },
-  { value: "NIKKEI225", label: "Nikkei 225", flag: "🇯🇵", description: "Leading companies on the Tokyo exchange" },
-  { value: "HSI", label: "Hang Seng", flag: "🇭🇰", description: "Top Hong Kong listed companies" },
-  { value: "KOSPI", label: "KOSPI", flag: "🇰🇷", description: "Largest South Korean stocks" },
-  { value: "SENSEX", label: "BSE Sensex", flag: "🇮🇳", description: "Top 30 Indian stocks on BSE" },
-  { value: "ASX200", label: "ASX 200", flag: "🇦🇺", description: "Top 200 Australian companies" },
-  { value: "BOVESPA", label: "Bovespa", flag: "🇧🇷", description: "Leading Brazilian stocks (B3)" },
+const HEATMAP_OPTIONS: { value: string; label: string; flag: string; descKey: string }[] = [
+  { value: "SPX500", label: "S&P 500", flag: "🇺🇸", descKey: "hmDesc_SPX500" },
+  { value: "NASDAQ100", label: "Nasdaq 100", flag: "🇺🇸", descKey: "hmDesc_NASDAQ100" },
+  { value: "DJI", label: "Dow Jones 30", flag: "🇺🇸", descKey: "hmDesc_DJI" },
+  { value: "NYSE", label: "NYSE Composite", flag: "🇺🇸", descKey: "hmDesc_NYSE" },
+  { value: "FTSE100", label: "FTSE 100", flag: "🇬🇧", descKey: "hmDesc_FTSE100" },
+  { value: "DAX40", label: "DAX 40", flag: "🇩🇪", descKey: "hmDesc_DAX40" },
+  { value: "CAC40", label: "CAC 40", flag: "🇫🇷", descKey: "hmDesc_CAC40" },
+  { value: "IBEX35", label: "IBEX 35", flag: "🇪🇸", descKey: "hmDesc_IBEX35" },
+  { value: "SMI20", label: "Swiss SMI 20", flag: "🇨🇭", descKey: "hmDesc_SMI20" },
+  { value: "NIKKEI225", label: "Nikkei 225", flag: "🇯🇵", descKey: "hmDesc_NIKKEI225" },
+  { value: "HSI", label: "Hang Seng", flag: "🇭🇰", descKey: "hmDesc_HSI" },
+  { value: "KOSPI", label: "KOSPI", flag: "🇰🇷", descKey: "hmDesc_KOSPI" },
+  { value: "SENSEX", label: "BSE Sensex", flag: "🇮🇳", descKey: "hmDesc_SENSEX" },
+  { value: "ASX200", label: "ASX 200", flag: "🇦🇺", descKey: "hmDesc_ASX200" },
+  { value: "BOVESPA", label: "Bovespa", flag: "🇧🇷", descKey: "hmDesc_BOVESPA" },
 ];
 
 const HeatmapSelector = ({
@@ -470,7 +470,7 @@ const HeatmapSelector = ({
                 <span className="text-2xl leading-none" aria-hidden="true">{opt.flag}</span>
                 <div className="flex-1">
                   <div className="font-semibold">{opt.label}</div>
-                  <div className="text-xs text-muted-foreground">{opt.description}</div>
+                  <div className="text-xs text-muted-foreground">{t(opt.descKey)}</div>
                 </div>
                 {active && (
                   <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
