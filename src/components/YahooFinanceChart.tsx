@@ -63,6 +63,8 @@ async function fetchSeries(ticker: string, type: string | undefined, range: Char
 
 export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceChartProps) => {
   const [range, setRange] = useState<ChartRange>("1M");
+  let t: (k: string) => string;
+  try { t = useLanguage().t; } catch { t = (k) => k; }
   const { isPaid, loading: subLoading } = useSubscription();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [primary, setPrimary] = useState<HistoryResponse | null>(null);
@@ -292,7 +294,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
                   autoFocus
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search ticker or name…"
+                  placeholder={t("searchTickerPh")}
                   className="w-44 bg-transparent text-xs outline-none placeholder:text-muted-foreground"
                 />
                 <button
