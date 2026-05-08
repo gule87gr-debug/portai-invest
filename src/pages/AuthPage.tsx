@@ -4,12 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { cn } from "@/lib/utils";
 import { KeyRound } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type AuthMode = "login" | "signup" | "forgot" | "otp";
 
 const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
+  const { t } = useLanguage();
   const [mode, setMode] = useState<AuthMode>("signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

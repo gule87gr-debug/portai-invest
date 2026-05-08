@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { TrendingUp, CheckCircle, XCircle, Loader2, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type Status = "loading" | "valid" | "already" | "invalid" | "success" | "error";
 
 const Unsubscribe = () => {
+  const { t } = useLanguage();
   const [params] = useSearchParams();
   const token = params.get("token");
   const [status, setStatus] = useState<Status>("loading");

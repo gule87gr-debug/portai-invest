@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle, Crown, Loader2, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const UpgradeSuccess = () => {
+  const { t } = useLanguage();
   const { isPro, loading, refresh } = useSubscription();
   const navigate = useNavigate();
   const [attempts, setAttempts] = useState(0);
