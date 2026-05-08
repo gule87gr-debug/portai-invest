@@ -40,15 +40,18 @@ type AnalyzedArticle = {
   pro_deep_dive?: ProDeepDive | null;
 };
 
-const timeAgo = (iso: string): string => {
-  const diff = Date.now() - new Date(iso).getTime();
-  const m = Math.floor(diff / 60_000);
-  if (m < 1) return "just now";
-  if (m < 60) return `${m}m ago`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  const d = Math.floor(h / 24);
-  return `${d}d ago`;
+const useTimeAgo = () => {
+  const { t } = useLanguage();
+  return (iso: string): string => {
+    const diff = Date.now() - new Date(iso).getTime();
+    const m = Math.floor(diff / 60_000);
+    if (m < 1) return t("justNow");
+    if (m < 60) return `${m}${t("minAgo")}`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}${t("hourAgo")}`;
+    const d = Math.floor(h / 24);
+    return `${d}${t("dayAgo")}`;
+  };
 };
 
 // Featured fallback so the feed never feels like a ghost town.
