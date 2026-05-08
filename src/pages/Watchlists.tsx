@@ -198,12 +198,12 @@ const Watchlists = () => {
                   )}
                 >
                   <Filter className="h-3 w-3" />
-                  {REGION_LABELS[regionFilter]}
+                  {`${REGION_FLAGS[regionFilter]} ${t(REGION_LABEL_KEYS[regionFilter])}`.trim()}
                   <ChevronDown className={cn("h-3 w-3 transition-transform", showRegionPicker && "rotate-180")} />
                 </button>
                 {showRegionPicker && (
                   <div className="absolute top-full left-0 mt-1 z-10 w-48 rounded-xl border border-border bg-card shadow-xl animate-fade-in py-1">
-                    {(Object.entries(REGION_LABELS) as [AssetRegion, string][]).map(([key, label]) => (
+                    {(Object.keys(REGION_LABELS) as AssetRegion[]).map((key) => (
                       <button
                         key={key}
                         onClick={() => { setRegionFilter(key); setShowRegionPicker(false); }}
@@ -212,7 +212,7 @@ const Watchlists = () => {
                           regionFilter === key && "text-primary bg-primary/10"
                         )}
                       >
-                        {label}
+                        {`${REGION_FLAGS[key]} ${t(REGION_LABEL_KEYS[key])}`.trim()}
                       </button>
                     ))}
                   </div>
