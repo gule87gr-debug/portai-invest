@@ -329,10 +329,13 @@ const Dashboard = () => {
 
       <div className="rounded-xl border border-border bg-card p-4">
         <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold">{t("stockHeatmap")}</h2>
+          <h2 className="text-lg font-semibold">
+            {(HEATMAP_OPTIONS.find((o) => o.value === heatmapSource)?.flag) ?? "🌐"}{" "}
+            {(HEATMAP_OPTIONS.find((o) => o.value === heatmapSource)?.label) ?? ""} {t("stockHeatmap")}
+          </h2>
           <HeatmapSelector value={heatmapSource} onChange={setHeatmapSource} />
         </div>
-        <TradingViewHeatmap height={550} dataSource={heatmapSource} />
+        <TradingViewHeatmap key={heatmapSource} height={550} dataSource={heatmapSource} />
       </div>
     </AppLayout>
   );
