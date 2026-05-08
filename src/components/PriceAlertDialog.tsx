@@ -75,15 +75,15 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
   const handleCreate = async () => {
     const target = parseFloat(price);
     if (!userId) {
-      toast.error("Please sign in to set price alerts");
+      toast.error(t("signInForAlertsToast"));
       return;
     }
     if (!isPro) {
-      toast.error("Price alerts are a Pro feature. Upgrade to unlock.");
+      toast.error(t("alertsProToast"));
       return;
     }
     if (isNaN(target) || target <= 0) {
-      toast.error("Enter a valid price greater than 0");
+      toast.error(t("enterValidPrice"));
       return;
     }
     setSaving(true);
@@ -97,10 +97,10 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
     });
     setSaving(false);
     if (error) {
-      toast.error("Failed to create alert");
+      toast.error(t("alertCreateFailed"));
       return;
     }
-    toast.success(`Alert set for ${ticker} ${direction} $${target}`);
+    toast.success(`${ticker} ${direction === "above" ? t("risesAbove") : t("fallsBelow")} $${target}`);
     setPrice("");
     loadAlerts();
   };
@@ -108,12 +108,12 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
   const handleDelete = async (id: string) => {
     await supabase.from("price_alerts").delete().eq("id", id);
     setAlerts((prev) => prev.filter((a) => a.id !== id));
-    toast.success("Alert removed");
+    toast.success(t("alertRemovedToast"));
   };
 
   const defaultTrigger = (
     <Button variant="outline" size="sm" className="gap-2">
-      <Bell className="h-4 w-4" /> Price Alert
+      <Bell className="h-4 w-4" /> {t("priceAlert")}
     </Button>
   );
 
