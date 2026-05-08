@@ -103,7 +103,7 @@ const Quiz = () => {
                   <h3 className="text-lg font-bold mb-1">{t("resultsLocked")}</h3>
                   <p className="text-sm text-muted-foreground mb-4 text-center max-w-xs">{t("resultsLockedDesc")}</p>
                   <button onClick={() => setShowUpgrade(true)} className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-                    <Crown className="h-4 w-4" /> {t("unlockResults")}
+                    <Crown className="h-4 w-4" /> {t("unlockResultsBtn")}
                   </button>
                 </div>
               )}
