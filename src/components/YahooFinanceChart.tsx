@@ -19,7 +19,17 @@ const COMPARE_COLORS = [
   "hsl(45 90% 55%)",
   "hsl(290 70% 65%)",
   "hsl(15 80% 60%)",
+  "hsl(160 70% 50%)",
+  "hsl(340 80% 60%)",
+  "hsl(190 85% 55%)",
+  "hsl(70 75% 50%)",
+  "hsl(255 75% 65%)",
+  "hsl(25 85% 55%)",
+  "hsl(130 65% 50%)",
+  "hsl(310 75% 60%)",
 ];
+
+const MAX_COMPARE = COMPARE_COLORS.length;
 
 interface Point { t: number; c: number; }
 interface HistoryResponse {
