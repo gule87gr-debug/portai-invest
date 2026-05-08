@@ -331,7 +331,7 @@ const Dashboard = () => {
         <div className="mb-3 flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold">
             {(HEATMAP_OPTIONS.find((o) => o.value === heatmapSource)?.flag) ?? "🌐"}{" "}
-            {(HEATMAP_OPTIONS.find((o) => o.value === heatmapSource)?.label) ?? ""} {t("stockHeatmap")}
+            {(HEATMAP_OPTIONS.find((o) => o.value === heatmapSource)?.label) ?? t("stockHeatmap")}
           </h2>
           <HeatmapSelector value={heatmapSource} onChange={setHeatmapSource} />
         </div>
