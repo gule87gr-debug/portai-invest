@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { SEO } from "@/components/SEO";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Send, Sparkles, Plus, Trash2, MessageCircle, Image, X, Crown } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -244,6 +245,11 @@ const AIChat = () => {
 
   return (
     <AppLayout>
+      <SEO
+        title="AI Financial Advisor — PortAI"
+        description="Chat with an AI financial advisor about stocks, ETFs and crypto. Ask market questions and analyze charts with image uploads."
+        path="/chat"
+      />
       <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} title="Limit Reached" description={upgradeReason} />
       <div className="mb-4 flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-3">

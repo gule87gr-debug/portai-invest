@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
+import { SEO } from "@/components/SEO";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { TradingViewTechnicalAnalysis } from "@/components/TradingViewWidgets";
 import { YahooFinanceChart } from "@/components/YahooFinanceChart";
@@ -41,6 +42,11 @@ const StockDetail = () => {
 
   return (
     <AppLayout>
+      <SEO
+        title={`${symbol}${info.name ? ` — ${info.name}` : ""} | PortAI`}
+        description={`Live ${symbol} price, AI-powered news bias analysis, technicals and chart. Set price alerts and track ${info.name || symbol} on PortAI.`}
+        path={`/stock/${symbol}`}
+      />
       <div className="mb-4">
         <div className="mb-3 flex items-center justify-between gap-2">
           <Link to="/watchlists" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">

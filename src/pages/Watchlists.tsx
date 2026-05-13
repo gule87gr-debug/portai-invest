@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { useApp, Stock } from "@/contexts/AppContext";
+import { SEO } from "@/components/SEO";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -157,6 +158,11 @@ const Watchlists = () => {
 
   return (
     <AppLayout>
+      <SEO
+        title="Stock Watchlists — PortAI"
+        description="Build multi-asset watchlists for stocks, ETFs and crypto. Live quotes, sparklines and price alerts from PortAI."
+        path="/watchlists"
+      />
       {createModal}
       <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} description={upgradeMsg} />
 
