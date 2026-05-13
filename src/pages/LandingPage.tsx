@@ -50,9 +50,6 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
   const [url, setUrl] = useState("");
   const [langOpen, setLangOpen] = useState(false);
 
-  useEffect(() => {
-    document.title = "PortAI | AI Financial News Bias Checker & Professional Portfolio Tracker";
-  }, []);
 
   const handleAnalyze = () => {
     const trimmed = url.trim();
