@@ -676,7 +676,7 @@ const Forum = () => {
         </>
       )}
 
-      <p className="mt-8 text-center text-[10px] text-muted-foreground/70">
+      <p className="mt-8 text-center text-[10px] text-muted-foreground">
         {t("footerForumDisclaimer")}
       </p>
 
