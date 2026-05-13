@@ -912,7 +912,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
               <Globe className="h-3.5 w-3.5 text-primary" />
               {lt("footAvailable")}
             </p>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/80 text-center">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground text-center">
               {lt("footPowered")}
             </p>
             <p className="text-xs text-muted-foreground text-center max-w-lg"><span className="font-semibold text-warning">{lt("badgeNFA")}.</span> {lt("footNFA")}</p>

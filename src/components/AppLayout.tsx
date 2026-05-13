@@ -19,10 +19,10 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
               {t("footerDisclaimer")}
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-              <Link to="/privacy-policy" className="text-[11px] text-muted-foreground/70 hover:text-foreground transition-colors">{t("privacy")}</Link>
-              <Link to="/terms-of-service" className="text-[11px] text-muted-foreground/70 hover:text-foreground transition-colors">{t("terms")}</Link>
-              <Link to="/data-compliance" className="text-[11px] text-muted-foreground/70 hover:text-foreground transition-colors">{t("compliance")}</Link>
-              <Link to="/ip-policy" className="text-[11px] text-muted-foreground/70 hover:text-foreground transition-colors">{t("ipPolicy")}</Link>
+              <Link to="/privacy-policy" className="text-[11px] text-muted-foreground hover:text-foreground transition-colors">{t("privacy")}</Link>
+              <Link to="/terms-of-service" className="text-[11px] text-muted-foreground hover:text-foreground transition-colors">{t("terms")}</Link>
+              <Link to="/data-compliance" className="text-[11px] text-muted-foreground hover:text-foreground transition-colors">{t("compliance")}</Link>
+              <Link to="/ip-policy" className="text-[11px] text-muted-foreground hover:text-foreground transition-colors">{t("ipPolicy")}</Link>
             </div>
           </div>
         </footer>
