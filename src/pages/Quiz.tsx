@@ -185,9 +185,6 @@ const Quiz = () => {
       <div className="mb-8 h-1.5 rounded-full bg-secondary">
         <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${progress}%` }} />
       </div>
-      <div className="mb-8 h-1.5 rounded-full bg-secondary">
-        <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${progress}%` }} />
-      </div>
 
       <div className="mx-auto max-w-2xl animate-fade-in" key={step}>
         <div className="rounded-2xl border border-border bg-card p-8">
