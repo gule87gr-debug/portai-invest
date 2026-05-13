@@ -66,6 +66,7 @@ const TermsOfService = () => {
       {/* Sections 10–15 (localized shell) */}
       <LegalContent nodes={pages.tosTail} />
     </LegalPageLayout>
+    </>
   );
 };
 
