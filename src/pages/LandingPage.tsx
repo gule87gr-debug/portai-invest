@@ -1,3 +1,4 @@
+import { SEO } from "@/components/SEO";
 import { Brain, BarChart3, MessageSquare, Eye, ArrowRight, Sparkles, LayoutDashboard, Shield, Globe, ChevronRight, Zap, ShieldCheck, Lock, Fingerprint, CheckCircle2, ChevronDown, Search, Activity, Database, CreditCard, Cpu, AlertCircle, FileText, Crown, HelpCircle, Quote, Users, Info } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLanguage, type Language } from "@/contexts/LanguageContext";
@@ -65,6 +66,11 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
 
   return (
     <TooltipProvider delayDuration={150}>
+    <SEO
+      title="PortAI — AI Bias Checker & Portfolio Tracker"
+      description="Track stocks, ETFs and crypto with AI-powered bias detection on financial news. Real-time portfolio tracking and trust scores for retail investors."
+      path="/"
+    />
     <div className="min-h-screen bg-background overflow-x-hidden noise-overlay pb-16 sm:pb-0">
       <style>{`
         .scroll-reveal {
