@@ -1,3 +1,4 @@
+import { SEO } from "@/components/SEO";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { LegalPageLayout } from "@/components/LegalPageLayout";
 import { LegalContent } from "@/components/LegalContent";
@@ -9,9 +10,16 @@ const IPPolicy = () => {
   const copy = getLegalPagesCopy(language).ipPolicy;
   usePageTitle(copy.pageTitleTag);
   return (
-    <LegalPageLayout title={copy.title} lastUpdated={copy.lastUpdated}>
-      <LegalContent nodes={copy.nodes} />
-    </LegalPageLayout>
+    <>
+      <SEO
+        title="IP Policy — PortAI"
+        description="PortAI intellectual property policy: how we protect our content and respond to copyright and trademark concerns."
+        path="/ip-policy"
+      />
+      <LegalPageLayout title={copy.title} lastUpdated={copy.lastUpdated}>
+        <LegalContent nodes={copy.nodes} />
+      </LegalPageLayout>
+    </>
   );
 };
 

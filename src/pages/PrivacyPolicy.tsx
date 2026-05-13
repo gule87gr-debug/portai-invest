@@ -1,3 +1,4 @@
+import { SEO } from "@/components/SEO";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { LegalPageLayout } from "@/components/LegalPageLayout";
 import { LegalContent } from "@/components/LegalContent";
@@ -9,9 +10,16 @@ const PrivacyPolicy = () => {
   const copy = getLegalPagesCopy(language).privacy;
   usePageTitle(copy.pageTitleTag);
   return (
-    <LegalPageLayout title={copy.title} lastUpdated={copy.lastUpdated}>
-      <LegalContent nodes={copy.nodes} />
-    </LegalPageLayout>
+    <>
+      <SEO
+        title="Privacy Policy — PortAI"
+        description="How PortAI collects, processes and protects your personal data. GDPR-compliant privacy policy for our AI-powered investment platform."
+        path="/privacy-policy"
+      />
+      <LegalPageLayout title={copy.title} lastUpdated={copy.lastUpdated}>
+        <LegalContent nodes={copy.nodes} />
+      </LegalPageLayout>
+    </>
   );
 };
 

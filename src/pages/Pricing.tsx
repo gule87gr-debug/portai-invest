@@ -1,3 +1,4 @@
+import { SEO } from "@/components/SEO";
 import { AppLayout } from "@/components/AppLayout";
 import { useSubscription, type SubscriptionTier } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
@@ -122,6 +123,11 @@ const Pricing = () => {
 
   return (
     <AppLayout>
+      <SEO
+        title="Pricing — PortAI Plus & Pro Plans"
+        description="Compare PortAI Free, Plus and Pro plans. Unlock AI bias detection, fact-checking, deeper market analysis and unlimited watchlists."
+        path="/pricing"
+      />
       <div className="mx-auto max-w-6xl py-8 relative">
         <button
           onClick={() => navigate(-1)}

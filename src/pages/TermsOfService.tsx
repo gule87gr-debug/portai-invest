@@ -1,3 +1,4 @@
+import { SEO } from "@/components/SEO";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { LegalPageLayout } from "@/components/LegalPageLayout";
 import { LegalContent } from "@/components/LegalContent";
@@ -12,7 +13,13 @@ const TermsOfService = () => {
   usePageTitle(pages.tosPageTitleTag);
 
   return (
-    <LegalPageLayout title={pages.tosTitle} lastUpdated={pages.tosLastUpdated}>
+    <>
+      <SEO
+        title="Terms of Service — PortAI"
+        description="The terms governing your use of PortAI's AI-powered investment tracking and bias-detection platform."
+        path="/terms-of-service"
+      />
+      <LegalPageLayout title={pages.tosTitle} lastUpdated={pages.tosLastUpdated}>
       {/* Sections 1–8 (localized shell) */}
       <LegalContent nodes={pages.tosIntro} />
 
@@ -59,6 +66,7 @@ const TermsOfService = () => {
       {/* Sections 10–15 (localized shell) */}
       <LegalContent nodes={pages.tosTail} />
     </LegalPageLayout>
+    </>
   );
 };
 
