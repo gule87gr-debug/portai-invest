@@ -1,4 +1,5 @@
 import { SEO } from "@/components/SEO";
+import { Helmet } from "react-helmet-async";
 import { AppLayout } from "@/components/AppLayout";
 import { useSubscription, type SubscriptionTier } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
@@ -128,6 +129,20 @@ const Pricing = () => {
         description="Compare PortAI Free, Plus and Pro plans. Unlock AI bias detection, fact-checking, deeper market analysis and unlimited watchlists."
         path="/pricing"
       />
+      <Helmet>
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: "PortAI",
+          description: "AI financial news bias checker and portfolio tracker subscription.",
+          brand: { "@type": "Brand", name: "PortAI" },
+          offers: [
+            { "@type": "Offer", name: "Free", price: "0", priceCurrency: "EUR", url: "https://portai-invest.com/pricing", availability: "https://schema.org/InStock" },
+            { "@type": "Offer", name: "Plus", price: "8.99", priceCurrency: "EUR", url: "https://portai-invest.com/pricing", availability: "https://schema.org/InStock" },
+            { "@type": "Offer", name: "Pro", price: "15.99", priceCurrency: "EUR", url: "https://portai-invest.com/pricing", availability: "https://schema.org/InStock" },
+          ],
+        })}</script>
+      </Helmet>
       <div className="mx-auto max-w-6xl py-8 relative">
         <button
           onClick={() => navigate(-1)}
