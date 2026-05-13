@@ -165,7 +165,7 @@ const Watchlists = () => {
           <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-bold">{t("addStock")}</h2>
-              <button onClick={() => { setShowAddStock(false); setStockSearch(""); setAssetFilter("all"); setRegionFilter("all"); setShowRegionPicker(false); }} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
+              <button onClick={() => { setShowAddStock(false); setStockSearch(""); setAssetFilter("all"); setRegionFilter("all"); setShowRegionPicker(false); }} aria-label="Close add stock dialog" className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
             </div>
             {!hasUnlimitedWatchlists && (
               <p className="text-xs text-muted-foreground mb-2">{active?.stocks.length ?? 0}/{FREE_MAX_STOCKS} stocks used</p>
@@ -269,7 +269,7 @@ const Watchlists = () => {
                 <button onClick={() => { setActiveIdx(i); setShowListPicker(false); }} className={cn("flex-1 rounded-lg px-3 py-2 text-left text-sm transition-colors", activeIdx === i ? "bg-primary/15 text-primary font-semibold" : "hover:bg-accent/50")}>
                   {list.name} <span className="text-xs text-muted-foreground ml-1">({list.stocks.length})</span>
                 </button>
-                <button onClick={() => { deleteWatchlist(list.id); if (activeIdx >= watchlists.length - 1) setActiveIdx(Math.max(0, activeIdx - 1)); }} className="p-1 text-muted-foreground hover:text-loss">
+                <button onClick={() => { deleteWatchlist(list.id); if (activeIdx >= watchlists.length - 1) setActiveIdx(Math.max(0, activeIdx - 1)); }} aria-label={`Delete watchlist: ${list.name}`} className="p-1 text-muted-foreground hover:text-loss">
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -286,7 +286,7 @@ const Watchlists = () => {
                 <p className="font-semibold text-sm">{list.name}</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">{list.stocks.length} {t("items")}</p>
               </button>
-              <button onClick={() => { deleteWatchlist(list.id); if (activeIdx >= watchlists.length - 1) setActiveIdx(Math.max(0, activeIdx - 1)); }} className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-loss transition-all">
+              <button onClick={() => { deleteWatchlist(list.id); if (activeIdx >= watchlists.length - 1) setActiveIdx(Math.max(0, activeIdx - 1)); }} aria-label={`Delete watchlist: ${list.name}`} className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-loss transition-all">
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -361,7 +361,7 @@ const Watchlists = () => {
                           )}
                           <span className="text-[10px] text-muted-foreground">{label}</span>
                         </div>
-                        <button onClick={(e) => { e.stopPropagation(); removeStockFromWatchlist(active.id, s.ticker); }} className="text-muted-foreground hover:text-loss transition-colors shrink-0">
+                        <button onClick={(e) => { e.stopPropagation(); removeStockFromWatchlist(active.id, s.ticker); }} aria-label={`Remove ${s.ticker} from watchlist`} className="text-muted-foreground hover:text-loss transition-colors shrink-0">
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>

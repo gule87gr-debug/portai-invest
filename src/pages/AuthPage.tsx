@@ -227,7 +227,7 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
             <TrendingUp className="h-7 w-7 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold">PortAI</h1>
+          <h1 className="text-2xl font-bold">PortAI — AI-Powered Investment Analysis</h1>
           <p className="text-sm text-muted-foreground">
             {mode === "forgot" ? "Reset your password" : mode === "otp" ? "Enter recovery code" : "AI-powered investment analysis"}
           </p>
@@ -340,7 +340,7 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input type={showPw ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handle()} placeholder="Password" className="h-11 w-full rounded-lg border border-border bg-card pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-                <button onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? "Hide password" : "Show password"} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>

@@ -1,10 +1,12 @@
 import { useEffect } from "react";
 
+const DEFAULT_TITLE = "PortAI — AI Bias Checker & Portfolio Tracker";
+
 export const usePageTitle = (title: string) => {
   useEffect(() => {
     document.title = title;
     return () => {
-      document.title = "PortAI — AI-Powered Investment Platform | Smart Investing with Artificial Intelligence";
+      document.title = DEFAULT_TITLE;
     };
   }, [title]);
 };

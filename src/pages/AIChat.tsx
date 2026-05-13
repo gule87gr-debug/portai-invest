@@ -278,7 +278,7 @@ const AIChat = () => {
             {sessions.map((s) => (
               <div key={s.id} className={cn("flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors cursor-pointer group", activeSessionId === s.id ? "bg-primary/15 text-primary" : "hover:bg-accent/50")}>
                 <span onClick={() => loadSession(s.id)} className="flex-1 truncate">{s.title}</span>
-                <button onClick={(e) => { e.stopPropagation(); deleteSession(s.id); }} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-loss transition-all ml-2">
+                <button onClick={(e) => { e.stopPropagation(); deleteSession(s.id); }} aria-label={`Delete chat session: ${s.title}`} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-loss transition-all ml-2">
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -345,7 +345,7 @@ const AIChat = () => {
               )}
               <div className={cn("max-w-[85%] sm:max-w-[70%] rounded-xl p-4 text-sm leading-relaxed", m.role === "user" ? "bg-primary text-primary-foreground rounded-tr-none" : "bg-card text-foreground rounded-tl-none")}>
                 {m.imageUrl && (
-                  <img src={m.imageUrl} alt="Uploaded" className="mb-2 max-h-48 rounded-lg object-cover" />
+                  <img src={m.imageUrl} alt="User-uploaded image for AI analysis" className="mb-2 max-h-48 rounded-lg object-cover" />
                 )}
                 {m.role === "assistant" ? <MarkdownContent content={m.content} /> : <span className="whitespace-pre-line">{m.content}</span>}
               </div>
@@ -373,7 +373,7 @@ const AIChat = () => {
           <div className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-card p-2">
             <img src={imagePreview} alt="Preview" className="h-16 w-16 rounded-lg object-cover" />
             <p className="flex-1 text-xs text-muted-foreground">{t("imageAttached")}</p>
-            <button onClick={() => setImagePreview(null)} className="text-muted-foreground hover:text-loss">
+            <button onClick={() => setImagePreview(null)} aria-label="Remove attached image" className="text-muted-foreground hover:text-loss">
               <X className="h-4 w-4" />
             </button>
           </div>
