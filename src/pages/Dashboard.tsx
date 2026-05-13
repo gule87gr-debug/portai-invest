@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
+import { SEO } from "@/components/SEO";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { TradingViewHeatmap } from "@/components/TradingViewWidgets";
 import { StockNewsFeed } from "@/components/StockNewsFeed";
@@ -135,6 +136,11 @@ const Dashboard = () => {
 
   return (
     <AppLayout>
+      <SEO
+        title="Market Intelligence — PortAI"
+        description="Real-time stock heatmaps, AI bias-checked financial news and trust scores for retail investors. Your daily market briefing."
+        path="/dashboard"
+      />
       <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} title={t("analysisLimitTitle")} description={t("analysisLimitDesc")} />
 
       <div className="mb-6">

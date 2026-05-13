@@ -53,6 +53,7 @@ export const AppSidebar = () => {
         <div className="fixed left-4 top-4 z-50 flex items-center gap-2">
           <button
             onClick={() => setOpen(true)}
+            aria-label="Open navigation menu"
             className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors hover:bg-accent hover:border-primary/30"
           >
             <Menu className="h-5 w-5" />
@@ -77,7 +78,7 @@ export const AppSidebar = () => {
             <span className="text-lg font-bold text-foreground">PortAI</span>
           </div>
           {!tourLocked && (
-            <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground">
+            <button onClick={() => setOpen(false)} aria-label="Close navigation menu" className="text-muted-foreground hover:text-foreground">
               <X className="h-5 w-5" />
             </button>
           )}

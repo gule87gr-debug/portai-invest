@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
+import { SEO } from "@/components/SEO";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useApp } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -171,6 +172,12 @@ const Quiz = () => {
 
   return (
     <AppLayout>
+      <SEO
+        title="Investor Profile Quiz — PortAI"
+        description="Take the PortAI investor profile quiz to get a personalized portfolio of stocks, ETFs and crypto matched to your risk and goals."
+        path="/quiz"
+      />
+      <h1 className="sr-only">Investor Profile Quiz</h1>
       <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
         <span>{t("step")} {step + 1} {t("of")} {steps.length}</span>
         <span className="text-primary font-semibold">{Math.round(progress)}%</span>
