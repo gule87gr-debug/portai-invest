@@ -95,7 +95,7 @@ const Watchlists = () => {
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold">{t("createNewWatchlist")}</h2>
-          <button onClick={() => setShowNewList(false)} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
+          <button onClick={() => setShowNewList(false)} aria-label="Close create watchlist dialog" className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
         </div>
         <input value={newListName} onChange={(e) => setNewListName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleCreateList()} placeholder={t("watchlistName")} autoFocus className="h-10 w-full rounded-lg border border-border bg-accent/30 px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
         <div className="mt-4 flex justify-end gap-2">
