@@ -285,6 +285,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </div>
       </header>
 
+      <main>
       {/* Three value cards — the "Wait, I need this" moment */}
       <section className="px-4 sm:px-6 pt-8 pb-16 max-w-5xl mx-auto">
         <RevealSection>
@@ -858,6 +859,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
           />
         </section>
       </RevealSection>
+      </main>
 
       <footer className="border-t border-border px-6 py-10">
         <div className="max-w-5xl mx-auto flex flex-col gap-8">
