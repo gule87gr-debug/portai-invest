@@ -1,0 +1,22 @@
+# PortAI
+
+> AI financial news bias checker and professional portfolio tracker for retail investors. Real-time tracking of stocks, ETFs and crypto, paired with AI sentiment and bias detection across major financial outlets.
+
+PortAI helps retail investors cut through biased financial reporting. The platform combines a multi-asset watchlist (stocks, ETFs, crypto) with AI-powered fact-checking, trust scoring of news sources, and a live S&P 500 heatmap. Pro tier unlocks deeper bias reports and AI market analysis.
+
+## Pages
+
+- [Home](/): Product overview, features, pricing snapshot, FAQ.
+- [Pricing](/pricing): Free, Plus and Pro plan details.
+- [Privacy Policy](/privacy-policy): How we collect and process user data.
+- [Terms of Service](/terms-of-service): Terms governing use of the platform.
+- [Data & Compliance](/data-compliance): GDPR, data retention and compliance details.
+- [IP Policy](/ip-policy): Intellectual property and content usage policy.
+
+## Optional
+
+- [Dashboard](/dashboard): Authenticated portfolio dashboard (login required).
+- [AI Chat](/chat): Pro AI fact-checking assistant (login required).
+- [Watchlists](/watchlists): User watchlist management (login required).
+- [Forum](/forum): Community discussion (login required).
+- [Quiz](/quiz): Investor profile quiz (login required).
