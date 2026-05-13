@@ -706,7 +706,7 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground mb-2">
               {lt("trustedByOutlets")}
             </p>
-            <p className="text-[11px] text-muted-foreground/80 mb-6">
+            <p className="text-[11px] text-muted-foreground mb-6">
               {lt("trustedByOutletsSub")}
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 opacity-60">
