@@ -569,8 +569,28 @@ const Forum = () => {
     );
   };
 
+  const forumJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "AI Media Bias Pulse",
+    description: "Community-analyzed financial news ranked by AI-detected bias.",
+    itemListElement: articles.slice(0, 20).map((a, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: a.url,
+      name: a.title,
+    })),
+  };
   return (
     <AppLayout>
+      <SEO
+        title="Market Media Pulse — AI News Bias Forum | PortAI"
+        description="See live AI bias scores on financial news from across the web. Vote, share and discuss the most-read market headlines."
+        path="/forum"
+      />
+      <Helmet>
+        <script type="application/ld+json">{JSON.stringify(forumJsonLd)}</script>
+      </Helmet>
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-2.5 mb-2">
