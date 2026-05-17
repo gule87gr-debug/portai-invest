@@ -251,10 +251,9 @@ const Forum = () => {
   const [loading, setLoading] = useState(true);
   const [liking, setLiking] = useState<string | null>(null);
   const [liked, setLiked] = useState<Set<string>>(new Set());
-  // Featured articles are not in the DB, so persist their likes per-device in localStorage.
-  const [featuredLikes, setFeaturedLikes] = useState<Record<string, number>>(() => {
-    try { return JSON.parse(localStorage.getItem("portai.featuredLikes") || "{}"); } catch { return {}; }
-  });
+  // Featured article likes: counts come from server (aggregated across all users).
+  // For guests we fall back to localStorage so the gesture still feels responsive.
+  const [featuredLikes, setFeaturedLikes] = useState<Record<string, number>>({});
   const [featuredLiked, setFeaturedLiked] = useState<Set<string>>(() => {
     try { return new Set(JSON.parse(localStorage.getItem("portai.featuredLiked") || "[]")); } catch { return new Set(); }
   });
@@ -282,14 +281,24 @@ const Forum = () => {
       }
       setArticles(rows);
     }
+    // Load aggregated featured-like counts (public, no auth required).
+    const { data: counts } = await supabase.rpc("get_featured_like_counts");
+    if (Array.isArray(counts)) {
+      const map: Record<string, number> = {};
+      for (const row of counts as { featured_id: string; like_count: number }[]) {
+        map[row.featured_id] = Number(row.like_count) || 0;
+      }
+      setFeaturedLikes(map);
+    }
     // Load this user's existing likes so the heart state persists
     const { data: userRes } = await supabase.auth.getUser();
     if (userRes?.user) {
-      const { data: likes } = await supabase
-        .from("article_likes")
-        .select("article_id")
-        .eq("user_id", userRes.user.id);
+      const [{ data: likes }, { data: fLikes }] = await Promise.all([
+        supabase.from("article_likes").select("article_id").eq("user_id", userRes.user.id),
+        supabase.from("featured_article_likes").select("featured_id").eq("user_id", userRes.user.id),
+      ]);
       if (likes) setLiked(new Set(likes.map((l: { article_id: string }) => l.article_id)));
+      if (fLikes) setFeaturedLiked(new Set(fLikes.map((l: { featured_id: string }) => l.featured_id)));
     }
     setLoading(false);
   };
@@ -361,21 +370,39 @@ const Forum = () => {
     const isFeatured = a.id.startsWith("featured-");
 
     if (isFeatured) {
-      // Featured articles aren't in the DB — toggle a local like and persist.
+      // Featured articles aren't in analyzed_articles — use the dedicated
+      // featured_article_likes table so counts sync across devices/users.
+      const wasLiked = featuredLiked.has(a.id);
+
+      // optimistic
       setFeaturedLiked((prev) => {
         const n = new Set(prev);
-        const wasLiked = n.has(a.id);
         if (wasLiked) n.delete(a.id); else n.add(a.id);
         try { localStorage.setItem("portai.featuredLiked", JSON.stringify([...n])); } catch { /* ignore */ }
         return n;
       });
-      setFeaturedLikes((prev) => {
-        const wasLiked = featuredLiked.has(a.id);
-        const baseline = prev[a.id] ?? 0;
-        const next = { ...prev, [a.id]: Math.max(0, baseline + (wasLiked ? -1 : 1)) };
-        try { localStorage.setItem("portai.featuredLikes", JSON.stringify(next)); } catch { /* ignore */ }
-        return next;
-      });
+      setFeaturedLikes((prev) => ({
+        ...prev,
+        [a.id]: Math.max(0, (prev[a.id] ?? 0) + (wasLiked ? -1 : 1)),
+      }));
+
+      setLiking(a.id);
+      const { error } = await supabase.rpc("toggle_featured_like", { _featured_id: a.id });
+      if (error) {
+        // revert optimistic update
+        setFeaturedLiked((prev) => {
+          const n = new Set(prev);
+          if (wasLiked) n.add(a.id); else n.delete(a.id);
+          try { localStorage.setItem("portai.featuredLiked", JSON.stringify([...n])); } catch { /* ignore */ }
+          return n;
+        });
+        setFeaturedLikes((prev) => ({
+          ...prev,
+          [a.id]: Math.max(0, (prev[a.id] ?? 0) + (wasLiked ? 1 : -1)),
+        }));
+        toast({ title: "Sign in to like featured articles", variant: "destructive" });
+      }
+      setLiking(null);
       return;
     }
 
@@ -441,8 +468,10 @@ const Forum = () => {
     const tc = toneClasses[bucket.tone];
     const pct = Math.max(6, Math.min(100, a.bias_score * 10));
     const isLiked = isFeatured ? featuredLiked.has(a.id) : liked.has(a.id);
+    // For featured articles, show the seed count plus any real server-side likes
+    // (Math.max so the seed is the minimum visible count, not added on top).
     const likeCount = isFeatured
-      ? (a.vindicate_count + (featuredLikes[a.id] ?? 0))
+      ? Math.max(a.vindicate_count, featuredLikes[a.id] ?? 0)
       : a.vindicate_count;
     return (
       <article
