@@ -1,15 +1,13 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { isAdminEmail, logAdminBypass } from "../_shared/admin-bypass.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const ADMIN_EMAILS = ["gule.87.gr@gmail.com"];
-
-// Mirror PRICE_TO_TIER / PRODUCT_TO_TIER from check-subscription
 const PRICE_TO_TIER: Record<string, "plus" | "pro"> = {
   "price_1TPM56PJefLcxc6CzfD5CUaS": "plus",
   "price_1TFyVKPJefLcxc6Cn1iwdSTk": "pro",
@@ -21,8 +19,16 @@ const PRODUCT_TO_TIER: Record<string, "plus" | "pro"> = {
   "prod_UEROAe01UbaEpK": "pro",
 };
 
-async function isPaidUser(stripe: Stripe, email: string): Promise<boolean> {
-  if (ADMIN_EMAILS.includes(email.toLowerCase())) return true;
+async function isPaidUser(
+  stripe: Stripe,
+  supabaseAdmin: ReturnType<typeof createClient>,
+  email: string,
+  userId: string | null,
+): Promise<boolean> {
+  if (await isAdminEmail(supabaseAdmin as any, email)) {
+    await logAdminBypass(supabaseAdmin as any, email, "get-premium-articles", userId);
+    return true;
+  }
   const customers = await stripe.customers.list({ email, limit: 1 });
   const cust = customers.data[0];
   if (!cust) return false;
@@ -71,7 +77,7 @@ serve(async (req) => {
       });
     }
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-    const allowed = await isPaidUser(stripe, user.email);
+    const allowed = await isPaidUser(stripe, supabaseAdmin, user.email, user.id);
     if (!allowed) {
       return new Response(JSON.stringify({ error: "Subscription required", articles: [] }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },

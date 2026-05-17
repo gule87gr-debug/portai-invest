@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { checkRateLimit, getClientIP, rateLimitResponse } from "../_shared/rate-limiter.ts";
 import { validateInput, validationErrorResponse, type SchemaDefinition } from "../_shared/input-validator.ts";
+import { isAdminEmail, logAdminBypass } from "../_shared/admin-bypass.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -399,10 +400,11 @@ serve(async (req) => {
     const userId = userData.user.id;
     let isPro = false;
 
-    // Admin override
-    const ADMIN_EMAILS = ["gule.87.gr@gmail.com"];
-    if (userData.user.email && ADMIN_EMAILS.includes(userData.user.email.toLowerCase())) {
+    // Admin bypass via DB lookup
+    const isAdmin = await isAdminEmail(supabaseAdmin, userData.user.email ?? null);
+    if (isAdmin) {
       isPro = true;
+      await logAdminBypass(supabaseAdmin, userData.user.email!, "analyze-link", userId);
     } else {
       const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
       if (stripeKey && userData.user.email) {

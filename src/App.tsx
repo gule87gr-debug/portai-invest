@@ -32,6 +32,7 @@ const UpgradeSuccess = lazy(() => import("./pages/UpgradeSuccess"));
 const BillingConsents = lazy(() => import("./pages/BillingConsents"));
 const DataCompliance = lazy(() => import("./pages/DataCompliance"));
 const IPPolicy = lazy(() => import("./pages/IPPolicy"));
+const AdminPage = lazy(() => import("./pages/Admin"));
 
 const queryClient = new QueryClient();
 
@@ -66,6 +67,7 @@ const AppWithLanguage = () => {
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/upgrade-success" element={<UpgradeSuccess />} />
           <Route path="/billing-consents" element={<BillingConsents />} />
+          <Route path="/admin" element={<AdminPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
