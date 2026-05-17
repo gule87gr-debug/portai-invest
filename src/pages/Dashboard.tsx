@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
@@ -9,9 +9,7 @@ import { TrendingStocks } from "@/components/TrendingStocks";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSubscription, trackAnalysis } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
-import { Link as LinkIcon, Search, Globe, ShieldCheck, FileText, AlertCircle, Loader2, Crown, Lock, Sparkles, X, ChevronDown } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Link as LinkIcon, Search, Globe, ShieldCheck, FileText, AlertCircle, Loader2, Crown, Lock, Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -39,26 +37,6 @@ const Dashboard = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState("");
-  const [heatmapSource, setHeatmapSource] = useState<string>(() => {
-    try {
-      const stored = localStorage.getItem("portai.heatmapSource") || "SPX500";
-      // Migrate legacy TradingView dataSource values to the new canonical names.
-      const legacyMap: Record<string, string> = {
-        DJI: "DowJones30",
-        NYSE: "NYSEComposite",
-        DAX40: "DAX",
-        Nikkei225: "NIKKEI225",
-        BSESENSEX: "SENSEX",
-        BOVESPA: "Bovespa",
-      };
-      return legacyMap[stored] ?? stored;
-    } catch {
-      return "SPX500";
-    }
-  });
-  useEffect(() => {
-    try { localStorage.setItem("portai.heatmapSource", heatmapSource); } catch { /* ignore */ }
-  }, [heatmapSource]);
   const [limitReached, setLimitReached] = useState(false);
   // Only reveal the remaining-analyses counter after we've confirmed an article
   // was actually accepted (so a "not an article" reply never makes the badge tick down)
@@ -345,165 +323,14 @@ const Dashboard = () => {
 
       <div className="rounded-xl border border-border bg-card p-4">
         <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold">
-            {(HEATMAP_OPTIONS.find((o) => o.value === heatmapSource)?.flag) ?? "🌐"}{" "}
-            {(HEATMAP_OPTIONS.find((o) => o.value === heatmapSource)?.label) ?? t("stockHeatmap")}
-          </h2>
-          <HeatmapSelector value={heatmapSource} onChange={setHeatmapSource} />
+          <h2 className="text-lg font-semibold">🇺🇸 S&P 500</h2>
         </div>
-        <TradingViewHeatmap key={heatmapSource} height={550} dataSource={heatmapSource} />
+        <TradingViewHeatmap height={550} dataSource="SPX500" />
       </div>
     </AppLayout>
   );
 };
 
-const HEATMAP_OPTIONS: { value: string; label: string; flag: string; descKey: string }[] = [
-  { value: "SPX500", label: "S&P 500", flag: "🇺🇸", descKey: "hmDesc_SPX500" },
-  { value: "NASDAQ100", label: "Nasdaq 100", flag: "🇺🇸", descKey: "hmDesc_NASDAQ100" },
-  { value: "DowJones30", label: "Dow Jones 30", flag: "🇺🇸", descKey: "hmDesc_DJI" },
-  { value: "NYSEComposite", label: "NYSE Composite", flag: "🇺🇸", descKey: "hmDesc_NYSE" },
-  { value: "FTSE100", label: "FTSE 100", flag: "🇬🇧", descKey: "hmDesc_FTSE100" },
-  { value: "DAX", label: "DAX 40", flag: "🇩🇪", descKey: "hmDesc_DAX40" },
-  { value: "CAC40", label: "CAC 40", flag: "🇫🇷", descKey: "hmDesc_CAC40" },
-  { value: "IBEX35", label: "IBEX 35", flag: "🇪🇸", descKey: "hmDesc_IBEX35" },
-  { value: "SMI20", label: "Swiss SMI 20", flag: "🇨🇭", descKey: "hmDesc_SMI20" },
-  { value: "NIKKEI225", label: "Nikkei 225", flag: "🇯🇵", descKey: "hmDesc_NIKKEI225" },
-  { value: "HSI", label: "Hang Seng", flag: "🇭🇰", descKey: "hmDesc_HSI" },
-  { value: "KOSPI", label: "KOSPI", flag: "🇰🇷", descKey: "hmDesc_KOSPI" },
-  { value: "SENSEX", label: "BSE Sensex", flag: "🇮🇳", descKey: "hmDesc_SENSEX" },
-  { value: "ASX200", label: "ASX 200", flag: "🇦🇺", descKey: "hmDesc_ASX200" },
-  { value: "Bovespa", label: "Bovespa", flag: "🇧🇷", descKey: "hmDesc_BOVESPA" },
-];
-
-const HeatmapSelector = ({
-  value,
-  onChange,
-}: { value: string; onChange: (v: string) => void }) => {
-  const [open, setOpen] = useState(false);
-  const { t } = useLanguage();
-  const current = HEATMAP_OPTIONS.find((o) => o.value === value) ?? HEATMAP_OPTIONS[0];
-  const initialIndex = Math.max(0, HEATMAP_OPTIONS.findIndex((o) => o.value === value));
-  const [focusIndex, setFocusIndex] = useState(initialIndex);
-  const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const listboxId = "heatmap-listbox";
-
-  // When the dialog opens, sync focus to the currently selected option
-  // and scroll it into view so users with keyboards/screen readers land in the right place.
-  useEffect(() => {
-    if (!open) return;
-    const idx = Math.max(0, HEATMAP_OPTIONS.findIndex((o) => o.value === value));
-    setFocusIndex(idx);
-    const id = window.setTimeout(() => {
-      const el = itemRefs.current[idx];
-      el?.focus();
-      el?.scrollIntoView({ block: "nearest" });
-    }, 50);
-    return () => window.clearTimeout(id);
-  }, [open, value]);
-
-  const moveFocus = (next: number) => {
-    const max = HEATMAP_OPTIONS.length - 1;
-    const clamped = next < 0 ? max : next > max ? 0 : next;
-    setFocusIndex(clamped);
-    const el = itemRefs.current[clamped];
-    el?.focus();
-    el?.scrollIntoView({ block: "nearest" });
-  };
-
-  const handleListKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    switch (e.key) {
-      case "ArrowDown":
-        e.preventDefault(); moveFocus(focusIndex + 1); break;
-      case "ArrowUp":
-        e.preventDefault(); moveFocus(focusIndex - 1); break;
-      case "Home":
-        e.preventDefault(); moveFocus(0); break;
-      case "End":
-        e.preventDefault(); moveFocus(HEATMAP_OPTIONS.length - 1); break;
-      case "Enter":
-      case " ":
-        e.preventDefault();
-        onChange(HEATMAP_OPTIONS[focusIndex].value);
-        setOpen(false);
-        break;
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          aria-haspopup="listbox"
-          aria-expanded={open}
-          aria-label={`${t("chooseMarket")}: ${current.label}`}
-          className="gap-2 border-border/60 bg-background/40 hover:bg-background/80"
-        >
-          <span className="text-base leading-none" aria-hidden="true">{current.flag}</span>
-          <span className="font-medium">{current.label}</span>
-          <ChevronDown className="h-4 w-4 opacity-60" aria-hidden="true" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{t("chooseMarket")}</DialogTitle>
-          <DialogDescription>
-            {t("switchHeatmap")}
-          </DialogDescription>
-        </DialogHeader>
-        <div
-          id={listboxId}
-          role="listbox"
-          aria-label={t("chooseMarket")}
-          aria-activedescendant={`heatmap-opt-${HEATMAP_OPTIONS[focusIndex]?.value}`}
-          tabIndex={-1}
-          onKeyDown={handleListKeyDown}
-          className="mt-2 flex max-h-[60vh] flex-col gap-2 overflow-y-auto pr-1 focus:outline-none"
-        >
-          {HEATMAP_OPTIONS.map((opt, i) => {
-            const active = opt.value === value;
-            const focused = i === focusIndex;
-            return (
-              <button
-                key={opt.value}
-                id={`heatmap-opt-${opt.value}`}
-                ref={(el) => { itemRefs.current[i] = el; }}
-                role="option"
-                aria-selected={active}
-                tabIndex={focused ? 0 : -1}
-                onClick={() => {
-                  onChange(opt.value);
-                  setOpen(false);
-                }}
-                onFocus={() => setFocusIndex(i)}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg border p-3 text-left transition-all",
-                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-                  active
-                    ? "border-primary bg-primary/10 ring-1 ring-primary/40"
-                    : "border-border/60 bg-card/50 hover:border-primary/50 hover:bg-card",
-                  focused && !active && "border-primary/60"
-                )}
-              >
-                <span className="text-2xl leading-none" aria-hidden="true">{opt.flag}</span>
-                <div className="flex-1">
-                  <div className="font-semibold">{opt.label}</div>
-                  <div className="text-xs text-muted-foreground">{t(opt.descKey)}</div>
-                </div>
-                {active && (
-                  <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
-                    {t("active")}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
 
 
 export default Dashboard;
