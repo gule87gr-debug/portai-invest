@@ -251,6 +251,13 @@ const Forum = () => {
   const [loading, setLoading] = useState(true);
   const [liking, setLiking] = useState<string | null>(null);
   const [liked, setLiked] = useState<Set<string>>(new Set());
+  // Featured articles are not in the DB, so persist their likes per-device in localStorage.
+  const [featuredLikes, setFeaturedLikes] = useState<Record<string, number>>(() => {
+    try { return JSON.parse(localStorage.getItem("portai.featuredLikes") || "{}"); } catch { return {}; }
+  });
+  const [featuredLiked, setFeaturedLiked] = useState<Set<string>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem("portai.featuredLiked") || "[]")); } catch { return new Set(); }
+  });
   const [filter, setFilter] = useState<"all" | "high" | "moderate" | "objective">("all");
 
   const load = async () => {
@@ -351,6 +358,27 @@ const Forum = () => {
 
   const handleLike = async (a: AnalyzedArticle) => {
     if (liking === a.id) return;
+    const isFeatured = a.id.startsWith("featured-");
+
+    if (isFeatured) {
+      // Featured articles aren't in the DB — toggle a local like and persist.
+      setFeaturedLiked((prev) => {
+        const n = new Set(prev);
+        const wasLiked = n.has(a.id);
+        if (wasLiked) n.delete(a.id); else n.add(a.id);
+        try { localStorage.setItem("portai.featuredLiked", JSON.stringify([...n])); } catch { /* ignore */ }
+        return n;
+      });
+      setFeaturedLikes((prev) => {
+        const wasLiked = featuredLiked.has(a.id);
+        const baseline = prev[a.id] ?? 0;
+        const next = { ...prev, [a.id]: Math.max(0, baseline + (wasLiked ? -1 : 1)) };
+        try { localStorage.setItem("portai.featuredLikes", JSON.stringify(next)); } catch { /* ignore */ }
+        return next;
+      });
+      return;
+    }
+
     setLiking(a.id);
     const wasLiked = liked.has(a.id);
     // optimistic
@@ -412,7 +440,10 @@ const Forum = () => {
     const bucket = trustBucket(a.bias_score);
     const tc = toneClasses[bucket.tone];
     const pct = Math.max(6, Math.min(100, a.bias_score * 10));
-    const isLiked = liked.has(a.id);
+    const isLiked = isFeatured ? featuredLiked.has(a.id) : liked.has(a.id);
+    const likeCount = isFeatured
+      ? (a.vindicate_count + (featuredLikes[a.id] ?? 0))
+      : a.vindicate_count;
     return (
       <article
         key={a.id}
@@ -543,19 +574,18 @@ const Forum = () => {
 
         <div className="flex items-center justify-between border-t border-border pt-3">
           <button
-            onClick={() => !isFeatured && handleLike(a)}
-            disabled={isFeatured || liking === a.id}
+            onClick={() => handleLike(a)}
+            disabled={liking === a.id}
             className={cn(
               "flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors",
               isLiked ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-accent",
-              isFeatured && "opacity-60 cursor-not-allowed hover:bg-transparent",
             )}
-            title={isFeatured ? t("likesCommunityOnly") : (isLiked ? t("unlikeAria") : t("likeTxt"))}
+            title={isLiked ? t("unlikeAria") : t("likeTxt")}
             aria-pressed={isLiked}
           >
             <ThumbsUp className={cn("h-3.5 w-3.5", isLiked && "fill-current")} />
             {isLiked ? t("likedTxt") : t("likeTxt")}
-            <span className="font-mono">{a.vindicate_count}</span>
+            <span className="font-mono">{likeCount}</span>
           </button>
           <button
             onClick={() => handleShare(a)}

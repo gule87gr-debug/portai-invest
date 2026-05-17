@@ -41,7 +41,17 @@ const Dashboard = () => {
   const [error, setError] = useState("");
   const [heatmapSource, setHeatmapSource] = useState<string>(() => {
     try {
-      return localStorage.getItem("portai.heatmapSource") || "SPX500";
+      const stored = localStorage.getItem("portai.heatmapSource") || "SPX500";
+      // Migrate legacy TradingView dataSource values to the new canonical names.
+      const legacyMap: Record<string, string> = {
+        DJI: "DowJones30",
+        NYSE: "NYSEComposite",
+        DAX40: "DAX",
+        Nikkei225: "NIKKEI225",
+        BSESENSEX: "SENSEX",
+        BOVESPA: "Bovespa",
+      };
+      return legacyMap[stored] ?? stored;
     } catch {
       return "SPX500";
     }
@@ -350,19 +360,19 @@ const Dashboard = () => {
 const HEATMAP_OPTIONS: { value: string; label: string; flag: string; descKey: string }[] = [
   { value: "SPX500", label: "S&P 500", flag: "🇺🇸", descKey: "hmDesc_SPX500" },
   { value: "NASDAQ100", label: "Nasdaq 100", flag: "🇺🇸", descKey: "hmDesc_NASDAQ100" },
-  { value: "DJI", label: "Dow Jones 30", flag: "🇺🇸", descKey: "hmDesc_DJI" },
-  { value: "NYSE", label: "NYSE Composite", flag: "🇺🇸", descKey: "hmDesc_NYSE" },
+  { value: "DowJones30", label: "Dow Jones 30", flag: "🇺🇸", descKey: "hmDesc_DJI" },
+  { value: "NYSEComposite", label: "NYSE Composite", flag: "🇺🇸", descKey: "hmDesc_NYSE" },
   { value: "FTSE100", label: "FTSE 100", flag: "🇬🇧", descKey: "hmDesc_FTSE100" },
-  { value: "DAX40", label: "DAX 40", flag: "🇩🇪", descKey: "hmDesc_DAX40" },
+  { value: "DAX", label: "DAX 40", flag: "🇩🇪", descKey: "hmDesc_DAX40" },
   { value: "CAC40", label: "CAC 40", flag: "🇫🇷", descKey: "hmDesc_CAC40" },
   { value: "IBEX35", label: "IBEX 35", flag: "🇪🇸", descKey: "hmDesc_IBEX35" },
   { value: "SMI20", label: "Swiss SMI 20", flag: "🇨🇭", descKey: "hmDesc_SMI20" },
-  { value: "Nikkei225", label: "Nikkei 225", flag: "🇯🇵", descKey: "hmDesc_NIKKEI225" },
+  { value: "NIKKEI225", label: "Nikkei 225", flag: "🇯🇵", descKey: "hmDesc_NIKKEI225" },
   { value: "HSI", label: "Hang Seng", flag: "🇭🇰", descKey: "hmDesc_HSI" },
   { value: "KOSPI", label: "KOSPI", flag: "🇰🇷", descKey: "hmDesc_KOSPI" },
-  { value: "BSESENSEX", label: "BSE Sensex", flag: "🇮🇳", descKey: "hmDesc_SENSEX" },
+  { value: "SENSEX", label: "BSE Sensex", flag: "🇮🇳", descKey: "hmDesc_SENSEX" },
   { value: "ASX200", label: "ASX 200", flag: "🇦🇺", descKey: "hmDesc_ASX200" },
-  { value: "BOVESPA", label: "Bovespa", flag: "🇧🇷", descKey: "hmDesc_BOVESPA" },
+  { value: "Bovespa", label: "Bovespa", flag: "🇧🇷", descKey: "hmDesc_BOVESPA" },
 ];
 
 const HeatmapSelector = ({
