@@ -1,4 +1,4 @@
-import { MessageCircle, Sparkles, MessageSquare, Eye, Settings, TrendingUp, Menu, X, LogOut, Newspaper } from "lucide-react";
+import { MessageCircle, Sparkles, MessageSquare, Eye, Settings, TrendingUp, Menu, X, LogOut, Newspaper, Shield } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
@@ -6,6 +6,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { NotificationBell } from "@/components/NotificationBell";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 const navKeys = [
   { to: "/dashboard", icon: Newspaper, key: "news", tour: "nav-news" },
@@ -21,6 +22,7 @@ export const AppSidebar = () => {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const [tourLocked, setTourLocked] = useState(false);
+  const { isAdmin } = useIsAdmin();
   let t: (key: string) => string;
   try {
     const lang = useLanguage();
