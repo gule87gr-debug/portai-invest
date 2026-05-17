@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_bypass_audit: {
+        Row: {
+          created_at: string
+          email: string
+          function_name: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          function_name: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          function_name?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      admin_emails: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          email: string
+          id: string
+          note: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          email: string
+          id?: string
+          note?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          id?: string
+          note?: string
+        }
+        Relationships: []
+      }
       analysis_usage: {
         Row: {
           created_at: string
@@ -572,6 +620,11 @@ export type Database = {
           name: string
           ticker: string
         }[]
+      }
+      is_admin_email: { Args: { _email: string }; Returns: boolean }
+      log_admin_bypass: {
+        Args: { _email: string; _function_name: string; _user_id: string }
+        Returns: undefined
       }
       move_to_dlq: {
         Args: {
