@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { isAdminEmail, logAdminBypass } from "../_shared/admin-bypass.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -72,9 +73,8 @@ serve(async (req) => {
     }
     const user = userData.user;
 
-    // Admin allowlist: grants permanent Pro access AND unlocks debug payload
-    const ADMIN_EMAILS = ["gule.87.gr@gmail.com"];
-    const isAdminCaller = ADMIN_EMAILS.includes(user.email.toLowerCase());
+    // Admin bypass: looked up via DB so it's configurable in the admin panel.
+    const isAdminCaller = await isAdminEmail(supabaseClient, user.email);
 
     const debugMode = debugRequested && (isAdminCaller || hasValidDebugSecret);
     if (debugRequested && !debugMode) {
@@ -84,6 +84,7 @@ serve(async (req) => {
     }
 
     if (isAdminCaller) {
+      await logAdminBypass(supabaseClient, user.email, "check-subscription", user.id);
       return new Response(JSON.stringify({
         subscribed: true,
         tier: "pro",
