@@ -574,19 +574,18 @@ const Forum = () => {
 
         <div className="flex items-center justify-between border-t border-border pt-3">
           <button
-            onClick={() => !isFeatured && handleLike(a)}
-            disabled={isFeatured || liking === a.id}
+            onClick={() => handleLike(a)}
+            disabled={liking === a.id}
             className={cn(
               "flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors",
               isLiked ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-accent",
-              isFeatured && "opacity-60 cursor-not-allowed hover:bg-transparent",
             )}
-            title={isFeatured ? t("likesCommunityOnly") : (isLiked ? t("unlikeAria") : t("likeTxt"))}
+            title={isLiked ? t("unlikeAria") : t("likeTxt")}
             aria-pressed={isLiked}
           >
             <ThumbsUp className={cn("h-3.5 w-3.5", isLiked && "fill-current")} />
             {isLiked ? t("likedTxt") : t("likeTxt")}
-            <span className="font-mono">{a.vindicate_count}</span>
+            <span className="font-mono">{likeCount}</span>
           </button>
           <button
             onClick={() => handleShare(a)}
