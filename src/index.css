@@ -161,107 +161,75 @@
 
 @layer utilities {
   .gradient-gain {
-    background: linear-gradient(135deg, hsl(168 100% 42%), hsl(168 100% 32%));
+    background: hsl(var(--gain) / 0.15);
   }
 
   .gradient-card {
-    background: linear-gradient(180deg, hsl(220 40% 11%), hsl(220 40% 9%));
+    background: hsl(var(--card));
   }
 
   .glass-card {
-    background: hsl(220 35% 7%);
-    border: 1px solid hsl(220 30% 14%);
-    box-shadow: 4px 4px 0 0 hsl(220 50% 4%), 0 0 0 1px hsl(220 30% 14%);
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    box-shadow: none;
     backdrop-filter: none;
-    border-radius: 6px;
+    border-radius: 0.5rem;
   }
 
   .glass {
-    background: hsl(220 35% 7% / 0.96);
-    backdrop-filter: blur(8px);
+    background: hsl(var(--card));
+    backdrop-filter: none;
   }
 
   .trust-glow { box-shadow: none; }
 
   .btn-glow {
-    box-shadow: 3px 3px 0 0 hsl(220 50% 4%);
-    transition: transform 120ms ease, box-shadow 120ms ease, background-color 160ms ease;
+    box-shadow: none;
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
   }
-  .btn-glow:hover {
-    transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0 0 hsl(220 50% 4%);
-  }
-  .btn-glow:active {
-    transform: translate(1px, 1px);
-    box-shadow: 1px 1px 0 0 hsl(220 50% 4%);
-  }
+  .btn-glow:hover { box-shadow: none; transform: none; }
+  .btn-glow:active { box-shadow: none; transform: none; }
 
   .gold-glow { position: relative; }
   .gold-glow::before { content: none; }
 
-  /* Tactile grain texture — SVG noise at low opacity */
+  /* Noise overlay disabled for clean dark terminal aesthetic */
   .noise-overlay { position: relative; }
-  .noise-overlay::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 1;
-    opacity: 0.06;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-  }
+  .noise-overlay::after { content: none; }
 
   .card-hover {
-    transition: border-color 200ms ease, transform 160ms ease, box-shadow 160ms ease;
+    transition: border-color 200ms ease, background-color 200ms ease;
   }
   .card-hover:hover {
-    border-color: hsl(153 64% 49% / 0.45);
-    transform: translate(-1px, -1px);
-    box-shadow: 5px 5px 0 0 hsl(220 50% 4%), 0 0 0 1px hsl(153 64% 49% / 0.3);
+    border-color: hsl(var(--primary) / 0.5);
   }
 
-  /* Editorial serif heading */
+  /* Editorial heading */
   .font-serif { font-family: var(--font-serif); }
   .editorial-heading {
-    font-family: var(--font-serif);
-    font-weight: 800;
+    font-family: var(--font-display);
+    font-weight: 700;
     letter-spacing: -0.02em;
-    line-height: 1.02;
+    line-height: 1.05;
   }
 
-  /* Hand-drawn underline using SVG */
   .ink-underline {
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' preserveAspectRatio='none'><path d='M2 7 Q 50 2, 100 6 T 198 5' stroke='%232ECC8F' stroke-width='2.5' fill='none' stroke-linecap='round'/></svg>");
-    background-repeat: no-repeat;
-    background-position: 0 100%;
-    background-size: 100% 0.5em;
-    padding-bottom: 0.15em;
+    background-image: none;
+    border-bottom: 2px solid hsl(var(--primary));
+    padding-bottom: 0.1em;
   }
 
-  /* Hand-drawn circle annotation */
   .ink-circle {
     position: relative;
     display: inline-block;
     padding: 0.1em 0.4em;
+    border: 1px solid hsl(var(--primary));
+    border-radius: 0.25rem;
   }
-  .ink-circle::before {
-    content: "";
-    position: absolute;
-    inset: -8% -10%;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60' preserveAspectRatio='none'><path d='M50 4 C 18 6, 4 24, 6 32 C 8 50, 38 56, 56 56 C 82 54, 96 42, 94 28 C 92 12, 70 4, 48 5' stroke='%232ECC8F' stroke-width='1.6' fill='none' stroke-linecap='round'/></svg>");
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
-    pointer-events: none;
-  }
+  .ink-circle::before { content: none; }
 
-  /* Brutalist offset shadow utility */
-  .shadow-brutal {
-    box-shadow: 4px 4px 0 0 hsl(220 50% 4%);
-  }
-  .shadow-brutal-lg {
-    box-shadow: 6px 6px 0 0 hsl(220 50% 4%);
-  }
+  .shadow-brutal { box-shadow: none; }
+  .shadow-brutal-lg { box-shadow: none; }
 
   .flash-gain { animation: flash-green 600ms ease-out; }
   .flash-loss { animation: flash-red 600ms ease-out; }
