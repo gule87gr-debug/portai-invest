@@ -1,0 +1,241 @@
+import { useCallback, useEffect, useState } from "react";
+import { AppLayout } from "@/components/AppLayout";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2, Shield, Trash2, Plus, CheckCircle2, AlertTriangle, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
+import { Navigate } from "react-router-dom";
+
+type AdminRow = { id: string; email: string; note: string; created_at: string };
+type AuditRow = { id: string; email: string; function_name: string; user_id: string | null; created_at: string };
+
+const AdminPage = () => {
+  const { isAdmin, loading: adminLoading } = useIsAdmin();
+  const [admins, setAdmins] = useState<AdminRow[]>([]);
+  const [audit, setAudit] = useState<AuditRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newEmail, setNewEmail] = useState("");
+  const [newNote, setNewNote] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [stripeReport, setStripeReport] = useState<{ ok: boolean; issues: string[] } | null>(null);
+  const [stripeLoading, setStripeLoading] = useState(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const [a, b] = await Promise.all([
+      supabase.functions.invoke("admin-manage-bypass", { body: { action: "list" } }),
+      supabase.functions.invoke("admin-manage-bypass", { body: { action: "list_audit" } }),
+    ]);
+    if (a.error) toast.error(a.error.message);
+    else setAdmins(((a.data as any)?.admins ?? []) as AdminRow[]);
+    if (b.error) toast.error(b.error.message);
+    else setAudit(((b.data as any)?.audit ?? []) as AuditRow[]);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (isAdmin) load();
+  }, [isAdmin, load]);
+
+  const handleAdd = async () => {
+    const email = newEmail.trim().toLowerCase();
+    if (!email) return;
+    setAdding(true);
+    const { error } = await supabase.functions.invoke("admin-manage-bypass", {
+      body: { action: "add", email, note: newNote.trim() },
+    });
+    setAdding(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setNewEmail("");
+    setNewNote("");
+    toast.success("Admin added");
+    await load();
+  };
+
+  const handleRemove = async (id: string, email: string) => {
+    if (!confirm(`Remove admin bypass for ${email}?`)) return;
+    const { error } = await supabase.functions.invoke("admin-manage-bypass", {
+      body: { action: "remove", id },
+    });
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Admin removed");
+    await load();
+  };
+
+  const runStripeAudit = async () => {
+    setStripeLoading(true);
+    setStripeReport(null);
+    const { data, error } = await supabase.functions.invoke("verify-stripe-pricing");
+    setStripeLoading(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setStripeReport(data as any);
+  };
+
+  if (adminLoading) {
+    return (
+      <AppLayout>
+        <div className="flex h-96 items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (!isAdmin) return <Navigate to="/dashboard" replace />;
+
+  return (
+    <AppLayout>
+      <div className="mx-auto max-w-5xl px-4 py-8 space-y-8">
+        <header className="flex items-center gap-3">
+          <Shield className="h-6 w-6 text-primary" />
+          <h1 className="text-2xl font-bold">Admin panel</h1>
+        </header>
+
+        {/* Stripe audit */}
+        <section className="rounded-lg border border-border bg-card p-5">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div>
+              <h2 className="text-base font-semibold">Stripe pricing audit</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Verifies only €8.99 Plus and €15.99 Pro are active; everything else inactive.
+              </p>
+            </div>
+            <button
+              onClick={runStripeAudit}
+              disabled={stripeLoading}
+              className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-50"
+            >
+              {stripeLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+              Run audit
+            </button>
+          </div>
+          {stripeReport && (
+            <div className={`rounded-md border p-3 text-sm ${stripeReport.ok ? "border-success/40 bg-success/5" : "border-loss/40 bg-loss/5"}`}>
+              <div className="flex items-center gap-2 font-semibold mb-1">
+                {stripeReport.ok ? (
+                  <><CheckCircle2 className="h-4 w-4 text-success" /> All pricing checks passed</>
+                ) : (
+                  <><AlertTriangle className="h-4 w-4 text-loss" /> {stripeReport.issues.length} issue(s) found</>
+                )}
+              </div>
+              {!stripeReport.ok && (
+                <ul className="list-disc pl-5 text-xs text-foreground/90 space-y-1">
+                  {stripeReport.issues.map((i, idx) => <li key={idx}>{i}</li>)}
+                </ul>
+              )}
+            </div>
+          )}
+        </section>
+
+        {/* Admin bypass list */}
+        <section className="rounded-lg border border-border bg-card p-5">
+          <h2 className="text-base font-semibold mb-1">Admin bypass emails</h2>
+          <p className="text-xs text-muted-foreground mb-4">
+            Users with these emails get permanent Pro access. Every use is logged below.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-2 mb-5">
+            <input
+              type="email"
+              placeholder="email@example.com"
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+              className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm"
+            />
+            <input
+              type="text"
+              placeholder="Note (optional)"
+              value={newNote}
+              onChange={(e) => setNewNote(e.target.value)}
+              className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm"
+            />
+            <button
+              onClick={handleAdd}
+              disabled={adding || !newEmail.trim()}
+              className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/85 disabled:opacity-50"
+            >
+              {adding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+              Add
+            </button>
+          </div>
+
+          {loading ? (
+            <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+          ) : admins.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">No admin emails configured.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-xs text-muted-foreground border-b border-border">
+                  <tr><th className="text-left py-2 px-2">Email</th><th className="text-left py-2 px-2">Note</th><th className="text-left py-2 px-2">Added</th><th></th></tr>
+                </thead>
+                <tbody>
+                  {admins.map((a) => (
+                    <tr key={a.id} className="border-b border-border/40">
+                      <td className="py-2 px-2 font-medium">{a.email}</td>
+                      <td className="py-2 px-2 text-muted-foreground">{a.note || "—"}</td>
+                      <td className="py-2 px-2 text-muted-foreground">{new Date(a.created_at).toLocaleDateString()}</td>
+                      <td className="py-2 px-2 text-right">
+                        <button
+                          onClick={() => handleRemove(a.id, a.email)}
+                          className="rounded-md p-1.5 text-loss hover:bg-loss/10"
+                          aria-label="Remove admin"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        {/* Audit log */}
+        <section className="rounded-lg border border-border bg-card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base font-semibold">Bypass audit log</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Last 100 admin-bypass events.</p>
+            </div>
+            <button onClick={load} className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-accent">
+              <RefreshCw className="h-3 w-3" /> Refresh
+            </button>
+          </div>
+          {audit.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">No bypass events recorded yet.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-xs text-muted-foreground border-b border-border">
+                  <tr><th className="text-left py-2 px-2">When</th><th className="text-left py-2 px-2">Email</th><th className="text-left py-2 px-2">Function</th></tr>
+                </thead>
+                <tbody>
+                  {audit.map((r) => (
+                    <tr key={r.id} className="border-b border-border/40">
+                      <td className="py-1.5 px-2 text-muted-foreground font-mono text-xs">{new Date(r.created_at).toLocaleString()}</td>
+                      <td className="py-1.5 px-2">{r.email}</td>
+                      <td className="py-1.5 px-2 text-muted-foreground">{r.function_name}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      </div>
+    </AppLayout>
+  );
+};
+
+export default AdminPage;
