@@ -281,14 +281,24 @@ const Forum = () => {
       }
       setArticles(rows);
     }
+    // Load aggregated featured-like counts (public, no auth required).
+    const { data: counts } = await supabase.rpc("get_featured_like_counts");
+    if (Array.isArray(counts)) {
+      const map: Record<string, number> = {};
+      for (const row of counts as { featured_id: string; like_count: number }[]) {
+        map[row.featured_id] = Number(row.like_count) || 0;
+      }
+      setFeaturedLikes(map);
+    }
     // Load this user's existing likes so the heart state persists
     const { data: userRes } = await supabase.auth.getUser();
     if (userRes?.user) {
-      const { data: likes } = await supabase
-        .from("article_likes")
-        .select("article_id")
-        .eq("user_id", userRes.user.id);
+      const [{ data: likes }, { data: fLikes }] = await Promise.all([
+        supabase.from("article_likes").select("article_id").eq("user_id", userRes.user.id),
+        supabase.from("featured_article_likes").select("featured_id").eq("user_id", userRes.user.id),
+      ]);
       if (likes) setLiked(new Set(likes.map((l: { article_id: string }) => l.article_id)));
+      if (fLikes) setFeaturedLiked(new Set(fLikes.map((l: { featured_id: string }) => l.featured_id)));
     }
     setLoading(false);
   };
