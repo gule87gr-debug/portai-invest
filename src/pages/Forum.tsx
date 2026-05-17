@@ -251,10 +251,9 @@ const Forum = () => {
   const [loading, setLoading] = useState(true);
   const [liking, setLiking] = useState<string | null>(null);
   const [liked, setLiked] = useState<Set<string>>(new Set());
-  // Featured articles are not in the DB, so persist their likes per-device in localStorage.
-  const [featuredLikes, setFeaturedLikes] = useState<Record<string, number>>(() => {
-    try { return JSON.parse(localStorage.getItem("portai.featuredLikes") || "{}"); } catch { return {}; }
-  });
+  // Featured article likes: counts come from server (aggregated across all users).
+  // For guests we fall back to localStorage so the gesture still feels responsive.
+  const [featuredLikes, setFeaturedLikes] = useState<Record<string, number>>({});
   const [featuredLiked, setFeaturedLiked] = useState<Set<string>>(() => {
     try { return new Set(JSON.parse(localStorage.getItem("portai.featuredLiked") || "[]")); } catch { return new Set(); }
   });
