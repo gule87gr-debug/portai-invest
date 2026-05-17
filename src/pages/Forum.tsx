@@ -358,6 +358,27 @@ const Forum = () => {
 
   const handleLike = async (a: AnalyzedArticle) => {
     if (liking === a.id) return;
+    const isFeatured = a.id.startsWith("featured-");
+
+    if (isFeatured) {
+      // Featured articles aren't in the DB — toggle a local like and persist.
+      setFeaturedLiked((prev) => {
+        const n = new Set(prev);
+        const wasLiked = n.has(a.id);
+        if (wasLiked) n.delete(a.id); else n.add(a.id);
+        try { localStorage.setItem("portai.featuredLiked", JSON.stringify([...n])); } catch { /* ignore */ }
+        return n;
+      });
+      setFeaturedLikes((prev) => {
+        const wasLiked = featuredLiked.has(a.id);
+        const baseline = prev[a.id] ?? 0;
+        const next = { ...prev, [a.id]: Math.max(0, baseline + (wasLiked ? -1 : 1)) };
+        try { localStorage.setItem("portai.featuredLikes", JSON.stringify(next)); } catch { /* ignore */ }
+        return next;
+      });
+      return;
+    }
+
     setLiking(a.id);
     const wasLiked = liked.has(a.id);
     // optimistic
