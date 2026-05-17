@@ -440,7 +440,10 @@ const Forum = () => {
     const bucket = trustBucket(a.bias_score);
     const tc = toneClasses[bucket.tone];
     const pct = Math.max(6, Math.min(100, a.bias_score * 10));
-    const isLiked = liked.has(a.id);
+    const isLiked = isFeatured ? featuredLiked.has(a.id) : liked.has(a.id);
+    const likeCount = isFeatured
+      ? (a.vindicate_count + (featuredLikes[a.id] ?? 0))
+      : a.vindicate_count;
     return (
       <article
         key={a.id}
