@@ -72,29 +72,12 @@ serve(async (req) => {
     }
     const user = userData.user;
 
-    // Admin allowlist: grants permanent Pro access AND unlocks debug payload
-    const ADMIN_EMAILS = ["gule.87.gr@gmail.com"];
-    const isAdminCaller = ADMIN_EMAILS.includes(user.email.toLowerCase());
-
-    // Final debug gate: must be requested AND (admin caller OR valid shared secret)
-    const debugMode = debugRequested && (isAdminCaller || hasValidDebugSecret);
+    // Debug gate: must be requested AND have valid shared secret
+    const debugMode = debugRequested && hasValidDebugSecret;
     if (debugRequested && !debugMode) {
       console.warn(
         `[check-subscription] Debug payload requested by non-privileged caller (${user.email}) — suppressed.`
       );
-    }
-
-    if (isAdminCaller) {
-      return new Response(JSON.stringify({
-        subscribed: true,
-        tier: "pro",
-        subscription_end: null,
-        cancel_at_period_end: false,
-        subscription_id: "admin_override",
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
     }
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });

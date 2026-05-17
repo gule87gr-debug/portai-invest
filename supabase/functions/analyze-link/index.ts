@@ -399,11 +399,7 @@ serve(async (req) => {
     const userId = userData.user.id;
     let isPro = false;
 
-    // Admin override
-    const ADMIN_EMAILS = ["gule.87.gr@gmail.com"];
-    if (userData.user.email && ADMIN_EMAILS.includes(userData.user.email.toLowerCase())) {
-      isPro = true;
-    } else {
+    {
       const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
       if (stripeKey && userData.user.email) {
         try {
