@@ -119,6 +119,22 @@ export const AppSidebar = () => {
             );
           })}
 
+          {isAdmin && (
+            <NavLink
+              to="/admin"
+              onClick={(e) => { if (tourLocked) e.preventDefault(); }}
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
+                location.pathname === "/admin"
+                  ? "bg-primary/15 text-primary"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              )}
+            >
+              <Shield className="h-4.5 w-4.5" />
+              <span className="flex-1">Admin</span>
+            </NavLink>
+          )}
+
           <div className="mt-auto pt-2 border-t border-sidebar-border">
             <button
               onClick={() => { if (!tourLocked) supabase.auth.signOut(); }}
