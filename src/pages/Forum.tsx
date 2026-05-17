@@ -370,21 +370,39 @@ const Forum = () => {
     const isFeatured = a.id.startsWith("featured-");
 
     if (isFeatured) {
-      // Featured articles aren't in the DB — toggle a local like and persist.
+      // Featured articles aren't in analyzed_articles — use the dedicated
+      // featured_article_likes table so counts sync across devices/users.
+      const wasLiked = featuredLiked.has(a.id);
+
+      // optimistic
       setFeaturedLiked((prev) => {
         const n = new Set(prev);
-        const wasLiked = n.has(a.id);
         if (wasLiked) n.delete(a.id); else n.add(a.id);
         try { localStorage.setItem("portai.featuredLiked", JSON.stringify([...n])); } catch { /* ignore */ }
         return n;
       });
-      setFeaturedLikes((prev) => {
-        const wasLiked = featuredLiked.has(a.id);
-        const baseline = prev[a.id] ?? 0;
-        const next = { ...prev, [a.id]: Math.max(0, baseline + (wasLiked ? -1 : 1)) };
-        try { localStorage.setItem("portai.featuredLikes", JSON.stringify(next)); } catch { /* ignore */ }
-        return next;
-      });
+      setFeaturedLikes((prev) => ({
+        ...prev,
+        [a.id]: Math.max(0, (prev[a.id] ?? 0) + (wasLiked ? -1 : 1)),
+      }));
+
+      setLiking(a.id);
+      const { error } = await supabase.rpc("toggle_featured_like", { _featured_id: a.id });
+      if (error) {
+        // revert optimistic update
+        setFeaturedLiked((prev) => {
+          const n = new Set(prev);
+          if (wasLiked) n.add(a.id); else n.delete(a.id);
+          try { localStorage.setItem("portai.featuredLiked", JSON.stringify([...n])); } catch { /* ignore */ }
+          return n;
+        });
+        setFeaturedLikes((prev) => ({
+          ...prev,
+          [a.id]: Math.max(0, (prev[a.id] ?? 0) + (wasLiked ? 1 : -1)),
+        }));
+        toast({ title: "Sign in to like featured articles", variant: "destructive" });
+      }
+      setLiking(null);
       return;
     }
 
