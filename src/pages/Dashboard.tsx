@@ -41,7 +41,17 @@ const Dashboard = () => {
   const [error, setError] = useState("");
   const [heatmapSource, setHeatmapSource] = useState<string>(() => {
     try {
-      return localStorage.getItem("portai.heatmapSource") || "SPX500";
+      const stored = localStorage.getItem("portai.heatmapSource") || "SPX500";
+      // Migrate legacy TradingView dataSource values to the new canonical names.
+      const legacyMap: Record<string, string> = {
+        DJI: "DowJones30",
+        NYSE: "NYSEComposite",
+        DAX40: "DAX",
+        Nikkei225: "NIKKEI225",
+        BSESENSEX: "SENSEX",
+        BOVESPA: "Bovespa",
+      };
+      return legacyMap[stored] ?? stored;
     } catch {
       return "SPX500";
     }
