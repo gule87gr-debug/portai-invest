@@ -279,6 +279,27 @@ export type Database = {
         }
         Relationships: []
       }
+      featured_article_likes: {
+        Row: {
+          created_at: string
+          featured_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          featured_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          featured_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -538,6 +559,13 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_featured_like_counts: {
+        Args: never
+        Returns: {
+          featured_id: string
+          like_count: number
+        }[]
+      }
       get_trending_stocks: {
         Args: { _since: string }
         Returns: {
@@ -573,6 +601,7 @@ export type Database = {
         Returns: undefined
       }
       toggle_article_like: { Args: { _article_id: string }; Returns: boolean }
+      toggle_featured_like: { Args: { _featured_id: string }; Returns: boolean }
       vindicate_article: { Args: { _article_id: string }; Returns: undefined }
     }
     Enums: {
