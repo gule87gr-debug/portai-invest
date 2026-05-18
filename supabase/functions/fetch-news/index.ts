@@ -79,6 +79,28 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Require authenticated user
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Authentication required" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
+    const token = authHeader.replace("Bearer ", "");
+    const { data: userData, error: userErr } = await supabase.auth.getUser(token);
+    if (userErr || !userData?.user) {
+      return new Response(JSON.stringify({ error: "Invalid token" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const body = await req.json();
     const {
       category = "all",
@@ -92,15 +114,31 @@ Deno.serve(async (req) => {
       search?: string;
     } = body;
 
+    // Validate against allow-lists; ignore unknown keys
+    const allowedCategories = Object.keys(categoryQueries);
+    const allowedRegions = Object.keys(regionQueries);
+    const safeCats = Array.isArray(catList)
+      ? catList.filter((c) => typeof c === "string" && allowedCategories.includes(c))
+      : undefined;
+    const safeRegions = Array.isArray(regionList)
+      ? regionList.filter((r) => typeof r === "string" && allowedRegions.includes(r))
+      : undefined;
+    const safeCategory = allowedCategories.includes(category) ? category : "all";
+
     let query: string;
-    const searchTrim = (search || "").trim();
+    let searchTrim = typeof search === "string" ? search.trim().slice(0, MAX_SEARCH_LEN) : "";
+    if (searchTrim && !SAFE_QUERY_RE.test(searchTrim)) {
+      searchTrim = "";
+    }
 
     if (searchTrim) {
       query = searchTrim;
-    } else if (Array.isArray(regionList) && regionList.length > 0) {
-      query = regionList
-        .map((r) => `(${regionQueries[r] || r})`)
+    } else if (safeRegions && safeRegions.length > 0) {
+      query = safeRegions
+        .map((r) => `(${regionQueries[r]})`)
         .join(" OR ");
+    } else if (safeCats && safeCats.length > 0 && !safeCats.includes("all")) {
+      query = safeCats
     } else if (Array.isArray(catList) && catList.length > 0 && !catList.includes("all")) {
       query = catList
         .map((c) => `(${categoryQueries[c] || c})`)
