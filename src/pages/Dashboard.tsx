@@ -146,16 +146,6 @@ const Dashboard = () => {
             <LinkIcon className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-semibold">{t("analyzeLink")}</h2>
           </div>
-          {!isPro && showRemaining && (
-            <span className="text-xs text-muted-foreground">
-              {remaining > 0 ? `${remaining}/${FREE_DAILY_ANALYSES} ${t("analysesRemainingToday")}` : t("noAnalysesRemainingToday")}
-            </span>
-          )}
-          {isPro && (
-            <span className="flex items-center gap-1 text-xs text-primary font-medium">
-              <Crown className="h-3.5 w-3.5" /> {t("unlimited")}
-            </span>
-          )}
         </div>
         <p className="mb-4 text-sm leading-relaxed text-muted-foreground">{t("pasteUrl")}</p>
 
