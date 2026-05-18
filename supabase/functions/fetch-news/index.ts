@@ -1,8 +1,13 @@
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
+
+const MAX_SEARCH_LEN = 200;
+const SAFE_QUERY_RE = /^[\p{L}\p{N}\s\-_.,&'"()|:]+$/u;
 
 interface NewsItem {
   title: string;
