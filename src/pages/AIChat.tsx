@@ -295,16 +295,6 @@ const AIChat = () => {
 
       <DisclaimerBanner />
 
-      {!hasUnlimitedChat && (
-        <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
-          <span className={cn(msgLimitReached && "text-destructive font-semibold")}>
-            {t("messagesCounter")}: {msgUsage}/{FREE_MSG_LIMIT} ({t("resetsEvery")} {FREE_MSG_WINDOW_HOURS}h)
-          </span>
-          <span className={cn(imgLimitReached && "text-destructive font-semibold")}>
-            {t("imageAnalysesCounter")}: {imgUsage}/{FREE_IMG_LIMIT} ({t("resetsEvery")} {FREE_IMG_WINDOW_HOURS}h)
-          </span>
-        </div>
-      )}
 
       {msgLimitReached && (
         <div className="mt-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3 flex items-center gap-2 text-sm">
