@@ -139,12 +139,10 @@ Deno.serve(async (req) => {
         .join(" OR ");
     } else if (safeCats && safeCats.length > 0 && !safeCats.includes("all")) {
       query = safeCats
-    } else if (Array.isArray(catList) && catList.length > 0 && !catList.includes("all")) {
-      query = catList
-        .map((c) => `(${categoryQueries[c] || c})`)
+        .map((c) => `(${categoryQueries[c]})`)
         .join(" OR ");
     } else {
-      query = categoryQueries[category] || categoryQueries.all;
+      query = categoryQueries[safeCategory] || categoryQueries.all;
     }
 
     const encodedQuery = encodeURIComponent(query);
