@@ -205,6 +205,11 @@ async function preCheckArticle(urlStr: string): Promise<PreCheck> {
     return { ok: false, reason: "Only http(s) links can be analyzed." };
   }
 
+  // SSRF guard: block private/loopback/link-local hosts (incl. cloud metadata IPs).
+  if (isPrivateOrLocalHost(parsed.hostname)) {
+    return { ok: false, reason: "This URL is not allowed." };
+  }
+
   const host = normalizeHost(parsed.hostname);
   let path = parsed.pathname || "/";
   // Strip trailing /amp or /amp.html so the path checks match the canonical article
