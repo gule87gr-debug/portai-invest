@@ -1,4 +1,5 @@
 import { AppLayout } from "@/components/AppLayout";
+import { SEO } from "@/components/SEO";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -29,6 +30,11 @@ const UpgradeSuccess = () => {
 
   return (
     <AppLayout>
+      <SEO
+        title="Subscription Confirmed | PortAI"
+        description="Your PortAI Pro subscription is now active. Enjoy premium features."
+        path="/upgrade-success"
+      />
       <div className="mx-auto max-w-lg py-16 px-4 text-center">
         <div className={cn(
           "mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full transition-all duration-500",

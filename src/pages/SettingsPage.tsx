@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { AppLayout } from "@/components/AppLayout";
+import { SEO } from "@/components/SEO";
 import { useApp } from "@/contexts/AppContext";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -196,6 +197,11 @@ const SettingsPage = () => {
 
   return (
     <AppLayout>
+      <SEO
+        title="Settings | PortAI"
+        description="Manage your PortAI profile, subscription, billing and preferences."
+        path="/settings"
+      />
       <h1 className="mb-6 text-3xl font-bold">{t("settings")}</h1>
 
       <div className="mx-auto max-w-2xl space-y-6">

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
+import { SEO } from "@/components/SEO";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -140,6 +141,11 @@ const BillingConsents = () => {
 
   return (
     <AppLayout>
+      <SEO
+        title="My Billing Consents | PortAI"
+        description="View your recorded billing consents, subscription history and legal agreements on PortAI."
+        path="/billing-consents"
+      />
       <div className="mx-auto w-full max-w-4xl space-y-6 p-4 md:p-6">
         <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
           <div className="space-y-1">

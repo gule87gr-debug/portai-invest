@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { SEO } from "@/components/SEO";
 import { TrendingUp, CheckCircle, XCircle, Loader2, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -44,6 +45,11 @@ const Unsubscribe = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <SEO
+        title="Unsubscribe | PortAI"
+        description="Manage your PortAI email subscription preferences and unsubscribe."
+        path="/unsubscribe"
+      />
       <div className="w-full max-w-sm text-center space-y-6 animate-fade-in">
         <div className="flex justify-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">

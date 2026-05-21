@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
+import { SEO } from "@/components/SEO";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Shield, Trash2, Plus, CheckCircle2, AlertTriangle, RefreshCw } from "lucide-react";
@@ -94,6 +95,11 @@ const AdminPage = () => {
 
   return (
     <AppLayout>
+      <SEO
+        title="Admin | PortAI"
+        description="PortAI admin panel for managing bypass access and subscription audits."
+        path="/admin"
+      />
       <div className="mx-auto max-w-5xl px-4 py-8 space-y-8">
         <header className="flex items-center gap-3">
           <Shield className="h-6 w-6 text-primary" />
