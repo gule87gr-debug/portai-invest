@@ -620,20 +620,31 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
 
     // Persist to the public Media Bias Pulse feed
     try {
-      await supabaseAdmin.from("analyzed_articles").insert({
-        url,
-        source: String(analysis.source ?? "Unknown").slice(0, 120),
-        title: String(analysis.title ?? "Article Analysis").slice(0, 300),
-        bias_score: Math.max(1, Math.min(10, Number(analysis.trustScore) || 5)),
-        red_flag: String(analysis.redFlag ?? "Unverified").slice(0, 60),
-        hidden_angle: String(analysis.hiddenAngle ?? "").slice(0, 600),
-        summary: String(analysis.summary ?? "").slice(0, 1000),
-        pro_deep_dive: analysis.proDeepDive ?? null,
-        submitted_by: userId,
-      });
+      const { data: inserted, error: insErr } = await supabaseAdmin
+        .from("analyzed_articles")
+        .insert({
+          url,
+          source: String(analysis.source ?? "Unknown").slice(0, 120),
+          title: String(analysis.title ?? "Article Analysis").slice(0, 300),
+          bias_score: Math.max(1, Math.min(10, Number(analysis.trustScore) || 5)),
+          red_flag: String(analysis.redFlag ?? "Unverified").slice(0, 60),
+          summary: String(analysis.summary ?? "").slice(0, 1000),
+          submitted_by: userId,
+        })
+        .select("id")
+        .single();
+      if (insErr) throw insErr;
+      if (inserted?.id) {
+        await supabaseAdmin.from("analyzed_articles_premium").insert({
+          article_id: inserted.id,
+          hidden_angle: String(analysis.hiddenAngle ?? "").slice(0, 600),
+          pro_deep_dive: analysis.proDeepDive ?? null,
+        });
+      }
     } catch (e) {
       console.error("Failed to persist analyzed_article:", e);
     }
+
 
     // Strip premium fields for non-Pro users to prevent client-side bypass
     if (!isPro) {
