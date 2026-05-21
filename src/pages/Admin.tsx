@@ -95,6 +95,11 @@ const AdminPage = () => {
 
   return (
     <AppLayout>
+      <SEO
+        title="Admin | PortAI"
+        description="PortAI admin panel for managing bypass access and subscription audits."
+        path="/admin"
+      />
       <div className="mx-auto max-w-5xl px-4 py-8 space-y-8">
         <header className="flex items-center gap-3">
           <Shield className="h-6 w-6 text-primary" />
