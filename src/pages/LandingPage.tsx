@@ -177,26 +177,26 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </p>
 
         {/* Prominent input box with pulse */}
-        <div id="hero-analyzer" className="mt-9 max-w-2xl mx-auto relative z-10 scroll-mt-24">
-          <div className="rounded-2xl">
-            <div className="flex flex-col sm:flex-row items-stretch gap-2 rounded-xl border border-border bg-card p-2">
+        <div id="hero-analyzer" className="mt-9 max-w-3xl mx-auto relative z-10 scroll-mt-24">
+          <div className="rounded-3xl">
+            <div className="focus-spring flex flex-col sm:flex-row items-stretch gap-2 rounded-3xl border border-border bg-card p-2">
               <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <input
                   type="url"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
                   placeholder={t("heroPlaceholder")}
-                  className="h-12 w-full rounded-xl bg-transparent pl-11 pr-4 text-sm sm:text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
+                  className="h-16 w-full rounded-2xl bg-transparent pl-14 pr-4 text-base sm:text-lg text-foreground placeholder:text-muted-foreground focus:outline-none"
                   aria-label={lt("heroUrlAria")}
                 />
               </div>
               <button
                 onClick={handleAnalyze}
-                className={`flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm sm:text-base font-bold text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97] shrink-0 ${url.trim().length > 8 ? "hero-input-pulse" : ""}`}
+                className={`flex items-center justify-center gap-2 rounded-2xl bg-primary px-8 h-16 text-base font-bold text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97] shrink-0 ${url.trim().length > 8 ? "hero-input-pulse" : ""}`}
               >
-                {lt("heroAnalyzeBtn")} <ArrowRight className="h-4 w-4" />
+                {lt("heroAnalyzeBtn")} <ArrowRight className="h-5 w-5" />
               </button>
             </div>
           </div>

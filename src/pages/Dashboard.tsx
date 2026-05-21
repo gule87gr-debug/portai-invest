@@ -13,6 +13,7 @@ import { Link as LinkIcon, Search, Globe, ShieldCheck, FileText, AlertCircle, Lo
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { ScannerSkeleton } from "@/components/ScannerSkeleton";
 
 type AnalysisResult = {
   title: string;
@@ -131,44 +132,50 @@ const Dashboard = () => {
       />
       <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} title={t("analysisLimitTitle")} description={t("analysisLimitDesc")} />
 
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">{t("marketIntelligence")}</h1>
-        <p className="mt-1 text-muted-foreground">{t("aiCuratedAnalysis")}</p>
+      <div className="mb-8">
+        <h1 className="editorial-h1 text-4xl sm:text-5xl font-bold">{t("marketIntelligence")}</h1>
+        <p className="mt-2 text-muted-foreground">{t("aiCuratedAnalysis")}</p>
       </div>
 
       <div className="mb-8" data-tour="news-feed">
         <StockNewsFeed />
       </div>
 
-      <div id="analyzer" className="mb-8 rounded-xl border border-border bg-card p-4 sm:p-6 scroll-mt-20" data-tour="analyze-link">
+      <div id="analyzer" className="mb-8 rounded-2xl border border-border bg-card p-6 sm:p-10 scroll-mt-20" data-tour="analyze-link">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2 mb-2">
           <div className="flex items-center gap-2">
             <LinkIcon className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold">{t("analyzeLink")}</h2>
+            <h2 className="editorial-h2 text-xl font-semibold">{t("analyzeLink")}</h2>
           </div>
         </div>
-        <p className="mb-4 text-sm leading-relaxed text-muted-foreground">{t("pasteUrl")}</p>
+        <p className="mb-5 text-sm leading-relaxed text-muted-foreground">{t("pasteUrl")}</p>
 
         <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Globe className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input value={url} onChange={(e) => setUrl(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAnalyze()} placeholder={t("pasteArticleUrl")} className={cn("h-11 w-full rounded-lg border border-border bg-accent/30 pl-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", url ? "pr-10" : "pr-4")} />
+          <div className="relative flex-1 focus-spring rounded-2xl border border-border bg-accent/30">
+            <Globe className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+            <input value={url} onChange={(e) => setUrl(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAnalyze()} placeholder={t("pasteArticleUrl")} className={cn("h-14 w-full rounded-2xl bg-transparent pl-12 text-base text-foreground placeholder:text-muted-foreground focus:outline-none", url ? "pr-12" : "pr-4")} />
             {url && (
               <button
                 type="button"
                 onClick={() => { setUrl(""); setError(""); }}
                 aria-label={t("clearLink")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>
             )}
           </div>
-          <button onClick={handleAnalyze} disabled={isAnalyzing || !url.trim()} className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 sm:py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 shrink-0">
+          <button onClick={handleAnalyze} disabled={isAnalyzing || !url.trim()} className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-2xl bg-primary px-7 h-14 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 shrink-0">
             {isAnalyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
             {isAnalyzing ? t("analyzing") : t("analyze")}
           </button>
         </div>
+
+        {isAnalyzing && (
+          <div className="mt-5">
+            <ScannerSkeleton lines={6} />
+          </div>
+        )}
 
         {limitReached && !isPro && (
           <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3">
@@ -210,9 +217,9 @@ const Dashboard = () => {
                     <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                     {t("share")}
                   </button>
-                  <div className="text-center">
-                    <p className={cn("text-3xl font-bold font-mono", trustColor(result.trustScore))}>{result.trustScore}<span className="text-sm text-muted-foreground">/10</span></p>
-                    <p className="text-[10px] text-muted-foreground">{t("trustScore")}</p>
+                  <div className="text-center spring-in">
+                    <p className={cn("text-4xl font-bold font-mono tnum", trustColor(result.trustScore))}>{result.trustScore}<span className="text-sm text-muted-foreground">/10</span></p>
+                    <p className="metric-label mt-1">{t("trustScore")}</p>
                   </div>
                 </div>
               </div>
@@ -311,9 +318,9 @@ const Dashboard = () => {
         <TrendingStocks />
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-4">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold">🇺🇸 S&P 500</h2>
+      <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h2 className="editorial-h2 text-xl font-semibold">🇺🇸 S&P 500</h2>
         </div>
         <TradingViewHeatmap height={550} dataSource="SPX500" />
       </div>

@@ -370,7 +370,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
                 labelFormatter={(t) => new Date(Number(t)).toLocaleString()}
                 formatter={(value: number) => [`$${Number(value).toFixed(2)}`, "Price"]}
               />
-              <Area type="monotone" dataKey="c" stroke={stroke} strokeWidth={2} fill="url(#chartFill)" isAnimationActive={false} />
+              <Area type="monotone" dataKey="c" stroke={stroke} strokeWidth={2} fill="url(#chartFill)" isAnimationActive={true} animationDuration={1200} animationEasing="ease-out" />
             </AreaChart>
           </ResponsiveContainer>
         )}
@@ -386,9 +386,9 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
                 formatter={(value: number, name) => [`${Number(value).toFixed(2)}%`, String(name)]}
               />
               <Legend wrapperStyle={{ fontSize: 11 }} />
-              <Line type="monotone" dataKey={primaryUpper} stroke={stroke} strokeWidth={2} dot={false} isAnimationActive={false} />
-              {extras.map((ex) => (
-                <Line key={ex.ticker} type="monotone" dataKey={ex.ticker} stroke={ex.color} strokeWidth={2} dot={false} isAnimationActive={false} connectNulls />
+              <Line type="monotone" dataKey={primaryUpper} stroke={stroke} strokeWidth={2} dot={false} isAnimationActive={true} animationDuration={1000} animationEasing="ease-out" />
+              {extras.map((ex, idx) => (
+                <Line key={ex.ticker} type="monotone" dataKey={ex.ticker} stroke={ex.color} strokeWidth={2} dot={false} isAnimationActive={true} animationDuration={1000} animationBegin={150 * (idx + 1)} animationEasing="ease-out" connectNulls />
               ))}
             </LineChart>
           </ResponsiveContainer>

@@ -139,6 +139,12 @@
     transition-timing-function: ease;
   }
 
+  html {
+    overflow-x: hidden;
+    /* Tabular numerals globally — prices, scores, percentages no longer jitter */
+    font-variant-numeric: tabular-nums;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-body);
@@ -146,13 +152,14 @@
     max-width: 100vw;
   }
 
-  html {
-    overflow-x: hidden;
-  }
-
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
   }
+
+  /* Editorial tightening on display headers */
+  h1 { letter-spacing: -0.035em; }
+  h2 { letter-spacing: -0.025em; }
+  h3 { letter-spacing: -0.015em; }
 
   code, pre, .font-mono {
     font-family: var(--font-mono);
@@ -289,5 +296,140 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* =========================================================
+   Premium "Bento" overhaul — layout, type & motion utilities.
+   No color/theme changes; relies entirely on existing tokens.
+   ========================================================= */
+
+@layer utilities {
+  /* Bento architecture */
+  .bento-grid { @apply grid gap-6; }
+  .bento-card {
+    @apply rounded-2xl border border-border bg-card p-8 sm:p-10;
+  }
+
+  /* Typography mechanics */
+  .tnum { font-variant-numeric: tabular-nums; }
+  .metric-label {
+    @apply text-xs uppercase tracking-[0.18em] text-muted-foreground font-medium;
+  }
+  .editorial-h1 { @apply tracking-tighter; }
+  .editorial-h2 { @apply tracking-tight; }
+
+  /* Globally smooth: bump xl radius to feel more modern (no color change) */
+  .rounded-xl { border-radius: 1rem; }
+
+  /* Universal pop-in for dropdowns / tooltips / popovers / modals */
+  .pop-in {
+    animation: pop-in 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Spring container — overshoots and settles */
+  .spring-in {
+    animation: spring-in 700ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  /* SVG line-draw helper */
+  .draw-line {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: draw-line 1.4s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  }
+
+  /* Hover-reveal accordion using grid trick */
+  .reveal-grid {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 320ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal-grid > * { overflow: hidden; }
+  .group:hover .reveal-grid,
+  .reveal-grid.is-open { grid-template-rows: 1fr; }
+
+  /* Spring focus ring for the hero analyzer */
+  .focus-spring {
+    transition: box-shadow 280ms cubic-bezier(0.34, 1.56, 0.64, 1),
+                border-color 220ms ease,
+                transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .focus-spring:focus-within {
+    box-shadow: 0 0 0 6px hsl(var(--primary) / 0.18);
+    border-color: hsl(var(--primary));
+  }
+
+  /* Masonry via CSS columns */
+  .masonry {
+    column-gap: 1.5rem;
+  }
+  .masonry > * {
+    break-inside: avoid;
+    margin-bottom: 1.5rem;
+    display: inline-block;
+    width: 100%;
+  }
+}
+
+/* Auto-hide scrollbar — invisible until hover/active */
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 999px;
+  transition: background-color 200ms ease;
+}
+*:hover::-webkit-scrollbar-thumb,
+*:active::-webkit-scrollbar-thumb,
+*:focus-within::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.35);
+}
+*::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.6); }
+html { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+html:hover { scrollbar-color: hsl(var(--muted-foreground) / 0.35) transparent; }
+
+/* Keyframes */
+@keyframes pop-in {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes spring-in {
+  0% { opacity: 0; transform: scale(0.85); }
+  60% { opacity: 1; transform: scale(1.04); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes draw-line {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes scanner-sweep {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(400%); }
+}
+
+@keyframes scanner-reveal {
+  0%, 100% { transform: scaleX(0.6); opacity: 0.5; }
+  50% { transform: scaleX(1); opacity: 1; }
+}
+
+@keyframes gauge-overshoot {
+  0% { transform: rotate(-90deg); }
+  60% { transform: rotate(8deg); }
+  80% { transform: rotate(-3deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* Respect reduced-motion globally */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }

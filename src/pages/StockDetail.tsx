@@ -66,10 +66,10 @@ const StockDetail = () => {
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold">{symbol}</h1>
-              <span className="rounded-md bg-muted px-2.5 py-1 text-xs text-muted-foreground">{t(`sec_${(info.sector || "").replace(/\s+/g, "")}`) !== `sec_${(info.sector || "").replace(/\s+/g, "")}` ? t(`sec_${(info.sector || "").replace(/\s+/g, "")}`) : info.sector}</span>
-            </div>
+          <div className="flex items-center gap-3">
+            <h1 className="editorial-h1 text-4xl sm:text-5xl font-bold tnum">{symbol}</h1>
+            <span className="metric-label rounded-md bg-muted px-2.5 py-1">{t(`sec_${(info.sector || "").replace(/\s+/g, "")}`) !== `sec_${(info.sector || "").replace(/\s+/g, "")}` ? t(`sec_${(info.sector || "").replace(/\s+/g, "")}`) : info.sector}</span>
+          </div>
             <p className="mt-1 text-muted-foreground">{info.name}</p>
           </div>
 
@@ -79,7 +79,7 @@ const StockDetail = () => {
               <div className="h-10 w-32 animate-pulse rounded-md bg-muted" />
             ) : quote ? (
               <>
-                <span className="text-3xl font-bold tabular-nums font-mono">
+                <span className="text-4xl font-bold tnum font-mono spring-in inline-block">
                   ${quote.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
                 <div className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-sm font-semibold ${
@@ -90,7 +90,7 @@ const StockDetail = () => {
                   {isPositive ? <TrendingUp className="h-3.5 w-3.5" /> :
                    isNegative ? <TrendingDown className="h-3.5 w-3.5" /> :
                    <Minus className="h-3.5 w-3.5" />}
-                  <span className="tabular-nums font-mono">
+                  <span className="tnum font-mono">
                     {quote.change >= 0 ? "+" : ""}{quote.change.toFixed(2)} ({quote.changePercent >= 0 ? "+" : ""}{quote.changePercent.toFixed(2)}%)
                   </span>
                 </div>
@@ -103,35 +103,35 @@ const StockDetail = () => {
 
         {/* OHLC bar */}
         {quote && (
-          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground font-mono tabular-nums">
-            <span>{t("openPx")} <strong className="text-foreground">${quote.open.toFixed(2)}</strong></span>
-            <span>{t("highPx")} <strong className="text-foreground">${quote.high.toFixed(2)}</strong></span>
-            <span>{t("lowPx")} <strong className="text-foreground">${quote.low.toFixed(2)}</strong></span>
-            <span>{t("prevClosePx")} <strong className="text-foreground">${quote.prevClose.toFixed(2)}</strong></span>
+          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 font-mono tnum">
+            <span className="metric-label">Open <strong className="text-foreground font-mono normal-case tracking-normal ml-1">${quote.open.toFixed(2)}</strong></span>
+            <span className="metric-label">High <strong className="text-foreground font-mono normal-case tracking-normal ml-1">${quote.high.toFixed(2)}</strong></span>
+            <span className="metric-label">Low <strong className="text-foreground font-mono normal-case tracking-normal ml-1">${quote.low.toFixed(2)}</strong></span>
+            <span className="metric-label">Prev Close <strong className="text-foreground font-mono normal-case tracking-normal ml-1">${quote.prevClose.toFixed(2)}</strong></span>
           </div>
         )}
       </div>
 
-      <div className="mb-6 rounded-xl border border-border bg-card p-4">
+      <div className="mb-6 rounded-2xl border border-border bg-card p-6 sm:p-8">
         <YahooFinanceChart ticker={symbol} type={assetEntry?.type} height={380} />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {tvSymbol && (
-          <div className="rounded-xl border border-border bg-card p-5">
-            <div className="mb-3 flex items-center gap-2">
+          <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 spring-in">
+            <div className="mb-4 flex items-center gap-2">
               <BarChart3 className="h-4 w-4 text-primary" />
-              <h2 className="text-lg font-semibold">{t("technicalAnalysis")}</h2>
+              <h2 className="editorial-h2 text-lg font-semibold">{t("technicalAnalysis")}</h2>
             </div>
             <TradingViewTechnicalAnalysis symbol={tvSymbol} />
           </div>
         )}
 
         <div className="space-y-6">
-          <div className="rounded-xl border border-border bg-card p-5">
-            <div className="mb-3 flex items-center gap-2">
+          <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
+            <div className="mb-4 flex items-center gap-2">
               <Building2 className="h-4 w-4 text-primary" />
-              <h2 className="text-lg font-semibold">{t("about")}</h2>
+              <h2 className="editorial-h2 text-lg font-semibold">{t("about")}</h2>
             </div>
             {info.loading && !info.isCurated ? (
               <div className="space-y-2">
@@ -144,10 +144,10 @@ const StockDetail = () => {
             )}
           </div>
 
-          <div className="rounded-xl border border-border bg-card p-5">
-            <div className="mb-3 flex items-center gap-2">
+          <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
+            <div className="mb-4 flex items-center gap-2">
               <Newspaper className="h-4 w-4 text-primary" />
-              <h2 className="text-lg font-semibold">{t("recentNews")}</h2>
+              <h2 className="editorial-h2 text-lg font-semibold">{t("recentNews")}</h2>
             </div>
             <StockNews ticker={symbol} height={400} />
           </div>
