@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { AppLayout } from "@/components/AppLayout";
+import { SEO } from "@/components/SEO";
 import { useApp } from "@/contexts/AppContext";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
