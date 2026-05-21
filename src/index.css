@@ -154,7 +154,13 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
-    word-spacing: -0.04em;
+    word-spacing: -0.09em;
+  }
+
+  /* Subheadings / lead paragraphs — tighten inter-word spacing */
+  p, .lead, .subheading,
+  [class*="text-lg"], [class*="text-xl"], [class*="text-2xl"], [class*="text-3xl"] {
+    word-spacing: -0.05em;
   }
 
   /* Editorial tightening on display headers */
