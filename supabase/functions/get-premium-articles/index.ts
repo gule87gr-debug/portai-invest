@@ -95,15 +95,21 @@ serve(async (req) => {
     }
 
     const { data, error } = await supabaseAdmin
-      .from("analyzed_articles")
-      .select("id, hidden_angle, pro_deep_dive")
-      .in("id", safeIds);
+      .from("analyzed_articles_premium")
+      .select("article_id, hidden_angle, pro_deep_dive")
+      .in("article_id", safeIds);
     if (error) {
-      return new Response(JSON.stringify({ error: error.message }), {
+      console.error("get-premium-articles select error:", error);
+      return new Response(JSON.stringify({ error: "Internal server error" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    return new Response(JSON.stringify({ articles: data ?? [] }), {
+    const articles = (data ?? []).map((r: any) => ({
+      id: r.article_id,
+      hidden_angle: r.hidden_angle,
+      pro_deep_dive: r.pro_deep_dive,
+    }));
+    return new Response(JSON.stringify({ articles }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
