@@ -46,18 +46,23 @@ export const UpgradeModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in p-4">
-      <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-primary/30 bg-card p-6 shadow-xl shadow-primary/10">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="upgrade-modal-title"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in p-4"
+    >
+      <div className="w-full max-w-md max-h-[90vh] overflow-y-auto bento-card spring-in border-primary/30 p-6 sm:p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/20">
             <Crown className="h-6 w-6 text-primary" />
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+          <button onClick={onClose} aria-label="Close upgrade dialog" className="text-muted-foreground hover:text-foreground focus-ring">
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <h2 className="text-xl font-bold mb-1">{title ?? t("upgradeYourPlan")}</h2>
+        <h2 id="upgrade-modal-title" className="text-xl font-bold mb-1 editorial-h2">{title ?? t("upgradeYourPlan")}</h2>
         <p className="text-sm text-muted-foreground mb-5">{description ?? t("upgradeChoose")}</p>
 
         <div className="space-y-4">

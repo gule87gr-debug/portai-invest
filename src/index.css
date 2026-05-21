@@ -422,7 +422,7 @@ html:hover { scrollbar-color: hsl(var(--muted-foreground) / 0.35) transparent; }
   100% { transform: rotate(0deg); }
 }
 
-/* Respect reduced-motion globally */
+/* Respect reduced-motion globally — both system pref and our in-app toggle */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -433,3 +433,27 @@ html:hover { scrollbar-color: hsl(var(--muted-foreground) / 0.35) transparent; }
     scroll-behavior: auto !important;
   }
 }
+
+html[data-reduced-motion="true"] *,
+html[data-reduced-motion="true"] *::before,
+html[data-reduced-motion="true"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Strong, consistent focus ring for keyboard users across all interactive elements.
+   :focus-visible avoids ring noise on mouse clicks but guarantees keyboard visibility. */
+@layer utilities {
+  :where(a, button, [role="button"], input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  .focus-ring:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+}
+

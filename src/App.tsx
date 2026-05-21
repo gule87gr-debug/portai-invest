@@ -12,6 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 import LandingPage from "./pages/LandingPage";
 import { CookieConsent } from "./components/CookieConsent";
 import { RouteSkeleton } from "./components/RouteSkeleton";
+import { OfflineIndicator } from "./components/OfflineIndicator";
+import { SkipToContent } from "./components/SkipToContent";
 
 // Lazy-load every authenticated/secondary route to keep the initial bundle small
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -146,6 +148,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <LanguageProvider initialLanguage="en">
+          <SkipToContent />
+          <OfflineIndicator />
           <Suspense fallback={<RouteSkeleton />}>
             <Routes>
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
