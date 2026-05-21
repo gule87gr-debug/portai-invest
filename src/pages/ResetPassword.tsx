@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { TrendingUp, Lock, Loader2, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { SEO } from "@/components/SEO";
 
 const ResetPassword = ({ onComplete }: { onComplete: () => void }) => {
   const [newPassword, setNewPassword] = useState("");
