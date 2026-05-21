@@ -431,7 +431,9 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
         )}
       </div>
     </div>
+    </>
   );
+
 };
 
 export default AuthPage;
