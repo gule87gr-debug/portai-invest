@@ -385,6 +385,38 @@ const AIChat = () => {
           </div>
         )}
 
+        <div className="mt-3 flex items-center gap-1.5 overflow-x-auto scrollbar-thin pb-1">
+          <span className="text-xs text-muted-foreground shrink-0 mr-1">Mode:</span>
+          {MODES.map((m) => {
+            const Icon = m.icon;
+            const locked = m.pro && !hasUnlimitedChat;
+            const active = mode === m.id;
+            return (
+              <button
+                key={m.id}
+                onClick={() => {
+                  if (locked) {
+                    setUpgradeReason(`${m.label} mode is a Pro feature. Upgrade to unlock advanced AI models.`);
+                    setShowUpgrade(true);
+                    return;
+                  }
+                  setMode(m.id);
+                }}
+                title={m.desc}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium shrink-0 transition-colors",
+                  active ? "border-primary bg-primary/15 text-primary" : "border-border bg-card text-muted-foreground hover:text-foreground",
+                  locked && "opacity-60"
+                )}
+              >
+                <Icon className="h-3 w-3" />
+                {m.label}
+                {locked && <Crown className="h-3 w-3" />}
+              </button>
+            );
+          })}
+        </div>
+
         <div className="mt-4 flex items-center gap-2">
           <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleImageSelect} />
           <button onClick={() => {
