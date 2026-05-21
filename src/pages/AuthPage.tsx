@@ -5,6 +5,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { cn } from "@/lib/utils";
 import { KeyRound } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { SEO } from "@/components/SEO";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
