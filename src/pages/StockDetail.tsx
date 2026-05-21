@@ -47,6 +47,25 @@ const StockDetail = () => {
         description={`Live ${symbol} price, AI-powered news bias analysis, technicals and chart. Set price alerts and track ${info.name || symbol} on PortAI.`}
         path={`/stock/${symbol}`}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            name: `${symbol}${info.name ? ` — ${info.name}` : ""}`,
+            url: `https://portai-invest.com/stock/${symbol}`,
+            description: `Live ${symbol} price, AI-powered news bias analysis, technicals and chart for ${info.name || symbol}.`,
+            mainEntity: {
+              "@type": "Thing",
+              name: info.name || symbol,
+              identifier: symbol,
+              description: info.sector ? `${info.name || symbol} (${symbol}) — ${info.sector} sector asset tracked on PortAI.` : `${symbol} asset tracked on PortAI.`,
+            },
+          }),
+        }}
+      />
+
       <div className="mb-4">
         <div className="mb-3 flex items-center justify-between gap-2">
           <Link to="/watchlists" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
