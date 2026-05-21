@@ -239,6 +239,7 @@ const AIChat = () => {
     const apiMessages = buildMessages(allMessages);
     await streamChat({
       messages: apiMessages,
+      mode,
       onDelta: upsert,
       onDone: () => {
         setIsTyping(false);
