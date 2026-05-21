@@ -240,6 +240,7 @@ Always end with: "⚠️ Just my take — not financial advice. Do your own rese
           ...sanitizedMessages,
         ],
         stream: true,
+        ...(cfg.reasoning ? { reasoning: { effort: cfg.reasoning } } : {}),
       }),
     });
 
