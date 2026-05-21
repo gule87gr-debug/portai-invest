@@ -87,9 +87,7 @@ export type Database = {
         Row: {
           bias_score: number
           created_at: string
-          hidden_angle: string
           id: string
-          pro_deep_dive: Json | null
           red_flag: string
           source: string
           submitted_by: string | null
@@ -102,9 +100,7 @@ export type Database = {
         Insert: {
           bias_score?: number
           created_at?: string
-          hidden_angle?: string
           id?: string
-          pro_deep_dive?: Json | null
           red_flag?: string
           source?: string
           submitted_by?: string | null
@@ -117,9 +113,7 @@ export type Database = {
         Update: {
           bias_score?: number
           created_at?: string
-          hidden_angle?: string
           id?: string
-          pro_deep_dive?: Json | null
           red_flag?: string
           source?: string
           submitted_by?: string | null
@@ -128,6 +122,27 @@ export type Database = {
           url?: string
           view_count?: number
           vindicate_count?: number
+        }
+        Relationships: []
+      }
+      analyzed_articles_premium: {
+        Row: {
+          article_id: string
+          created_at: string
+          hidden_angle: string
+          pro_deep_dive: Json | null
+        }
+        Insert: {
+          article_id: string
+          created_at?: string
+          hidden_angle?: string
+          pro_deep_dive?: Json | null
+        }
+        Update: {
+          article_id?: string
+          created_at?: string
+          hidden_angle?: string
+          pro_deep_dive?: Json | null
         }
         Relationships: []
       }
