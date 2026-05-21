@@ -284,17 +284,40 @@ async function preCheckArticle(urlStr: string): Promise<PreCheck> {
   try {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 6000);
-    const res = await fetch(parsed.toString(), {
-      method: "GET",
-      redirect: "follow",
-      signal: ctrl.signal,
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
-        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.9",
-      },
-    });
+    const fetchHeaders = {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+      Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.9",
+    } as const;
+
+    // Manually follow redirects so we can re-validate each hop against the
+    // private-IP blocklist (prevents SSRF via open redirect to 169.254.169.254).
+    let current = parsed.toString();
+    let res: Response | null = null;
+    for (let hop = 0; hop < 5; hop++) {
+      res = await fetch(current, {
+        method: "GET",
+        redirect: "manual",
+        signal: ctrl.signal,
+        headers: fetchHeaders,
+      });
+      if (res.status >= 300 && res.status < 400) {
+        const loc = res.headers.get("location");
+        if (!loc) break;
+        let next: URL;
+        try { next = new URL(loc, current); } catch { clearTimeout(timer); return { ok: false, reason: "This URL is not allowed." }; }
+        if (!/^https?:$/.test(next.protocol) || isPrivateOrLocalHost(next.hostname)) {
+          clearTimeout(timer);
+          return { ok: false, reason: "This URL is not allowed." };
+        }
+        current = next.toString();
+        continue;
+      }
+      break;
+    }
     clearTimeout(timer);
+    if (!res) return { ok: false, reason: "We couldn't reach this page." };
+
 
     // If the publisher blocks the bot (403/429/503), don't penalize the user —
     // fall back to path heuristics.
