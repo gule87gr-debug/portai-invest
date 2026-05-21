@@ -45,6 +45,11 @@ const Unsubscribe = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <SEO
+        title="Unsubscribe | PortAI"
+        description="Manage your PortAI email subscription preferences and unsubscribe."
+        path="/unsubscribe"
+      />
       <div className="w-full max-w-sm text-center space-y-6 animate-fade-in">
         <div className="flex justify-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
