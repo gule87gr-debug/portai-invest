@@ -108,7 +108,8 @@ Return ONLY the description text, nothing else.`;
 
     if (!aiRes.ok) {
       const text = await aiRes.text();
-      return new Response(JSON.stringify({ error: "ai failed", status: aiRes.status, detail: text.slice(0, 200) }), {
+      console.error("describe-asset ai gateway error:", aiRes.status, text.slice(0, 500));
+      return new Response(JSON.stringify({ error: "Service temporarily unavailable" }), {
         status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
