@@ -32,8 +32,8 @@ function buildMessages(msgs: Message[]): Array<{ role: string; content: MessageC
   });
 }
 
-async function streamChat({ messages, onDelta, onDone, onError }: {
-  messages: Array<{ role: string; content: MessageContent }>; onDelta: (text: string) => void; onDone: () => void; onError: (msg: string) => void;
+async function streamChat({ messages, mode, onDelta, onDone, onError }: {
+  messages: Array<{ role: string; content: MessageContent }>; mode: ChatMode; onDelta: (text: string) => void; onDone: () => void; onError: (msg: string) => void;
 }) {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session?.access_token) { onError("Please sign in to use the AI chat."); return; }
@@ -41,7 +41,7 @@ async function streamChat({ messages, onDelta, onDone, onError }: {
   const resp = await fetch(CHAT_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
-    body: JSON.stringify({ messages }),
+    body: JSON.stringify({ messages, mode }),
   });
   if (!resp.ok) { const err = await resp.json().catch(() => ({ error: "Request failed" })); onError(err.error || `Error ${resp.status}`); return; }
   if (!resp.body) { onError("No response body"); return; }
