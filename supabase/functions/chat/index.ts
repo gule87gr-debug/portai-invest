@@ -34,7 +34,15 @@ serve(async (req) => {
       });
     }
 
-    const { messages } = rawBody;
+    const { messages, mode } = rawBody;
+
+    const MODE_CONFIG: Record<string, { model: string; imageModel: string; proOnly: boolean; reasoning?: string }> = {
+      fast:      { model: "google/gemini-3-flash-preview", imageModel: "google/gemini-2.5-flash", proOnly: false },
+      balanced:  { model: "google/gemini-2.5-pro",          imageModel: "google/gemini-2.5-pro",   proOnly: true },
+      reasoning: { model: "openai/gpt-5.4",                  imageModel: "openai/gpt-5",            proOnly: true, reasoning: "medium" },
+      creative:  { model: "openai/gpt-5",                    imageModel: "openai/gpt-5",            proOnly: true },
+    };
+    const selectedMode: string = typeof mode === "string" && MODE_CONFIG[mode] ? mode : "fast";
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return new Response(JSON.stringify({ error: "\"messages\" must be a non-empty array" }), {
