@@ -379,12 +379,17 @@ const Watchlists = () => {
                           <Sparkline seed={s.ticker} width={160} height={32} />
                           <div className="flex items-center gap-5 text-right">
                             <div>
-                              <p className="metric-label">Volume</p>
+                              <p className="metric-label">High</p>
                               <p className="text-xs font-mono tnum text-foreground">
-                                {quote?.volume ? quote.volume.toLocaleString() : "—"}
+                                {quote?.high ? `$${quote.high.toFixed(2)}` : "—"}
                               </p>
                             </div>
                             <div>
+                              <p className="metric-label">Open</p>
+                              <p className="text-xs font-mono tnum text-foreground">
+                                {quote?.open ? `$${quote.open.toFixed(2)}` : "—"}
+                              </p>
+                            </div>
                               <p className="metric-label">Open</p>
                               <p className="text-xs font-mono tnum text-foreground">
                                 {quote?.open ? `$${quote.open.toFixed(2)}` : "—"}
