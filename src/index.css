@@ -139,6 +139,12 @@
     transition-timing-function: ease;
   }
 
+  html {
+    overflow-x: hidden;
+    /* Tabular numerals globally — prices, scores, percentages no longer jitter */
+    font-variant-numeric: tabular-nums;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-body);
@@ -146,13 +152,14 @@
     max-width: 100vw;
   }
 
-  html {
-    overflow-x: hidden;
-  }
-
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
   }
+
+  /* Editorial tightening on display headers */
+  h1 { letter-spacing: -0.035em; }
+  h2 { letter-spacing: -0.025em; }
+  h3 { letter-spacing: -0.015em; }
 
   code, pre, .font-mono {
     font-family: var(--font-mono);
