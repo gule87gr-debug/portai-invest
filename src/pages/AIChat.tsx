@@ -14,6 +14,14 @@ import ReactMarkdown from "react-markdown";
 type MessageContent = string | Array<{ type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }>;
 type Message = { role: "user" | "assistant"; content: string; imageUrl?: string };
 type ChatSession = { id: string; title: string; created_at: string };
+type ChatMode = "fast" | "balanced" | "reasoning" | "creative";
+
+const MODES: { id: ChatMode; label: string; desc: string; icon: typeof Zap; pro: boolean }[] = [
+  { id: "fast",      label: "Fast",      desc: "Quick answers (Gemini 3 Flash)",          icon: Zap,       pro: false },
+  { id: "balanced",  label: "Balanced",  desc: "Deeper analysis (Gemini 2.5 Pro)",        icon: Gauge,     pro: true  },
+  { id: "reasoning", label: "Reasoning", desc: "Step-by-step thinking (GPT-5.4)",         icon: Brain,     pro: true  },
+  { id: "creative",  label: "Creative",  desc: "Nuanced takes (GPT-5)",                   icon: Lightbulb, pro: true  },
+];
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 
