@@ -185,7 +185,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error("Error fetching news:", error);
     return new Response(
-      JSON.stringify({ success: false, error: (error as Error).message, fallback: true, items: [] }),
+      JSON.stringify({ success: false, error: "Unable to fetch news", fallback: true, items: [] }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

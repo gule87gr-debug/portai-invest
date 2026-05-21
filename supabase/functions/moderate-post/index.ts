@@ -103,14 +103,16 @@ Respond with ONLY a JSON object: {"allowed": true} or {"allowed": false, "reason
     });
 
     if (!response.ok) {
-      return new Response(JSON.stringify({ allowed: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      console.error("moderation gateway error:", response.status);
+      return new Response(
+        JSON.stringify({ allowed: false, reason: "Moderation temporarily unavailable. Please try again shortly." }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "";
-    
+
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
@@ -119,15 +121,20 @@ Respond with ONLY a JSON object: {"allowed": true} or {"allowed": false, "reason
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-    } catch {}
+    } catch (parseErr) {
+      console.error("moderation parse error:", parseErr);
+    }
 
-    return new Response(JSON.stringify({ allowed: true }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    // Unparseable AI response — fail closed
+    return new Response(
+      JSON.stringify({ allowed: false, reason: "Moderation temporarily unavailable. Please try again shortly." }),
+      { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   } catch (e) {
     console.error("moderation error:", e);
-    return new Response(JSON.stringify({ allowed: true }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ allowed: false, reason: "Moderation temporarily unavailable. Please try again shortly." }),
+      { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   }
 });
