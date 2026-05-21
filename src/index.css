@@ -154,6 +154,7 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
+    word-spacing: -0.04em;
   }
 
   /* Editorial tightening on display headers */
