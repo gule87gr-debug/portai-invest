@@ -4,7 +4,7 @@ import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SEO } from "@/components/SEO";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { Send, Sparkles, Plus, Trash2, MessageCircle, Image, X, Crown } from "lucide-react";
+import { Send, Sparkles, Plus, Trash2, MessageCircle, Image, X, Crown, Zap, Brain, Lightbulb, Gauge } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { cn } from "@/lib/utils";
@@ -14,6 +14,14 @@ import ReactMarkdown from "react-markdown";
 type MessageContent = string | Array<{ type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }>;
 type Message = { role: "user" | "assistant"; content: string; imageUrl?: string };
 type ChatSession = { id: string; title: string; created_at: string };
+type ChatMode = "fast" | "balanced" | "reasoning" | "creative";
+
+const MODES: { id: ChatMode; label: string; desc: string; icon: typeof Zap; pro: boolean }[] = [
+  { id: "fast",      label: "Fast",      desc: "Quick answers (Gemini 3 Flash)",          icon: Zap,       pro: false },
+  { id: "balanced",  label: "Balanced",  desc: "Deeper analysis (Gemini 2.5 Pro)",        icon: Gauge,     pro: true  },
+  { id: "reasoning", label: "Reasoning", desc: "Step-by-step thinking (GPT-5.4)",         icon: Brain,     pro: true  },
+  { id: "creative",  label: "Creative",  desc: "Nuanced takes (GPT-5)",                   icon: Lightbulb, pro: true  },
+];
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 
@@ -32,8 +40,8 @@ function buildMessages(msgs: Message[]): Array<{ role: string; content: MessageC
   });
 }
 
-async function streamChat({ messages, onDelta, onDone, onError }: {
-  messages: Array<{ role: string; content: MessageContent }>; onDelta: (text: string) => void; onDone: () => void; onError: (msg: string) => void;
+async function streamChat({ messages, mode, onDelta, onDone, onError }: {
+  messages: Array<{ role: string; content: MessageContent }>; mode: ChatMode; onDelta: (text: string) => void; onDone: () => void; onError: (msg: string) => void;
 }) {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session?.access_token) { onError("Please sign in to use the AI chat."); return; }
@@ -41,7 +49,7 @@ async function streamChat({ messages, onDelta, onDone, onError }: {
   const resp = await fetch(CHAT_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
-    body: JSON.stringify({ messages }),
+    body: JSON.stringify({ messages, mode }),
   });
   if (!resp.ok) { const err = await resp.json().catch(() => ({ error: "Request failed" })); onError(err.error || `Error ${resp.status}`); return; }
   if (!resp.body) { onError("No response body"); return; }
@@ -107,6 +115,7 @@ const AIChat = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [msgUsage, setMsgUsage] = useState(0);
   const [imgUsage, setImgUsage] = useState(0);
+  const [mode, setMode] = useState<ChatMode>("fast");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -230,6 +239,7 @@ const AIChat = () => {
     const apiMessages = buildMessages(allMessages);
     await streamChat({
       messages: apiMessages,
+      mode,
       onDelta: upsert,
       onDone: () => {
         setIsTyping(false);
@@ -374,6 +384,38 @@ const AIChat = () => {
             </button>
           </div>
         )}
+
+        <div className="mt-3 flex items-center gap-1.5 overflow-x-auto scrollbar-thin pb-1">
+          <span className="text-xs text-muted-foreground shrink-0 mr-1">Mode:</span>
+          {MODES.map((m) => {
+            const Icon = m.icon;
+            const locked = m.pro && !hasUnlimitedChat;
+            const active = mode === m.id;
+            return (
+              <button
+                key={m.id}
+                onClick={() => {
+                  if (locked) {
+                    setUpgradeReason(`${m.label} mode is a Pro feature. Upgrade to unlock advanced AI models.`);
+                    setShowUpgrade(true);
+                    return;
+                  }
+                  setMode(m.id);
+                }}
+                title={m.desc}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium shrink-0 transition-colors",
+                  active ? "border-primary bg-primary/15 text-primary" : "border-border bg-card text-muted-foreground hover:text-foreground",
+                  locked && "opacity-60"
+                )}
+              >
+                <Icon className="h-3 w-3" />
+                {m.label}
+                {locked && <Crown className="h-3 w-3" />}
+              </button>
+            );
+          })}
+        </div>
 
         <div className="mt-4 flex items-center gap-2">
           <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleImageSelect} />

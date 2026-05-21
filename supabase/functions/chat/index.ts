@@ -34,7 +34,15 @@ serve(async (req) => {
       });
     }
 
-    const { messages } = rawBody;
+    const { messages, mode } = rawBody;
+
+    const MODE_CONFIG: Record<string, { model: string; imageModel: string; proOnly: boolean; reasoning?: string }> = {
+      fast:      { model: "google/gemini-3-flash-preview", imageModel: "google/gemini-2.5-flash", proOnly: false },
+      balanced:  { model: "google/gemini-2.5-pro",          imageModel: "google/gemini-2.5-pro",   proOnly: true },
+      reasoning: { model: "openai/gpt-5.4",                  imageModel: "openai/gpt-5",            proOnly: true, reasoning: "medium" },
+      creative:  { model: "openai/gpt-5",                    imageModel: "openai/gpt-5",            proOnly: true },
+    };
+    const selectedMode: string = typeof mode === "string" && MODE_CONFIG[mode] ? mode : "fast";
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return new Response(JSON.stringify({ error: "\"messages\" must be a non-empty array" }), {
@@ -171,7 +179,10 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const model = hasImages ? "google/gemini-2.5-flash" : "google/gemini-3-flash-preview";
+    // Pro-only modes fall back to fast for free users
+    const effectiveMode = MODE_CONFIG[selectedMode].proOnly && !isPro ? "fast" : selectedMode;
+    const cfg = MODE_CONFIG[effectiveMode];
+    const model = hasImages ? cfg.imageModel : cfg.model;
 
     const systemPrompt = hasImages
       ? `You are PortAI — a friendly, knowledgeable financial advisor with image analysis capabilities.
@@ -229,6 +240,7 @@ Always end with: "⚠️ Just my take — not financial advice. Do your own rese
           ...sanitizedMessages,
         ],
         stream: true,
+        ...(cfg.reasoning ? { reasoning: { effort: cfg.reasoning } } : {}),
       }),
     });
 
