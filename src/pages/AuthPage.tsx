@@ -220,8 +220,27 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
   const hasEmailError = emailError.length > 0;
   const isSubmitDisabled = loading || hasEmailError || (mode === "signup" && (usernameStatus === "taken" || usernameStatus === "checking"));
 
+  const seoTitle = mode === "forgot" ? "Reset Password | PortAI"
+    : mode === "otp" ? "Verify Code | PortAI"
+    : mode === "login" ? "Log In | PortAI"
+    : "Sign Up | PortAI";
+  const seoDescription = mode === "forgot"
+    ? "Reset your PortAI password securely. Receive a one-time code by email to regain access to your account."
+    : mode === "otp"
+    ? "Enter the verification code sent to your email to confirm your PortAI account."
+    : mode === "login"
+    ? "Log in to PortAI to track stocks, ETFs and crypto with AI-powered news bias detection."
+    : "Create a free PortAI account to track portfolios and detect bias in financial news with AI.";
+  const seoPath = mode === "forgot" ? "/auth/forgot"
+    : mode === "otp" ? "/auth/verify"
+    : mode === "login" ? "/auth/login"
+    : "/auth/signup";
+
   return (
+    <>
+    <SEO title={seoTitle} description={seoDescription} path={seoPath} />
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
+
       <div className="w-full max-w-sm space-y-6 animate-fade-in">
         <div className="flex flex-col items-center gap-3">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
