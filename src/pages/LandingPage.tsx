@@ -800,6 +800,23 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
                 "@context": "https://schema.org",
                 "@graph": [
                   {
+                    "@type": "Organization",
+                    "name": "PortAI",
+                    "url": "https://portai-invest.com",
+                    "logo": "https://portai-invest.com/og-image.jpg",
+                    "sameAs": ["https://portai-invest.lovable.app"]
+                  },
+                  {
+                    "@type": "WebSite",
+                    "name": "PortAI",
+                    "url": "https://portai-invest.com",
+                    "potentialAction": {
+                      "@type": "SearchAction",
+                      "target": "https://portai-invest.com/watchlists?q={search_term_string}",
+                      "query-input": "required name=search_term_string"
+                    }
+                  },
+                  {
                     "@type": "SoftwareApplication",
                     "name": "PortAI",
                     "url": "https://portai-invest.com",
