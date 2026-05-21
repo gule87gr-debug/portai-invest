@@ -345,31 +345,53 @@ const Watchlists = () => {
                 }
 
                 return (
-                  <div key={s.ticker} onClick={() => navigate(`/stock/${s.ticker}`)} className="rounded-xl border border-border bg-card/60 backdrop-blur-md cursor-pointer transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 overflow-hidden">
-                    <div className="flex items-center justify-between px-3 sm:px-4 py-3">
+                  <div key={s.ticker} onClick={() => navigate(`/stock/${s.ticker}`)} className="group rounded-2xl border border-border bg-card/60 cursor-pointer transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 overflow-hidden">
+                    <div className="flex items-center justify-between px-4 sm:px-6 py-4">
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="min-w-0">
-                          <span className="font-semibold text-sm block">{s.ticker}</span>
+                          <span className="font-semibold text-sm block tracking-tight">{s.ticker}</span>
                           <span className="text-xs text-muted-foreground truncate block max-w-[140px] sm:max-w-[200px]">{s.name}</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
                         <div className="flex flex-col items-end gap-0.5">
                           {price !== null ? (
-                            <span className="text-sm font-semibold tabular-nums text-foreground">${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            <span className="text-sm font-semibold tnum text-foreground">${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                           ) : quotesLoading ? (
                             <span className="text-sm text-muted-foreground animate-pulse">···</span>
                           ) : null}
                           {dailyPct !== "—" && (
-                            <span className={cn("text-xs font-semibold tabular-nums", isUp ? "text-gain" : "text-loss")}>
+                            <span className={cn("text-xs font-semibold tnum", isUp ? "text-gain" : "text-loss")}>
                               {isUp ? "+" : ""}{dailyPct}%
                             </span>
                           )}
-                          <span className="text-[10px] text-muted-foreground">{label}</span>
+                          <span className="metric-label text-[9px]">{label}</span>
                         </div>
                         <button onClick={(e) => { e.stopPropagation(); removeStockFromWatchlist(active.id, s.ticker); }} aria-label={`Remove ${s.ticker} from watchlist`} className="text-muted-foreground hover:text-loss transition-colors shrink-0">
                           <Trash2 className="h-4 w-4" />
                         </button>
+                      </div>
+                    </div>
+                    {/* Hover-reveal: sparkline + volume strip */}
+                    <div className="reveal-grid px-4 sm:px-6">
+                      <div>
+                        <div className="flex items-center justify-between gap-4 border-t border-border/60 py-3">
+                          <Sparkline seed={s.ticker} width={160} height={32} />
+                          <div className="flex items-center gap-5 text-right">
+                            <div>
+                              <p className="metric-label">Volume</p>
+                              <p className="text-xs font-mono tnum text-foreground">
+                                {quote?.volume ? quote.volume.toLocaleString() : "—"}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="metric-label">Open</p>
+                              <p className="text-xs font-mono tnum text-foreground">
+                                {quote?.open ? `$${quote.open.toFixed(2)}` : "—"}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
