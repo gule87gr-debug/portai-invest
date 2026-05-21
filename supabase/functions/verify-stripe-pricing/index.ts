@@ -90,6 +90,7 @@ serve(async (req) => {
 
     return json({ ok: issues.length === 0, issues });
   } catch (e) {
-    return json({ ok: false, error: (e as Error).message }, 500);
+    console.error("verify-stripe-pricing error:", e);
+    return json({ ok: false, error: "Internal server error" }, 500);
   }
 });

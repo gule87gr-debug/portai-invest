@@ -193,7 +193,36 @@ type PreCheck =
   | { ok: true; metaTitle?: string; metaType?: string; metaDescription?: string }
   | { ok: false; reason: string };
 
+function isPrivateOrLocalHost(hostname: string): boolean {
+  if (!hostname) return true;
+  const h = hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (h === "localhost" || h.endsWith(".localhost") || h.endsWith(".local") || h.endsWith(".internal")) return true;
+  // IPv4
+  const m = h.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (m) {
+    const [a, b] = [parseInt(m[1]), parseInt(m[2])];
+    if (a === 10) return true;
+    if (a === 127) return true;
+    if (a === 0) return true;
+    if (a === 169 && b === 254) return true; // link-local incl. 169.254.169.254
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    if (a === 192 && b === 168) return true;
+    if (a === 100 && b >= 64 && b <= 127) return true; // CGNAT
+    if (a >= 224) return true; // multicast / reserved
+    return false;
+  }
+  // IPv6: block loopback, link-local, unique-local, unspecified, and IPv4-mapped private
+  if (h === "::" || h === "::1") return true;
+  if (h.startsWith("fe80:") || h.startsWith("fc") || h.startsWith("fd")) return true;
+  if (h.startsWith("::ffff:")) {
+    const v4 = h.slice(7);
+    return isPrivateOrLocalHost(v4);
+  }
+  return false;
+}
+
 async function preCheckArticle(urlStr: string): Promise<PreCheck> {
+
   let parsed: URL;
   try {
     parsed = new URL(urlStr);
@@ -203,6 +232,11 @@ async function preCheckArticle(urlStr: string): Promise<PreCheck> {
 
   if (!/^https?:$/.test(parsed.protocol)) {
     return { ok: false, reason: "Only http(s) links can be analyzed." };
+  }
+
+  // SSRF guard: block private/loopback/link-local hosts (incl. cloud metadata IPs).
+  if (isPrivateOrLocalHost(parsed.hostname)) {
+    return { ok: false, reason: "This URL is not allowed." };
   }
 
   const host = normalizeHost(parsed.hostname);

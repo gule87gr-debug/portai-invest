@@ -43,7 +43,7 @@ serve(async (req) => {
         .from("admin_emails")
         .select("id, email, note, created_at, created_by")
         .order("created_at", { ascending: false });
-      if (error) return json({ error: error.message }, 500);
+      if (error) console.error("admin-manage-bypass db error:", error); return json({ error: "Internal server error" }, 500);
       return json({ admins: data ?? [] });
     }
 
@@ -54,7 +54,7 @@ serve(async (req) => {
       const { error } = await supabaseAdmin
         .from("admin_emails")
         .insert({ email, note, created_by: caller.id });
-      if (error) return json({ error: error.message }, 500);
+      if (error) console.error("admin-manage-bypass db error:", error); return json({ error: "Internal server error" }, 500);
       return json({ ok: true });
     }
 
@@ -71,7 +71,7 @@ serve(async (req) => {
         return json({ error: "You cannot remove your own admin access" }, 400);
       }
       const { error } = await supabaseAdmin.from("admin_emails").delete().eq("id", id);
-      if (error) return json({ error: error.message }, 500);
+      if (error) console.error("admin-manage-bypass db error:", error); return json({ error: "Internal server error" }, 500);
       return json({ ok: true });
     }
 
@@ -81,7 +81,7 @@ serve(async (req) => {
         .select("id, email, function_name, user_id, created_at")
         .order("created_at", { ascending: false })
         .limit(100);
-      if (error) return json({ error: error.message }, 500);
+      if (error) console.error("admin-manage-bypass db error:", error); return json({ error: "Internal server error" }, 500);
       return json({ audit: data ?? [] });
     }
 
