@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
+import { SEO } from "@/components/SEO";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Shield, Trash2, Plus, CheckCircle2, AlertTriangle, RefreshCw } from "lucide-react";
