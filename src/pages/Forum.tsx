@@ -477,7 +477,7 @@ const Forum = () => {
       <article
         key={a.id}
         className={cn(
-          "rounded-2xl border bg-card p-4 sm:p-5 animate-fade-in transition-shadow hover:shadow-lg",
+          "bento-card animate-fade-in transition-shadow hover:shadow-lg p-5 sm:p-6",
           isFeatured ? "border-primary/30" : "border-border",
         )}
         style={{ animationDelay: `${i * 35}ms` }}

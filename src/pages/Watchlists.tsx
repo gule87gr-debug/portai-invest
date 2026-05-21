@@ -300,7 +300,7 @@ const Watchlists = () => {
         </div>
 
         {active && (
-          <div className="flex-1 rounded-xl border border-border bg-card p-4 sm:p-6 animate-fade-in">
+          <div className="flex-1 bento-card spring-in p-5 sm:p-8">
             <div className="mb-4 flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <h2 className="text-lg sm:text-xl font-bold truncate">{active.name}</h2>
@@ -345,7 +345,15 @@ const Watchlists = () => {
                 }
 
                 return (
-                  <div key={s.ticker} onClick={() => navigate(`/stock/${s.ticker}`)} className="group rounded-2xl border border-border bg-card/60 cursor-pointer transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 overflow-hidden">
+                  <div
+                    key={s.ticker}
+                    role="link"
+                    tabIndex={0}
+                    onClick={() => navigate(`/stock/${s.ticker}`)}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate(`/stock/${s.ticker}`); } }}
+                    aria-label={`Open ${s.ticker} ${s.name}`}
+                    className="group rounded-2xl border border-border bg-card/60 cursor-pointer transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 overflow-hidden focus-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  >
                     <div className="flex items-center justify-between px-4 sm:px-6 py-4">
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="min-w-0">
