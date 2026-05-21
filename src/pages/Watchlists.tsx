@@ -390,11 +390,6 @@ const Watchlists = () => {
                                 {quote?.open ? `$${quote.open.toFixed(2)}` : "—"}
                               </p>
                             </div>
-                              <p className="metric-label">Open</p>
-                              <p className="text-xs font-mono tnum text-foreground">
-                                {quote?.open ? `$${quote.open.toFixed(2)}` : "—"}
-                              </p>
-                            </div>
                           </div>
                         </div>
                       </div>
