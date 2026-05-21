@@ -1,4 +1,5 @@
 import { AppLayout } from "@/components/AppLayout";
+import { SEO } from "@/components/SEO";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
