@@ -86,7 +86,9 @@ const ResetPassword = ({ onComplete }: { onComplete: () => void }) => {
         </button>
       </div>
     </div>
+    </>
   );
+
 };
 
 export default ResetPassword;
