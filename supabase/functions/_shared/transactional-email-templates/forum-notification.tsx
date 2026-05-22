@@ -56,6 +56,13 @@ const ForumNotificationEmail = ({ type = 'comment', fromUser = 'Someone', thread
           <Text style={footer}>
             You're receiving this because someone interacted with your {SITE_NAME} forum post.
           </Text>
+          <Text style={disclaimer}>
+            {SITE_NAME} is for educational purposes only. Not financial advice — always consult a qualified financial professional before making investment decisions.
+          </Text>
+          <Text style={address}>
+            PortAI · Spain (European Union) · {SITE_URL}
+          </Text>
+
         </Container>
       </Body>
     </Html>
