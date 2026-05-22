@@ -80,4 +80,5 @@ const buttonContainer = { textAlign: 'center' as const, margin: '28px 0' }
 const button = { backgroundColor: PRIMARY, color: '#ffffff', borderRadius: '10px', fontSize: '14px', fontWeight: '600', padding: '12px 28px', textDecoration: 'none' }
 const hr = { borderColor: '#e5e7eb', margin: '28px 0 16px' }
 const footer = { fontSize: '11px', color: '#9ca3af', lineHeight: '1.5', margin: '0 0 4px' }
-const disclaimer = { fontSize: '11px', color: '#9ca3af', fontStyle: 'italic' as const, margin: '0' }
+const disclaimer = { fontSize: '11px', color: '#9ca3af', fontStyle: 'italic' as const, margin: '0 0 8px' }
+const address = { fontSize: '11px', color: '#9ca3af', margin: '0' }
