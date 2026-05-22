@@ -405,20 +405,21 @@ const AIChat = () => {
               <button
                 onClick={() => setShowModeMenu((v) => !v)}
                 className={cn(
-                  "flex h-12 shrink-1 items-center gap-2 rounded-xl border px-3 text-sm font-semibold text-foreground transition-all",
+                  "flex h-12 shrink-0 items-center gap-1.5 rounded-xl border px-2.5 text-xs font-semibold text-foreground transition-all",
                   showModeMenu
                     ? "border-primary bg-primary/10 ring-2 ring-primary/20"
-                    : "border-border bg-card hover:bg-accent hover:border-primary/30"
+                    : "border-primary/40 bg-primary/5 hover:bg-accent hover:border-primary/60"
                 )}
                 title={`AI Model: ${current.label}`}
+                aria-label={`Select AI model (current: ${current.label})`}
               >
-                <CurIcon className="h-4 w-4 text-primary shrink-1" />
-                <span className="hidden sm:inline whitespace-nowrap">{current.label}</span>
-                <ChevronDown className={cn("h-4 w-4 text-muted-foreground shrink-1 transition-transform", showModeMenu && "rotate-180")} />
+                <CurIcon className="h-4 w-4 text-primary shrink-0" />
+                <span className="whitespace-nowrap max-w-[72px] truncate">{current.label}</span>
+                <ChevronDown className={cn("h-3.5 w-3.5 text-muted-foreground shrink-0 transition-transform", showModeMenu && "rotate-180")} />
               </button>
             );
           })()}
-          <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && !msgLimitReached && send(input)} placeholder={msgLimitReached ? "Message limit reached — upgrade to Pro" : t("askAnything")} disabled={msgLimitReached} className={cn("h-12 flex-1 rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", msgLimitReached && "opacity-50 cursor-not-allowed")} />
+          <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && !msgLimitReached && send(input)} placeholder={msgLimitReached ? "Limit reached" : t("askAnything")} disabled={msgLimitReached} className={cn("h-12 flex-1 min-w-0 rounded-xl border border-border bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", msgLimitReached && "opacity-50 cursor-not-allowed")} />
           <button onClick={() => send(input)} disabled={isTyping || msgLimitReached} className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
             <Send className="h-5 w-5" />
           </button>
