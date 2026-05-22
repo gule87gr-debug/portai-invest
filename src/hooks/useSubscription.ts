@@ -38,23 +38,35 @@ export const useSubscription = (): SubscriptionState => {
   const [scheduledChangesCount, setScheduledChangesCount] = useState(0);
   const [dailyAnalysesUsed, setDailyAnalysesUsed] = useState(0);
 
+  const resetToFree = useCallback(() => {
+    setTier("free");
+    setSubscriptionEnd(null);
+    setCancelAtPeriodEnd(false);
+    setSubscriptionId(null);
+    setSubscriptionStatus(null);
+    setScheduledTier(null);
+    setScheduledStart(null);
+    setScheduledChangesCount(0);
+    setDailyAnalysesUsed(0);
+  }, []);
+
   const checkSubscription = useCallback(async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        setTier("free");
-        setSubscriptionEnd(null);
-        setCancelAtPeriodEnd(false);
-        setSubscriptionId(null);
-        setSubscriptionStatus(null);
-        setScheduledTier(null);
-        setScheduledStart(null);
-        setScheduledChangesCount(0);
+      if (!session?.access_token) {
+        resetToFree();
         setLoading(false);
         return;
       }
-      const { data, error } = await supabase.functions.invoke("check-subscription");
-      if (error) throw error;
+      const { data, error } = await supabase.functions.invoke("check-subscription", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (error) {
+        // 401 after sign-out / expired token — treat as free, don't throw
+        resetToFree();
+        setLoading(false);
+        return;
+      }
       const nextTier: SubscriptionTier = data?.tier ?? (data?.subscribed ? "pro" : "free");
       setTier(nextTier);
       setSubscriptionEnd(data?.subscription_end ?? null);
@@ -65,10 +77,10 @@ export const useSubscription = (): SubscriptionState => {
       setScheduledStart(data?.scheduled_start ?? null);
       setScheduledChangesCount(data?.scheduled_changes_count ?? 0);
     } catch {
-      setTier("free");
+      resetToFree();
     }
     setLoading(false);
-  }, []);
+  }, [resetToFree]);
 
   const loadDailyUsage = useCallback(async () => {
     const today = new Date().toISOString().split("T")[0];
@@ -90,8 +102,19 @@ export const useSubscription = (): SubscriptionState => {
   useEffect(() => {
     refresh();
     const interval = setInterval(checkSubscription, 60000);
-    return () => clearInterval(interval);
-  }, [refresh, checkSubscription]);
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        resetToFree();
+        setLoading(false);
+      } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        refresh();
+      }
+    });
+    return () => {
+      clearInterval(interval);
+      sub.subscription.unsubscribe();
+    };
+  }, [refresh, checkSubscription, resetToFree]);
 
   const isPro = tier === "pro";
   const isPlus = tier === "plus";
