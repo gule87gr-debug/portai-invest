@@ -390,7 +390,31 @@ const AIChat = () => {
         )}
 
 
-        <div className="relative mt-4 flex items-center gap-2">
+        <div className="relative mt-4">
+          {(() => {
+            const current = MODES.find((m) => m.id === mode)!;
+            const CurIcon = current.icon;
+            return (
+              <button
+                onClick={() => setShowModeMenu((v) => !v)}
+                className={cn(
+                  "mb-2 flex h-10 w-full items-center justify-between gap-2 rounded-xl border px-3 text-xs font-semibold text-foreground transition-all sm:hidden",
+                  showModeMenu
+                    ? "border-primary bg-primary/10 ring-2 ring-primary/20"
+                    : "border-primary/40 bg-primary/5 hover:bg-accent hover:border-primary/60"
+                )}
+                aria-label={`Select AI model (current: ${current.label})`}
+              >
+                <span className="flex items-center gap-2 min-w-0">
+                  <CurIcon className="h-4 w-4 text-primary shrink-0" />
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground shrink-0">AI Model</span>
+                  <span className="truncate text-primary">{current.label}</span>
+                </span>
+                <ChevronDown className={cn("h-4 w-4 text-muted-foreground shrink-0 transition-transform", showModeMenu && "rotate-180")} />
+              </button>
+            );
+          })()}
+          <div className="flex items-center gap-2">
           <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleImageSelect} />
           <button onClick={() => {
             if (imgLimitReached) { setUpgradeReason(`You've used all ${FREE_IMG_LIMIT} free image analyses (resets every ${FREE_IMG_WINDOW_HOURS}h). Upgrade to Pro for unlimited image analyses.`); setShowUpgrade(true); return; }
@@ -405,7 +429,7 @@ const AIChat = () => {
               <button
                 onClick={() => setShowModeMenu((v) => !v)}
                 className={cn(
-                  "flex h-12 shrink-0 items-center gap-1.5 rounded-xl border px-2.5 text-xs font-semibold text-foreground transition-all",
+                  "hidden sm:flex h-12 shrink-0 items-center gap-1.5 rounded-xl border px-2.5 text-xs font-semibold text-foreground transition-all",
                   showModeMenu
                     ? "border-primary bg-primary/10 ring-2 ring-primary/20"
                     : "border-primary/40 bg-primary/5 hover:bg-accent hover:border-primary/60"
@@ -423,6 +447,7 @@ const AIChat = () => {
           <button onClick={() => send(input)} disabled={isTyping || msgLimitReached} className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
             <Send className="h-5 w-5" />
           </button>
+          </div>
 
           {showModeMenu && (
             <>
