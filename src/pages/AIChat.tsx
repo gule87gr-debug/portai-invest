@@ -441,9 +441,15 @@ const AIChat = () => {
                         key={m.id}
                         onClick={() => {
                           if (locked) {
+                            toast.error(`${m.label} is a Pro feature`, {
+                              description: "Upgrade to unlock advanced AI models.",
+                              action: {
+                                label: "Upgrade",
+                                onClick: () => setShowUpgrade(true),
+                              },
+                            });
                             setUpgradeReason(`${m.label} mode is a Pro feature. Upgrade to unlock advanced AI models.`);
                             setShowUpgrade(true);
-                            setShowModeMenu(false);
                             return;
                           }
                           setMode(m.id);
