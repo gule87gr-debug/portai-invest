@@ -116,6 +116,7 @@ const AIChat = () => {
   const [msgUsage, setMsgUsage] = useState(0);
   const [imgUsage, setImgUsage] = useState(0);
   const [mode, setMode] = useState<ChatMode>("fast");
+  const [showModeMenu, setShowModeMenu] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
