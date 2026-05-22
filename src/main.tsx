@@ -7,33 +7,31 @@ import { bootReducedMotion } from "./hooks/use-reduced-motion";
 // Apply persisted reduced-motion preference before first paint.
 bootReducedMotion();
 
-// Service worker registration — strictly guarded so it never runs inside
-// the Lovable editor preview (iframe) or on preview hosts where it would
-// cause stale-content issues.
-function shouldRegisterSW(): boolean {
-  if (typeof window === "undefined") return false;
-  if (!("serviceWorker" in navigator)) return false;
-  if (!import.meta.env.PROD) return false;
-  let inIframe = true;
-  try { inIframe = window.self !== window.top; } catch { inIframe = true; }
-  if (inIframe) return false;
-  const host = window.location.hostname;
-  const isPreviewHost =
-    host.includes("id-preview--") ||
-    host.includes("preview--") ||
-    host.endsWith("lovableproject.com") ||
-    host.endsWith("lovableproject-dev.com");
-  return !isPreviewHost;
+// Retire the previous PWA/service-worker setup so published clients stop
+// serving stale bundles after updates.
+async function cleanupClientCaches() {
+  if (typeof window === "undefined") return;
+
+  if ("serviceWorker" in navigator) {
+    try {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map((registration) => registration.unregister()));
+    } catch {
+      // Ignore cleanup failures.
+    }
+  }
+
+  if ("caches" in window) {
+    try {
+      const cacheKeys = await caches.keys();
+      await Promise.all(cacheKeys.map((key) => caches.delete(key)));
+    } catch {
+      // Ignore cleanup failures.
+    }
+  }
 }
 
-if (shouldRegisterSW()) {
-  import("virtual:pwa-register")
-    .then(({ registerSW }) => registerSW({ immediate: true }))
-    .catch(() => { /* PWA disabled in this build */ });
-} else if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
-  // Defensive cleanup: unregister any previously-installed worker when running in preview/iframe.
-  navigator.serviceWorker.getRegistrations().then((rs) => rs.forEach((r) => r.unregister())).catch(() => {});
-}
+void cleanupClientCaches();
 
 createRoot(document.getElementById("root")!).render(
   <HelmetProvider>
