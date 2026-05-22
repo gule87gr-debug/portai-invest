@@ -56,6 +56,13 @@ const ForumNotificationEmail = ({ type = 'comment', fromUser = 'Someone', thread
           <Text style={footer}>
             You're receiving this because someone interacted with your {SITE_NAME} forum post.
           </Text>
+          <Text style={disclaimer}>
+            {SITE_NAME} is for educational purposes only. Not financial advice — always consult a qualified financial professional before making investment decisions.
+          </Text>
+          <Text style={address}>
+            PortAI · Spain (European Union) · {SITE_URL}
+          </Text>
+
         </Container>
       </Body>
     </Html>
@@ -85,4 +92,6 @@ const threadTitle_style = { fontSize: '14px', color: '#111827', fontWeight: '500
 const buttonContainer = { textAlign: 'center' as const, margin: '24px 0' }
 const button = { backgroundColor: PRIMARY, color: '#ffffff', borderRadius: '10px', fontSize: '14px', fontWeight: '600', padding: '12px 28px', textDecoration: 'none' }
 const hr = { borderColor: '#e5e7eb', margin: '24px 0 16px' }
-const footer = { fontSize: '11px', color: '#9ca3af', lineHeight: '1.5', margin: '0' }
+const footer = { fontSize: '11px', color: '#9ca3af', lineHeight: '1.5', margin: '0 0 8px' }
+const disclaimer = { fontSize: '11px', color: '#9ca3af', fontStyle: 'italic' as const, margin: '0 0 8px' }
+const address = { fontSize: '11px', color: '#9ca3af', margin: '0' }

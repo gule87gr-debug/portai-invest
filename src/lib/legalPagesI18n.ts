@@ -153,16 +153,30 @@ const en: LegalPagesCopy = {
       ]},
       { type: "p", text: "To exercise these rights, contact us at privacy@portai-invest.com. We will respond within 30 days as required by GDPR." },
 
-      { type: "h2", text: "11. International Data Transfers" },
+      { type: "h2", text: "11. California Residents (CCPA / CPRA)" },
+      { type: "p", text: "If you are a California resident, the California Consumer Privacy Act of 2018 (\"CCPA\"), as amended by the California Privacy Rights Act (\"CPRA\"), gives you the following rights regarding your personal information:" },
+      { type: "ul", items: [
+        "**Right to Know** — Request disclosure of the categories and specific pieces of personal information we have collected about you in the preceding 12 months, the categories of sources, the business purpose for collecting it, and the categories of third parties with whom we share it.",
+        "**Right to Delete** — Request that we delete personal information we collected from you, subject to legal exceptions.",
+        "**Right to Correct** — Request correction of inaccurate personal information we maintain about you.",
+        "**Right to Opt-Out of Sale or Sharing** — As stated below, **PortAI does not sell or \"share\" (as defined under the CPRA, for cross-context behavioral advertising) your personal information**, and has not done so in the preceding 12 months. There is therefore no opt-out required, but you may submit a request at any time to confirm this.",
+        "**Right to Limit Use of Sensitive Personal Information** — We do not use sensitive personal information for any purpose other than what is reasonably necessary to provide the service you requested.",
+        "**Right to Non-Discrimination** — We will not discriminate against you for exercising any of these rights.",
+      ]},
+      { type: "p", text: "**Categories of personal information collected in the past 12 months:** identifiers (name, email, IP address), commercial information (subscription/transaction history), internet/network activity (pages visited, features used, search queries), geolocation data (approximate, from IP), and user-generated content (forum posts, watchlists, AI chat history). Sources and purposes are described in Sections 2 and 3 above." },
+      { type: "p", text: "**Do Not Sell or Share My Personal Information:** PortAI does not sell or share your personal information for monetary or other valuable consideration, and does not engage in cross-context behavioral advertising. To submit any CCPA/CPRA request, email **privacy@portai-invest.com** with the subject line \"California Privacy Request\". We will verify your identity and respond within 45 days as required by law. You may also designate an authorized agent to make a request on your behalf." },
+
+      { type: "h2", text: "12. International Data Transfers" },
       { type: "p", text: "Your data may be transferred to and processed in countries other than your country of residence. We ensure appropriate safeguards are in place, including Standard Contractual Clauses (SCCs) approved by the European Commission, to protect your data in accordance with GDPR." },
 
-      { type: "h2", text: "12. Children's Privacy" },
+
+      { type: "h2", text: "13. Children's Privacy" },
       { type: "p", text: "PortAI is not intended for individuals under the age of 18. We do not knowingly collect personal information from minors. If we become aware that we have collected data from a minor, we will take steps to delete it promptly." },
 
-      { type: "h2", text: "13. Changes to This Policy" },
+      { type: "h2", text: "14. Changes to This Policy" },
       { type: "p", text: "We may update this Privacy Policy from time to time. We will notify you of material changes by posting the updated policy on this page and updating the \"Last updated\" date. Your continued use of the platform after changes constitutes acceptance of the updated policy." },
 
-      { type: "h2", text: "14. Contact Us" },
+      { type: "h2", text: "15. Contact Us" },
       { type: "p", text: "If you have questions about this Privacy Policy, please contact us at:" },
       { type: "ul", items: [
         "Email: privacy@portai-invest.com",
@@ -310,6 +324,16 @@ const en: LegalPagesCopy = {
         "**Resolution:** If no counter-notice is received within 10 business days, the removal is permanent",
       ]},
       { type: "p", text: "Repeat infringers may have their accounts terminated." },
+
+      { type: "h3", text: "4.1 Designated Copyright Agent (DMCA §512(c))" },
+      { type: "p", text: "In accordance with 17 U.S.C. §512(c)(2), PortAI has designated the following agent to receive notifications of claimed copyright infringement. Notices that do not substantially comply with the statutory requirements may not be effective." },
+      { type: "ul", items: [
+        "**Designated Agent:** PortAI Copyright Agent",
+        "**Email (preferred):** dmca@portai-invest.com",
+        "**Postal address:** PortAI Legal — DMCA Agent, c/o PortAI, Spain (EU). A full street address is available upon written request to legal@portai-invest.com.",
+        "**Operating entity:** PortAI (operated from Spain, European Union)",
+      ]},
+      { type: "p", text: "Counter-notifications under 17 U.S.C. §512(g) must be sent to the same agent and must include all information required by the statute." },
 
       { type: "h2", text: "5. Prohibited Use of PortAI Branding" },
       { type: "p", text: "Without prior written permission from PortAI, you may not:" },
