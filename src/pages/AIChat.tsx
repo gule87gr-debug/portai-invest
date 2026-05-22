@@ -4,7 +4,7 @@ import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SEO } from "@/components/SEO";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { Send, Sparkles, Plus, Trash2, MessageCircle, Image, X, Crown, Zap, Brain, Lightbulb, Gauge } from "lucide-react";
+import { Send, Sparkles, Plus, Trash2, MessageCircle, Image, X, Crown, Zap, Brain, Lightbulb, Gauge, ChevronDown, Bot } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { cn } from "@/lib/utils";
