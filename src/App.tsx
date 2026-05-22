@@ -58,7 +58,7 @@ const AppWithLanguage = () => {
       )}
       <Suspense fallback={<RouteSkeleton />}>
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<Navigate to="/chat" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/chat" element={<AIChat />} />
           <Route path="/quiz" element={<Quiz />} />
