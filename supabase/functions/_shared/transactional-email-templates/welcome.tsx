@@ -50,8 +50,12 @@ const WelcomeEmail = ({ displayName }: WelcomeProps) => (
           This is a one-time welcome email. You're receiving this because you created a {SITE_NAME} account.
         </Text>
         <Text style={disclaimer}>
-          {SITE_NAME} is for educational purposes only. Not financial advice.
+          {SITE_NAME} is for educational purposes only. Not financial advice — always consult a qualified financial professional before making investment decisions.
         </Text>
+        <Text style={address}>
+          PortAI · Spain (European Union) · {SITE_URL}
+        </Text>
+
       </Container>
     </Body>
   </Html>
