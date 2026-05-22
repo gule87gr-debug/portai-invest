@@ -170,13 +170,13 @@ const en: LegalPagesCopy = {
       { type: "p", text: "Your data may be transferred to and processed in countries other than your country of residence. We ensure appropriate safeguards are in place, including Standard Contractual Clauses (SCCs) approved by the European Commission, to protect your data in accordance with GDPR." },
 
 
-      { type: "h2", text: "12. Children's Privacy" },
+      { type: "h2", text: "13. Children's Privacy" },
       { type: "p", text: "PortAI is not intended for individuals under the age of 18. We do not knowingly collect personal information from minors. If we become aware that we have collected data from a minor, we will take steps to delete it promptly." },
 
-      { type: "h2", text: "13. Changes to This Policy" },
+      { type: "h2", text: "14. Changes to This Policy" },
       { type: "p", text: "We may update this Privacy Policy from time to time. We will notify you of material changes by posting the updated policy on this page and updating the \"Last updated\" date. Your continued use of the platform after changes constitutes acceptance of the updated policy." },
 
-      { type: "h2", text: "14. Contact Us" },
+      { type: "h2", text: "15. Contact Us" },
       { type: "p", text: "If you have questions about this Privacy Policy, please contact us at:" },
       { type: "ul", items: [
         "Email: privacy@portai-invest.com",
