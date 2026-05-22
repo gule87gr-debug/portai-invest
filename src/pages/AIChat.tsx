@@ -9,6 +9,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 
 type MessageContent = string | Array<{ type: "text"; text: string } | { type: "image_url"; image_url: { url: string } }>;
@@ -440,9 +441,15 @@ const AIChat = () => {
                         key={m.id}
                         onClick={() => {
                           if (locked) {
+                            toast.error(`${m.label} is a Pro feature`, {
+                              description: "Upgrade to unlock advanced AI models.",
+                              action: {
+                                label: "Upgrade",
+                                onClick: () => setShowUpgrade(true),
+                              },
+                            });
                             setUpgradeReason(`${m.label} mode is a Pro feature. Upgrade to unlock advanced AI models.`);
                             setShowUpgrade(true);
-                            setShowModeMenu(false);
                             return;
                           }
                           setMode(m.id);
