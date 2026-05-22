@@ -13,6 +13,7 @@ import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { BillingStatusWidget } from "@/components/BillingStatusWidget";
+import { TrialActivation } from "@/components/TrialActivation";
 
 const SettingsPage = () => {
   const { profile, setProfile, setShowTutorial } = useApp();
@@ -206,6 +207,7 @@ const SettingsPage = () => {
 
       <div className="mx-auto max-w-2xl space-y-6">
         <BillingStatusWidget />
+        <TrialActivation />
         <div className="rounded-xl border border-border bg-card p-6">
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-lg font-semibold">{t("profile")}</h2>

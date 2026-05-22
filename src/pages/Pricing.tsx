@@ -9,6 +9,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { TrialActivation } from "@/components/TrialActivation";
 
 const TIER_PRICE: Record<"plus" | "pro", string> = {
   plus: "€8.99",
@@ -155,6 +156,10 @@ const Pricing = () => {
         <div className="text-center mb-10">
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">{t("choosePlan")}</h1>
           <p className="text-muted-foreground max-w-lg mx-auto">{t("pricingSubtitle")}</p>
+        </div>
+
+        <div className="mb-8">
+          <TrialActivation />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

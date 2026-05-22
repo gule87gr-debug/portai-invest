@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ScannerSkeleton } from "@/components/ScannerSkeleton";
+import { TrialActivation } from "@/components/TrialActivation";
 
 type AnalysisResult = {
   title: string;
@@ -135,6 +136,9 @@ const Dashboard = () => {
       <div className="mb-8">
         <h1 className="editorial-h1 text-4xl sm:text-5xl font-bold">{t("marketIntelligence")}</h1>
         <p className="mt-2 text-muted-foreground">{t("aiCuratedAnalysis")}</p>
+        <div className="mt-5">
+          <TrialActivation />
+        </div>
       </div>
 
       <div className="mb-8" data-tour="news-feed">
