@@ -325,6 +325,16 @@ const en: LegalPagesCopy = {
       ]},
       { type: "p", text: "Repeat infringers may have their accounts terminated." },
 
+      { type: "h3", text: "4.1 Designated Copyright Agent (DMCA §512(c))" },
+      { type: "p", text: "In accordance with 17 U.S.C. §512(c)(2), PortAI has designated the following agent to receive notifications of claimed copyright infringement. Notices that do not substantially comply with the statutory requirements may not be effective." },
+      { type: "ul", items: [
+        "**Designated Agent:** PortAI Copyright Agent",
+        "**Email (preferred):** dmca@portai-invest.com",
+        "**Postal address:** PortAI Legal — DMCA Agent, c/o PortAI, Spain (EU). A full street address is available upon written request to legal@portai-invest.com.",
+        "**Operating entity:** PortAI (operated from Spain, European Union)",
+      ]},
+      { type: "p", text: "Counter-notifications under 17 U.S.C. §512(g) must be sent to the same agent and must include all information required by the statute." },
+
       { type: "h2", text: "5. Prohibited Use of PortAI Branding" },
       { type: "p", text: "Without prior written permission from PortAI, you may not:" },
       { type: "ul", items: [
