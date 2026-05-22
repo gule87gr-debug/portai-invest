@@ -425,8 +425,11 @@ const AIChat = () => {
           {showModeMenu && (
             <>
               <div className="fixed inset-0 z-30" onClick={() => setShowModeMenu(false)} />
-              <div className="absolute bottom-full left-0 right-0 z-40 mb-2 rounded-xl border border-border bg-card p-2 shadow-xl animate-fade-in">
-                <p className="px-2 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">AI Response Mode</p>
+              <div className="absolute bottom-full left-0 right-1 z-40 mb-2 rounded-xl border border-border bg-card p-2 shadow-xl animate-fade-in">
+                <div className="flex items-center gap-2 px-2 pb-2 pt-1">
+                  <Bot className="h-3.5 w-3.5 text-primary" />
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">AI Model</p>
+                </div>
                 <div className="space-y-1">
                   {MODES.map((m) => {
                     const Icon = m.icon;
