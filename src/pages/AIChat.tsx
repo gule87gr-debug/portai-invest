@@ -116,6 +116,7 @@ const AIChat = () => {
   const [msgUsage, setMsgUsage] = useState(0);
   const [imgUsage, setImgUsage] = useState(0);
   const [mode, setMode] = useState<ChatMode>("fast");
+  const [showModeMenu, setShowModeMenu] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -305,37 +306,6 @@ const AIChat = () => {
 
       <DisclaimerBanner />
 
-      <div className="mt-3 flex items-center gap-1.5 overflow-x-auto scrollbar-thin pb-1">
-        <span className="text-xs text-muted-foreground shrink-0 mr-1">Mode:</span>
-        {MODES.map((m) => {
-          const Icon = m.icon;
-          const locked = m.pro && !hasUnlimitedChat;
-          const active = mode === m.id;
-          return (
-            <button
-              key={m.id}
-              onClick={() => {
-                if (locked) {
-                  setUpgradeReason(`${m.label} mode is a Pro feature. Upgrade to unlock advanced AI models.`);
-                  setShowUpgrade(true);
-                  return;
-                }
-                setMode(m.id);
-              }}
-              title={m.desc}
-              className={cn(
-                "flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium shrink-0 transition-colors",
-                active ? "border-primary bg-primary/15 text-primary" : "border-border bg-card text-muted-foreground hover:text-foreground",
-                locked && "opacity-60"
-              )}
-            >
-              <Icon className="h-3 w-3" />
-              {m.label}
-              {locked && <Crown className="h-3 w-3" />}
-            </button>
-          );
-        })}
-      </div>
 
 
 
@@ -419,7 +389,7 @@ const AIChat = () => {
         )}
 
 
-        <div className="mt-4 flex items-center gap-2">
+        <div className="relative mt-4 flex items-center gap-2">
           <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleImageSelect} />
           <button onClick={() => {
             if (imgLimitReached) { setUpgradeReason(`You've used all ${FREE_IMG_LIMIT} free image analyses (resets every ${FREE_IMG_WINDOW_HOURS}h). Upgrade to Pro for unlimited image analyses.`); setShowUpgrade(true); return; }
@@ -427,10 +397,69 @@ const AIChat = () => {
           }} className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-foreground hover:bg-accent", imgLimitReached && "opacity-50")} title={imgLimitReached ? "Image analysis limit reached" : t("uploadImage")}>
             <Image className="h-5 w-5" />
           </button>
+          {(() => {
+            const current = MODES.find((m) => m.id === mode)!;
+            const CurIcon = current.icon;
+            return (
+              <button
+                onClick={() => setShowModeMenu((v) => !v)}
+                className="flex h-12 shrink-0 items-center gap-1.5 rounded-xl border border-border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+                title={`Mode: ${current.label}`}
+              >
+                <CurIcon className="h-4 w-4 text-primary" />
+                <span className="hidden sm:inline">{current.label}</span>
+              </button>
+            );
+          })()}
           <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && !msgLimitReached && send(input)} placeholder={msgLimitReached ? "Message limit reached — upgrade to Pro" : t("askAnything")} disabled={msgLimitReached} className={cn("h-12 flex-1 rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", msgLimitReached && "opacity-50 cursor-not-allowed")} />
           <button onClick={() => send(input)} disabled={isTyping || msgLimitReached} className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
             <Send className="h-5 w-5" />
           </button>
+
+          {showModeMenu && (
+            <>
+              <div className="fixed inset-0 z-30" onClick={() => setShowModeMenu(false)} />
+              <div className="absolute bottom-full left-0 right-0 z-40 mb-2 rounded-xl border border-border bg-card p-2 shadow-xl animate-fade-in">
+                <p className="px-2 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">AI Response Mode</p>
+                <div className="space-y-1">
+                  {MODES.map((m) => {
+                    const Icon = m.icon;
+                    const locked = m.pro && !hasUnlimitedChat;
+                    const active = mode === m.id;
+                    return (
+                      <button
+                        key={m.id}
+                        onClick={() => {
+                          if (locked) {
+                            setUpgradeReason(`${m.label} mode is a Pro feature. Upgrade to unlock advanced AI models.`);
+                            setShowUpgrade(true);
+                            setShowModeMenu(false);
+                            return;
+                          }
+                          setMode(m.id);
+                          setShowModeMenu(false);
+                        }}
+                        className={cn(
+                          "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors",
+                          active ? "bg-primary/15" : "hover:bg-accent",
+                          locked && "opacity-70"
+                        )}
+                      >
+                        <Icon className={cn("h-4 w-4 shrink-0", active ? "text-primary" : "text-muted-foreground")} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className={cn("text-sm font-semibold", active ? "text-primary" : "text-foreground")}>{m.label}</span>
+                            {locked && <Crown className="h-3 w-3 text-primary" />}
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate">{m.desc}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </AppLayout>
