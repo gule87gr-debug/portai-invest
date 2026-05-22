@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export type SubscriptionTier = "free" | "plus" | "pro";
@@ -21,6 +21,15 @@ type SubscriptionState = {
   scheduledChangesCount: number;
   dailyAnalysesUsed: number;
   canAnalyze: boolean;
+  // Trial fields
+  trialActive: boolean;
+  trialUsed: boolean;
+  trialEndsAt: string | null;
+  trialDaysLeft: number | null;
+  trialEndingToday: boolean;
+  proTourCompleted: boolean;
+  activateTrial: () => Promise<{ ok: boolean; error?: string }>;
+  markProTourCompleted: () => Promise<void>;
   refresh: () => Promise<void>;
 };
 
@@ -28,6 +37,7 @@ const FREE_DAILY_ANALYSES = 1;
 
 export const useSubscription = (): SubscriptionState => {
   const [tier, setTier] = useState<SubscriptionTier>("free");
+  const [paidTier, setPaidTier] = useState<SubscriptionTier>("free");
   const [loading, setLoading] = useState(true);
   const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null);
   const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(false);
@@ -38,8 +48,15 @@ export const useSubscription = (): SubscriptionState => {
   const [scheduledChangesCount, setScheduledChangesCount] = useState(0);
   const [dailyAnalysesUsed, setDailyAnalysesUsed] = useState(0);
 
+  const [trialActive, setTrialActive] = useState(false);
+  const [trialUsed, setTrialUsed] = useState(false);
+  const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null);
+  const [proTourCompleted, setProTourCompleted] = useState(false);
+  const expireInFlight = useRef(false);
+
   const resetToFree = useCallback(() => {
     setTier("free");
+    setPaidTier("free");
     setSubscriptionEnd(null);
     setCancelAtPeriodEnd(false);
     setSubscriptionId(null);
@@ -48,6 +65,10 @@ export const useSubscription = (): SubscriptionState => {
     setScheduledStart(null);
     setScheduledChangesCount(0);
     setDailyAnalysesUsed(0);
+    setTrialActive(false);
+    setTrialUsed(false);
+    setTrialEndsAt(null);
+    setProTourCompleted(false);
   }, []);
 
   const checkSubscription = useCallback(async () => {
@@ -62,13 +83,12 @@ export const useSubscription = (): SubscriptionState => {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (error) {
-        // 401 after sign-out / expired token — treat as free, don't throw
         resetToFree();
         setLoading(false);
         return;
       }
       const nextTier: SubscriptionTier = data?.tier ?? (data?.subscribed ? "pro" : "free");
-      setTier(nextTier);
+      setPaidTier(nextTier);
       setSubscriptionEnd(data?.subscription_end ?? null);
       setCancelAtPeriodEnd(data?.cancel_at_period_end ?? false);
       setSubscriptionId(data?.subscription_id ?? null);
@@ -81,6 +101,48 @@ export const useSubscription = (): SubscriptionState => {
     }
     setLoading(false);
   }, [resetToFree]);
+
+  const loadTrial = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data } = await supabase
+      .from("user_settings")
+      .select("pro_trial_active, trial_used, trial_end_date, pro_tour_completed")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (!data) {
+      setTrialActive(false);
+      setTrialUsed(false);
+      setTrialEndsAt(null);
+      setProTourCompleted(false);
+      return;
+    }
+    setTrialUsed(!!data.trial_used);
+    setTrialEndsAt(data.trial_end_date ?? null);
+    setProTourCompleted(!!data.pro_tour_completed);
+
+    const stillActive =
+      !!data.pro_trial_active &&
+      !!data.trial_end_date &&
+      new Date(data.trial_end_date).getTime() > Date.now();
+    setTrialActive(stillActive);
+
+    // Auto-expire on the client (idempotent on the server)
+    if (data.pro_trial_active && data.trial_end_date && !stillActive && !expireInFlight.current) {
+      expireInFlight.current = true;
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          await supabase.functions.invoke("manage-trial", {
+            body: { action: "expire" },
+            headers: { Authorization: `Bearer ${session.access_token}` },
+          });
+        }
+      } finally {
+        expireInFlight.current = false;
+      }
+    }
+  }, []);
 
   const loadDailyUsage = useCallback(async () => {
     const today = new Date().toISOString().split("T")[0];
@@ -96,12 +158,15 @@ export const useSubscription = (): SubscriptionState => {
 
   const refresh = useCallback(async () => {
     setLoading(true);
-    await Promise.all([checkSubscription(), loadDailyUsage()]);
-  }, [checkSubscription, loadDailyUsage]);
+    await Promise.all([checkSubscription(), loadDailyUsage(), loadTrial()]);
+  }, [checkSubscription, loadDailyUsage, loadTrial]);
 
   useEffect(() => {
     refresh();
-    const interval = setInterval(checkSubscription, 60000);
+    const interval = setInterval(() => {
+      checkSubscription();
+      loadTrial();
+    }, 60000);
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") {
         resetToFree();
@@ -114,14 +179,51 @@ export const useSubscription = (): SubscriptionState => {
       clearInterval(interval);
       sub.subscription.unsubscribe();
     };
-  }, [refresh, checkSubscription, resetToFree]);
+  }, [refresh, checkSubscription, loadTrial, resetToFree]);
 
-  const isPro = tier === "pro";
-  const isPlus = tier === "plus";
+  // Effective tier: paid wins; otherwise trial promotes free→pro
+  const effectiveTier: SubscriptionTier =
+    paidTier !== "free" ? paidTier : trialActive ? "pro" : "free";
+
+  // Keep `tier` in sync without an effect dependency loop
+  useEffect(() => {
+    setTier(effectiveTier);
+  }, [effectiveTier]);
+
+  const trialDaysLeft = trialEndsAt
+    ? Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : null;
+  const trialEndingToday = trialActive && trialDaysLeft !== null && trialDaysLeft <= 1;
+
+  const activateTrial = useCallback(async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) return { ok: false, error: "Sign in to start your trial." };
+    const { data, error } = await supabase.functions.invoke("manage-trial", {
+      body: { action: "activate" },
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    });
+    if (error) return { ok: false, error: error.message };
+    if ((data as any)?.error) return { ok: false, error: (data as any).error };
+    await loadTrial();
+    return { ok: true };
+  }, [loadTrial]);
+
+  const markProTourCompleted = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    setProTourCompleted(true);
+    await supabase
+      .from("user_settings")
+      .update({ pro_tour_completed: true })
+      .eq("user_id", user.id);
+  }, []);
+
+  const isPro = effectiveTier === "pro";
+  const isPlus = effectiveTier === "plus";
   const isPaid = isPro || isPlus;
 
   return {
-    tier,
+    tier: effectiveTier,
     isPro,
     isPlus,
     isPaid,
@@ -140,11 +242,18 @@ export const useSubscription = (): SubscriptionState => {
     dailyAnalysesUsed,
     // Only Pro gets unlimited article analyses; Plus uses free limit
     canAnalyze: isPro || dailyAnalysesUsed < FREE_DAILY_ANALYSES,
+    trialActive,
+    trialUsed,
+    trialEndsAt,
+    trialDaysLeft,
+    trialEndingToday,
+    proTourCompleted,
+    activateTrial,
+    markProTourCompleted,
     refresh,
   };
 };
 
-// Usage tracking is now handled server-side in the analyze-link edge function
 export const trackAnalysis = async () => {
   // No-op: usage is recorded server-side
 };
