@@ -4,7 +4,7 @@ import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SEO } from "@/components/SEO";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { Send, Sparkles, Plus, Trash2, MessageCircle, Image, X, Crown, Zap, Brain, Lightbulb, Gauge } from "lucide-react";
+import { Send, Sparkles, Plus, Trash2, MessageCircle, Image, X, Crown, Zap, Brain, Lightbulb, Gauge, ChevronDown, Bot } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { cn } from "@/lib/utils";
@@ -403,11 +403,17 @@ const AIChat = () => {
             return (
               <button
                 onClick={() => setShowModeMenu((v) => !v)}
-                className="flex h-12 shrink-0 items-center gap-1.5 rounded-xl border border-border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:bg-accent"
-                title={`Mode: ${current.label}`}
+                className={cn(
+                  "flex h-12 shrink-1 items-center gap-2 rounded-xl border px-3 text-sm font-semibold text-foreground transition-all",
+                  showModeMenu
+                    ? "border-primary bg-primary/10 ring-2 ring-primary/20"
+                    : "border-border bg-card hover:bg-accent hover:border-primary/30"
+                )}
+                title={`AI Model: ${current.label}`}
               >
-                <CurIcon className="h-4 w-4 text-primary" />
-                <span className="hidden sm:inline">{current.label}</span>
+                <CurIcon className="h-4 w-4 text-primary shrink-1" />
+                <span className="hidden sm:inline whitespace-nowrap">{current.label}</span>
+                <ChevronDown className={cn("h-4 w-4 text-muted-foreground shrink-1 transition-transform", showModeMenu && "rotate-180")} />
               </button>
             );
           })()}
@@ -419,8 +425,11 @@ const AIChat = () => {
           {showModeMenu && (
             <>
               <div className="fixed inset-0 z-30" onClick={() => setShowModeMenu(false)} />
-              <div className="absolute bottom-full left-0 right-0 z-40 mb-2 rounded-xl border border-border bg-card p-2 shadow-xl animate-fade-in">
-                <p className="px-2 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">AI Response Mode</p>
+              <div className="absolute bottom-full left-0 right-1 z-40 mb-2 rounded-xl border border-border bg-card p-2 shadow-xl animate-fade-in">
+                <div className="flex items-center gap-2 px-2 pb-2 pt-1">
+                  <Bot className="h-3.5 w-3.5 text-primary" />
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">AI Model</p>
+                </div>
                 <div className="space-y-1">
                   {MODES.map((m) => {
                     const Icon = m.icon;
