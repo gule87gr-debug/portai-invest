@@ -33,3 +33,5 @@ project_id = "vejlgkyydezrnqrzwodp"
     verify_jwt = false
   [functions.check-price-alerts]
     verify_jwt = false
+  [functions.manage-trial]
+    verify_jwt = false
