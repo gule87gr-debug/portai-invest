@@ -504,6 +504,45 @@ export type Database = {
         }
         Relationships: []
       }
+      trial_audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          trial_end_date: string | null
+          trial_start_date: string | null
+          user_agent: string | null
+          user_email: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          user_agent?: string | null
+          user_email: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          user_agent?: string | null
+          user_email?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_settings: {
         Row: {
           anonymous_mode: boolean
@@ -512,6 +551,11 @@ export type Database = {
           display_name: string
           id: string
           language: string
+          pro_tour_completed: boolean
+          pro_trial_active: boolean
+          trial_end_date: string | null
+          trial_start_date: string | null
+          trial_used: boolean
           tutorial_completed: boolean
           updated_at: string
           user_id: string
@@ -524,6 +568,11 @@ export type Database = {
           display_name?: string
           id?: string
           language?: string
+          pro_tour_completed?: boolean
+          pro_trial_active?: boolean
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          trial_used?: boolean
           tutorial_completed?: boolean
           updated_at?: string
           user_id: string
@@ -536,6 +585,11 @@ export type Database = {
           display_name?: string
           id?: string
           language?: string
+          pro_tour_completed?: boolean
+          pro_trial_active?: boolean
+          trial_end_date?: string | null
+          trial_start_date?: string | null
+          trial_used?: boolean
           tutorial_completed?: boolean
           updated_at?: string
           user_id?: string
