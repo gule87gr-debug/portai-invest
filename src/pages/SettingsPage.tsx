@@ -5,14 +5,12 @@ import { useApp } from "@/contexts/AppContext";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useSubscription } from "@/hooks/useSubscription";
-import { User, Eye, EyeOff, Upload, Camera, LogOut, Globe, Sun, Moon, Check, X as XIcon, Loader2, GraduationCap, Crown, CreditCard, AlertTriangle, ShieldCheck, Zap } from "lucide-react";
+import { User, Eye, EyeOff, Upload, Camera, LogOut, Globe, Sun, Moon, Check, X as XIcon, Loader2, GraduationCap, Crown, CreditCard, AlertTriangle, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "@/hooks/use-theme";
-import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { BillingStatusWidget } from "@/components/BillingStatusWidget";
 import { TrialActivation } from "@/components/TrialActivation";
 
 const SettingsPage = () => {
@@ -37,7 +35,6 @@ const SettingsPage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [userEmail, setUserEmail] = useState("");
   const { isDark, toggle: toggleTheme } = useTheme();
-  const { reduced: reducedMotion, toggle: toggleReducedMotion } = useReducedMotion();
 
   const [nameStatus, setNameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
   const [savedName, setSavedName] = useState<string>("");
@@ -206,8 +203,6 @@ const SettingsPage = () => {
       <h1 className="mb-6 text-3xl font-bold">{t("settings")}</h1>
 
       <div className="mx-auto max-w-2xl space-y-6">
-        <BillingStatusWidget />
-        <TrialActivation />
         <div className="rounded-xl border border-border bg-card p-6">
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-lg font-semibold">{t("profile")}</h2>
@@ -406,6 +401,7 @@ const SettingsPage = () => {
               <p className="text-sm text-muted-foreground">
                 You're on the <span className="font-medium text-foreground">Free</span> plan.
               </p>
+              <TrialActivation />
               <button
                 onClick={() => setShowUpgradeModal(true)}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
@@ -847,20 +843,6 @@ const SettingsPage = () => {
           </div>
         </div>
 
-        <div className="rounded-xl border border-border bg-card p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Zap className="h-5 w-5 text-primary" />
-              <div>
-                <h3 className="font-semibold">Reduced motion</h3>
-                <p className="text-xs text-muted-foreground">Minimise animations and transitions across the app.</p>
-              </div>
-            </div>
-            <button onClick={toggleReducedMotion} aria-pressed={reducedMotion} aria-label="Toggle reduced motion" className={cn("relative h-6 w-11 rounded-full transition-colors", reducedMotion ? "bg-primary" : "bg-muted")}>
-              <span className={cn("absolute top-0.5 h-5 w-5 rounded-full bg-foreground transition-transform", reducedMotion ? "left-[22px]" : "left-0.5")} />
-            </button>
-          </div>
-        </div>
 
         <div className="rounded-xl border border-border bg-card p-6">
           <div className="flex items-center justify-between">

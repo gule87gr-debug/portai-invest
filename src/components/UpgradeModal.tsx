@@ -1,6 +1,7 @@
 import { Crown, X, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { TrialActivation } from "@/components/TrialActivation";
 
 interface UpgradeModalProps {
   open: boolean;
@@ -64,6 +65,11 @@ export const UpgradeModal = ({
 
         <h2 id="upgrade-modal-title" className="text-xl font-bold mb-1 editorial-h2">{title ?? t("upgradeYourPlan")}</h2>
         <p className="text-sm text-muted-foreground mb-5">{description ?? t("upgradeChoose")}</p>
+
+        <div className="mb-5">
+          <TrialActivation />
+        </div>
+
 
         <div className="space-y-4">
           {/* Plus card */}

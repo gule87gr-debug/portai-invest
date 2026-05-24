@@ -10,7 +10,8 @@ import { UpgradeModal } from "@/components/UpgradeModal";
 import { searchAssets, AssetEntry, assetDatabase, AssetRegion, REGION_LABELS, REGION_FLAGS, REGION_LABEL_KEYS } from "@/lib/stockDatabase";
 import { getTradingViewSymbol } from "@/lib/tradingViewSymbol";
 import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
-import { Sparkline, generateSparklineData } from "@/components/Sparkline";
+import { generateSparklineData } from "@/components/Sparkline";
+import { DailySparkline } from "@/components/DailySparkline";
 import { useQuotes } from "@/hooks/useQuotes";
 import { Plus, Trash2, Search, X, ChevronDown, Eye, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -384,7 +385,7 @@ const Watchlists = () => {
                     <div className="reveal-grid px-4 sm:px-6">
                       <div>
                         <div className="flex items-center justify-between gap-4 border-t border-border/60 py-3">
-                          <Sparkline seed={s.ticker} width={160} height={32} />
+                          <DailySparkline ticker={s.ticker} type={activeTypes[s.ticker.toUpperCase()]} width={160} height={32} />
                           <div className="flex items-center gap-5 text-right">
                             <div>
                               <p className="metric-label">High</p>
