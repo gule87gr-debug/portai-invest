@@ -842,20 +842,6 @@ const SettingsPage = () => {
           </div>
         </div>
 
-        <div className="rounded-xl border border-border bg-card p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Zap className="h-5 w-5 text-primary" />
-              <div>
-                <h3 className="font-semibold">Reduced motion</h3>
-                <p className="text-xs text-muted-foreground">Minimise animations and transitions across the app.</p>
-              </div>
-            </div>
-            <button onClick={toggleReducedMotion} aria-pressed={reducedMotion} aria-label="Toggle reduced motion" className={cn("relative h-6 w-11 rounded-full transition-colors", reducedMotion ? "bg-primary" : "bg-muted")}>
-              <span className={cn("absolute top-0.5 h-5 w-5 rounded-full bg-foreground transition-transform", reducedMotion ? "left-[22px]" : "left-0.5")} />
-            </button>
-          </div>
-        </div>
 
         <div className="rounded-xl border border-border bg-card p-6">
           <div className="flex items-center justify-between">
