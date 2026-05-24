@@ -401,6 +401,7 @@ const SettingsPage = () => {
               <p className="text-sm text-muted-foreground">
                 You're on the <span className="font-medium text-foreground">Free</span> plan.
               </p>
+              <TrialActivation />
               <button
                 onClick={() => setShowUpgradeModal(true)}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
