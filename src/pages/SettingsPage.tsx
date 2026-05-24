@@ -5,14 +5,12 @@ import { useApp } from "@/contexts/AppContext";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useSubscription } from "@/hooks/useSubscription";
-import { User, Eye, EyeOff, Upload, Camera, LogOut, Globe, Sun, Moon, Check, X as XIcon, Loader2, GraduationCap, Crown, CreditCard, AlertTriangle, ShieldCheck, Zap } from "lucide-react";
+import { User, Eye, EyeOff, Upload, Camera, LogOut, Globe, Sun, Moon, Check, X as XIcon, Loader2, GraduationCap, Crown, CreditCard, AlertTriangle, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "@/hooks/use-theme";
-import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { BillingStatusWidget } from "@/components/BillingStatusWidget";
 import { TrialActivation } from "@/components/TrialActivation";
 
 const SettingsPage = () => {
