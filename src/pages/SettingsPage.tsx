@@ -203,8 +203,6 @@ const SettingsPage = () => {
       <h1 className="mb-6 text-3xl font-bold">{t("settings")}</h1>
 
       <div className="mx-auto max-w-2xl space-y-6">
-        <BillingStatusWidget />
-        <TrialActivation />
         <div className="rounded-xl border border-border bg-card p-6">
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-lg font-semibold">{t("profile")}</h2>
