@@ -35,7 +35,6 @@ const SettingsPage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [userEmail, setUserEmail] = useState("");
   const { isDark, toggle: toggleTheme } = useTheme();
-  const { reduced: reducedMotion, toggle: toggleReducedMotion } = useReducedMotion();
 
   const [nameStatus, setNameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
   const [savedName, setSavedName] = useState<string>("");
