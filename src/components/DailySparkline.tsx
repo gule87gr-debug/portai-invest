@@ -42,9 +42,9 @@ export const DailySparkline = ({
     supabase.functions
       .invoke("fetch-history", { body: { ticker, type, range: "1D" } })
       .then(({ data: res }) => {
-        const closes: number[] = Array.isArray(res?.series)
-          ? res.series
-              .map((p: any) => (typeof p?.close === "number" ? p.close : null))
+        const closes: number[] = Array.isArray(res?.points)
+          ? res.points
+              .map((p: any) => (typeof p?.c === "number" ? p.c : null))
               .filter((n: number | null): n is number => n !== null)
           : [];
         if (closes.length >= 2) {
