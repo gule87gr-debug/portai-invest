@@ -66,6 +66,11 @@ export const UpgradeModal = ({
         <h2 id="upgrade-modal-title" className="text-xl font-bold mb-1 editorial-h2">{title ?? t("upgradeYourPlan")}</h2>
         <p className="text-sm text-muted-foreground mb-5">{description ?? t("upgradeChoose")}</p>
 
+        <div className="mb-5">
+          <TrialActivation />
+        </div>
+
+
         <div className="space-y-4">
           {/* Plus card */}
           <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
