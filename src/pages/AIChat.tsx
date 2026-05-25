@@ -17,12 +17,14 @@ type Message = { role: "user" | "assistant"; content: string; imageUrl?: string 
 type ChatSession = { id: string; title: string; created_at: string };
 type ChatMode = "fast" | "balanced" | "reasoning" | "creative";
 
-const MODES: { id: ChatMode; label: string; desc: string; icon: typeof Zap; pro: boolean }[] = [
-  { id: "fast",      label: "Fast",      desc: "Quick answers (Gemini 3 Flash)",          icon: Zap,       pro: false },
-  { id: "balanced",  label: "Balanced",  desc: "Deeper analysis (Gemini 2.5 Pro)",        icon: Gauge,     pro: true  },
-  { id: "reasoning", label: "Reasoning", desc: "Step-by-step thinking (GPT-5.4)",         icon: Brain,     pro: true  },
-  { id: "creative",  label: "Creative",  desc: "Nuanced takes (GPT-5)",                   icon: Lightbulb, pro: true  },
+const MODES: { id: ChatMode; label: string; desc: string; icon: typeof Zap; advanced: boolean }[] = [
+  { id: "fast",      label: "Fast",      desc: "Quick answers (Gemini 3 Flash)",          icon: Zap,       advanced: false },
+  { id: "balanced",  label: "Balanced",  desc: "Deeper analysis (Gemini 2.5 Pro)",        icon: Gauge,     advanced: true  },
+  { id: "reasoning", label: "Reasoning", desc: "Step-by-step thinking (GPT-5.4)",         icon: Brain,     advanced: true  },
+  { id: "creative",  label: "Creative",  desc: "Nuanced takes (GPT-5)",                   icon: Lightbulb, advanced: true  },
 ];
+
+const PLUS_MODE_DAILY_LIMIT = 5;
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 
@@ -100,7 +102,7 @@ const MarkdownContent = ({ content }: { content: string }) => (
 );
 
 const FREE_MSG_LIMIT = 10;
-const FREE_MSG_WINDOW_HOURS = 12;
+const FREE_MSG_WINDOW_HOURS = 24;
 const FREE_IMG_LIMIT = 3;
 const FREE_IMG_WINDOW_HOURS = 24;
 
@@ -116,31 +118,42 @@ const AIChat = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [msgUsage, setMsgUsage] = useState(0);
   const [imgUsage, setImgUsage] = useState(0);
+  const [modeUsage, setModeUsage] = useState<Record<ChatMode, number>>({ fast: 0, balanced: 0, reasoning: 0, creative: 0 });
   const [mode, setMode] = useState<ChatMode>("fast");
   const [showModeMenu, setShowModeMenu] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { isPro, hasUnlimitedChat } = useSubscription();
+  const { isPro, isPlus, isPaid, hasUnlimitedChat } = useSubscription();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState("");
   const welcomeShown = messages.length === 0;
   const suggestions = [t("suggestETF"), t("suggestDiversify"), t("suggestPE"), t("suggestDCA")];
 
-  const msgLimitReached = !hasUnlimitedChat && msgUsage >= FREE_MSG_LIMIT;
-  const imgLimitReached = !hasUnlimitedChat && imgUsage >= FREE_IMG_LIMIT;
+  // Free-tier limits
+  const msgLimitReached = !isPaid && msgUsage >= FREE_MSG_LIMIT;
+  const imgLimitReached = !isPaid && imgUsage >= FREE_IMG_LIMIT;
+  // Plus advanced-mode limit
+  const currentModeAdvanced = MODES.find((m) => m.id === mode)?.advanced ?? false;
+  const plusModeReached = isPlus && currentModeAdvanced && (modeUsage[mode] ?? 0) >= PLUS_MODE_DAILY_LIMIT;
 
   const loadUsage = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    const msgCutoff = new Date(Date.now() - FREE_MSG_WINDOW_HOURS * 3600000).toISOString();
-    const imgCutoff = new Date(Date.now() - FREE_IMG_WINDOW_HOURS * 3600000).toISOString();
-    const [{ count: mc }, { count: ic }] = await Promise.all([
-      supabase.from("chat_usage").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("usage_type", "message").gte("created_at", msgCutoff),
-      supabase.from("chat_usage").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("usage_type", "image_analysis").gte("created_at", imgCutoff),
+    const cutoff = new Date(Date.now() - 24 * 3600000).toISOString();
+    const [{ count: mc }, { count: ic }, { data: modeRows }] = await Promise.all([
+      supabase.from("chat_usage").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("usage_type", "message").gte("created_at", cutoff),
+      supabase.from("chat_usage").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("usage_type", "image_analysis").gte("created_at", cutoff),
+      supabase.from("chat_usage").select("usage_type").eq("user_id", user.id).like("usage_type", "mode:%").gte("created_at", cutoff),
     ]);
     setMsgUsage(mc ?? 0);
     setImgUsage(ic ?? 0);
+    const counts: Record<ChatMode, number> = { fast: 0, balanced: 0, reasoning: 0, creative: 0 };
+    (modeRows ?? []).forEach((r: any) => {
+      const m = (r.usage_type as string).replace("mode:", "") as ChatMode;
+      if (m in counts) counts[m] = (counts[m] ?? 0) + 1;
+    });
+    setModeUsage(counts);
   };
 
   // Usage is now tracked server-side in the chat edge function
