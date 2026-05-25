@@ -30,10 +30,12 @@ export const UpgradeModal = ({
     t("plusFeatHeatmaps"),
     t("plusFeatDeepDive"),
     t("plusFeatAlerts"),
+    "Advanced AI models (5 messages/day each)",
   ];
 
   const proFeatures = [
-    t("proFeatEverything"),
+    "Everything in Plus, plus:",
+    "Unlimited messages on all AI models",
     t("proFeatAnalyses"),
     t("proFeatFactCheck"),
     t("proFeatInstitutional"),

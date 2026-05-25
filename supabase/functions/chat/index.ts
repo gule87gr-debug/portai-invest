@@ -11,23 +11,35 @@ const corsHeaders = {
 const MAX_MESSAGES = 50;
 const MAX_MESSAGE_CONTENT_LENGTH = 8000;
 
+// Free-tier daily limits (counted separately)
 const FREE_MSG_LIMIT = 10;
-const FREE_MSG_WINDOW_HOURS = 12;
 const FREE_IMG_LIMIT = 3;
-const FREE_IMG_WINDOW_HOURS = 24;
+const WINDOW_HOURS = 24;
+
+// Plus-tier per-mode daily limit for non-fast modes
+const PLUS_MODE_DAILY_LIMIT = 5;
+
+// Price → tier (mirrors check-subscription)
+const PRICE_TO_TIER: Record<string, "plus" | "pro"> = {
+  "price_1TPM56PJefLcxc6CzfD5CUaS": "plus",
+  "price_1TFyVKPJefLcxc6Cn1iwdSTk": "pro",
+  "price_1TPM5RPJefLcxc6Cap03GhJm": "pro",
+  "price_1TPQ1oPJefLcxc6CTI4Hf42E": "pro",
+};
+const PRODUCT_TO_TIER: Record<string, "plus" | "pro"> = {
+  "prod_UO8LzRA6kfvdwm": "plus",
+  "prod_UEROAe01UbaEpK": "pro",
+};
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  // Rate limit: 15 requests per minute per IP
   const ip = getClientIP(req);
   const rl = checkRateLimit(`chat:${ip}`, { maxRequests: 15, windowMs: 60_000 });
   if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs, corsHeaders);
 
   try {
     const rawBody = await req.json();
-
-    // Validate messages array
     if (!rawBody || typeof rawBody !== "object") {
       return new Response(JSON.stringify({ error: "Invalid request body" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -36,11 +48,11 @@ serve(async (req) => {
 
     const { messages, mode } = rawBody;
 
-    const MODE_CONFIG: Record<string, { model: string; imageModel: string; proOnly: boolean; reasoning?: string }> = {
-      fast:      { model: "google/gemini-3-flash-preview", imageModel: "google/gemini-2.5-flash", proOnly: false },
-      balanced:  { model: "google/gemini-2.5-pro",          imageModel: "google/gemini-2.5-pro",   proOnly: true },
-      reasoning: { model: "openai/gpt-5.4",                  imageModel: "openai/gpt-5",            proOnly: true, reasoning: "medium" },
-      creative:  { model: "openai/gpt-5",                    imageModel: "openai/gpt-5",            proOnly: true },
+    const MODE_CONFIG: Record<string, { model: string; imageModel: string; nonFree: boolean; reasoning?: string }> = {
+      fast:      { model: "google/gemini-3-flash-preview", imageModel: "google/gemini-2.5-flash", nonFree: false },
+      balanced:  { model: "google/gemini-2.5-pro",          imageModel: "google/gemini-2.5-pro",   nonFree: true },
+      reasoning: { model: "openai/gpt-5.4",                  imageModel: "openai/gpt-5",            nonFree: true, reasoning: "medium" },
+      creative:  { model: "openai/gpt-5",                    imageModel: "openai/gpt-5",            nonFree: true },
     };
     const selectedMode: string = typeof mode === "string" && MODE_CONFIG[mode] ? mode : "fast";
 
@@ -49,30 +61,23 @@ serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
     if (messages.length > MAX_MESSAGES) {
       return new Response(JSON.stringify({ error: `Too many messages (max ${MAX_MESSAGES})` }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Validate and sanitize each message
     const validRoles = new Set(["user", "assistant"]);
-    const sanitizedMessages = [];
+    const sanitizedMessages: any[] = [];
     let hasImages = false;
 
     for (const msg of messages) {
       if (!msg || typeof msg !== "object") continue;
       if (!validRoles.has(msg.role)) continue;
-
       if (typeof msg.content === "string") {
-        if (msg.content.length > MAX_MESSAGE_CONTENT_LENGTH) {
-          sanitizedMessages.push({ role: msg.role, content: msg.content.slice(0, MAX_MESSAGE_CONTENT_LENGTH) });
-        } else {
-          sanitizedMessages.push({ role: msg.role, content: msg.content });
-        }
+        sanitizedMessages.push({ role: msg.role, content: msg.content.slice(0, MAX_MESSAGE_CONTENT_LENGTH) });
       } else if (Array.isArray(msg.content)) {
-        const validParts = [];
+        const validParts: any[] = [];
         for (const part of msg.content) {
           if (part.type === "text" && typeof part.text === "string") {
             validParts.push({ type: "text", text: part.text.slice(0, MAX_MESSAGE_CONTENT_LENGTH) });
@@ -84,9 +89,7 @@ serve(async (req) => {
             }
           }
         }
-        if (validParts.length > 0) {
-          sanitizedMessages.push({ role: msg.role, content: validParts });
-        }
+        if (validParts.length > 0) sanitizedMessages.push({ role: msg.role, content: validParts });
       }
     }
 
@@ -96,7 +99,6 @@ serve(async (req) => {
       });
     }
 
-    // --- Server-side auth & usage enforcement ---
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
@@ -119,69 +121,101 @@ serve(async (req) => {
     }
 
     const userId = userData.user.id;
-    let isPro = false;
+    let tier: "free" | "plus" | "pro" = "free";
 
-    // Admin bypass via DB lookup (configurable in admin panel).
+    // Admin bypass = Pro
     const isAdmin = await isAdminEmail(supabaseAdmin, userData.user.email ?? null);
     if (isAdmin) {
-      isPro = true;
+      tier = "pro";
       await logAdminBypass(supabaseAdmin, userData.user.email!, "chat", userId);
     } else {
-      const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-      if (stripeKey && userData.user.email) {
-        try {
-          const Stripe = (await import("https://esm.sh/stripe@18.5.0")).default;
-          const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-          const customers = await stripe.customers.list({ email: userData.user.email, limit: 1 });
-          if (customers.data.length > 0) {
-            const subs = await stripe.subscriptions.list({ customer: customers.data[0].id, status: "active", limit: 1 });
-            isPro = subs.data.length > 0;
-          }
-        } catch {
-          // If Stripe check fails, default to free tier
+      // Trial-active users = Pro
+      try {
+        const { data: settings } = await supabaseAdmin
+          .from("user_settings")
+          .select("pro_trial_active, trial_end_date")
+          .eq("user_id", userId)
+          .maybeSingle();
+        if (
+          settings?.pro_trial_active &&
+          settings?.trial_end_date &&
+          new Date(settings.trial_end_date).getTime() > Date.now()
+        ) {
+          tier = "pro";
+        }
+      } catch { /* ignore */ }
+
+      if (tier === "free") {
+        const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+        if (stripeKey && userData.user.email) {
+          try {
+            const Stripe = (await import("https://esm.sh/stripe@18.5.0")).default;
+            const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+            const customers = await stripe.customers.list({ email: userData.user.email, limit: 1 });
+            if (customers.data.length > 0) {
+              const subs = await stripe.subscriptions.list({ customer: customers.data[0].id, status: "active", limit: 5 });
+              const rank = { free: 0, plus: 1, pro: 2 } as const;
+              for (const sub of subs.data) {
+                for (const item of sub.items.data) {
+                  const priceId = item.price?.id ?? "";
+                  const productId = typeof item.price?.product === "string" ? item.price.product : "";
+                  const t = PRICE_TO_TIER[priceId] ?? PRODUCT_TO_TIER[productId] ?? "pro";
+                  if (rank[t] > rank[tier]) tier = t;
+                }
+              }
+            }
+          } catch { /* default to free */ }
         }
       }
     }
 
-    // Enforce limits for free users
-    if (!isPro) {
-      const msgCutoff = new Date(Date.now() - FREE_MSG_WINDOW_HOURS * 3600000).toISOString();
-      const { count: msgCount } = await supabaseAdmin
-        .from("chat_usage")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", userId)
-        .eq("usage_type", "message")
-        .gte("created_at", msgCutoff);
+    const cfg = MODE_CONFIG[selectedMode];
+    const cutoff = new Date(Date.now() - WINDOW_HOURS * 3600000).toISOString();
 
+    // Mode access gating
+    if (cfg.nonFree && tier === "free") {
+      return new Response(JSON.stringify({
+        error: `${selectedMode} mode is available on Plus and Pro. Upgrade to access advanced AI models.`,
+      }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // Per-tier usage enforcement
+    if (tier === "free") {
+      const { count: msgCount } = await supabaseAdmin
+        .from("chat_usage").select("*", { count: "exact", head: true })
+        .eq("user_id", userId).eq("usage_type", "message").gte("created_at", cutoff);
       if ((msgCount ?? 0) >= FREE_MSG_LIMIT) {
-        return new Response(JSON.stringify({ error: "Message limit reached. Upgrade to Pro for unlimited messages." }), {
+        return new Response(JSON.stringify({ error: `Daily message limit reached (${FREE_MSG_LIMIT}/day). Upgrade to Plus or Pro for more messages.` }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-
       if (hasImages) {
-        const imgCutoff = new Date(Date.now() - FREE_IMG_WINDOW_HOURS * 3600000).toISOString();
         const { count: imgCount } = await supabaseAdmin
-          .from("chat_usage")
-          .select("*", { count: "exact", head: true })
-          .eq("user_id", userId)
-          .eq("usage_type", "image_analysis")
-          .gte("created_at", imgCutoff);
-
+          .from("chat_usage").select("*", { count: "exact", head: true })
+          .eq("user_id", userId).eq("usage_type", "image_analysis").gte("created_at", cutoff);
         if ((imgCount ?? 0) >= FREE_IMG_LIMIT) {
-          return new Response(JSON.stringify({ error: "Image analysis limit reached. Upgrade to Pro for unlimited image analysis." }), {
+          return new Response(JSON.stringify({ error: `Daily image analysis limit reached (${FREE_IMG_LIMIT}/day). Upgrade to Plus or Pro for unlimited image analysis.` }), {
             status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
       }
+    } else if (tier === "plus" && cfg.nonFree) {
+      // Plus: advanced modes capped at 5/day each
+      const modeUsageKey = `mode:${selectedMode}`;
+      const { count: modeCount } = await supabaseAdmin
+        .from("chat_usage").select("*", { count: "exact", head: true })
+        .eq("user_id", userId).eq("usage_type", modeUsageKey).gte("created_at", cutoff);
+      if ((modeCount ?? 0) >= PLUS_MODE_DAILY_LIMIT) {
+        return new Response(JSON.stringify({ error: `Daily limit reached for ${selectedMode} mode (${PLUS_MODE_DAILY_LIMIT}/day on Plus). Upgrade to Pro for unlimited messages on all models.` }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
+    // Pro: no limits
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Pro-only modes fall back to fast for free users
-    const effectiveMode = MODE_CONFIG[selectedMode].proOnly && !isPro ? "fast" : selectedMode;
-    const cfg = MODE_CONFIG[effectiveMode];
     const model = hasImages ? cfg.imageModel : cfg.model;
 
     const systemPrompt = hasImages
@@ -229,16 +263,10 @@ Always end with: "⚠️ Just my take — not financial advice. Do your own rese
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model,
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...sanitizedMessages,
-        ],
+        messages: [{ role: "system", content: systemPrompt }, ...sanitizedMessages],
         stream: true,
         ...(cfg.reasoning ? { reasoning: { effort: cfg.reasoning } } : {}),
       }),
@@ -262,11 +290,15 @@ Always end with: "⚠️ Just my take — not financial advice. Do your own rese
       });
     }
 
-    // Record usage server-side AFTER successful AI response start
-    if (userId && !isPro) {
-      await supabaseAdmin.from("chat_usage").insert({ user_id: userId, usage_type: "message" });
-      if (hasImages) {
-        await supabaseAdmin.from("chat_usage").insert({ user_id: userId, usage_type: "image_analysis" });
+    // Record usage (always: message + image, plus per-mode for Plus on advanced modes)
+    if (userId && tier !== "pro") {
+      if (tier === "free") {
+        await supabaseAdmin.from("chat_usage").insert({ user_id: userId, usage_type: "message" });
+        if (hasImages) {
+          await supabaseAdmin.from("chat_usage").insert({ user_id: userId, usage_type: "image_analysis" });
+        }
+      } else if (tier === "plus" && cfg.nonFree) {
+        await supabaseAdmin.from("chat_usage").insert({ user_id: userId, usage_type: `mode:${selectedMode}` });
       }
     }
 

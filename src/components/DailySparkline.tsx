@@ -7,6 +7,9 @@ interface Props {
   width?: number;
   height?: number;
   className?: string;
+  /** When provided, overrides the auto-detected direction so the color
+   *  matches the daily change shown next to the sparkline. */
+  colorIsUp?: boolean;
 }
 
 // Tiny in-memory cache so re-renders / multiple rows don't re-fetch
@@ -24,6 +27,7 @@ export const DailySparkline = ({
   width = 160,
   height = 32,
   className = "",
+  colorIsUp,
 }: Props) => {
   const [data, setData] = useState<number[] | null>(() => {
     const c = cache.get(ticker.toUpperCase());
@@ -76,7 +80,8 @@ export const DailySparkline = ({
     return { points: pts, isUp: data[data.length - 1] >= data[0], ready: true };
   }, [data, width, height]);
 
-  const color = isUp ? "#00D4B1" : "#FF4D4D";
+  const effectiveUp = typeof colorIsUp === "boolean" ? colorIsUp : isUp;
+  const color = effectiveUp ? "#00D4B1" : "#FF4D4D";
 
   if (!ready) {
     return (
