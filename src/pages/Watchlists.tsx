@@ -385,7 +385,7 @@ const Watchlists = () => {
                     <div className="reveal-grid px-4 sm:px-6">
                       <div>
                         <div className="flex items-center justify-between gap-4 border-t border-border/60 py-3">
-                          <DailySparkline ticker={s.ticker} type={activeTypes[s.ticker.toUpperCase()]} width={160} height={32} />
+                          <DailySparkline ticker={s.ticker} type={activeTypes[s.ticker.toUpperCase()]} width={160} height={32} colorIsUp={isUp} />
                           <div className="flex items-center gap-5 text-right">
                             <div>
                               <p className="metric-label">High</p>
