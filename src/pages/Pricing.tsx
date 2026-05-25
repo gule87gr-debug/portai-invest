@@ -32,11 +32,14 @@ const Pricing = () => {
   ];
   const plusTierFeatures = [
     t("featPlusQuiz"), t("featPlusChat"), t("featPlusImg"),
-    t("featPlusWatch"), t("featPlusDeepDive"), t("featForumAccess"),
+    t("featPlusWatch"), t("featPlusDeepDive"),
+    "Advanced AI models (Balanced, Reasoning, Creative) — 5 messages/day each",
+    t("featForumAccess"),
   ];
   const proTierFeatures = [
-    t("featProEverything"), t("featProAnalyses"), t("featProAlerts"),
-    t("featProPriority"), t("featForumAccess"),
+    t("featProEverything"),
+    "Unlimited messages on all AI models (Balanced, Reasoning, Creative)",
+    t("featProAnalyses"), t("featProAlerts"), t("featProPriority"),
   ];
 
   const beginUpgradeFlow = (target: "plus" | "pro") => {
