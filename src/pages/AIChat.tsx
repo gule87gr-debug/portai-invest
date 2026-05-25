@@ -212,18 +212,26 @@ const AIChat = () => {
     if ((!text.trim() && !imagePreview) || isTyping) return;
     const hasImage = !!imagePreview;
 
-    if (!hasUnlimitedChat) {
+    // Free-tier daily caps
+    if (!isPaid) {
       if (msgLimitReached) {
-        setUpgradeReason(`You've used all ${FREE_MSG_LIMIT} free messages (resets every ${FREE_MSG_WINDOW_HOURS}h). Upgrade to Plus or Pro for unlimited messages.`);
+        setUpgradeReason(`You've used all ${FREE_MSG_LIMIT} free messages today. Upgrade to Plus or Pro for more.`);
         setShowUpgrade(true);
         return;
       }
       if (hasImage && imgLimitReached) {
-        setUpgradeReason(`You've used all ${FREE_IMG_LIMIT} free image analyses (resets every ${FREE_IMG_WINDOW_HOURS}h). Upgrade to Plus or Pro for unlimited image analyses.`);
+        setUpgradeReason(`You've used all ${FREE_IMG_LIMIT} free image analyses today. Upgrade to Plus or Pro for unlimited.`);
         setShowUpgrade(true);
         return;
       }
     }
+    // Plus advanced-mode daily cap
+    if (plusModeReached) {
+      setUpgradeReason(`You've used all ${PLUS_MODE_DAILY_LIMIT} daily messages for ${mode} mode on Plus. Upgrade to Pro for unlimited messages on all models.`);
+      setShowUpgrade(true);
+      return;
+    }
+
 
     const userMsg: Message = { role: "user", content: text || "Analyze this image", imageUrl: imagePreview || undefined };
     const allMessages = [...messages, userMsg];
@@ -473,21 +481,21 @@ const AIChat = () => {
                 <div className="space-y-1">
                   {MODES.map((m) => {
                     const Icon = m.icon;
-                    const locked = m.pro && !hasUnlimitedChat;
+                    const lockedForFree = m.advanced && !isPaid;
+                    const usedForMode = modeUsage[m.id] ?? 0;
+                    const plusCapReached = m.advanced && isPlus && usedForMode >= PLUS_MODE_DAILY_LIMIT;
                     const active = mode === m.id;
                     return (
                       <button
                         key={m.id}
                         onClick={() => {
-                          if (locked) {
-                            toast.error(`${m.label} is a Pro feature`, {
-                              description: "Upgrade to unlock advanced AI models.",
-                              action: {
-                                label: "Upgrade",
-                                onClick: () => setShowUpgrade(true),
-                              },
-                            });
-                            setUpgradeReason(`${m.label} mode is a Pro feature. Upgrade to unlock advanced AI models.`);
+                          if (lockedForFree) {
+                            setUpgradeReason(`${m.label} mode is available on Plus and Pro. Upgrade to access advanced AI models.`);
+                            setShowUpgrade(true);
+                            return;
+                          }
+                          if (plusCapReached) {
+                            setUpgradeReason(`You've used all ${PLUS_MODE_DAILY_LIMIT} daily ${m.label} messages on Plus. Upgrade to Pro for unlimited.`);
                             setShowUpgrade(true);
                             return;
                           }
@@ -497,17 +505,23 @@ const AIChat = () => {
                         className={cn(
                           "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors",
                           active ? "bg-primary/15" : "hover:bg-accent",
-                          locked && "opacity-70"
+                          (lockedForFree || plusCapReached) && "opacity-70"
                         )}
                       >
                         <Icon className={cn("h-4 w-4 shrink-0", active ? "text-primary" : "text-muted-foreground")} />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5">
                             <span className={cn("text-sm font-semibold", active ? "text-primary" : "text-foreground")}>{m.label}</span>
-                            {locked && <Crown className="h-3 w-3 text-primary" />}
+                            {lockedForFree && <Crown className="h-3 w-3 text-primary" />}
+                            {m.advanced && isPlus && !isPro && (
+                              <span className="ml-auto text-[10px] font-semibold text-muted-foreground tnum">
+                                {usedForMode}/{PLUS_MODE_DAILY_LIMIT}
+                              </span>
+                            )}
                           </div>
                           <p className="text-xs text-muted-foreground truncate">{m.desc}</p>
                         </div>
+
                       </button>
                     );
                   })}
