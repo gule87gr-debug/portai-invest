@@ -300,7 +300,7 @@ const SettingsPage = () => {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" /> {t("loadingSubscription")}
             </div>
-          ) : isPaid ? (
+          ) : isPaying ? (
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <span className="rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary">
