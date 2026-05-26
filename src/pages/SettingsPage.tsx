@@ -206,9 +206,19 @@ const SettingsPage = () => {
         <div className="rounded-xl border border-border bg-card p-6">
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-lg font-semibold">{t("profile")}</h2>
-            {isPro && (
+            {isPro && !isTrialPro && (
               <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary">
                 <Crown className="h-3 w-3" /> PRO
+              </span>
+            )}
+            {isPlus && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary">
+                <Crown className="h-3 w-3" /> PLUS
+              </span>
+            )}
+            {isTrialPro && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary">
+                <Crown className="h-3 w-3" /> PRO TRIAL
               </span>
             )}
           </div>
