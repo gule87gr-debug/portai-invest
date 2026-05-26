@@ -8,6 +8,10 @@ type SubscriptionState = {
   isPro: boolean;
   isPlus: boolean;
   isPaid: boolean;
+  /** True only when the user is actually paying (Stripe-backed sub), not via trial. */
+  isPaying: boolean;
+  /** True when current Pro access comes from the 14-day trial (not a paid sub). */
+  isTrialPro: boolean;
   hasUnlimitedChat: boolean;
   hasUnlimitedWatchlists: boolean;
   hasFullQuiz: boolean;
@@ -221,12 +225,16 @@ export const useSubscription = (): SubscriptionState => {
   const isPro = effectiveTier === "pro";
   const isPlus = effectiveTier === "plus";
   const isPaid = isPro || isPlus;
+  const isPaying = paidTier !== "free";
+  const isTrialPro = trialActive && paidTier === "free";
 
   return {
     tier: effectiveTier,
     isPro,
     isPlus,
     isPaid,
+    isPaying,
+    isTrialPro,
     // Plus & Pro both grant these:
     hasUnlimitedChat: isPaid,
     hasUnlimitedWatchlists: isPaid,

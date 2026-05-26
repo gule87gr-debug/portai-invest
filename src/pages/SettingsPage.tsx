@@ -17,7 +17,7 @@ const SettingsPage = () => {
   const { profile, setProfile, setShowTutorial } = useApp();
   const navigate = useNavigate();
   usePageTitle("Settings | PortAI");
-  const { tier, isPaid, isPlus, isPro, subscriptionEnd, cancelAtPeriodEnd, subscriptionId, subscriptionStatus, scheduledTier, scheduledStart, scheduledChangesCount, loading: subLoading, refresh } = useSubscription();
+  const { tier, isPaid, isPaying, isTrialPro, isPlus, isPro, trialDaysLeft, trialEndsAt, subscriptionEnd, cancelAtPeriodEnd, subscriptionId, subscriptionStatus, scheduledTier, scheduledStart, scheduledChangesCount, loading: subLoading, refresh } = useSubscription();
 
   let language: Language, setLanguage: (l: Language) => void, t: (key: string) => string, langNames: Record<Language, string>;
   try {
@@ -206,9 +206,19 @@ const SettingsPage = () => {
         <div className="rounded-xl border border-border bg-card p-6">
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-lg font-semibold">{t("profile")}</h2>
-            {isPro && (
+            {isPro && !isTrialPro && (
               <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary">
                 <Crown className="h-3 w-3" /> PRO
+              </span>
+            )}
+            {isPlus && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary">
+                <Crown className="h-3 w-3" /> PLUS
+              </span>
+            )}
+            {isTrialPro && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary">
+                <Crown className="h-3 w-3" /> PRO TRIAL
               </span>
             )}
           </div>
@@ -290,7 +300,7 @@ const SettingsPage = () => {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" /> {t("loadingSubscription")}
             </div>
-          ) : isPaid ? (
+          ) : isPaying ? (
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <span className="rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary">
@@ -398,16 +408,30 @@ const SettingsPage = () => {
             </div>
           ) : (
             <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                You're on the <span className="font-medium text-foreground">Free</span> plan.
-              </p>
+              {isTrialPro ? (
+                <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Crown className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-semibold text-foreground">
+                      Pro Trial · {trialDaysLeft} day{trialDaysLeft === 1 ? "" : "s"} left
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    You're on the free 14-day Pro trial{trialEndsAt ? ` until ${new Date(trialEndsAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}` : ""}. No card on file — subscribe any time to keep Pro access.
+                  </p>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  You're on the <span className="font-medium text-foreground">Free</span> plan.
+                </p>
+              )}
               <TrialActivation />
               <button
                 onClick={() => setShowUpgradeModal(true)}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
               >
                 <Crown className="h-4 w-4" />
-                Upgrade Plan
+                {isTrialPro ? "Subscribe to keep Pro" : "Upgrade Plan"}
               </button>
               <button
                 onClick={() => navigate("/billing-consents")}

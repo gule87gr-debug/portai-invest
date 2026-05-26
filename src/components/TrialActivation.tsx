@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Crown, Sparkles, Clock, Loader2, Check } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -30,7 +31,7 @@ const PRO_TOUR_FEATURES = [
 
 export const TrialActivation = ({ variant = "card", className }: Props) => {
   const {
-    isPaid,
+    isPaying,
     trialActive,
     trialUsed,
     trialDaysLeft,
@@ -38,6 +39,7 @@ export const TrialActivation = ({ variant = "card", className }: Props) => {
     activateTrial,
     markProTourCompleted,
   } = useSubscription();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -49,8 +51,9 @@ export const TrialActivation = ({ variant = "card", className }: Props) => {
     }
   }, [trialActive, proTourCompleted]);
 
-  // Hide entirely for paid users or users who already used their trial (unless still active)
-  if (isPaid && !trialActive) return null;
+  // Only ever show for true Free-tier users (never for paying Plus/Pro).
+  // Trial badge is still shown while trial is active.
+  if (isPaying) return null;
   if (trialUsed && !trialActive) return null;
 
   const handleActivate = async () => {
@@ -187,9 +190,18 @@ export const TrialActivation = ({ variant = "card", className }: Props) => {
             <Clock className="h-3 w-3" /> No automatic billing. You'll only be
             charged if you choose to subscribe after the trial ends.
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button
               variant="outline"
+              onClick={() => { setOpen(false); navigate("/pricing"); }}
+              disabled={submitting}
+              className="sm:mr-auto"
+            >
+              <Crown className="h-4 w-4" />
+              Subscribe to Pro instead
+            </Button>
+            <Button
+              variant="ghost"
               onClick={() => setOpen(false)}
               disabled={submitting}
             >
