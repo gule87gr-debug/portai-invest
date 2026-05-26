@@ -724,7 +724,6 @@ export type Database = {
       }
       toggle_article_like: { Args: { _article_id: string }; Returns: boolean }
       toggle_featured_like: { Args: { _featured_id: string }; Returns: boolean }
-      vindicate_article: { Args: { _article_id: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
