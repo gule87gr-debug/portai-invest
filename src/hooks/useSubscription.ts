@@ -225,12 +225,16 @@ export const useSubscription = (): SubscriptionState => {
   const isPro = effectiveTier === "pro";
   const isPlus = effectiveTier === "plus";
   const isPaid = isPro || isPlus;
+  const isPaying = paidTier !== "free";
+  const isTrialPro = trialActive && paidTier === "free";
 
   return {
     tier: effectiveTier,
     isPro,
     isPlus,
     isPaid,
+    isPaying,
+    isTrialPro,
     // Plus & Pro both grant these:
     hasUnlimitedChat: isPaid,
     hasUnlimitedWatchlists: isPaid,
