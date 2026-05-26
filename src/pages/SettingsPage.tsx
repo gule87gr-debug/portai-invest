@@ -17,7 +17,7 @@ const SettingsPage = () => {
   const { profile, setProfile, setShowTutorial } = useApp();
   const navigate = useNavigate();
   usePageTitle("Settings | PortAI");
-  const { tier, isPaid, isPlus, isPro, subscriptionEnd, cancelAtPeriodEnd, subscriptionId, subscriptionStatus, scheduledTier, scheduledStart, scheduledChangesCount, loading: subLoading, refresh } = useSubscription();
+  const { tier, isPaid, isPaying, isTrialPro, isPlus, isPro, trialDaysLeft, trialEndsAt, subscriptionEnd, cancelAtPeriodEnd, subscriptionId, subscriptionStatus, scheduledTier, scheduledStart, scheduledChangesCount, loading: subLoading, refresh } = useSubscription();
 
   let language: Language, setLanguage: (l: Language) => void, t: (key: string) => string, langNames: Record<Language, string>;
   try {
