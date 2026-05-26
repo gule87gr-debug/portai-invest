@@ -31,7 +31,7 @@ const PRO_TOUR_FEATURES = [
 
 export const TrialActivation = ({ variant = "card", className }: Props) => {
   const {
-    isPaid,
+    isPaying,
     trialActive,
     trialUsed,
     trialDaysLeft,
@@ -39,6 +39,7 @@ export const TrialActivation = ({ variant = "card", className }: Props) => {
     activateTrial,
     markProTourCompleted,
   } = useSubscription();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -50,8 +51,9 @@ export const TrialActivation = ({ variant = "card", className }: Props) => {
     }
   }, [trialActive, proTourCompleted]);
 
-  // Hide entirely for paid users or users who already used their trial (unless still active)
-  if (isPaid && !trialActive) return null;
+  // Only ever show for true Free-tier users (never for paying Plus/Pro).
+  // Trial badge is still shown while trial is active.
+  if (isPaying) return null;
   if (trialUsed && !trialActive) return null;
 
   const handleActivate = async () => {
