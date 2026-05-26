@@ -190,9 +190,18 @@ export const TrialActivation = ({ variant = "card", className }: Props) => {
             <Clock className="h-3 w-3" /> No automatic billing. You'll only be
             charged if you choose to subscribe after the trial ends.
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button
               variant="outline"
+              onClick={() => { setOpen(false); navigate("/pricing"); }}
+              disabled={submitting}
+              className="sm:mr-auto"
+            >
+              <Crown className="h-4 w-4" />
+              Subscribe to Pro instead
+            </Button>
+            <Button
+              variant="ghost"
               onClick={() => setOpen(false)}
               disabled={submitting}
             >
