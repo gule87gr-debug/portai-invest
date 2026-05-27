@@ -83,7 +83,7 @@ const Dashboard = () => {
     setError("");
     setLimitReached(false);
     try {
-      const { data, error: fnError } = await supabase.functions.invoke("analyze-link", { body: { url: url.trim() } });
+      const { data, error: fnError } = await supabase.functions.invoke("analyze-link", { body: { url: url.trim(), language: (typeof window !== "undefined" ? localStorage.getItem("portai.language") : null) || "en" } });
       if (fnError) {
         // Edge function returned non-2xx — surface limit-reached specifically
         const msg = String(fnError.message || "");
