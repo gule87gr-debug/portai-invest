@@ -13,7 +13,7 @@ import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
 import { generateSparklineData } from "@/components/Sparkline";
 import { DailySparkline } from "@/components/DailySparkline";
 import { useQuotes } from "@/hooks/useQuotes";
-import { Plus, Trash2, Search, X, ChevronDown, Eye, Filter } from "lucide-react";
+import { Plus, Trash2, Search, X, ChevronDown, Eye, Filter, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -21,7 +21,7 @@ const FREE_MAX_WATCHLISTS = 1;
 const FREE_MAX_STOCKS = 5;
 
 const Watchlists = () => {
-  const { watchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, deleteWatchlist, watchlistsLoaded } = useApp();
+  const { watchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, moveStock, deleteWatchlist, watchlistsLoaded } = useApp();
   const { t } = useLanguage();
   const { hasUnlimitedWatchlists } = useSubscription();
   usePageTitle("Stock Watchlists | PortAI");
@@ -288,12 +288,12 @@ const Watchlists = () => {
       <div className="flex gap-6">
         <div className="hidden sm:block w-60 shrink-0 space-y-3">
           {watchlists.map((list, i) => (
-            <div key={list.id} className="relative group">
-              <button onClick={() => setActiveIdx(i)} className={cn("w-full rounded-xl border p-4 text-left transition-all", activeIdx === i ? "border-primary bg-primary/10" : "border-border bg-card hover:bg-accent/50")}>
+            <div key={list.id} className="relative">
+              <button onClick={() => setActiveIdx(i)} className={cn("w-full rounded-xl border p-4 pr-10 text-left transition-all", activeIdx === i ? "border-primary bg-primary/10" : "border-border bg-card hover:bg-accent/50")}>
                 <p className="font-semibold text-sm">{list.name}</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">{list.stocks.length} {t("items")}</p>
               </button>
-              <button onClick={() => { deleteWatchlist(list.id); if (activeIdx >= watchlists.length - 1) setActiveIdx(Math.max(0, activeIdx - 1)); }} aria-label={`Delete watchlist: ${list.name}`} className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-loss transition-all">
+              <button onClick={() => { deleteWatchlist(list.id); if (activeIdx >= watchlists.length - 1) setActiveIdx(Math.max(0, activeIdx - 1)); }} aria-label={`Delete watchlist: ${list.name}`} className="absolute top-2 right-2 text-muted-foreground hover:text-loss transition-colors">
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -362,7 +362,7 @@ const Watchlists = () => {
                           <span className="text-xs text-muted-foreground truncate block max-w-[140px] sm:max-w-[200px]">{s.name}</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 shrink-0">
+                      <div className="flex items-center gap-2 shrink-0">
                         <div className="flex flex-col items-end gap-0.5">
                           {price !== null ? (
                             <span className="text-sm font-semibold tnum text-foreground">${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
@@ -375,6 +375,24 @@ const Watchlists = () => {
                             </span>
                           )}
                           <span className="metric-label text-[9px]">{label}</span>
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); moveStock(active.id, s.ticker, "up"); }}
+                            disabled={active.stocks.findIndex((x) => x.ticker === s.ticker) === 0}
+                            aria-label={`Move ${s.ticker} up`}
+                            className="text-muted-foreground hover:text-foreground transition-colors disabled:opacity-20 disabled:hover:text-muted-foreground"
+                          >
+                            <ChevronUp className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); moveStock(active.id, s.ticker, "down"); }}
+                            disabled={active.stocks.findIndex((x) => x.ticker === s.ticker) === active.stocks.length - 1}
+                            aria-label={`Move ${s.ticker} down`}
+                            className="text-muted-foreground hover:text-foreground transition-colors disabled:opacity-20 disabled:hover:text-muted-foreground"
+                          >
+                            <ChevronDown className="h-3.5 w-3.5" />
+                          </button>
                         </div>
                         <button onClick={(e) => { e.stopPropagation(); removeStockFromWatchlist(active.id, s.ticker); }} aria-label={`Remove ${s.ticker} from watchlist`} className="text-muted-foreground hover:text-loss transition-colors shrink-0">
                           <Trash2 className="h-4 w-4" />
