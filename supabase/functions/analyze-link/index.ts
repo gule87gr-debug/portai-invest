@@ -11,6 +11,11 @@ const corsHeaders = {
 
 const inputSchema: SchemaDefinition = {
   url: { type: "string", required: true, minLength: 5, maxLength: 2048, pattern: /^https?:\/\/.+/ },
+  language: { type: "string", required: false, maxLength: 8 },
+};
+
+const LANGUAGE_NAMES: Record<string, string> = {
+  en: "English", es: "Spanish", fr: "French", pt: "Portuguese", de: "German", it: "Italian",
 };
 
 const FREE_DAILY_ANALYSES = 1;
