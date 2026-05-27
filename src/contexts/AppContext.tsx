@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-export type Stock = { ticker: string; sector: string; name: string; signal: string };
+export type Stock = { ticker: string; sector: string; name: string; signal: string; createdAt?: string };
 export type WatchlistData = { id: string; name: string; stocks: Stock[]; desc: string };
 
 export type ForumComment = { id: string; author: string; avatar: string; avatarUrl?: string | null; body: string; time: string; likes: number; userId?: string };
@@ -25,6 +25,7 @@ type AppState = {
   addWatchlist: (w: WatchlistData) => void;
   addStockToWatchlist: (listId: string, stock: Stock) => void;
   removeStockFromWatchlist: (listId: string, ticker: string) => void;
+  moveStock: (listId: string, ticker: string, direction: "up" | "down") => void;
   deleteWatchlist: (listId: string) => void;
   watchlistsLoaded: boolean;
   threads: ForumThread[];
@@ -383,7 +384,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       const { data: stocksData } = await supabase
         .from("watchlist_stocks")
         .select("*")
-        .in("watchlist_id", wlData.map((w: any) => w.id));
+        .in("watchlist_id", wlData.map((w: any) => w.id))
+        .order("created_at", { ascending: false });
 
       const mapped: WatchlistData[] = wlData.map((w: any) => ({
         id: w.id,
@@ -391,7 +393,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         desc: w.description || "",
         stocks: (stocksData || [])
           .filter((s: any) => s.watchlist_id === w.id)
-          .map((s: any) => ({ ticker: s.ticker, name: s.name, sector: s.sector, signal: s.signal })),
+          .map((s: any) => ({ ticker: s.ticker, name: s.name, sector: s.sector, signal: s.signal, createdAt: s.created_at })),
       }));
       setWatchlists(mapped);
     } else {
@@ -529,19 +531,43 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const addStockToWatchlist = async (listId: string, stock: Stock) => {
     const list = watchlists.find((w) => w.id === listId);
     if (!list || list.stocks.find((s) => s.ticker === stock.ticker)) return;
-    await supabase.from("watchlist_stocks").insert({
+    const { data: inserted } = await supabase.from("watchlist_stocks").insert({
       watchlist_id: listId,
       ticker: stock.ticker,
       name: stock.name,
       sector: stock.sector,
       signal: stock.signal,
-    } as any);
-    setWatchlists((prev) => prev.map((w) => w.id === listId ? { ...w, stocks: [...w.stocks, stock] } : w));
+    } as any).select("created_at").single();
+    const newStock = { ...stock, createdAt: (inserted as any)?.created_at ?? new Date().toISOString() };
+    // New entries appear at the TOP of the list
+    setWatchlists((prev) => prev.map((w) => w.id === listId ? { ...w, stocks: [newStock, ...w.stocks] } : w));
   };
 
   const removeStockFromWatchlist = async (listId: string, ticker: string) => {
     await supabase.from("watchlist_stocks").delete().eq("watchlist_id", listId).eq("ticker", ticker);
     setWatchlists((prev) => prev.map((w) => w.id === listId ? { ...w, stocks: w.stocks.filter((s) => s.ticker !== ticker) } : w));
+  };
+
+  const moveStock = async (listId: string, ticker: string, direction: "up" | "down") => {
+    const list = watchlists.find((w) => w.id === listId);
+    if (!list) return;
+    const idx = list.stocks.findIndex((s) => s.ticker === ticker);
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (idx < 0 || swapIdx < 0 || swapIdx >= list.stocks.length) return;
+    const a = list.stocks[idx];
+    const b = list.stocks[swapIdx];
+    // Swap created_at so DB ordering matches
+    const aCreated = a.createdAt;
+    const bCreated = b.createdAt;
+    const next = [...list.stocks];
+    next[idx] = { ...b, createdAt: aCreated };
+    next[swapIdx] = { ...a, createdAt: bCreated };
+    setWatchlists((prev) => prev.map((w) => w.id === listId ? { ...w, stocks: next } : w));
+    if (aCreated && bCreated) {
+      // Use offsets to avoid unique-constraint-style equality issues; created_at is plain timestamp
+      await supabase.from("watchlist_stocks").update({ created_at: bCreated } as any).eq("watchlist_id", listId).eq("ticker", a.ticker);
+      await supabase.from("watchlist_stocks").update({ created_at: aCreated } as any).eq("watchlist_id", listId).eq("ticker", b.ticker);
+    }
   };
 
   const addThread = (t: ForumThread) => setThreads((prev) => [t, ...prev]);
@@ -555,7 +581,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setThreads((prev) => prev.map((t) => t.id === threadId ? { ...t, comments: t.comments.filter((c) => c.id !== commentId) } : t));
 
   return (
-    <AppContext.Provider value={{ watchlists, setWatchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, deleteWatchlist, watchlistsLoaded, threads, setThreads, addThread, likeThread, addComment, setFactCheck, deleteThread, deleteComment, profile, setProfile, currentUserId, initialLanguage, showTutorial, setShowTutorial }}>
+    <AppContext.Provider value={{ watchlists, setWatchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, moveStock, deleteWatchlist, watchlistsLoaded, threads, setThreads, addThread, likeThread, addComment, setFactCheck, deleteThread, deleteComment, profile, setProfile, currentUserId, initialLanguage, showTutorial, setShowTutorial }}>
       {children}
     </AppContext.Provider>
   );

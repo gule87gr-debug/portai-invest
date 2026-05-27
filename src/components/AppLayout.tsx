@@ -10,7 +10,7 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
       <AppSidebar />
       <div className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto w-full flex flex-col">
         <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
-          <div className="mx-auto max-w-6xl px-3 sm:px-6 pb-6 pt-16 sm:pt-6 overflow-x-hidden">
+          <div className="mx-auto max-w-6xl px-3 sm:px-6 pb-6 pt-16 lg:pt-6 overflow-x-hidden">
             <TrialEndingBanner />
             {children}
           </div>

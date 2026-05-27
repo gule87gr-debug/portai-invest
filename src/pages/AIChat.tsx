@@ -512,11 +512,22 @@ const AIChat = () => {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5">
                             <span className={cn("text-sm font-semibold", active ? "text-primary" : "text-foreground")}>{m.label}</span>
-                            {lockedForFree && <Crown className="h-3 w-3 text-primary" />}
+                            {m.advanced ? (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
+                                <Crown className="h-2.5 w-2.5" /> Plus / Pro
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+                                Free
+                              </span>
+                            )}
                             {m.advanced && isPlus && !isPro && (
                               <span className="ml-auto text-[10px] font-semibold text-muted-foreground tnum">
                                 {usedForMode}/{PLUS_MODE_DAILY_LIMIT}
                               </span>
+                            )}
+                            {m.advanced && isPro && (
+                              <span className="ml-auto text-[9px] font-bold uppercase tracking-wider text-primary">∞</span>
                             )}
                           </div>
                           <p className="text-xs text-muted-foreground truncate">{m.desc}</p>
