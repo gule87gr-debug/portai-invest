@@ -435,7 +435,8 @@ serve(async (req) => {
     const { valid, errors, sanitized } = validateInput(rawBody, inputSchema);
     if (!valid) return validationErrorResponse(errors, corsHeaders);
 
-    const { url } = sanitized as { url: string };
+    const { url, language: langCode } = sanitized as { url: string; language?: string };
+    const langName = LANGUAGE_NAMES[(langCode || "en").toLowerCase()] || "English";
 
     // --- Server-side auth & usage enforcement ---
     const supabaseAdmin = createClient(
@@ -542,7 +543,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are a financial article credibility analyst. Given a URL, you must FIRST determine whether the URL points to an actual news/journalism article (or written analysis/opinion piece). You must respond with valid JSON only, no markdown.
+            content: `You are a financial article credibility analyst. ALL human-readable text in your JSON response — including "title", "source", "summary", "biases", "strengths", "redFlag", "hiddenAngle", and every "proDeepDive" field — MUST be written in ${langName}. JSON keys stay in English; only translate the values. Given a URL, you must FIRST determine whether the URL points to an actual news/journalism article (or written analysis/opinion piece). You must respond with valid JSON only, no markdown.
 
 STEP 1 — Classification (REQUIRED):
 Set "isArticle" to false when the URL clearly points to any of:
