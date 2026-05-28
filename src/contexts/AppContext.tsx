@@ -590,7 +590,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       const newTs = timestamps[i];
       if (originalIdx !== i && newTs) {
         updates.push(
-          supabase.from("watchlist_stocks").update({ created_at: newTs } as any).eq("watchlist_id", listId).eq("ticker", s.ticker)
+          Promise.resolve(
+            supabase.from("watchlist_stocks").update({ created_at: newTs } as any).eq("watchlist_id", listId).eq("ticker", s.ticker)
+          )
         );
       }
     });
