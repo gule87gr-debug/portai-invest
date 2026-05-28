@@ -26,6 +26,7 @@ type AppState = {
   addStockToWatchlist: (listId: string, stock: Stock) => void;
   removeStockFromWatchlist: (listId: string, ticker: string) => void;
   moveStock: (listId: string, ticker: string, direction: "up" | "down") => void;
+  reorderStocks: (listId: string, fromIndex: number, toIndex: number) => Promise<void>;
   deleteWatchlist: (listId: string) => void;
   watchlistsLoaded: boolean;
   threads: ForumThread[];
@@ -570,6 +571,32 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const reorderStocks = async (listId: string, fromIndex: number, toIndex: number) => {
+    const list = watchlists.find((w) => w.id === listId);
+    if (!list) return;
+    if (fromIndex === toIndex) return;
+    if (fromIndex < 0 || toIndex < 0 || fromIndex >= list.stocks.length || toIndex >= list.stocks.length) return;
+    const current = [...list.stocks];
+    const [moved] = current.splice(fromIndex, 1);
+    current.splice(toIndex, 0, moved);
+    // Reuse the original DESC-ordered timestamps so DB ordering matches new visual order
+    const timestamps = list.stocks.map((s) => s.createdAt);
+    const next = current.map((s, i) => ({ ...s, createdAt: timestamps[i] ?? s.createdAt }));
+    setWatchlists((prev) => prev.map((w) => w.id === listId ? { ...w, stocks: next } : w));
+    // Persist only changed rows
+    const updates: Promise<unknown>[] = [];
+    next.forEach((s, i) => {
+      const originalIdx = list.stocks.findIndex((x) => x.ticker === s.ticker);
+      const newTs = timestamps[i];
+      if (originalIdx !== i && newTs) {
+        updates.push(
+          supabase.from("watchlist_stocks").update({ created_at: newTs } as any).eq("watchlist_id", listId).eq("ticker", s.ticker)
+        );
+      }
+    });
+    await Promise.all(updates);
+  };
+
   const addThread = (t: ForumThread) => setThreads((prev) => [t, ...prev]);
   const likeThread = (id: string) => setThreads((prev) => prev.map((t) => t.id === id ? { ...t, likes: t.likedByUser ? t.likes - 1 : t.likes + 1, likedByUser: !t.likedByUser } : t));
   const addComment = (threadId: string, comment: ForumComment) =>
@@ -581,7 +608,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setThreads((prev) => prev.map((t) => t.id === threadId ? { ...t, comments: t.comments.filter((c) => c.id !== commentId) } : t));
 
   return (
-    <AppContext.Provider value={{ watchlists, setWatchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, moveStock, deleteWatchlist, watchlistsLoaded, threads, setThreads, addThread, likeThread, addComment, setFactCheck, deleteThread, deleteComment, profile, setProfile, currentUserId, initialLanguage, showTutorial, setShowTutorial }}>
+    <AppContext.Provider value={{ watchlists, setWatchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, moveStock, reorderStocks, deleteWatchlist, watchlistsLoaded, threads, setThreads, addThread, likeThread, addComment, setFactCheck, deleteThread, deleteComment, profile, setProfile, currentUserId, initialLanguage, showTutorial, setShowTutorial }}>
       {children}
     </AppContext.Provider>
   );
