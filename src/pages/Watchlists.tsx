@@ -16,6 +16,7 @@ import { useQuotes } from "@/hooks/useQuotes";
 import { Plus, Trash2, Search, X, ChevronDown, Eye, Filter, GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { DraggableStockList } from "@/components/DraggableStockList";
 
 const FREE_MAX_WATCHLISTS = 1;
 const FREE_MAX_STOCKS = 5;
