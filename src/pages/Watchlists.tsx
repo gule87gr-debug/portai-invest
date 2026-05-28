@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { useApp, Stock } from "@/contexts/AppContext";
@@ -13,7 +13,7 @@ import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
 import { generateSparklineData } from "@/components/Sparkline";
 import { DailySparkline } from "@/components/DailySparkline";
 import { useQuotes } from "@/hooks/useQuotes";
-import { Plus, Trash2, Search, X, ChevronDown, Eye, Filter, ChevronUp } from "lucide-react";
+import { Plus, Trash2, Search, X, ChevronDown, Eye, Filter, GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -21,7 +21,7 @@ const FREE_MAX_WATCHLISTS = 1;
 const FREE_MAX_STOCKS = 5;
 
 const Watchlists = () => {
-  const { watchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, moveStock, deleteWatchlist, watchlistsLoaded } = useApp();
+  const { watchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, reorderStocks, deleteWatchlist, watchlistsLoaded } = useApp();
   const { t } = useLanguage();
   const { hasUnlimitedWatchlists } = useSubscription();
   usePageTitle("Stock Watchlists | PortAI");
