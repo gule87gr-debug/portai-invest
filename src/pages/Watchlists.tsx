@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { useApp, Stock } from "@/contexts/AppContext";
@@ -13,15 +13,16 @@ import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
 import { generateSparklineData } from "@/components/Sparkline";
 import { DailySparkline } from "@/components/DailySparkline";
 import { useQuotes } from "@/hooks/useQuotes";
-import { Plus, Trash2, Search, X, ChevronDown, Eye, Filter, ChevronUp } from "lucide-react";
+import { Plus, Trash2, Search, X, ChevronDown, Eye, Filter, GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { DraggableStockList } from "@/components/DraggableStockList";
 
 const FREE_MAX_WATCHLISTS = 1;
 const FREE_MAX_STOCKS = 5;
 
 const Watchlists = () => {
-  const { watchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, moveStock, deleteWatchlist, watchlistsLoaded } = useApp();
+  const { watchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, reorderStocks, deleteWatchlist, watchlistsLoaded } = useApp();
   const { t } = useLanguage();
   const { hasUnlimitedWatchlists } = useSubscription();
   usePageTitle("Stock Watchlists | PortAI");
@@ -318,113 +319,15 @@ const Watchlists = () => {
               </div>
             )}
 
-            <div className="space-y-3">
-              {active.stocks.map((s) => {
-                const quote = quotes[s.ticker.toUpperCase()];
-                const hasQuote = !!quote;
-                // Always show data: real when available, simulated fallback otherwise
-                let price: number | null = null;
-                let dailyPct: string;
-                let isUp: boolean;
-                let label: string;
-
-                if (hasQuote) {
-                  price = quote.price;
-                  dailyPct = quote.changePercent.toFixed(2);
-                  isUp = quote.changePercent >= 0;
-                  label = quote.live ? "Live" : "Last close";
-                } else if (quotesLoading) {
-                  dailyPct = "—";
-                  isUp = true;
-                  label = "Loading…";
-                } else {
-                  // Fallback: deterministic simulated data so cards are never empty
-                  const { pctChange, isUp: simUp } = generateSparklineData(`${s.ticker}-${new Date().toISOString().split("T")[0]}`);
-                  dailyPct = pctChange.toFixed(2);
-                  isUp = simUp;
-                  label = "Estimated";
-                }
-
-                return (
-                  <div
-                    key={s.ticker}
-                    role="link"
-                    tabIndex={0}
-                    onClick={() => navigate(`/stock/${s.ticker}`)}
-                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate(`/stock/${s.ticker}`); } }}
-                    aria-label={`Open ${s.ticker} ${s.name}`}
-                    className="group rounded-2xl border border-border bg-card/60 cursor-pointer transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 overflow-hidden focus-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                  >
-                    <div className="flex items-center justify-between px-4 sm:px-6 py-4">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="min-w-0">
-                          <span className="font-semibold text-sm block tracking-tight">{s.ticker}</span>
-                          <span className="text-xs text-muted-foreground truncate block max-w-[140px] sm:max-w-[200px]">{s.name}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <div className="flex flex-col items-end gap-0.5">
-                          {price !== null ? (
-                            <span className="text-sm font-semibold tnum text-foreground">${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                          ) : quotesLoading ? (
-                            <span className="text-sm text-muted-foreground animate-pulse">···</span>
-                          ) : null}
-                          {dailyPct !== "—" && (
-                            <span className={cn("text-xs font-semibold tnum", isUp ? "text-gain" : "text-loss")}>
-                              {isUp ? "+" : ""}{dailyPct}%
-                            </span>
-                          )}
-                          <span className="metric-label text-[9px]">{label}</span>
-                        </div>
-                        <div className="flex flex-col gap-0.5">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); moveStock(active.id, s.ticker, "up"); }}
-                            disabled={active.stocks.findIndex((x) => x.ticker === s.ticker) === 0}
-                            aria-label={`Move ${s.ticker} up`}
-                            className="text-muted-foreground hover:text-foreground transition-colors disabled:opacity-20 disabled:hover:text-muted-foreground"
-                          >
-                            <ChevronUp className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); moveStock(active.id, s.ticker, "down"); }}
-                            disabled={active.stocks.findIndex((x) => x.ticker === s.ticker) === active.stocks.length - 1}
-                            aria-label={`Move ${s.ticker} down`}
-                            className="text-muted-foreground hover:text-foreground transition-colors disabled:opacity-20 disabled:hover:text-muted-foreground"
-                          >
-                            <ChevronDown className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                        <button onClick={(e) => { e.stopPropagation(); removeStockFromWatchlist(active.id, s.ticker); }} aria-label={`Remove ${s.ticker} from watchlist`} className="text-muted-foreground hover:text-loss transition-colors shrink-0">
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </div>
-                    {/* Hover-reveal: sparkline + volume strip */}
-                    <div className="reveal-grid px-4 sm:px-6">
-                      <div>
-                        <div className="flex items-center justify-between gap-4 border-t border-border/60 py-3">
-                          <DailySparkline ticker={s.ticker} type={activeTypes[s.ticker.toUpperCase()]} width={160} height={32} colorIsUp={isUp} />
-                          <div className="flex items-center gap-5 text-right">
-                            <div>
-                              <p className="metric-label">High</p>
-                              <p className="text-xs font-mono tnum text-foreground">
-                                {quote?.high ? `$${quote.high.toFixed(2)}` : "—"}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="metric-label">Open</p>
-                              <p className="text-xs font-mono tnum text-foreground">
-                                {quote?.open ? `$${quote.open.toFixed(2)}` : "—"}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <DraggableStockList
+              stocks={active.stocks}
+              onReorder={(from, to) => reorderStocks(active.id, from, to)}
+              onRemove={(ticker) => removeStockFromWatchlist(active.id, ticker)}
+              onOpen={(ticker) => navigate(`/stock/${ticker}`)}
+              quotes={quotes}
+              quotesLoading={quotesLoading}
+              activeTypes={activeTypes}
+            />
           </div>
         )}
       </div>

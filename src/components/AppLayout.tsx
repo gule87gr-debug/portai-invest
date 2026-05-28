@@ -2,6 +2,7 @@ import { AppSidebar } from "./AppSidebar";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { TrialEndingBanner } from "./TrialEndingBanner";
+import { FirstVisitPaywall } from "./FirstVisitPaywall";
 
 export const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const { t } = useLanguage();
@@ -15,6 +16,7 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
             {children}
           </div>
         </main>
+        <FirstVisitPaywall />
         <footer className="border-t border-border px-4 py-4 mt-auto">
           <div className="mx-auto max-w-6xl flex flex-col items-center gap-2">
             <p className="text-[11px] text-muted-foreground text-center max-w-lg leading-relaxed">
