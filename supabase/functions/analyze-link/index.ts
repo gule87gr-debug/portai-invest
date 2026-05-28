@@ -543,7 +543,9 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are a financial article credibility analyst. ALL human-readable text in your JSON response — including "title", "source", "summary", "biases", "strengths", "redFlag", "hiddenAngle", and every "proDeepDive" field — MUST be written in ${langName}. JSON keys stay in English; only translate the values. Given a URL, you must FIRST determine whether the URL points to an actual news/journalism article (or written analysis/opinion piece). You must respond with valid JSON only, no markdown.
+            content: `OUTPUT LANGUAGE: ${langName}. Every human-readable string value in your JSON output — including but not limited to "title", "source", "summary", every item in "biases" and "strengths", "redFlag", "hiddenAngle", and every field inside "proDeepDive" (stakeholderMotives, omittedDataPoints, sentimentDivergence) — MUST be written in ${langName}. JSON keys, ticker symbols, and proper nouns stay in their original form; everything else MUST be translated. Never mix languages in a single value.
+
+You are a financial article credibility analyst. Given a URL, you must FIRST determine whether the URL points to an actual news/journalism article (or written analysis/opinion piece). You must respond with valid JSON only, no markdown.
 
 STEP 1 — Classification (REQUIRED):
 Set "isArticle" to false when the URL clearly points to any of:
@@ -558,11 +560,11 @@ Set "isArticle" to false when the URL clearly points to any of:
 - Forums, comment threads, message boards
 - Anything not in a language you can analyze, or anything ambiguous/empty
 
-If "isArticle" is false, respond with EXACTLY:
-{ "isArticle": false, "reason": "<one short sentence explaining what the URL actually is, e.g. 'This URL is a YouTube video, not a written article.'>" }
+If "isArticle" is false, respond with EXACTLY (the "reason" must be written in ${langName}):
+{ "isArticle": false, "reason": "<one short sentence in ${langName} explaining what the URL actually is>" }
 Do NOT include any other fields when isArticle is false.
 
-STEP 2 — If and only if the URL clearly points to a written news/analysis/opinion article, return this exact JSON structure:
+STEP 2 — If and only if the URL clearly points to a written news/analysis/opinion article, return this exact JSON structure (remember: ALL string values below must be written in ${langName}):
 {
   "isArticle": true,
   "title": "descriptive title of the analysis",
@@ -571,7 +573,7 @@ STEP 2 — If and only if the URL clearly points to a written news/analysis/opin
   "summary": "200 word max summary of what you can infer about the content and source credibility",
   "biases": ["list", "of", "potential", "biases"],
   "strengths": ["list", "of", "credibility", "strengths"],
-  "redFlag": "ONE short tag (2-4 words): Promotional Language | Conflict of Interest | One-Sided | Pump Pattern | Sensational Headline | Cherry-Picked Data | Unverified Claims | Objective Reporting",
+  "redFlag": "ONE short tag (2-4 words) translated to ${langName}, equivalent to one of: Promotional Language | Conflict of Interest | One-Sided | Pump Pattern | Sensational Headline | Cherry-Picked Data | Unverified Claims | Objective Reporting",
   "hiddenAngle": "2-3 sentence Pro insight describing what the article is hiding, omitting, or downplaying. Be concrete.",
   "proDeepDive": {
     "stakeholderMotives": "2-3 sentences: who specifically benefits from THIS article's framing — name the institutions, insiders, analysts or funds whose positioning aligns with the narrative. Reference concrete incentives (recent insider trades, analyst price-target history, fund holdings) rather than generic 'institutions benefit' language.",
@@ -586,7 +588,8 @@ The proDeepDive is the PAID Pro tier insight and MUST go meaningfully deeper tha
   - Reference concrete second-order signals: filing types (10-K, 13F, 8-K, S-1), insider Form 4 activity, options skew/IV, short interest %, analyst dispersion, peer-comparison numbers, historical base rates, regulatory dockets, or capital-flow data.
   - Avoid generic phrases like 'institutions benefit', 'investors should be cautious', 'context is missing'. Always specify WHICH institutions, WHICH context, WHICH numbers.
   - Read like a buy-side note, not a retail summary.
-If you cannot supply that depth for a field, return a single sentence stating exactly which data you would need to deliver it — never pad with boilerplate.
+  - Be written in ${langName} — do NOT fall back to English just because the analytical depth is high. Translate technical terms naturally (e.g., "short interest" → equivalent in ${langName}). Acronyms like 10-K, 13F, ETF, P/E may stay as acronyms.
+If you cannot supply that depth for a field, return a single sentence (in ${langName}) stating exactly which data you would need to deliver it — never pad with boilerplate.
 
 Scoring guide:
 - 9-10: Major wire services (Reuters, AP), SEC filings, Fed publications
@@ -599,7 +602,7 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
           },
           {
             role: "user",
-            content: `Analyze this financial article URL for credibility and bias: ${url}`,
+            content: `Analyze this financial article URL for credibility and bias. Respond entirely in ${langName}. URL: ${url}`,
           },
         ],
       }),
