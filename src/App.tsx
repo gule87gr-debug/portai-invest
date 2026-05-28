@@ -15,26 +15,56 @@ import { RouteSkeleton } from "./components/RouteSkeleton";
 import { OfflineIndicator } from "./components/OfflineIndicator";
 import { SkipToContent } from "./components/SkipToContent";
 
+// Wrap dynamic imports so that a stale chunk (after a redeploy) triggers a
+// one-time hard reload instead of leaving the user on a blank screen.
+const RELOAD_KEY = "portai-chunk-reload";
+function lazyWithRetry<T extends { default: React.ComponentType<any> }>(
+  factory: () => Promise<T>
+) {
+  return lazy(async () => {
+    try {
+      return await factory();
+    } catch (err: any) {
+      const msg = String(err?.message || err);
+      const isChunkErr =
+        msg.includes("Importing a module script failed") ||
+        msg.includes("Failed to fetch dynamically imported module") ||
+        msg.includes("error loading dynamically imported module") ||
+        err?.name === "ChunkLoadError";
+      if (isChunkErr && typeof window !== "undefined") {
+        const already = sessionStorage.getItem(RELOAD_KEY);
+        if (!already) {
+          sessionStorage.setItem(RELOAD_KEY, "1");
+          window.location.reload();
+          // Return a never-resolving promise while reload happens.
+          return new Promise<T>(() => {});
+        }
+      }
+      throw err;
+    }
+  });
+}
+
 // Lazy-load every authenticated/secondary route to keep the initial bundle small
-const Dashboard = lazy(() => import("./pages/Dashboard"));
-const AIChat = lazy(() => import("./pages/AIChat"));
-const Quiz = lazy(() => import("./pages/Quiz"));
-const Forum = lazy(() => import("./pages/Forum"));
-const Watchlists = lazy(() => import("./pages/Watchlists"));
-const StockDetail = lazy(() => import("./pages/StockDetail"));
-const SettingsPage = lazy(() => import("./pages/SettingsPage"));
-const AuthPage = lazy(() => import("./pages/AuthPage"));
-const ResetPassword = lazy(() => import("./pages/ResetPassword"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const Pricing = lazy(() => import("./pages/Pricing"));
-const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
-const TermsOfService = lazy(() => import("./pages/TermsOfService"));
-const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
-const UpgradeSuccess = lazy(() => import("./pages/UpgradeSuccess"));
-const BillingConsents = lazy(() => import("./pages/BillingConsents"));
-const DataCompliance = lazy(() => import("./pages/DataCompliance"));
-const IPPolicy = lazy(() => import("./pages/IPPolicy"));
-const AdminPage = lazy(() => import("./pages/Admin"));
+const Dashboard = lazyWithRetry(() => import("./pages/Dashboard"));
+const AIChat = lazyWithRetry(() => import("./pages/AIChat"));
+const Quiz = lazyWithRetry(() => import("./pages/Quiz"));
+const Forum = lazyWithRetry(() => import("./pages/Forum"));
+const Watchlists = lazyWithRetry(() => import("./pages/Watchlists"));
+const StockDetail = lazyWithRetry(() => import("./pages/StockDetail"));
+const SettingsPage = lazyWithRetry(() => import("./pages/SettingsPage"));
+const AuthPage = lazyWithRetry(() => import("./pages/AuthPage"));
+const ResetPassword = lazyWithRetry(() => import("./pages/ResetPassword"));
+const NotFound = lazyWithRetry(() => import("./pages/NotFound"));
+const Pricing = lazyWithRetry(() => import("./pages/Pricing"));
+const PrivacyPolicy = lazyWithRetry(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazyWithRetry(() => import("./pages/TermsOfService"));
+const Unsubscribe = lazyWithRetry(() => import("./pages/Unsubscribe"));
+const UpgradeSuccess = lazyWithRetry(() => import("./pages/UpgradeSuccess"));
+const BillingConsents = lazyWithRetry(() => import("./pages/BillingConsents"));
+const DataCompliance = lazyWithRetry(() => import("./pages/DataCompliance"));
+const IPPolicy = lazyWithRetry(() => import("./pages/IPPolicy"));
+const AdminPage = lazyWithRetry(() => import("./pages/Admin"));
 
 const queryClient = new QueryClient();
 

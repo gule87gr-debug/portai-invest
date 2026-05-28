@@ -7,6 +7,11 @@ import { bootReducedMotion } from "./hooks/use-reduced-motion";
 // Apply persisted reduced-motion preference before first paint.
 bootReducedMotion();
 
+// Clear stale-chunk reload guard once the app boots successfully.
+if (typeof window !== "undefined") {
+  try { sessionStorage.removeItem("portai-chunk-reload"); } catch {}
+}
+
 // Retire the previous PWA/service-worker setup so published clients stop
 // serving stale bundles after updates.
 async function cleanupClientCaches() {
