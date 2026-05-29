@@ -11,10 +11,17 @@ const TIER_META: Record<string, { label: string; price: string; tone: string }> 
 };
 
 export const BillingStatusWidget = () => {
-  const { tier, isPaid, subscriptionEnd, subscriptionStatus, cancelAtPeriodEnd, loading } = useSubscription();
+  const { tier, isPaid, isPaying, isTrialPro, trialDaysLeft, trialEndsAt, subscriptionEnd, subscriptionStatus, cancelAtPeriodEnd, loading } = useSubscription();
   const [portalLoading, setPortalLoading] = useState(false);
-  const meta = TIER_META[tier] ?? TIER_META.free;
+  const baseMeta = TIER_META[tier] ?? TIER_META.free;
+  // Distinguish trial-Pro from paid Pro so the label and price never lie.
+  const meta = isTrialPro
+    ? { label: "Pro Trial", price: "Free trial", tone: "bg-amber-500/15 text-amber-500" }
+    : baseMeta;
 
+  const trialEndDate = trialEndsAt
+    ? new Date(trialEndsAt).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })
+    : "—";
   const nextBilling = subscriptionEnd
     ? new Date(subscriptionEnd).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })
     : "—";
