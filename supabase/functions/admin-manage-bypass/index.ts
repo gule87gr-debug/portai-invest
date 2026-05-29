@@ -85,6 +85,22 @@ serve(async (req) => {
       return json({ audit: data ?? [] });
     }
 
+    if (action === "list_users") {
+      const page = Math.max(1, Number(body?.page ?? 1));
+      const perPage = Math.min(200, Math.max(1, Number(body?.perPage ?? 100)));
+      const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage });
+      if (error) { console.error("admin-manage-bypass list_users error:", error); return json({ error: "Internal server error" }, 500); }
+      const users = (data?.users ?? []).map((u: any) => ({
+        id: u.id,
+        email: u.email,
+        created_at: u.created_at,
+        last_sign_in_at: u.last_sign_in_at,
+        email_confirmed_at: u.email_confirmed_at,
+        provider: u.app_metadata?.provider ?? null,
+      }));
+      return json({ users, page, perPage });
+    }
+
     return json({ error: "Unknown action" }, 400);
   } catch (e) {
     console.error("admin-manage-bypass error:", e);
