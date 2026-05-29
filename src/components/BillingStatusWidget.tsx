@@ -61,7 +61,7 @@ export const BillingStatusWidget = () => {
                 Canceling
               </span>
             )}
-            {subscriptionStatus && subscriptionStatus !== "active" && (
+            {!isTrialPro && subscriptionStatus && subscriptionStatus !== "active" && (
               <span className="rounded-md bg-muted px-2 py-0.5 text-[10px] font-bold uppercase text-muted-foreground">
                 {subscriptionStatus}
               </span>
@@ -70,7 +70,9 @@ export const BillingStatusWidget = () => {
           <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
             <Calendar className="h-3.5 w-3.5" />
             <span>
-              {isPaid
+              {isTrialPro
+                ? `Trial ends on ${trialEndDate}${trialDaysLeft !== null ? ` · ${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"} left` : ""}`
+                : isPaid
                 ? `${cancelAtPeriodEnd ? "Ends" : "Renews"} on ${nextBilling}`
                 : "No active subscription"}
             </span>
@@ -79,7 +81,7 @@ export const BillingStatusWidget = () => {
         <div className="shrink-0">
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-          ) : isPaid ? (
+          ) : isPaying ? (
             <button
               onClick={handleManageBilling}
               disabled={portalLoading}
@@ -94,7 +96,7 @@ export const BillingStatusWidget = () => {
               className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/85"
             >
               <Crown className="h-3 w-3" />
-              Upgrade
+              {isTrialPro ? "Subscribe" : "Upgrade"}
             </a>
           )}
         </div>
@@ -102,3 +104,4 @@ export const BillingStatusWidget = () => {
     </div>
   );
 };
+
