@@ -221,6 +221,68 @@ const AdminPage = () => {
               <h2 className="text-base font-semibold">Bypass audit log</h2>
               <p className="text-xs text-muted-foreground mt-0.5">Last 100 admin-bypass events.</p>
             </div>
+        {/* Registered users */}
+        <section className="rounded-lg border border-border bg-card p-5">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div>
+              <h2 className="text-base font-semibold">Registered users ({users.length})</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">All accounts that have signed up. Shows up to the 200 most recent.</p>
+            </div>
+            <input
+              type="search"
+              placeholder="Search email…"
+              value={userSearch}
+              onChange={(e) => setUserSearch(e.target.value)}
+              className="w-48 rounded-md border border-border bg-background px-3 py-1.5 text-xs"
+            />
+          </div>
+          {loading ? (
+            <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+          ) : users.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">No users yet.</p>
+          ) : (
+            <div className="overflow-x-auto max-h-[480px]">
+              <table className="w-full text-sm">
+                <thead className="text-xs text-muted-foreground border-b border-border sticky top-0 bg-card">
+                  <tr>
+                    <th className="text-left py-2 px-2">Email</th>
+                    <th className="text-left py-2 px-2">Provider</th>
+                    <th className="text-left py-2 px-2">Joined</th>
+                    <th className="text-left py-2 px-2">Last sign-in</th>
+                    <th className="text-left py-2 px-2">Verified</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users
+                    .filter((u) => !userSearch || (u.email ?? "").toLowerCase().includes(userSearch.toLowerCase()))
+                    .map((u) => (
+                      <tr key={u.id} className="border-b border-border/40">
+                        <td className="py-1.5 px-2 font-medium truncate max-w-[260px]">{u.email ?? "—"}</td>
+                        <td className="py-1.5 px-2 text-muted-foreground">{u.provider ?? "email"}</td>
+                        <td className="py-1.5 px-2 text-muted-foreground">{new Date(u.created_at).toLocaleDateString()}</td>
+                        <td className="py-1.5 px-2 text-muted-foreground">{u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleDateString() : "—"}</td>
+                        <td className="py-1.5 px-2">
+                          {u.email_confirmed_at ? (
+                            <CheckCircle2 className="h-3.5 w-3.5 text-success" />
+                          ) : (
+                            <span className="text-[10px] uppercase text-muted-foreground">Pending</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        {/* Audit log */}
+        <section className="rounded-lg border border-border bg-card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base font-semibold">Bypass audit log</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Last 100 admin-bypass events.</p>
+            </div>
             <button onClick={load} className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-accent">
               <RefreshCw className="h-3 w-3" /> Refresh
             </button>
