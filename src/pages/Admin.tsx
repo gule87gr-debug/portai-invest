@@ -214,14 +214,8 @@ const AdminPage = () => {
           )}
         </section>
 
-        {/* Audit log */}
-        <section className="rounded-lg border border-border bg-card p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-base font-semibold">Bypass audit log</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">Last 100 admin-bypass events.</p>
-            </div>
-        {/* Registered users */}
+
+
         <section className="rounded-lg border border-border bg-card p-5">
           <div className="flex items-center justify-between gap-3 mb-4">
             <div>
