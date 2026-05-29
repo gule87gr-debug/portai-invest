@@ -4,9 +4,12 @@ import { Crown, Check, X, Sparkles } from "lucide-react";
 import { useApp } from "@/contexts/AppContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 const STORAGE_PREFIX = "portai.welcomePaywall.";
+// Treat anyone whose account is older than this as an "existing user" — the
+// paywall must only appear once, for brand-new accounts.
+const NEW_USER_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
 
 export const FirstVisitPaywall = () => {
   const { currentUserId } = useApp();
@@ -18,14 +21,34 @@ export const FirstVisitPaywall = () => {
   useEffect(() => {
     if (!currentUserId) return;
     if (isPaying || trialActive) return;
-    try {
-      const key = STORAGE_PREFIX + currentUserId;
-      if (!localStorage.getItem(key)) {
-        // Small delay so it doesn't interrupt the initial paint/animations
-        const tm = window.setTimeout(() => setOpen(true), 600);
-        return () => window.clearTimeout(tm);
-      }
-    } catch { /* ignore */ }
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const key = STORAGE_PREFIX + currentUserId;
+        // Already shown for this account → never show again.
+        if (localStorage.getItem(key)) return;
+
+        // Only show for brand-new accounts. Pre-seal it for anyone older
+        // than the new-user window so existing users never see it.
+        const { data } = await supabase.auth.getUser();
+        const createdAt = data?.user?.created_at
+          ? new Date(data.user.created_at).getTime()
+          : 0;
+        const isNewUser = createdAt && Date.now() - createdAt < NEW_USER_WINDOW_MS;
+        if (!isNewUser) {
+          try { localStorage.setItem(key, new Date().toISOString()); } catch { /* ignore */ }
+          return;
+        }
+
+        if (!cancelled) {
+          const tm = window.setTimeout(() => !cancelled && setOpen(true), 600);
+          return () => window.clearTimeout(tm);
+        }
+      } catch { /* ignore */ }
+    })();
+
+    return () => { cancelled = true; };
   }, [currentUserId, isPaying, trialActive]);
 
   const dismiss = (markSeen = true) => {
@@ -52,12 +75,17 @@ export const FirstVisitPaywall = () => {
     tr("welcomeFreeLimit2", "Limited AI Chat messages per day"),
     tr("welcomeFreeLimit3", "No real-time sentiment alerts"),
   ];
+  const plusPerks = [
+    tr("welcomePlusPerk1", "Unlimited watchlists & assets"),
+    tr("welcomePlusPerk2", "Full quiz results & recommendations"),
+    tr("welcomePlusPerk3", "Advanced AI models (5 msgs/day each)"),
+    tr("welcomePlusPerk4", "Pro Deep Dive on every article"),
+  ];
   const proPerks = [
     tr("welcomeProPerk1", "Unlimited article bias analyses"),
-    tr("welcomeProPerk2", "Pro Deep Dive: stakeholder motives, omitted data, sentiment divergence"),
-    tr("welcomeProPerk3", "Unlimited watchlists & assets"),
-    tr("welcomeProPerk4", "Real-time sentiment alerts on your tickers"),
-    tr("welcomeProPerk5", "Priority access to advanced AI models"),
+    tr("welcomeProPerk2", "Unlimited AI chat on all models"),
+    tr("welcomeProPerk3", "Real-time sentiment alerts"),
+    tr("welcomeProPerk4", "Everything in Plus"),
   ];
 
   return (
@@ -67,7 +95,7 @@ export const FirstVisitPaywall = () => {
       aria-labelledby="welcome-paywall-title"
       className="fixed inset-0 z-[60] flex items-center justify-center bg-background/85 backdrop-blur-md animate-fade-in p-3 sm:p-4"
     >
-      <div className="relative w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-2xl border border-primary/30 bg-card shadow-2xl shadow-primary/10 spring-in">
+      <div className="relative w-full max-w-4xl max-h-[92vh] overflow-y-auto rounded-2xl border border-primary/30 bg-card shadow-2xl shadow-primary/10 spring-in">
         <button
           onClick={() => dismiss(true)}
           aria-label={tr("close", "Close")}
@@ -87,10 +115,10 @@ export const FirstVisitPaywall = () => {
             {tr("welcomePaywallTitle", "Pick the experience that fits you")}
           </h2>
           <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-            {tr("welcomePaywallSub", "You can stay on the Free tier or unlock Pro for unlimited bias analysis and deep market intelligence.")}
+            {tr("welcomePaywallSub", "Start free, upgrade anytime. You can also change plans later from Settings.")}
           </p>
 
-          <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+          <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
             {/* Free tier */}
             <div className="rounded-xl border border-border bg-accent/20 p-4 sm:p-5 flex flex-col">
               <div className="flex items-baseline justify-between mb-2">
@@ -131,8 +159,42 @@ export const FirstVisitPaywall = () => {
               </button>
             </div>
 
+            {/* Plus tier */}
+            <div className="rounded-xl border border-primary/40 bg-gradient-to-br from-primary/[0.06] to-transparent p-4 sm:p-5 flex flex-col">
+              <div className="flex items-baseline justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <h3 className="text-base font-bold">Plus</h3>
+                </div>
+                <div className="text-right">
+                  <span className="text-sm font-bold text-foreground">€8.99</span>
+                  <span className="text-[11px] text-muted-foreground">/mo</span>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mb-3">{tr("welcomePlusSubtitle", "More room to research")}</p>
+
+              <p className="text-[11px] font-bold uppercase tracking-wider text-primary mb-1.5">
+                {tr("everythingYouGet", "Everything you get")}
+              </p>
+              <ul className="space-y-1.5 mb-4">
+                {plusPerks.map((p) => (
+                  <li key={p} className="flex items-start gap-2 text-xs">
+                    <Check className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
+                    <span className="text-foreground/90">{p}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <button
+                onClick={() => { dismiss(true); navigate("/pricing"); }}
+                className="mt-auto w-full rounded-lg border border-primary bg-primary/10 px-4 py-2.5 text-sm font-bold text-primary hover:bg-primary/15 transition-colors active:scale-[0.98]"
+              >
+                {tr("upgradeToPlus", "Upgrade to Plus")}
+              </button>
+            </div>
+
             {/* Pro tier */}
-            <div className="relative rounded-xl border border-primary bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4 sm:p-5 flex flex-col">
+            <div className="relative rounded-xl border-2 border-primary bg-gradient-to-br from-primary/15 via-primary/5 to-transparent p-4 sm:p-5 flex flex-col">
               <span className="absolute -top-2 right-4 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary-foreground shadow-md">
                 {tr("bestValue", "Best Value")}
               </span>
