@@ -9,11 +9,14 @@ import { Navigate } from "react-router-dom";
 
 type AdminRow = { id: string; email: string; note: string; created_at: string };
 type AuditRow = { id: string; email: string; function_name: string; user_id: string | null; created_at: string };
+type UserRow = { id: string; email: string | null; created_at: string; last_sign_in_at: string | null; email_confirmed_at: string | null; provider: string | null };
 
 const AdminPage = () => {
   const { isAdmin, loading: adminLoading } = useIsAdmin();
   const [admins, setAdmins] = useState<AdminRow[]>([]);
   const [audit, setAudit] = useState<AuditRow[]>([]);
+  const [users, setUsers] = useState<UserRow[]>([]);
+  const [userSearch, setUserSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [newEmail, setNewEmail] = useState("");
   const [newNote, setNewNote] = useState("");
@@ -23,20 +26,24 @@ const AdminPage = () => {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [a, b] = await Promise.all([
+    const [a, b, u] = await Promise.all([
       supabase.functions.invoke("admin-manage-bypass", { body: { action: "list" } }),
       supabase.functions.invoke("admin-manage-bypass", { body: { action: "list_audit" } }),
+      supabase.functions.invoke("admin-manage-bypass", { body: { action: "list_users", perPage: 200 } }),
     ]);
     if (a.error) toast.error(a.error.message);
     else setAdmins(((a.data as any)?.admins ?? []) as AdminRow[]);
     if (b.error) toast.error(b.error.message);
     else setAudit(((b.data as any)?.audit ?? []) as AuditRow[]);
+    if (u.error) toast.error(u.error.message);
+    else setUsers(((u.data as any)?.users ?? []) as UserRow[]);
     setLoading(false);
   }, []);
 
   useEffect(() => {
     if (isAdmin) load();
   }, [isAdmin, load]);
+
 
   const handleAdd = async () => {
     const email = newEmail.trim().toLowerCase();
