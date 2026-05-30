@@ -256,7 +256,7 @@ const Watchlists = () => {
           <h1 className="text-2xl sm:text-3xl font-bold">{t("watchlists")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{t("trackStocks")}</p>
         </div>
-        <button onClick={handleNewListClick} className="flex items-center gap-2 rounded-lg bg-primary px-3 sm:px-4 py-2 sm:py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+        <button onClick={handleNewListClick} aria-label={t("newList")} className="flex items-center gap-2 rounded-lg bg-primary px-3 sm:px-4 py-2 sm:py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
           <Plus className="h-4 w-4" /> <span className="hidden sm:inline">{t("newList")}</span>
         </button>
       </div>
@@ -308,7 +308,7 @@ const Watchlists = () => {
                 <h2 className="text-lg sm:text-xl font-bold truncate">{active.name}</h2>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground line-clamp-2">{active.desc}</p>
               </div>
-              <button onClick={handleAddStockClick} className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 shrink-0">
+              <button onClick={handleAddStockClick} aria-label={t("addStock")} className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 shrink-0">
                 <Plus className="h-3.5 w-3.5" /> <span className="hidden sm:inline">{t("addStock")}</span>
               </button>
             </div>
