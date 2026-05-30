@@ -86,11 +86,18 @@ serve(async (req) => {
     }
 
     if (action === "list_users") {
-      const page = Math.max(1, Number(body?.page ?? 1));
-      const perPage = Math.min(200, Math.max(1, Number(body?.perPage ?? 100)));
-      const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage });
-      if (error) { console.error("admin-manage-bypass list_users error:", error); return json({ error: "Internal server error" }, 500); }
-      const users = (data?.users ?? []).map((u: any) => ({
+      // Paginate through ALL users (cap to avoid runaway loops).
+      const perPage = 1000;
+      const MAX_PAGES = 50; // up to 50,000 users
+      const all: any[] = [];
+      for (let page = 1; page <= MAX_PAGES; page++) {
+        const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage });
+        if (error) { console.error("admin-manage-bypass list_users error:", error); return json({ error: "Internal server error" }, 500); }
+        const batch = data?.users ?? [];
+        all.push(...batch);
+        if (batch.length < perPage) break;
+      }
+      const users = all.map((u: any) => ({
         id: u.id,
         email: u.email,
         created_at: u.created_at,
@@ -98,7 +105,7 @@ serve(async (req) => {
         email_confirmed_at: u.email_confirmed_at,
         provider: u.app_metadata?.provider ?? null,
       }));
-      return json({ users, page, perPage });
+      return json({ users, total: users.length });
     }
 
     return json({ error: "Unknown action" }, 400);
