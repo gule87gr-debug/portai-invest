@@ -88,17 +88,17 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
 
   const handle = async () => {
     setEmailInUse(false);
-    if (!email.trim() || !password.trim()) return setError("Please fill in all fields");
-    if (email.trim().length > 255) return setError("Email is too long");
-    if (!emailRegex.test(email.trim())) return setError("Please enter a valid email address");
-    if (password.length < 8) return setError("Password must be at least 8 characters");
-    if (password.length > 128) return setError("Password is too long");
-    if (mode === "signup" && !/[A-Z]/.test(password)) return setError("Password must contain at least one uppercase letter");
-    if (mode === "signup" && !/[0-9]/.test(password)) return setError("Password must contain at least one number");
-    if (mode === "signup" && !username.trim()) return setError("Display name is required");
-    if (mode === "signup" && username.trim().length < 2) return setError("Display name must be at least 2 characters");
-    if (mode === "signup" && username.trim().length > 30) return setError("Display name must be 30 characters or less");
-    if (mode === "signup" && usernameStatus === "taken") return setError("This display name is already taken");
+    if (!email.trim() || !password.trim()) return setError(t("fillAllFields"));
+    if (email.trim().length > 255) return setError(t("invalidEmail"));
+    if (!emailRegex.test(email.trim())) return setError(t("invalidEmail"));
+    if (password.length < 8) return setError(t("passwordMin8"));
+    if (password.length > 128) return setError(t("passwordMin8"));
+    if (mode === "signup" && !/[A-Z]/.test(password)) return setError(t("passwordNeedsUpper"));
+    if (mode === "signup" && !/[0-9]/.test(password)) return setError(t("passwordNeedsNumber"));
+    if (mode === "signup" && !username.trim()) return setError(t("displayNameRequired"));
+    if (mode === "signup" && username.trim().length < 2) return setError(t("displayNameMin2"));
+    if (mode === "signup" && username.trim().length > 30) return setError(t("displayNameMax30"));
+    if (mode === "signup" && usernameStatus === "taken") return setError(t("displayNameTaken"));
     setLoading(true);
     setError("");
 
@@ -109,16 +109,17 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
       });
       if (availabilityError || !availableNow) {
         setUsernameStatus("taken");
-        setError("This display name was just taken. Please choose another.");
+        setError(t("displayNameJustTaken"));
         setLoading(false);
         return;
       }
+
 
       const { data, error: authError } = await supabase.auth.signUp({ email, password });
       if (authError) {
         if (authError.message.toLowerCase().includes("already registered") || authError.message.toLowerCase().includes("already been registered")) {
           setEmailInUse(true);
-          setError("This email is already registered.");
+          setError(t("emailInUse"));
         } else {
           setError(authError.message);
         }
@@ -153,8 +154,8 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
   };
 
   const handleForgotPassword = async () => {
-    if (!email.trim()) return setError("Please enter your email address");
-    if (!emailRegex.test(email.trim())) return setError("Please enter a valid email address");
+    if (!email.trim()) return setError(t("enterEmailPrompt"));
+    if (!emailRegex.test(email.trim())) return setError(t("invalidEmail"));
     setLoading(true);
     setError("");
     setSuccess("");
@@ -164,7 +165,7 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
     if (resetError) {
       setError(resetError.message);
     } else {
-      setSuccess("A recovery code has been sent to your email.");
+      setSuccess(t("recoveryCodeSentMsg"));
       setMode("otp");
       startCooldown();
     }
@@ -181,15 +182,16 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
     if (resetError) {
       setError(resetError.message);
     } else {
-      setSuccess("A new recovery code has been sent to your email.");
+      setSuccess(t("newRecoveryCodeSentMsg"));
       setOtpCode("");
       startCooldown();
     }
   };
 
+
   const handleVerifyOtp = async () => {
     const code = otpCode.trim();
-    if (!code) return setError("Please enter the recovery code");
+    if (!code) return setError(t("enterRecoveryCodePrompt"));
     setLoading(true);
     setError("");
 
@@ -204,7 +206,7 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
     } else {
       // Session is now set with PASSWORD_RECOVERY event.
       // App.tsx will intercept and show the ResetPassword page.
-      setSuccess("Code verified! Redirecting...");
+      setSuccess(t("codeVerifiedRedirect"));
     }
   };
 
@@ -247,9 +249,9 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
             <TrendingUp className="h-7 w-7 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold">PortAI — AI-Powered Investment Analysis</h1>
+          <h1 className="text-2xl font-bold">PortAI — {t("aiPoweredAnalysisTag")}</h1>
           <p className="text-sm text-muted-foreground">
-            {mode === "forgot" ? "Reset your password" : mode === "otp" ? "Enter recovery code" : "AI-powered investment analysis"}
+            {mode === "forgot" ? t("resetYourPassword") : mode === "otp" ? t("enterRecoveryCodeTitle") : t("aiPoweredAnalysisTag")}
           </p>
         </div>
 
@@ -260,7 +262,7 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
               <div>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <input type="email" value={email} onChange={(e) => validateEmail(e.target.value)} placeholder="Email address" className={cn("h-11 w-full rounded-lg border bg-card pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", hasEmailError ? "border-loss" : "border-border")} />
+                  <input type="email" value={email} onChange={(e) => validateEmail(e.target.value)} placeholder={t("emailAddress")} className={cn("h-11 w-full rounded-lg border bg-card pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", hasEmailError ? "border-loss" : "border-border")} />
                 </div>
                 {hasEmailError && <p className="mt-1 text-xs text-loss">{emailError}</p>}
               </div>
@@ -270,11 +272,11 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
             {success && <p className="text-sm text-gain">{success}</p>}
 
             <button onClick={handleForgotPassword} disabled={loading || hasEmailError} className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send Recovery Code"}
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("sendRecoveryCode")}
             </button>
 
             <button onClick={goBackToLogin} className="flex w-full items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-              <ArrowLeft className="h-4 w-4" /> Back to Log In
+              <ArrowLeft className="h-4 w-4" /> {t("backToLoginBtn")}
             </button>
           </>
         )}
@@ -290,7 +292,7 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
                   type="text"
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value)}
-                  placeholder="Recovery code"
+                  placeholder={t("recoveryCodePh")}
                   autoComplete="one-time-code"
                   className="h-11 w-full rounded-lg border border-border bg-card pl-10 pr-4 text-sm text-foreground font-mono tracking-widest placeholder:text-muted-foreground placeholder:font-sans placeholder:tracking-normal focus:outline-none focus:ring-2 focus:ring-ring"
                 />
@@ -301,12 +303,12 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
             {success && <p className="text-sm text-gain">{success}</p>}
 
             <button onClick={handleVerifyOtp} disabled={loading || !otpCode.trim()} className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify Code"}
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t("verifyCodeBtn")}
             </button>
 
             <div className="flex items-center justify-between">
               <button onClick={goBackToLogin} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                <ArrowLeft className="h-4 w-4" /> Back to Log In
+                <ArrowLeft className="h-4 w-4" /> {t("backToLoginBtn")}
               </button>
               <button
                 onClick={handleResendCode}
@@ -314,7 +316,7 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
                 className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors disabled:text-muted-foreground disabled:cursor-not-allowed"
               >
                 <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
-                {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend code"}
+                {resendCooldown > 0 ? t("resendInSec").replace("{n}", String(resendCooldown)) : t("resendCodeBtn")}
               </button>
             </div>
           </>
@@ -327,7 +329,7 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
             <div className="flex rounded-lg bg-card p-1">
               {(["signup", "login"] as const).map((m) => (
                 <button key={m} onClick={() => { setMode(m); setError(""); setEmailInUse(false); setEmailError(""); }} className={cn("flex-1 rounded-md py-2 text-sm font-medium transition-colors", mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}>
-                  {m === "signup" ? "Create Account" : "Log In"}
+                  {m === "signup" ? t("createAccount") : t("logIn")}
                 </button>
               ))}
             </div>
@@ -336,7 +338,7 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
               <div>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <input type="email" value={email} onChange={(e) => validateEmail(e.target.value)} placeholder="Email address" className={cn("h-11 w-full rounded-lg border bg-card pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", hasEmailError ? "border-loss" : "border-border")} />
+                  <input type="email" value={email} onChange={(e) => validateEmail(e.target.value)} placeholder={t("emailAddress")} className={cn("h-11 w-full rounded-lg border bg-card pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", hasEmailError ? "border-loss" : "border-border")} />
                 </div>
                 {hasEmailError && <p className="mt-1 text-xs text-loss">{emailError}</p>}
               </div>
@@ -345,7 +347,7 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
                 <div>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <input type="text" value={username} onChange={(e) => checkUsername(e.target.value)} placeholder="Choose a display name" className={cn("h-11 w-full rounded-lg border bg-card pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", usernameStatus === "taken" ? "border-loss" : usernameStatus === "available" ? "border-gain" : "border-border")} />
+                    <input type="text" value={username} onChange={(e) => checkUsername(e.target.value)} placeholder={t("chooseDisplayNamePh")} className={cn("h-11 w-full rounded-lg border bg-card pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", usernameStatus === "taken" ? "border-loss" : usernameStatus === "available" ? "border-gain" : "border-border")} />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
                       {usernameStatus === "checking" && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
                       {usernameStatus === "available" && <Check className="h-4 w-4 text-gain" />}
@@ -359,15 +361,15 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
 
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input type={showPw ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handle()} placeholder="Password" className="h-11 w-full rounded-lg border border-border bg-card pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-                <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? "Hide password" : "Show password"} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                <input type={showPw ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handle()} placeholder={t("password")} className="h-11 w-full rounded-lg border border-border bg-card pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+                <button type="button" onClick={() => setShowPw(!showPw)} aria-label={showPw ? t("hidePasswordA") : t("showPasswordA")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
 
               {mode === "login" && (
                 <button onClick={() => { setMode("forgot"); setError(""); setSuccess(""); }} className="text-xs text-primary hover:underline">
-                  Forgot password?
+                  {t("forgotPasswordQ")}
                 </button>
               )}
             </div>
@@ -377,19 +379,19 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
                 <p className="text-sm text-loss">{error}</p>
                 {emailInUse && (
                   <button onClick={() => { setMode("login"); setError(""); setEmailInUse(false); }} className="w-full rounded-lg border border-primary/30 bg-primary/10 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/20">
-                    Switch to Log In
+                    {t("switchToLogin")}
                   </button>
                 )}
               </div>
             )}
 
             <button onClick={handle} disabled={isSubmitDisabled} className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : mode === "signup" ? "Create Account" : "Log In"}
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : mode === "signup" ? t("createAccount") : t("logIn")}
             </button>
 
             <div className="relative flex items-center gap-3">
               <div className="flex-1 border-t border-border" />
-              <span className="text-xs text-muted-foreground">or continue with</span>
+              <span className="text-xs text-muted-foreground">{t("orContinueWith")}</span>
               <div className="flex-1 border-t border-border" />
             </div>
 
@@ -423,9 +425,9 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
             </div>
 
             <p className="text-center text-xs text-muted-foreground">
-              {mode === "signup" ? "Already have an account?" : "Don't have an account?"}{" "}
+              {mode === "signup" ? t("alreadyHaveAccount") : t("dontHaveAccount")}{" "}
               <button onClick={() => { setMode(mode === "signup" ? "login" : "signup"); setError(""); setEmailInUse(false); setEmailError(""); }} className="text-primary hover:underline">
-                {mode === "signup" ? "Log in" : "Sign up"}
+                {mode === "signup" ? t("logIn") : t("signUp")}
               </button>
             </p>
           </>
