@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 
 type AdminRow = { id: string; email: string; note: string; created_at: string };
 type AuditRow = { id: string; email: string; function_name: string; user_id: string | null; created_at: string };
-type UserRow = { id: string; email: string | null; created_at: string; last_sign_in_at: string | null; email_confirmed_at: string | null; provider: string | null };
+type UserRow = { id: string; email: string | null; username: string | null; created_at: string; last_sign_in_at: string | null; email_confirmed_at: string | null; provider: string | null };
 
 const AdminPage = () => {
   const { isAdmin, loading: adminLoading } = useIsAdmin();
@@ -19,31 +19,46 @@ const AdminPage = () => {
   const [users, setUsers] = useState<UserRow[]>([]);
   const [userSearch, setUserSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [auditLoading, setAuditLoading] = useState(false);
+  const [usersLoaded, setUsersLoaded] = useState(false);
+  const [auditLoaded, setAuditLoaded] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [newNote, setNewNote] = useState("");
   const [adding, setAdding] = useState(false);
   const [stripeReport, setStripeReport] = useState<{ ok: boolean; issues: string[] } | null>(null);
   const [stripeLoading, setStripeLoading] = useState(false);
 
-  const load = useCallback(async () => {
+  // Load only admin list on mount (fast). Users + audit are lazy-loaded when dialogs open.
+  const loadAdmins = useCallback(async () => {
     setLoading(true);
-    const [a, b, u] = await Promise.all([
-      supabase.functions.invoke("admin-manage-bypass", { body: { action: "list" } }),
-      supabase.functions.invoke("admin-manage-bypass", { body: { action: "list_audit" } }),
-      supabase.functions.invoke("admin-manage-bypass", { body: { action: "list_users" } }),
-    ]);
-    if (a.error) toast.error(a.error.message);
-    else setAdmins(((a.data as any)?.admins ?? []) as AdminRow[]);
-    if (b.error) toast.error(b.error.message);
-    else setAudit(((b.data as any)?.audit ?? []) as AuditRow[]);
-    if (u.error) toast.error(u.error.message);
-    else setUsers(((u.data as any)?.users ?? []) as UserRow[]);
+    const { data, error } = await supabase.functions.invoke("admin-manage-bypass", { body: { action: "list" } });
+    if (error) toast.error(error.message);
+    else setAdmins(((data as any)?.admins ?? []) as AdminRow[]);
     setLoading(false);
   }, []);
 
+  const loadUsers = useCallback(async () => {
+    setUsersLoading(true);
+    const { data, error } = await supabase.functions.invoke("admin-manage-bypass", { body: { action: "list_users" } });
+    if (error) toast.error(error.message);
+    else setUsers(((data as any)?.users ?? []) as UserRow[]);
+    setUsersLoading(false);
+    setUsersLoaded(true);
+  }, []);
+
+  const loadAudit = useCallback(async () => {
+    setAuditLoading(true);
+    const { data, error } = await supabase.functions.invoke("admin-manage-bypass", { body: { action: "list_audit" } });
+    if (error) toast.error(error.message);
+    else setAudit(((data as any)?.audit ?? []) as AuditRow[]);
+    setAuditLoading(false);
+    setAuditLoaded(true);
+  }, []);
+
   useEffect(() => {
-    if (isAdmin) load();
-  }, [isAdmin, load]);
+    if (isAdmin) loadAdmins();
+  }, [isAdmin, loadAdmins]);
 
 
   const handleAdd = async () => {
