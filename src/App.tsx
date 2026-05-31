@@ -66,7 +66,17 @@ const DataCompliance = lazyWithRetry(() => import("./pages/DataCompliance"));
 const IPPolicy = lazyWithRetry(() => import("./pages/IPPolicy"));
 const AdminPage = lazyWithRetry(() => import("./pages/Admin"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 min: avoid refetch on every mount
+      gcTime: 30 * 60 * 1000, // 30 min: keep cached data warm
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      retry: 1,
+    },
+  },
+});
 
 const RouteFallback = () => (
   <div className="flex min-h-screen items-center justify-center bg-background">
