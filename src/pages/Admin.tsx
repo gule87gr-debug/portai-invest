@@ -76,7 +76,7 @@ const AdminPage = () => {
     setNewEmail("");
     setNewNote("");
     toast.success("Admin added");
-    await load();
+    await loadAdmins();
   };
 
   const handleRemove = async (id: string, email: string) => {
@@ -89,7 +89,7 @@ const AdminPage = () => {
       return;
     }
     toast.success("Admin removed");
-    await load();
+    await loadAdmins();
   };
 
   const runStripeAudit = async () => {
@@ -260,7 +260,7 @@ const AdminPage = () => {
                   onChange={(e) => setUserSearch(e.target.value)}
                   className="w-full sm:w-64 rounded-md border border-border bg-background px-3 py-1.5 text-xs"
                 />
-                <button onClick={load} className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-accent shrink-0">
+                <button onClick={loadUsers} className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-accent shrink-0">
                   <RefreshCw className="h-3 w-3" /> Refresh
                 </button>
               </div>
@@ -324,7 +324,7 @@ const AdminPage = () => {
                 <DialogDescription>Last 100 admin-bypass events.</DialogDescription>
               </DialogHeader>
               <div className="flex justify-end mb-2">
-                <button onClick={load} className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-accent">
+                <button onClick={loadUsers} className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-accent">
                   <RefreshCw className="h-3 w-3" /> Refresh
                 </button>
               </div>
