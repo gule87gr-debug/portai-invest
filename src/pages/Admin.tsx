@@ -234,14 +234,14 @@ const AdminPage = () => {
 
         {/* Popups: Registered users + Bypass audit log */}
         <section className="grid gap-3 sm:grid-cols-2">
-          <Dialog>
+          <Dialog onOpenChange={(open) => { if (open && !usersLoaded && !usersLoading) loadUsers(); }}>
             <DialogTrigger asChild>
               <button className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-4 text-left hover:bg-accent transition-colors">
                 <div className="flex items-center gap-3">
                   <Users className="h-5 w-5 text-primary" />
                   <div>
                     <p className="text-sm font-semibold">Registered users</p>
-                    <p className="text-xs text-muted-foreground">{loading ? "Loading…" : `${users.length} total`}</p>
+                    <p className="text-xs text-muted-foreground">{usersLoaded ? `${users.length} total` : "Click to load"}</p>
                   </div>
                 </div>
                 <span className="text-xs text-muted-foreground">Open →</span>
@@ -249,22 +249,22 @@ const AdminPage = () => {
             </DialogTrigger>
             <DialogContent className="max-w-3xl">
               <DialogHeader>
-                <DialogTitle>Registered users ({users.length})</DialogTitle>
+                <DialogTitle>Registered users{usersLoaded ? ` (${users.length})` : ""}</DialogTitle>
                 <DialogDescription>All accounts that have signed up.</DialogDescription>
               </DialogHeader>
               <div className="flex items-center justify-between gap-2 mb-2">
                 <input
                   type="search"
-                  placeholder="Search email…"
+                  placeholder="Search email or username…"
                   value={userSearch}
                   onChange={(e) => setUserSearch(e.target.value)}
                   className="w-full sm:w-64 rounded-md border border-border bg-background px-3 py-1.5 text-xs"
                 />
-                <button onClick={loadUsers} className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-accent shrink-0">
-                  <RefreshCw className="h-3 w-3" /> Refresh
+                <button onClick={loadUsers} disabled={usersLoading} className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-accent shrink-0 disabled:opacity-50">
+                  <RefreshCw className={`h-3 w-3 ${usersLoading ? "animate-spin" : ""}`} /> Refresh
                 </button>
               </div>
-              {loading ? (
+              {usersLoading ? (
                 <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
               ) : users.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-6">No users yet.</p>
@@ -273,6 +273,7 @@ const AdminPage = () => {
                   <table className="w-full text-sm">
                     <thead className="text-xs text-muted-foreground border-b border-border sticky top-0 bg-card">
                       <tr>
+                        <th className="text-left py-2 px-2">Username</th>
                         <th className="text-left py-2 px-2">Email</th>
                         <th className="text-left py-2 px-2">Provider</th>
                         <th className="text-left py-2 px-2">Joined</th>
@@ -282,10 +283,17 @@ const AdminPage = () => {
                     </thead>
                     <tbody>
                       {users
-                        .filter((u) => !userSearch || (u.email ?? "").toLowerCase().includes(userSearch.toLowerCase()))
+                        .filter((u) => {
+                          if (!userSearch) return true;
+                          const q = userSearch.toLowerCase();
+                          return (u.email ?? "").toLowerCase().includes(q) || (u.username ?? "").toLowerCase().includes(q);
+                        })
                         .map((u) => (
                           <tr key={u.id} className="border-b border-border/40">
-                            <td className="py-1.5 px-2 font-medium truncate max-w-[260px]">{u.email ?? "—"}</td>
+                            <td className="py-1.5 px-2 font-medium truncate max-w-[180px]">
+                              {u.username ?? <span className="text-muted-foreground italic">—</span>}
+                            </td>
+                            <td className="py-1.5 px-2 text-muted-foreground truncate max-w-[240px]">{u.email ?? "—"}</td>
                             <td className="py-1.5 px-2 text-muted-foreground">{u.provider ?? "email"}</td>
                             <td className="py-1.5 px-2 text-muted-foreground">{new Date(u.created_at).toLocaleDateString()}</td>
                             <td className="py-1.5 px-2 text-muted-foreground">{u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleDateString() : "—"}</td>
@@ -305,14 +313,14 @@ const AdminPage = () => {
             </DialogContent>
           </Dialog>
 
-          <Dialog>
+          <Dialog onOpenChange={(open) => { if (open && !auditLoaded && !auditLoading) loadAudit(); }}>
             <DialogTrigger asChild>
               <button className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-4 text-left hover:bg-accent transition-colors">
                 <div className="flex items-center gap-3">
                   <ScrollText className="h-5 w-5 text-primary" />
                   <div>
                     <p className="text-sm font-semibold">Bypass audit log</p>
-                    <p className="text-xs text-muted-foreground">{loading ? "Loading…" : `${audit.length} events`}</p>
+                    <p className="text-xs text-muted-foreground">{auditLoaded ? `${audit.length} events` : "Click to load"}</p>
                   </div>
                 </div>
                 <span className="text-xs text-muted-foreground">Open →</span>
@@ -324,11 +332,13 @@ const AdminPage = () => {
                 <DialogDescription>Last 100 admin-bypass events.</DialogDescription>
               </DialogHeader>
               <div className="flex justify-end mb-2">
-                <button onClick={loadUsers} className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-accent">
-                  <RefreshCw className="h-3 w-3" /> Refresh
+                <button onClick={loadAudit} disabled={auditLoading} className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-accent disabled:opacity-50">
+                  <RefreshCw className={`h-3 w-3 ${auditLoading ? "animate-spin" : ""}`} /> Refresh
                 </button>
               </div>
-              {audit.length === 0 ? (
+              {auditLoading ? (
+                <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+              ) : audit.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-6">No bypass events recorded yet.</p>
               ) : (
                 <div className="overflow-auto max-h-[60vh]">
