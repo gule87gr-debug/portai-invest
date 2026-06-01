@@ -114,16 +114,24 @@ serve(async (req) => {
           });
         }
       }
-      const users = all.map((u: any) => ({
-        id: u.id,
-        email: u.email,
-        username: nameMap.get(u.id) ?? null,
-        created_at: u.created_at,
-        last_sign_in_at: u.last_sign_in_at,
-        email_confirmed_at: u.email_confirmed_at,
-        provider: u.app_metadata?.provider ?? null,
-      }));
+      const users = all.map((u: any) => {
+        const meta = u.user_metadata ?? {};
+        const metaName =
+          meta.display_name || meta.full_name || meta.name || meta.user_name || meta.preferred_username || null;
+        const emailLocal = typeof u.email === "string" && u.email.includes("@") ? u.email.split("@")[0] : null;
+        const username = nameMap.get(u.id) ?? metaName ?? emailLocal ?? null;
+        return {
+          id: u.id,
+          email: u.email,
+          username,
+          created_at: u.created_at,
+          last_sign_in_at: u.last_sign_in_at,
+          email_confirmed_at: u.email_confirmed_at,
+          provider: u.app_metadata?.provider ?? null,
+        };
+      });
       return json({ users, total: users.length });
+
     }
 
     return json({ error: "Unknown action" }, 400);
