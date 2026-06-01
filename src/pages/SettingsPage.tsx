@@ -5,7 +5,7 @@ import { useApp } from "@/contexts/AppContext";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useSubscription } from "@/hooks/useSubscription";
-import { User, Eye, EyeOff, Upload, Camera, LogOut, Globe, Sun, Moon, Check, X as XIcon, Loader2, GraduationCap, Crown, CreditCard, AlertTriangle, ShieldCheck } from "lucide-react";
+import { User, Eye, EyeOff, Upload, Camera, LogOut, Globe, Sun, Moon, Check, X as XIcon, Loader2, GraduationCap, Crown, CreditCard, AlertTriangle, ShieldCheck, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "@/hooks/use-theme";
@@ -135,6 +135,31 @@ const SettingsPage = () => {
   };
 
   const handleLogout = async () => { await supabase.auth.signOut(); };
+
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== "DELETE") {
+      toast.error(t("deleteAccountTypeError") !== "deleteAccountTypeError" ? t("deleteAccountTypeError") : "Type DELETE to confirm.");
+      return;
+    }
+    setDeleteLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-account", { body: {} });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(t("deleteAccountDone") !== "deleteAccountDone" ? t("deleteAccountDone") : "Your account and data have been deleted.");
+      await supabase.auth.signOut();
+      navigate("/", { replace: true });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to delete account";
+      toast.error(msg);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
 
   const handleCancelSubscription = async () => {
     if (!subscriptionId) return;
@@ -908,6 +933,68 @@ const SettingsPage = () => {
               {t("startTourBtn")}
             </button>
           </div>
+        </div>
+
+        {/* Danger Zone — GDPR Art. 17 self-serve deletion */}
+        <div className="rounded-2xl border border-loss/30 bg-loss/5 p-5 space-y-4">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-loss/15">
+              <AlertTriangle className="h-5 w-5 text-loss" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base font-semibold text-foreground">
+                {t("dangerZone") !== "dangerZone" ? t("dangerZone") : "Danger Zone"}
+              </h2>
+              <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                {t("deleteAccountBody") !== "deleteAccountBody"
+                  ? t("deleteAccountBody")
+                  : "Permanently delete your account and all associated data (watchlists, alerts, chats, settings). This action cannot be undone."}
+              </p>
+            </div>
+          </div>
+
+          {!showDeleteAccount ? (
+            <button
+              onClick={() => setShowDeleteAccount(true)}
+              className="flex items-center gap-2 rounded-xl border border-loss/40 px-4 py-2 text-sm font-medium text-loss transition-colors hover:bg-loss/10"
+            >
+              <Trash2 className="h-4 w-4" />
+              {t("deleteAccount") !== "deleteAccount" ? t("deleteAccount") : "Delete my account"}
+            </button>
+          ) : (
+            <div className="space-y-3 rounded-xl border border-loss/30 bg-background/40 p-4">
+              <label className="block text-xs font-medium text-foreground">
+                {t("deleteAccountTypePrompt") !== "deleteAccountTypePrompt"
+                  ? t("deleteAccountTypePrompt")
+                  : "Type DELETE to confirm:"}
+              </label>
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="DELETE"
+                autoComplete="off"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-loss focus:outline-none"
+              />
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={deleteLoading || deleteConfirmText !== "DELETE"}
+                  className="flex items-center gap-2 rounded-xl bg-loss px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-loss/90 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {deleteLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                  {t("permanentlyDelete") !== "permanentlyDelete" ? t("permanentlyDelete") : "Permanently delete"}
+                </button>
+                <button
+                  onClick={() => { setShowDeleteAccount(false); setDeleteConfirmText(""); }}
+                  disabled={deleteLoading}
+                  className="rounded-xl border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+                >
+                  {t("cancel") !== "cancel" ? t("cancel") : "Cancel"}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center justify-end">
