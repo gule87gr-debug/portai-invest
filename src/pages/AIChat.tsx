@@ -311,7 +311,7 @@ const AIChat = () => {
 
       {showSessions && (
         <div className="mb-4 rounded-xl border border-border bg-card p-4 animate-fade-in">
-          <h3 className="text-sm font-semibold mb-3">{t("chatHistory")}</h3>
+          <h2 className="text-sm font-semibold mb-3">{t("chatHistory")}</h2>
           {sessions.length === 0 && <p className="text-xs text-muted-foreground">{t("noSavedChats")}</p>}
           <div className="space-y-1 max-h-48 overflow-y-auto scrollbar-thin">
             {sessions.map((s) => (
