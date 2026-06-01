@@ -136,6 +136,31 @@ const SettingsPage = () => {
 
   const handleLogout = async () => { await supabase.auth.signOut(); };
 
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== "DELETE") {
+      toast.error(t("deleteAccountTypeError") !== "deleteAccountTypeError" ? t("deleteAccountTypeError") : "Type DELETE to confirm.");
+      return;
+    }
+    setDeleteLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-account", { body: {} });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success(t("deleteAccountDone") !== "deleteAccountDone" ? t("deleteAccountDone") : "Your account and data have been deleted.");
+      await supabase.auth.signOut();
+      navigate("/", { replace: true });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to delete account";
+      toast.error(msg);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   const handleCancelSubscription = async () => {
     if (!subscriptionId) return;
     if (!cancelAck) {
