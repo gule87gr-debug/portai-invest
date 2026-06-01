@@ -311,7 +311,7 @@ const AIChat = () => {
 
       {showSessions && (
         <div className="mb-4 rounded-xl border border-border bg-card p-4 animate-fade-in">
-          <h3 className="text-sm font-semibold mb-3">{t("chatHistory")}</h3>
+          <h2 className="text-sm font-semibold mb-3">{t("chatHistory")}</h2>
           {sessions.length === 0 && <p className="text-xs text-muted-foreground">{t("noSavedChats")}</p>}
           <div className="space-y-1 max-h-48 overflow-y-auto scrollbar-thin">
             {sessions.map((s) => (
@@ -440,7 +440,7 @@ const AIChat = () => {
           <button onClick={() => {
             if (imgLimitReached) { setUpgradeReason(`You've used all ${FREE_IMG_LIMIT} free image analyses (resets every ${FREE_IMG_WINDOW_HOURS}h). Upgrade to Pro for unlimited image analyses.`); setShowUpgrade(true); return; }
             fileInputRef.current?.click();
-          }} className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-foreground hover:bg-accent", imgLimitReached && "opacity-50")} title={imgLimitReached ? "Image analysis limit reached" : t("uploadImage")}>
+          }} aria-label={t("uploadImage")} className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors hover:text-foreground hover:bg-accent", imgLimitReached && "opacity-50")} title={imgLimitReached ? "Image analysis limit reached" : t("uploadImage")}>
             <Image className="h-5 w-5" />
           </button>
           {(() => {
