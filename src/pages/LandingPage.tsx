@@ -1,5 +1,5 @@
 import { SEO } from "@/components/SEO";
-import { Brain, BarChart3, MessageSquare, Eye, ArrowRight, Sparkles, LayoutDashboard, Shield, Globe, ChevronRight, Zap, ShieldCheck, Lock, Fingerprint, CheckCircle2, ChevronDown, Search, Activity, Database, CreditCard, Cpu, AlertCircle, FileText, Crown, HelpCircle, Quote, Users, Info } from "lucide-react";
+import { Brain, BarChart3, MessageSquare, Eye, ArrowRight, Sparkles, LayoutDashboard, Shield, Globe, Zap, ShieldCheck, Lock, Fingerprint, CheckCircle2, ChevronDown, Search, Activity, Database, CreditCard, Cpu, AlertCircle, FileText, Crown, HelpCircle, Info } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLanguage, type Language } from "@/contexts/LanguageContext";
 import { useLandingT } from "@/lib/landingI18n";
