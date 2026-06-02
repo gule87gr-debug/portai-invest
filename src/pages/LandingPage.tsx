@@ -497,30 +497,6 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </section>
       </RevealSection>
 
-      {/* Trusted-by — outlets we analyze */}
-      <RevealSection>
-        <section className="px-6 py-10 border-t border-border bg-card/20">
-          <div className="max-w-5xl mx-auto text-center">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground mb-2">
-              {lt("trustedByOutlets")}
-            </p>
-            <p className="text-[11px] text-muted-foreground mb-6">
-              {lt("trustedByOutletsSub")}
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 opacity-60">
-              {["CNBC", "Yahoo Finance", "Bloomberg", "Reuters", "WSJ", "Financial Times", "MarketWatch"].map((src) => (
-                <span
-                  key={src}
-                  className="text-sm sm:text-base font-bold tracking-tight text-foreground/70 grayscale hover:opacity-100 hover:text-foreground transition-all"
-                  style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
-                >
-                  {src}
-                </span>
-              ))}
-            </div>
-          </div>
-        </section>
-      </RevealSection>
 
       {/* How it Works — AI-Monitored Watchlist bridge */}
       <RevealSection>
