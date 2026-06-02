@@ -1,5 +1,5 @@
 import { SEO } from "@/components/SEO";
-import { Brain, BarChart3, MessageSquare, Eye, ArrowRight, Sparkles, LayoutDashboard, Shield, Globe, ChevronRight, Zap, ShieldCheck, Lock, Fingerprint, CheckCircle2, ChevronDown, Search, Activity, Database, CreditCard, Cpu, AlertCircle, FileText, Crown, HelpCircle, Quote, Users, Info } from "lucide-react";
+import { Brain, BarChart3, MessageSquare, Eye, ArrowRight, Sparkles, LayoutDashboard, Shield, Globe, Zap, ShieldCheck, Lock, Fingerprint, CheckCircle2, ChevronDown, Search, Activity, Database, CreditCard, Cpu, AlertCircle, FileText, Crown, HelpCircle, Info } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLanguage, type Language } from "@/contexts/LanguageContext";
 import { useLandingT } from "@/lib/landingI18n";
@@ -72,32 +72,14 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       <style>{`
         .scroll-reveal {
           opacity: 0;
-          transform: translateY(18px);
-          filter: blur(4px);
-          transition: opacity 650ms cubic-bezier(0.16, 1, 0.3, 1),
-                      transform 650ms cubic-bezier(0.16, 1, 0.3, 1),
-                      filter 650ms cubic-bezier(0.16, 1, 0.3, 1);
+          transform: translateY(12px);
+          transition: opacity 500ms cubic-bezier(0.16, 1, 0.3, 1),
+                      transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
         }
         .scroll-reveal.animate-in {
           opacity: 1;
           transform: translateY(0);
-          filter: blur(0);
         }
-        @keyframes hero-pulse {
-          0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
-          50% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
-        }
-        .hero-input-pulse {
-          animation: none;
-        }
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .marquee-track {
-          animation: marquee 38s linear infinite;
-        }
-        .marquee-track:hover { animation-play-state: paused; }
       `}</style>
 
       {/* Top promo banner */}
@@ -153,140 +135,65 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </div>
       </nav>
 
-      {/* Hero — Dual value proposition */}
-      <header className="px-4 sm:px-6 pt-12 sm:pt-16 pb-10 max-w-4xl mx-auto text-center relative gold-glow">
-        <div className="inline-flex items-center gap-2 rounded-full border border-loss/30 bg-loss/10 px-4 py-1.5 text-xs font-bold text-loss mb-6 tracking-label uppercase">
-          <ShieldCheck className="h-3.5 w-3.5" /> {lt("heroTagline")}
+      {/* Hero — editorial, single voice */}
+      <header className="px-4 sm:px-6 pt-20 sm:pt-28 pb-16 max-w-4xl mx-auto">
+        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-8">
+          <span className="h-px w-8 bg-border" />
+          <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+          <span>{lt("heroTagline")}</span>
         </div>
 
-        {/* SEO H1 — visible, keyword-rich */}
         <h1
-          className="editorial-heading text-5xl sm:text-6xl lg:text-7xl relative z-10"
-          style={{ lineHeight: "1.02" }}
+          className="editorial-heading text-foreground text-[2.75rem] sm:text-6xl lg:text-[5rem]"
+          style={{ lineHeight: "1.04" }}
         >
-          {lt("heroH1part1")}
-          <br />
-          <span className="text-foreground">{lt("heroH1part2")} <span className="ink-underline text-primary">{lt("heroH1part3")}</span></span>
+          {lt("heroH1part1")} {lt("heroH1part2")} {lt("heroH1part3")}.
         </h1>
-        <p className="sr-only">
-          {lt("heroSrDesc")}
-        </p>
 
-        <p className="mt-5 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed relative z-10" style={{ textWrap: "pretty" as any }}>
+        <p className="sr-only">{lt("heroSrDesc")}</p>
+
+        <p className="mt-8 text-base sm:text-lg text-muted-foreground max-w-2xl leading-relaxed">
           {lt("heroDesc")}
         </p>
 
-        {/* Prominent input box with pulse */}
-        <div id="hero-analyzer" className="mt-9 max-w-3xl mx-auto relative z-10 scroll-mt-24">
-          <div className="rounded-3xl">
-            <div className="focus-spring flex flex-col sm:flex-row items-stretch gap-2 rounded-3xl border border-border bg-card p-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <input
-                  type="url"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
-                  placeholder={t("heroPlaceholder")}
-                  className="h-16 w-full rounded-2xl bg-transparent pl-14 pr-4 text-base sm:text-lg text-foreground placeholder:text-muted-foreground focus:outline-none"
-                  aria-label={lt("heroUrlAria")}
-                />
-              </div>
-              <button
-                onClick={handleAnalyze}
-                className={`flex items-center justify-center gap-2 rounded-2xl bg-primary px-8 h-16 text-base font-bold text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97] shrink-0 ${url.trim().length > 8 ? "hero-input-pulse" : ""}`}
-              >
-                {lt("heroAnalyzeBtn")} <ArrowRight className="h-5 w-5" />
-              </button>
+        {/* Analyzer input */}
+        <div id="hero-analyzer" className="mt-10 max-w-3xl scroll-mt-24">
+          <div className="focus-spring flex flex-col sm:flex-row items-stretch gap-2 rounded-xl border border-border bg-card p-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="url"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
+                placeholder={t("heroPlaceholder")}
+                className="h-14 w-full rounded-lg bg-transparent pl-11 pr-4 text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
+                aria-label={lt("heroUrlAria")}
+              />
             </div>
+            <button
+              onClick={handleAnalyze}
+              className="flex items-center justify-center gap-2 rounded-lg bg-primary px-7 h-14 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 shrink-0"
+            >
+              {lt("heroAnalyzeBtn")} <ArrowRight className="h-4 w-4" />
+            </button>
           </div>
 
-          {/* Dual CTA */}
-          <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
             <button
               onClick={onGetStarted}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-5 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/15 w-full sm:w-auto"
+              className="inline-flex items-center gap-1.5 font-semibold text-foreground hover:text-primary transition-colors"
             >
-              <Eye className="h-4 w-4" /> {lt("heroSeeLive")}
+              <Eye className="h-3.5 w-3.5" /> {lt("heroSeeLive")}
             </button>
-            <p className="text-xs text-muted-foreground">
-              {t("heroOr")}{" "}
-              <button onClick={onGetStarted} className="font-semibold text-primary hover:underline">
-                {t("heroCreate")}
-              </button>
-            </p>
+            <span className="h-3 w-px bg-border" />
+            <button onClick={onGetStarted} className="font-semibold text-foreground hover:text-primary transition-colors">
+              {t("heroCreate")}
+            </button>
           </div>
-        </div>
-
-        {/* Dual Dashboard mockup — Watchlist + Bias Report */}
-        <div className="mt-12 max-w-5xl mx-auto relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-md border border-border bg-card p-3 shadow-brutal-lg">
-            {/* Watchlist panel */}
-            <div className="rounded-md border border-border bg-background/60 p-4 text-left">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{lt("mockLiveWatchlist")}</p>
-                <span className="inline-flex items-center gap-2 text-[10px] font-mono text-primary">
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                  {lt("mockUpdated")}
-                </span>
-              </div>
-              <div className="space-y-2">
-                {[
-                  { sym: "AAPL", name: "Apple Inc.", price: "$232.18", chg: "+1.42%", up: true, pts: "M2,18 L10,14 L18,16 L26,10 L34,12 L42,7 L50,9 L58,5" },
-                  { sym: "NVDA", name: "NVIDIA", price: "$184.92", chg: "+3.08%", up: true, pts: "M2,20 L10,17 L18,15 L26,13 L34,11 L42,8 L50,6 L58,3" },
-                  { sym: "TSLA", name: "Tesla", price: "$298.40", chg: "-0.86%", up: false, pts: "M2,8 L10,10 L18,9 L26,13 L34,12 L42,15 L50,14 L58,17" },
-                  { sym: "BTC", name: "Bitcoin", price: "$108,420", chg: "+2.11%", up: true, pts: "M2,16 L10,14 L18,15 L26,11 L34,12 L42,8 L50,9 L58,5" },
-                ].map((r) => (
-                  <div key={r.sym} className="flex items-center gap-3 border-b border-border/50 px-1 py-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-foreground font-mono">{r.sym}</p>
-                      <p className="text-[10px] text-muted-foreground truncate">{r.name}</p>
-                    </div>
-                    <svg width="60" height="22" viewBox="0 0 60 22" className="shrink-0">
-                      <path d={r.pts} fill="none" stroke={r.up ? "hsl(var(--gain))" : "hsl(var(--loss))"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    <div className="text-right shrink-0">
-                      <p className="text-xs font-bold text-foreground font-mono">{r.price}</p>
-                      <p className={`text-[10px] font-bold font-mono ${r.up ? "text-gain" : "text-loss"}`}>{r.chg}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Bias report panel */}
-            <div className="rounded-md border border-border bg-background/60 p-4 text-left">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{lt("mockBiasReport")}</p>
-                <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 border border-primary/30 px-2 py-0.5 text-[10px] font-bold text-primary"><ShieldCheck className="h-3 w-3" /> Pro</span>
-              </div>
-              <div className="rounded-lg border border-border bg-card/40 p-3 mb-3">
-                <p className="text-[10px] text-muted-foreground mb-1 font-mono uppercase tracking-wider">{lt("mockCnbcTesla")}</p>
-                <div className="flex items-baseline gap-2">
-                  <span className="ink-circle"><span className="text-3xl font-bold font-mono text-primary">6.4</span></span>
-                  <p className="text-[11px] text-muted-foreground">{lt("mockTrustScoreLabel")}</p>
-                </div>
-                <div className="mt-2 h-1.5 w-full rounded-full bg-border overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-loss via-warning to-primary" style={{ width: "64%" }} />
-                </div>
-              </div>
-              <div className="space-y-2">
-                {[
-                  { icon: AlertCircle, label: lt("mockBias1"), tone: "warning" as const },
-                  { icon: FileText, label: lt("mockBias2"), tone: "loss" as const },
-                  { icon: CheckCircle2, label: lt("mockBias3"), tone: "primary" as const },
-                ].map((item) => (
-                  <div key={item.label} className="flex items-center gap-2 rounded-md border border-border/60 bg-card/30 px-2.5 py-1.5">
-                    <item.icon className={`h-3.5 w-3.5 shrink-0 ${item.tone === "warning" ? "text-warning" : item.tone === "loss" ? "text-loss" : "text-primary"}`} />
-                    <p className="text-[11px] text-foreground/90">{item.label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          <p className="mt-3 text-center text-[11px] text-muted-foreground">{lt("mockSamplePreview")}</p>
         </div>
       </header>
+
 
       <main>
       {/* Three value cards — the "Wait, I need this" moment */}
@@ -341,66 +248,6 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </section>
       </RevealSection>
 
-      {/* Community & Trust — testimonials marquee + market reach */}
-      <RevealSection>
-        <section aria-labelledby="community-trust-heading" className="px-4 sm:px-6 py-12 border-b border-border">
-          <div className="max-w-6xl mx-auto">
-            <p className="text-center text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-2">{lt("communityTrust")}</p>
-            <h2 id="community-trust-heading" className="text-center editorial-heading text-2xl sm:text-3xl text-foreground mb-8" style={{ textWrap: "balance" as any }}>
-              {lt("communityTrustHeading")}
-            </h2>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch">
-              {/* Testimonials marquee */}
-              <div className="lg:col-span-2 rounded-2xl border border-border bg-card/40 backdrop-blur-md overflow-hidden relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-background to-transparent z-10" />
-                <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-background to-transparent z-10" />
-                <div className="flex marquee-track py-5" style={{ width: "max-content" }}>
-                  {[...Array(2)].flatMap((_, dup) => ([
-                    { quote: "PortAI caught a pump-and-dump narrative before I lost a cent.", who: "Lukas M. · Munich, DE" },
-                    { quote: "Finally a tool that tells me when CNBC is just chasing clicks.", who: "Sofía R. · Madrid, ES" },
-                    { quote: "The bias score is now part of my pre-market routine.", who: "Marcus T. · Chicago, US" },
-                    { quote: "Saved me from buying into a hyped earnings beat that omitted a revenue miss.", who: "James W. · London, UK" },
-                    { quote: "Tracking my crypto and stocks in one watchlist with bias alerts is a game changer.", who: "Tiago F. · Lisbon, PT" },
-                    { quote: "I use the trust score before any position over €5k. Period.", who: "Giulia C. · Milan, IT" },
-                  ].map((tst, i) => (
-                    <div key={`${dup}-${i}`} className="w-[320px] shrink-0 mx-3 rounded-xl border border-border/70 bg-background/40 p-4">
-                      <Quote className="h-4 w-4 text-primary/70 mb-2" />
-                      <p className="text-sm text-foreground/90 leading-relaxed mb-3">&ldquo;{tst.quote}&rdquo;</p>
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{tst.who}</p>
-                    </div>
-                  ))))}
-                </div>
-              </div>
-
-              {/* Market Reach card */}
-              <div className="rounded-xl border border-border bg-card p-6 flex flex-col justify-center">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-3">{lt("marketReach")}</p>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 border border-primary/25">
-                      <FileText className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold font-mono text-foreground tracking-tight">1M+</p>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{lt("headlinesAnalyzed")}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 border border-primary/25">
-                      <Users className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold font-mono text-foreground tracking-tight">12+</p>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{lt("activeCountries")}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </RevealSection>
 
       {/* Stats bar — moved below tech stack */}
       <RevealSection>
@@ -567,52 +414,6 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </section>
       </RevealSection>
 
-      {/* Data Bridge Interactive Card */}
-      <RevealSection>
-        <section className="px-4 sm:px-6 py-14 max-w-5xl mx-auto">
-          <div className="rounded-3xl border-2 border-primary/30 bg-gradient-to-br from-primary/[0.08] via-card to-card p-6 sm:p-10 relative overflow-hidden">
-            <div className="absolute top-4 right-4 inline-flex items-center gap-1 rounded-full bg-primary/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
-              <Crown className="h-3 w-3" /> Pro Tier
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-2">The Data Bridge</p>
-                <h2 className="editorial-heading text-3xl sm:text-4xl text-foreground mb-3" style={{ textWrap: "balance" as any }}>
-                  Watchlist meets Newsroom — automatically.
-                </h2>
-                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-4">
-                  When a stock in your watchlist hits a volatility trigger, PortAI Pro instantly scans global media for bias, surfacing the narrative behind the price move before the crowd reacts.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {["English", "Español", "Français", "Deutsch", "Italiano", "Português"].map((lang) => (
-                    <span key={lang} className="inline-flex items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
-                      <Globe className="h-3 w-3" /> {lang}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-3">
-                {[
-                  { icon: Zap, title: "Volatility Trigger", body: "AAPL ▲ 4.2% in 15 min" },
-                  { icon: Search, title: "Auto Media Scan", body: "92 articles across 6 languages" },
-                  { icon: ShieldCheck, title: "Bias Report Ready", body: "Trust score 6.4 · 3 omitted angles" },
-                ].map((step, i) => (
-                  <div key={step.title} className="flex items-center gap-3 rounded-xl border border-border bg-card/70 backdrop-blur-sm p-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 border border-primary/25 text-primary font-bold text-xs">
-                      {i + 1}
-                    </div>
-                    <step.icon className="h-4 w-4 text-primary shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-foreground">{step.title}</p>
-                      <p className="text-[11px] text-muted-foreground font-mono truncate">{step.body}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      </RevealSection>
 
       <RevealSection>
         <section id="why-portai" aria-labelledby="why-portai-heading" className="px-4 sm:px-6 py-14 max-w-3xl mx-auto">
@@ -696,30 +497,6 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </section>
       </RevealSection>
 
-      {/* Trusted-by — outlets we analyze */}
-      <RevealSection>
-        <section className="px-6 py-10 border-t border-border bg-card/20">
-          <div className="max-w-5xl mx-auto text-center">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground mb-2">
-              {lt("trustedByOutlets")}
-            </p>
-            <p className="text-[11px] text-muted-foreground mb-6">
-              {lt("trustedByOutletsSub")}
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 opacity-60">
-              {["CNBC", "Yahoo Finance", "Bloomberg", "Reuters", "WSJ", "Financial Times", "MarketWatch"].map((src) => (
-                <span
-                  key={src}
-                  className="text-sm sm:text-base font-bold tracking-tight text-foreground/70 grayscale hover:opacity-100 hover:text-foreground transition-all"
-                  style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
-                >
-                  {src}
-                </span>
-              ))}
-            </div>
-          </div>
-        </section>
-      </RevealSection>
 
       {/* How it Works — AI-Monitored Watchlist bridge */}
       <RevealSection>
