@@ -414,52 +414,6 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </section>
       </RevealSection>
 
-      {/* Data Bridge Interactive Card */}
-      <RevealSection>
-        <section className="px-4 sm:px-6 py-14 max-w-5xl mx-auto">
-          <div className="rounded-3xl border-2 border-primary/30 bg-gradient-to-br from-primary/[0.08] via-card to-card p-6 sm:p-10 relative overflow-hidden">
-            <div className="absolute top-4 right-4 inline-flex items-center gap-1 rounded-full bg-primary/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
-              <Crown className="h-3 w-3" /> Pro Tier
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-2">The Data Bridge</p>
-                <h2 className="editorial-heading text-3xl sm:text-4xl text-foreground mb-3" style={{ textWrap: "balance" as any }}>
-                  Watchlist meets Newsroom — automatically.
-                </h2>
-                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-4">
-                  When a stock in your watchlist hits a volatility trigger, PortAI Pro instantly scans global media for bias, surfacing the narrative behind the price move before the crowd reacts.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {["English", "Español", "Français", "Deutsch", "Italiano", "Português"].map((lang) => (
-                    <span key={lang} className="inline-flex items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
-                      <Globe className="h-3 w-3" /> {lang}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-3">
-                {[
-                  { icon: Zap, title: "Volatility Trigger", body: "AAPL ▲ 4.2% in 15 min" },
-                  { icon: Search, title: "Auto Media Scan", body: "92 articles across 6 languages" },
-                  { icon: ShieldCheck, title: "Bias Report Ready", body: "Trust score 6.4 · 3 omitted angles" },
-                ].map((step, i) => (
-                  <div key={step.title} className="flex items-center gap-3 rounded-xl border border-border bg-card/70 backdrop-blur-sm p-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 border border-primary/25 text-primary font-bold text-xs">
-                      {i + 1}
-                    </div>
-                    <step.icon className="h-4 w-4 text-primary shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-foreground">{step.title}</p>
-                      <p className="text-[11px] text-muted-foreground font-mono truncate">{step.body}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      </RevealSection>
 
       <RevealSection>
         <section id="why-portai" aria-labelledby="why-portai-heading" className="px-4 sm:px-6 py-14 max-w-3xl mx-auto">
