@@ -144,10 +144,10 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </div>
 
         <h1
-          className="editorial-heading text-foreground text-[2.75rem] sm:text-6xl lg:text-[5rem]"
+          className="editorial-heading text-center text-foreground text-[2.75rem] sm:text-6xl lg:text-[5rem]"
           style={{ lineHeight: "1.04" }}
         >
-          {lt("heroH1part1")} {lt("heroH1part2")} {lt("heroH1part3")}.
+          {lt("heroH1part1")} {lt("heroH1part2")} {lt("heroH1part3")}
         </h1>
 
         <p className="sr-only">{lt("heroSrDesc")}</p>
