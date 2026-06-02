@@ -135,140 +135,65 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </div>
       </nav>
 
-      {/* Hero — Dual value proposition */}
-      <header className="px-4 sm:px-6 pt-12 sm:pt-16 pb-10 max-w-4xl mx-auto text-center relative gold-glow">
-        <div className="inline-flex items-center gap-2 rounded-full border border-loss/30 bg-loss/10 px-4 py-1.5 text-xs font-bold text-loss mb-6 tracking-label uppercase">
-          <ShieldCheck className="h-3.5 w-3.5" /> {lt("heroTagline")}
+      {/* Hero — editorial, single voice */}
+      <header className="px-4 sm:px-6 pt-20 sm:pt-28 pb-16 max-w-4xl mx-auto">
+        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-8">
+          <span className="h-px w-8 bg-border" />
+          <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+          <span>{lt("heroTagline")}</span>
         </div>
 
-        {/* SEO H1 — visible, keyword-rich */}
         <h1
-          className="editorial-heading text-5xl sm:text-6xl lg:text-7xl relative z-10"
-          style={{ lineHeight: "1.02" }}
+          className="editorial-heading text-foreground text-[2.75rem] sm:text-6xl lg:text-[5rem]"
+          style={{ lineHeight: "1.04" }}
         >
-          {lt("heroH1part1")}
-          <br />
-          <span className="text-foreground">{lt("heroH1part2")} <span className="ink-underline text-primary">{lt("heroH1part3")}</span></span>
+          {lt("heroH1part1")} {lt("heroH1part2")} {lt("heroH1part3")}.
         </h1>
-        <p className="sr-only">
-          {lt("heroSrDesc")}
-        </p>
 
-        <p className="mt-5 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed relative z-10" style={{ textWrap: "pretty" as any }}>
+        <p className="sr-only">{lt("heroSrDesc")}</p>
+
+        <p className="mt-8 text-base sm:text-lg text-muted-foreground max-w-2xl leading-relaxed">
           {lt("heroDesc")}
         </p>
 
-        {/* Prominent input box with pulse */}
-        <div id="hero-analyzer" className="mt-9 max-w-3xl mx-auto relative z-10 scroll-mt-24">
-          <div className="rounded-3xl">
-            <div className="focus-spring flex flex-col sm:flex-row items-stretch gap-2 rounded-3xl border border-border bg-card p-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <input
-                  type="url"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
-                  placeholder={t("heroPlaceholder")}
-                  className="h-16 w-full rounded-2xl bg-transparent pl-14 pr-4 text-base sm:text-lg text-foreground placeholder:text-muted-foreground focus:outline-none"
-                  aria-label={lt("heroUrlAria")}
-                />
-              </div>
-              <button
-                onClick={handleAnalyze}
-                className={`flex items-center justify-center gap-2 rounded-2xl bg-primary px-8 h-16 text-base font-bold text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97] shrink-0 ${url.trim().length > 8 ? "hero-input-pulse" : ""}`}
-              >
-                {lt("heroAnalyzeBtn")} <ArrowRight className="h-5 w-5" />
-              </button>
+        {/* Analyzer input */}
+        <div id="hero-analyzer" className="mt-10 max-w-3xl scroll-mt-24">
+          <div className="focus-spring flex flex-col sm:flex-row items-stretch gap-2 rounded-xl border border-border bg-card p-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="url"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAnalyze()}
+                placeholder={t("heroPlaceholder")}
+                className="h-14 w-full rounded-lg bg-transparent pl-11 pr-4 text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
+                aria-label={lt("heroUrlAria")}
+              />
             </div>
+            <button
+              onClick={handleAnalyze}
+              className="flex items-center justify-center gap-2 rounded-lg bg-primary px-7 h-14 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 shrink-0"
+            >
+              {lt("heroAnalyzeBtn")} <ArrowRight className="h-4 w-4" />
+            </button>
           </div>
 
-          {/* Dual CTA */}
-          <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
             <button
               onClick={onGetStarted}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-5 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/15 w-full sm:w-auto"
+              className="inline-flex items-center gap-1.5 font-semibold text-foreground hover:text-primary transition-colors"
             >
-              <Eye className="h-4 w-4" /> {lt("heroSeeLive")}
+              <Eye className="h-3.5 w-3.5" /> {lt("heroSeeLive")}
             </button>
-            <p className="text-xs text-muted-foreground">
-              {t("heroOr")}{" "}
-              <button onClick={onGetStarted} className="font-semibold text-primary hover:underline">
-                {t("heroCreate")}
-              </button>
-            </p>
+            <span className="h-3 w-px bg-border" />
+            <button onClick={onGetStarted} className="font-semibold text-foreground hover:text-primary transition-colors">
+              {t("heroCreate")}
+            </button>
           </div>
-        </div>
-
-        {/* Dual Dashboard mockup — Watchlist + Bias Report */}
-        <div className="mt-12 max-w-5xl mx-auto relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-md border border-border bg-card p-3 shadow-brutal-lg">
-            {/* Watchlist panel */}
-            <div className="rounded-md border border-border bg-background/60 p-4 text-left">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{lt("mockLiveWatchlist")}</p>
-                <span className="inline-flex items-center gap-2 text-[10px] font-mono text-primary">
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                  {lt("mockUpdated")}
-                </span>
-              </div>
-              <div className="space-y-2">
-                {[
-                  { sym: "AAPL", name: "Apple Inc.", price: "$232.18", chg: "+1.42%", up: true, pts: "M2,18 L10,14 L18,16 L26,10 L34,12 L42,7 L50,9 L58,5" },
-                  { sym: "NVDA", name: "NVIDIA", price: "$184.92", chg: "+3.08%", up: true, pts: "M2,20 L10,17 L18,15 L26,13 L34,11 L42,8 L50,6 L58,3" },
-                  { sym: "TSLA", name: "Tesla", price: "$298.40", chg: "-0.86%", up: false, pts: "M2,8 L10,10 L18,9 L26,13 L34,12 L42,15 L50,14 L58,17" },
-                  { sym: "BTC", name: "Bitcoin", price: "$108,420", chg: "+2.11%", up: true, pts: "M2,16 L10,14 L18,15 L26,11 L34,12 L42,8 L50,9 L58,5" },
-                ].map((r) => (
-                  <div key={r.sym} className="flex items-center gap-3 border-b border-border/50 px-1 py-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-foreground font-mono">{r.sym}</p>
-                      <p className="text-[10px] text-muted-foreground truncate">{r.name}</p>
-                    </div>
-                    <svg width="60" height="22" viewBox="0 0 60 22" className="shrink-0">
-                      <path d={r.pts} fill="none" stroke={r.up ? "hsl(var(--gain))" : "hsl(var(--loss))"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    <div className="text-right shrink-0">
-                      <p className="text-xs font-bold text-foreground font-mono">{r.price}</p>
-                      <p className={`text-[10px] font-bold font-mono ${r.up ? "text-gain" : "text-loss"}`}>{r.chg}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Bias report panel */}
-            <div className="rounded-md border border-border bg-background/60 p-4 text-left">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{lt("mockBiasReport")}</p>
-                <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 border border-primary/30 px-2 py-0.5 text-[10px] font-bold text-primary"><ShieldCheck className="h-3 w-3" /> Pro</span>
-              </div>
-              <div className="rounded-lg border border-border bg-card/40 p-3 mb-3">
-                <p className="text-[10px] text-muted-foreground mb-1 font-mono uppercase tracking-wider">{lt("mockCnbcTesla")}</p>
-                <div className="flex items-baseline gap-2">
-                  <span className="ink-circle"><span className="text-3xl font-bold font-mono text-primary">6.4</span></span>
-                  <p className="text-[11px] text-muted-foreground">{lt("mockTrustScoreLabel")}</p>
-                </div>
-                <div className="mt-2 h-1.5 w-full rounded-full bg-border overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-loss via-warning to-primary" style={{ width: "64%" }} />
-                </div>
-              </div>
-              <div className="space-y-2">
-                {[
-                  { icon: AlertCircle, label: lt("mockBias1"), tone: "warning" as const },
-                  { icon: FileText, label: lt("mockBias2"), tone: "loss" as const },
-                  { icon: CheckCircle2, label: lt("mockBias3"), tone: "primary" as const },
-                ].map((item) => (
-                  <div key={item.label} className="flex items-center gap-2 rounded-md border border-border/60 bg-card/30 px-2.5 py-1.5">
-                    <item.icon className={`h-3.5 w-3.5 shrink-0 ${item.tone === "warning" ? "text-warning" : item.tone === "loss" ? "text-loss" : "text-primary"}`} />
-                    <p className="text-[11px] text-foreground/90">{item.label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          <p className="mt-3 text-center text-[11px] text-muted-foreground">{lt("mockSamplePreview")}</p>
         </div>
       </header>
+
 
       <main>
       {/* Three value cards — the "Wait, I need this" moment */}
