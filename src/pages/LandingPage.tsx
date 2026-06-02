@@ -72,32 +72,14 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
       <style>{`
         .scroll-reveal {
           opacity: 0;
-          transform: translateY(18px);
-          filter: blur(4px);
-          transition: opacity 650ms cubic-bezier(0.16, 1, 0.3, 1),
-                      transform 650ms cubic-bezier(0.16, 1, 0.3, 1),
-                      filter 650ms cubic-bezier(0.16, 1, 0.3, 1);
+          transform: translateY(12px);
+          transition: opacity 500ms cubic-bezier(0.16, 1, 0.3, 1),
+                      transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
         }
         .scroll-reveal.animate-in {
           opacity: 1;
           transform: translateY(0);
-          filter: blur(0);
         }
-        @keyframes hero-pulse {
-          0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
-          50% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
-        }
-        .hero-input-pulse {
-          animation: none;
-        }
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .marquee-track {
-          animation: marquee 38s linear infinite;
-        }
-        .marquee-track:hover { animation-play-state: paused; }
       `}</style>
 
       {/* Top promo banner */}
