@@ -1150,7 +1150,7 @@ const translations: Record<Language, Record<string, string>> = {
     rationaleTpl: "Una cartera {risk} y {profit} diseñada para un horizonte {time}. Pensada para inversores {exp}. Esta asignación equilibra riesgo y recompensa con un objetivo de {ret} de retornos anuales.",
   },
   fr: {
-    home: "Accueil", dashboard: "Tableau de bord", aiChat: "Chat IA", quiz: "Quiz", forum: "Pulse Média", watchlists: "Listes", settings: "Paramètres", news: "Actualités", articleAnalyzer: "Actualités", new: "NOUVEAU",
+    home: "Accueil", dashboard: "Tableau de bord", aiChat: "Chat IA", quiz: "Quiz", forum: "Pulse Média", watchlists: "Listes", settings: "Paramètres", news: "Analyser", articleAnalyzer: "Analyser", new: "NOUVEAU",
     // Landing
     landingBanner: "Durée limitée : Plus -40% (8,99 €) · Pro -36% (15,99 €)",
     heroBadge: "Bouclier IA contre les biais",
@@ -1175,7 +1175,7 @@ const translations: Record<Language, Record<string, string>> = {
     pasteUrl: "Collez l'URL d'un article financier. L'IA fournira un score de confiance (1-10), un résumé et une détection de biais.",
     trustScore: "Score de Confiance", smartSummary: "Résumé Intelligent", biasDetection: "Détection de Biais",
     stockHeatmap: "Carte Thermique S&P 500",
-    marketNewsFeed: "Fil d'Actualités du Marché", autoRefresh: "Mise à jour automatique",
+    marketNewsFeed: "Fil d'Actualités", autoRefresh: "Mise à jour automatique",
     newsDisclaimer: "Actualités de Google News. À titre informatif uniquement — pas de conseil financier.",
     crypto: "Crypto", etfs: "ETFs",
     trustScoreDesc: "L'IA évalue la crédibilité de la source, l'expertise de l'auteur et la qualité des citations sur une échelle de 1-10",
@@ -1698,7 +1698,7 @@ const translations: Record<Language, Record<string, string>> = {
     rationaleTpl: "Un portefeuille {risk}, {profit} conçu pour un horizon {time}. Adapté aux investisseurs {exp}. Cette allocation équilibre risque et rendement pour cibler {ret} de rendements annuels.",
   },
   pt: {
-    home: "Início", dashboard: "Painel", aiChat: "Chat IA", quiz: "Quiz", forum: "Pulso Media", watchlists: "Listas", settings: "Configurações", news: "Notícias", articleAnalyzer: "Notícias", new: "NOVO",
+    home: "Início", dashboard: "Painel", aiChat: "Chat IA", quiz: "Quiz", forum: "Pulso Media", watchlists: "Listas", settings: "Configurações", news: "Analisar", articleAnalyzer: "Analisar", new: "NOVO",
     // Landing
     landingBanner: "Por tempo limitado: Plus 40% OFF (€8,99) · Pro 36% OFF (€15,99)",
     heroBadge: "Escudo IA contra o viés",
@@ -1723,7 +1723,7 @@ const translations: Record<Language, Record<string, string>> = {
     pasteUrl: "Cole qualquer URL de artigo financeiro. A IA fornecerá uma pontuação de confiança (1-10), resumo e detecção de viés.",
     trustScore: "Pontuação de Confiança", smartSummary: "Resumo Inteligente", biasDetection: "Detecção de Viés",
     stockHeatmap: "Mapa de Calor S&P 500",
-    marketNewsFeed: "Feed de Notícias do Mercado", autoRefresh: "Atualiza automaticamente",
+    marketNewsFeed: "Feed de Notícias", autoRefresh: "Atualiza automaticamente",
     newsDisclaimer: "Notícias do Google News. Apenas para fins informativos — não é aconselhamento financeiro.",
     crypto: "Cripto", etfs: "ETFs",
     trustScoreDesc: "A IA avalia a credibilidade da fonte, experiência do autor e qualidade das citações em uma escala de 1-10",
