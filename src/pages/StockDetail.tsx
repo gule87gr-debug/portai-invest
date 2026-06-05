@@ -85,8 +85,11 @@ const StockDetail = () => {
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-          <div className="flex items-center gap-3">
-            <h1 className="editorial-h1 text-4xl sm:text-5xl font-bold tnum">{symbol}</h1>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="editorial-h1 text-4xl sm:text-5xl font-bold tnum">
+              <span className="tnum">{symbol}</span>
+              {info.name ? <span className="text-muted-foreground font-normal"> — {info.name}</span> : null}
+            </h1>
             <span className="metric-label rounded-md bg-muted px-2.5 py-1">{t(`sec_${(info.sector || "").replace(/\s+/g, "")}`) !== `sec_${(info.sector || "").replace(/\s+/g, "")}` ? t(`sec_${(info.sector || "").replace(/\s+/g, "")}`) : info.sector}</span>
           </div>
             <p className="mt-1 text-muted-foreground">{info.name}</p>
