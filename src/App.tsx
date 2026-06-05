@@ -47,6 +47,7 @@ function lazyWithRetry<T extends { default: React.ComponentType<any> }>(
 
 // Lazy-load every authenticated/secondary route to keep the initial bundle small
 const Dashboard = lazyWithRetry(() => import("./pages/Dashboard"));
+const NewsPage = lazyWithRetry(() => import("./pages/NewsPage"));
 const AIChat = lazyWithRetry(() => import("./pages/AIChat"));
 const Quiz = lazyWithRetry(() => import("./pages/Quiz"));
 const Forum = lazyWithRetry(() => import("./pages/Forum"));
@@ -100,6 +101,7 @@ const AppWithLanguage = () => {
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/news" element={<NewsPage />} />
           <Route path="/chat" element={<AIChat />} />
           <Route path="/quiz" element={<Quiz />} />
           <Route path="/forum" element={<Forum />} />
