@@ -98,7 +98,8 @@ Deno.serve(async (req) => {
     // Finally, delete the auth user
     const { error: delErr } = await admin.auth.admin.deleteUser(userId);
     if (delErr) {
-      return new Response(JSON.stringify({ error: `Failed to delete auth user: ${delErr.message}` }), {
+      console.error("delete-account: auth.admin.deleteUser failed", delErr.message);
+      return new Response(JSON.stringify({ error: "Internal server error" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -109,7 +110,8 @@ Deno.serve(async (req) => {
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : "Unknown error";
-    return new Response(JSON.stringify({ error: message }), {
+    console.error("delete-account: unhandled exception", message);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
