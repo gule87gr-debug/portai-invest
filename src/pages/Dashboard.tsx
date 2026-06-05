@@ -4,7 +4,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { TradingViewHeatmap } from "@/components/TradingViewWidgets";
-import { StockNewsFeed } from "@/components/StockNewsFeed";
+
 import { TrendingStocks } from "@/components/TrendingStocks";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSubscription, trackAnalysis } from "@/hooks/useSubscription";
@@ -139,10 +139,6 @@ const Dashboard = () => {
         <div className="mt-5">
           <TrialActivation />
         </div>
-      </div>
-
-      <div className="mb-8" data-tour="news-feed">
-        <StockNewsFeed />
       </div>
 
       <div id="analyzer" className="mb-8 rounded-2xl border border-border bg-card p-6 sm:p-10 scroll-mt-20" data-tour="analyze-link">
