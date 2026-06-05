@@ -5,7 +5,7 @@ export type Language = "en" | "es" | "fr" | "pt" | "de" | "it";
 const translations: Record<Language, Record<string, string>> = {
   en: {
     // Nav
-    home: "Home", dashboard: "Dashboard", aiChat: "AI Chat", quiz: "Quiz", forum: "Media Pulse", watchlists: "Watchlists", settings: "Settings", news: "Analyze", articleAnalyzer: "Analyze", new: "NEW",
+    home: "Home", dashboard: "Dashboard", aiChat: "AI Chat", quiz: "Quiz", forum: "Media Pulse", watchlists: "Watchlists", settings: "Settings", news: "News", articleAnalyzer: "Analyze", new: "NEW",
     // Landing
     landingBanner: "Limited time: Plus 40% OFF (€8.99) · Pro 36% OFF (€15.99)",
     heroBadge: "AI-Powered Bias Shield",
@@ -602,7 +602,7 @@ const translations: Record<Language, Record<string, string>> = {
     rationaleTpl: "A {risk}, {profit} portfolio designed for a {time} horizon. Tailored for {exp} investors. This allocation balances risk and reward to target {ret} annual returns.",
   },
   es: {
-    home: "Inicio", dashboard: "Panel", aiChat: "Chat IA", quiz: "Cuestionario", forum: "Pulso Media", watchlists: "Listas", settings: "Ajustes", news: "Analizar", articleAnalyzer: "Analizar", new: "NUEVO",
+    home: "Inicio", dashboard: "Panel", aiChat: "Chat IA", quiz: "Cuestionario", forum: "Pulso Media", watchlists: "Listas", settings: "Ajustes", news: "Noticias", articleAnalyzer: "Analizar", new: "NUEVO",
     // Landing
     landingBanner: "Tiempo limitado: Plus 40% OFF (€8,99) · Pro 36% OFF (€15,99)",
     heroBadge: "Escudo IA contra el sesgo",
@@ -1150,7 +1150,7 @@ const translations: Record<Language, Record<string, string>> = {
     rationaleTpl: "Una cartera {risk} y {profit} diseñada para un horizonte {time}. Pensada para inversores {exp}. Esta asignación equilibra riesgo y recompensa con un objetivo de {ret} de retornos anuales.",
   },
   fr: {
-    home: "Accueil", dashboard: "Tableau de bord", aiChat: "Chat IA", quiz: "Quiz", forum: "Pulse Média", watchlists: "Listes", settings: "Paramètres", news: "Analyser", articleAnalyzer: "Analyser", new: "NOUVEAU",
+    home: "Accueil", dashboard: "Tableau de bord", aiChat: "Chat IA", quiz: "Quiz", forum: "Pulse Média", watchlists: "Listes", settings: "Paramètres", news: "Actualités", articleAnalyzer: "Analyser", new: "NOUVEAU",
     // Landing
     landingBanner: "Durée limitée : Plus -40% (8,99 €) · Pro -36% (15,99 €)",
     heroBadge: "Bouclier IA contre les biais",
@@ -1698,7 +1698,7 @@ const translations: Record<Language, Record<string, string>> = {
     rationaleTpl: "Un portefeuille {risk}, {profit} conçu pour un horizon {time}. Adapté aux investisseurs {exp}. Cette allocation équilibre risque et rendement pour cibler {ret} de rendements annuels.",
   },
   pt: {
-    home: "Início", dashboard: "Painel", aiChat: "Chat IA", quiz: "Quiz", forum: "Pulso Media", watchlists: "Listas", settings: "Configurações", news: "Analisar", articleAnalyzer: "Analisar", new: "NOVO",
+    home: "Início", dashboard: "Painel", aiChat: "Chat IA", quiz: "Quiz", forum: "Pulso Media", watchlists: "Listas", settings: "Configurações", news: "Notícias", articleAnalyzer: "Analisar", new: "NOVO",
     // Landing
     landingBanner: "Por tempo limitado: Plus 40% OFF (€8,99) · Pro 36% OFF (€15,99)",
     heroBadge: "Escudo IA contra o viés",
