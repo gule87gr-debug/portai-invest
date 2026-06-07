@@ -58,29 +58,6 @@ const AuthPage = ({ onAuth, initialMode = "signup" }: { onAuth: () => void; init
     }
   };
 
-  const checkUsername = (value: string) => {
-    setUsername(value);
-    setUsernameStatus("idle");
-    if (usernameTimerRef.current) clearTimeout(usernameTimerRef.current);
-
-    const trimmed = value.trim();
-    if (!trimmed || trimmed.length < 2) return;
-
-    usernameTimerRef.current = setTimeout(async () => {
-      setUsernameStatus("checking");
-      const { data, error } = await supabase.rpc("check_username_available", {
-        desired_username: trimmed,
-      });
-
-      if (error) {
-        setUsernameStatus("idle");
-        return;
-      }
-
-      setUsernameStatus(data ? "available" : "taken");
-    }, 500);
-  };
-
   const handle = async () => {
     setEmailInUse(false);
     if (!email.trim() || !password.trim()) return setError(t("fillAllFields"));
@@ -90,26 +67,10 @@ const AuthPage = ({ onAuth, initialMode = "signup" }: { onAuth: () => void; init
     if (password.length > 128) return setError(t("passwordMin8"));
     if (mode === "signup" && !/[A-Z]/.test(password)) return setError(t("passwordNeedsUpper"));
     if (mode === "signup" && !/[0-9]/.test(password)) return setError(t("passwordNeedsNumber"));
-    if (mode === "signup" && !username.trim()) return setError(t("displayNameRequired"));
-    if (mode === "signup" && username.trim().length < 2) return setError(t("displayNameMin2"));
-    if (mode === "signup" && username.trim().length > 30) return setError(t("displayNameMax30"));
-    if (mode === "signup" && usernameStatus === "taken") return setError(t("displayNameTaken"));
     setLoading(true);
     setError("");
 
     if (mode === "signup") {
-      // Re-check availability right before creating to prevent race conditions
-      const { data: availableNow, error: availabilityError } = await supabase.rpc("check_username_available", {
-        desired_username: username.trim(),
-      });
-      if (availabilityError || !availableNow) {
-        setUsernameStatus("taken");
-        setError(t("displayNameJustTaken"));
-        setLoading(false);
-        return;
-      }
-
-
       const { data, error: authError } = await supabase.auth.signUp({ email, password });
       if (authError) {
         if (authError.message.toLowerCase().includes("already registered") || authError.message.toLowerCase().includes("already been registered")) {
@@ -122,9 +83,10 @@ const AuthPage = ({ onAuth, initialMode = "signup" }: { onAuth: () => void; init
         return;
       }
       if (data.user) {
+        const defaultName = email.trim().split("@")[0] || "User";
         await supabase.from("user_settings").insert({
           user_id: data.user.id,
-          display_name: username.trim(),
+          display_name: defaultName,
         });
         // Send welcome email
         supabase.functions.invoke("send-transactional-email", {
@@ -132,7 +94,7 @@ const AuthPage = ({ onAuth, initialMode = "signup" }: { onAuth: () => void; init
             templateName: "welcome",
             recipientEmail: email.trim(),
             idempotencyKey: `welcome-${data.user.id}`,
-            templateData: { displayName: username.trim() },
+            templateData: { displayName: defaultName },
           },
         }).catch(() => {}); // Fire-and-forget
       }
