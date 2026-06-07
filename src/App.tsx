@@ -123,6 +123,7 @@ const AppRoutes = () => {
   const [session, setSession] = useState<any>(undefined);
   const [passwordRecovery, setPasswordRecovery] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
+  const [authMode, setAuthMode] = useState<"signup" | "login">("signup");
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -141,6 +142,13 @@ const AppRoutes = () => {
 
   const handleGetStarted = () => {
     localStorage.setItem("portai-has-visited", "true");
+    setAuthMode("signup");
+    setShowAuth(true);
+  };
+
+  const handleLogIn = () => {
+    localStorage.setItem("portai-has-visited", "true");
+    setAuthMode("login");
     setShowAuth(true);
   };
 
@@ -157,10 +165,10 @@ const AppRoutes = () => {
       <LanguageProvider initialLanguage="en">
         {showAuth ? (
           <Suspense fallback={<RouteSkeleton />}>
-            <AuthPage onAuth={() => {}} />
+            <AuthPage onAuth={() => {}} initialMode={authMode} />
           </Suspense>
         ) : (
-          <LandingPage onGetStarted={handleGetStarted} />
+          <LandingPage onGetStarted={handleGetStarted} onLogIn={handleLogIn} />
         )}
       </LanguageProvider>
     );
