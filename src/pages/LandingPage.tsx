@@ -43,7 +43,7 @@ const RevealSection = ({ children, className = "" }: { children: React.ReactNode
   );
 };
 
-const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
+const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLogIn?: () => void }) => {
   const { t, language, setLanguage, languageNames } = useLanguage();
   const lt = useLandingT(language);
   const [url, setUrl] = useState("");
