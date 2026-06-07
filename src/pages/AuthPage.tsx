@@ -178,7 +178,7 @@ const AuthPage = ({ onAuth, initialMode = "signup" }: { onAuth: () => void; init
   };
 
   const hasEmailError = emailError.length > 0;
-  const isSubmitDisabled = loading || hasEmailError || (mode === "signup" && (usernameStatus === "taken" || usernameStatus === "checking"));
+  const isSubmitDisabled = loading || hasEmailError;
 
   const seoTitle = mode === "forgot" ? "Reset Password | PortAI"
     : mode === "otp" ? "Verify Code | PortAI"
