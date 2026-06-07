@@ -50,7 +50,7 @@ const Dashboard = lazyWithRetry(() => import("./pages/Dashboard"));
 const NewsPage = lazyWithRetry(() => import("./pages/NewsPage"));
 const AIChat = lazyWithRetry(() => import("./pages/AIChat"));
 const Quiz = lazyWithRetry(() => import("./pages/Quiz"));
-const Forum = lazyWithRetry(() => import("./pages/Forum"));
+
 const Watchlists = lazyWithRetry(() => import("./pages/Watchlists"));
 const StockDetail = lazyWithRetry(() => import("./pages/StockDetail"));
 const SettingsPage = lazyWithRetry(() => import("./pages/SettingsPage"));
