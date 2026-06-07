@@ -300,21 +300,6 @@ const AuthPage = ({ onAuth, initialMode = "signup" }: { onAuth: () => void; init
                 {hasEmailError && <p className="mt-1 text-xs text-loss">{emailError}</p>}
               </div>
 
-              {mode === "signup" && (
-                <div>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <input type="text" value={username} onChange={(e) => checkUsername(e.target.value)} placeholder={t("chooseDisplayNamePh")} className={cn("h-11 w-full rounded-lg border bg-card pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", usernameStatus === "taken" ? "border-loss" : usernameStatus === "available" ? "border-gain" : "border-border")} />
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      {usernameStatus === "checking" && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-                      {usernameStatus === "available" && <Check className="h-4 w-4 text-gain" />}
-                      {usernameStatus === "taken" && <XIcon className="h-4 w-4 text-loss" />}
-                    </div>
-                  </div>
-                  {usernameStatus === "taken" && <p className="mt-1 text-xs text-loss">{t("displayNameTaken")}</p>}
-                  {usernameStatus === "available" && <p className="mt-1 text-xs text-gain">{t("displayNameAvailable")}</p>}
-                </div>
-              )}
 
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
