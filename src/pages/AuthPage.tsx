@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { TrendingUp, Mail, Lock, Loader2, Eye, EyeOff, User, Check, X as XIcon, ArrowLeft, RefreshCw } from "lucide-react";
+import { TrendingUp, Mail, Lock, Loader2, Eye, EyeOff, ArrowLeft, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { cn } from "@/lib/utils";
@@ -11,24 +11,20 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type AuthMode = "login" | "signup" | "forgot" | "otp";
 
-const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
+const AuthPage = ({ onAuth, initialMode = "signup" }: { onAuth: () => void; initialMode?: "login" | "signup" }) => {
   const { t } = useLanguage();
-  const [mode, setMode] = useState<AuthMode>("signup");
+  const [mode, setMode] = useState<AuthMode>(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
   const [showPw, setShowPw] = useState(false);
-  const [showNewPw, setShowNewPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [emailInUse, setEmailInUse] = useState(false);
   const [emailError, setEmailError] = useState("");
-  const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
   const [otpCode, setOtpCode] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const usernameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const startCooldown = useCallback(() => {
     setResendCooldown(30);
@@ -48,7 +44,6 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
   useEffect(() => {
     return () => {
       if (cooldownRef.current) clearInterval(cooldownRef.current);
-      if (usernameTimerRef.current) clearTimeout(usernameTimerRef.current);
     };
   }, []);
 
