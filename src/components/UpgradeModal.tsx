@@ -1,7 +1,8 @@
-import { Crown, X, Check } from "lucide-react";
+import { Crown, X, Check, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { TrialActivation } from "@/components/TrialActivation";
+import { useSubscription } from "@/hooks/useSubscription";
 
 interface UpgradeModalProps {
   open: boolean;
@@ -19,6 +20,7 @@ export const UpgradeModal = ({
   const navigate = useNavigate();
   let t: (k: string) => string;
   try { t = useLanguage().t; } catch { t = (k) => k; }
+  const { isTrialPro, trialDaysLeft } = useSubscription();
 
   if (!open) return null;
 
@@ -112,6 +114,12 @@ export const UpgradeModal = ({
             <span className="absolute -top-2 right-4 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary-foreground">
               {t("bestValue")}
             </span>
+            {isTrialPro && (
+              <div className="flex items-center gap-2 rounded-lg border border-primary/40 bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary">
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>Free trial active{typeof trialDaysLeft === "number" ? ` — ${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"} left` : ""}. Subscribe now to keep your benefits — your trial will end immediately.</span>
+              </div>
+            )}
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">

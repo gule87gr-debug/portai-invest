@@ -11,7 +11,6 @@ const supportingFeatures = [
   { icon: Brain, key: "aiChat", descKey: "supF2Desc" as const },
   { icon: Sparkles, key: "quiz", descKey: "supF3Desc" as const },
   { icon: Eye, key: "watchlists", descKey: "supF4Desc" as const },
-  { icon: MessageSquare, key: "forum", descKey: "supF5Desc" as const },
   { icon: Globe, key: "settings", descKey: "supF6Desc" as const },
 ];
 
@@ -44,7 +43,7 @@ const RevealSection = ({ children, className = "" }: { children: React.ReactNode
   );
 };
 
-const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
+const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLogIn?: () => void }) => {
   const { t, language, setLanguage, languageNames } = useLanguage();
   const lt = useLandingT(language);
   const [url, setUrl] = useState("");
@@ -126,6 +125,12 @@ const LandingPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
               </>
             )}
           </div>
+          <button
+            onClick={onLogIn ?? onGetStarted}
+            className="rounded-lg border border-border bg-card px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-foreground transition-all duration-200 hover:bg-accent hover:border-primary/30 active:scale-[0.97]"
+          >
+            {t("logIn")}
+          </button>
           <button
             onClick={onGetStarted}
             className="rounded-lg bg-primary px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97]"

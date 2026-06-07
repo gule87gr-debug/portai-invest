@@ -50,7 +50,7 @@ const Dashboard = lazyWithRetry(() => import("./pages/Dashboard"));
 const NewsPage = lazyWithRetry(() => import("./pages/NewsPage"));
 const AIChat = lazyWithRetry(() => import("./pages/AIChat"));
 const Quiz = lazyWithRetry(() => import("./pages/Quiz"));
-const Forum = lazyWithRetry(() => import("./pages/Forum"));
+
 const Watchlists = lazyWithRetry(() => import("./pages/Watchlists"));
 const StockDetail = lazyWithRetry(() => import("./pages/StockDetail"));
 const SettingsPage = lazyWithRetry(() => import("./pages/SettingsPage"));
@@ -104,7 +104,7 @@ const AppWithLanguage = () => {
           <Route path="/news" element={<NewsPage />} />
           <Route path="/chat" element={<AIChat />} />
           <Route path="/quiz" element={<Quiz />} />
-          <Route path="/forum" element={<Forum />} />
+          <Route path="/forum" element={<Navigate to="/dashboard" replace />} />
           <Route path="/watchlists" element={<Watchlists />} />
           <Route path="/stock/:ticker" element={<StockDetail />} />
           <Route path="/settings" element={<SettingsPage />} />
@@ -123,6 +123,7 @@ const AppRoutes = () => {
   const [session, setSession] = useState<any>(undefined);
   const [passwordRecovery, setPasswordRecovery] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
+  const [authMode, setAuthMode] = useState<"signup" | "login">("signup");
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -141,6 +142,13 @@ const AppRoutes = () => {
 
   const handleGetStarted = () => {
     localStorage.setItem("portai-has-visited", "true");
+    setAuthMode("signup");
+    setShowAuth(true);
+  };
+
+  const handleLogIn = () => {
+    localStorage.setItem("portai-has-visited", "true");
+    setAuthMode("login");
     setShowAuth(true);
   };
 
@@ -157,10 +165,10 @@ const AppRoutes = () => {
       <LanguageProvider initialLanguage="en">
         {showAuth ? (
           <Suspense fallback={<RouteSkeleton />}>
-            <AuthPage onAuth={() => {}} />
+            <AuthPage onAuth={() => {}} initialMode={authMode} />
           </Suspense>
         ) : (
-          <LandingPage onGetStarted={handleGetStarted} />
+          <LandingPage onGetStarted={handleGetStarted} onLogIn={handleLogIn} />
         )}
       </LanguageProvider>
     );

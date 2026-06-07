@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { TrendingUp, Mail, Lock, Loader2, Eye, EyeOff, User, Check, X as XIcon, ArrowLeft, RefreshCw } from "lucide-react";
+import { TrendingUp, Mail, Lock, Loader2, Eye, EyeOff, ArrowLeft, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { cn } from "@/lib/utils";
@@ -11,24 +11,20 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type AuthMode = "login" | "signup" | "forgot" | "otp";
 
-const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
+const AuthPage = ({ onAuth, initialMode = "signup" }: { onAuth: () => void; initialMode?: "login" | "signup" }) => {
   const { t } = useLanguage();
-  const [mode, setMode] = useState<AuthMode>("signup");
+  const [mode, setMode] = useState<AuthMode>(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
   const [showPw, setShowPw] = useState(false);
-  const [showNewPw, setShowNewPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [emailInUse, setEmailInUse] = useState(false);
   const [emailError, setEmailError] = useState("");
-  const [usernameStatus, setUsernameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
   const [otpCode, setOtpCode] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const usernameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const startCooldown = useCallback(() => {
     setResendCooldown(30);
@@ -48,7 +44,6 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
   useEffect(() => {
     return () => {
       if (cooldownRef.current) clearInterval(cooldownRef.current);
-      if (usernameTimerRef.current) clearTimeout(usernameTimerRef.current);
     };
   }, []);
 
@@ -63,29 +58,6 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
     }
   };
 
-  const checkUsername = (value: string) => {
-    setUsername(value);
-    setUsernameStatus("idle");
-    if (usernameTimerRef.current) clearTimeout(usernameTimerRef.current);
-
-    const trimmed = value.trim();
-    if (!trimmed || trimmed.length < 2) return;
-
-    usernameTimerRef.current = setTimeout(async () => {
-      setUsernameStatus("checking");
-      const { data, error } = await supabase.rpc("check_username_available", {
-        desired_username: trimmed,
-      });
-
-      if (error) {
-        setUsernameStatus("idle");
-        return;
-      }
-
-      setUsernameStatus(data ? "available" : "taken");
-    }, 500);
-  };
-
   const handle = async () => {
     setEmailInUse(false);
     if (!email.trim() || !password.trim()) return setError(t("fillAllFields"));
@@ -95,26 +67,10 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
     if (password.length > 128) return setError(t("passwordMin8"));
     if (mode === "signup" && !/[A-Z]/.test(password)) return setError(t("passwordNeedsUpper"));
     if (mode === "signup" && !/[0-9]/.test(password)) return setError(t("passwordNeedsNumber"));
-    if (mode === "signup" && !username.trim()) return setError(t("displayNameRequired"));
-    if (mode === "signup" && username.trim().length < 2) return setError(t("displayNameMin2"));
-    if (mode === "signup" && username.trim().length > 30) return setError(t("displayNameMax30"));
-    if (mode === "signup" && usernameStatus === "taken") return setError(t("displayNameTaken"));
     setLoading(true);
     setError("");
 
     if (mode === "signup") {
-      // Re-check availability right before creating to prevent race conditions
-      const { data: availableNow, error: availabilityError } = await supabase.rpc("check_username_available", {
-        desired_username: username.trim(),
-      });
-      if (availabilityError || !availableNow) {
-        setUsernameStatus("taken");
-        setError(t("displayNameJustTaken"));
-        setLoading(false);
-        return;
-      }
-
-
       const { data, error: authError } = await supabase.auth.signUp({ email, password });
       if (authError) {
         if (authError.message.toLowerCase().includes("already registered") || authError.message.toLowerCase().includes("already been registered")) {
@@ -127,9 +83,10 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
         return;
       }
       if (data.user) {
+        const defaultName = email.trim().split("@")[0] || "User";
         await supabase.from("user_settings").insert({
           user_id: data.user.id,
-          display_name: username.trim(),
+          display_name: defaultName,
         });
         // Send welcome email
         supabase.functions.invoke("send-transactional-email", {
@@ -137,7 +94,7 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
             templateName: "welcome",
             recipientEmail: email.trim(),
             idempotencyKey: `welcome-${data.user.id}`,
-            templateData: { displayName: username.trim() },
+            templateData: { displayName: defaultName },
           },
         }).catch(() => {}); // Fire-and-forget
       }
@@ -221,7 +178,7 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
   };
 
   const hasEmailError = emailError.length > 0;
-  const isSubmitDisabled = loading || hasEmailError || (mode === "signup" && (usernameStatus === "taken" || usernameStatus === "checking"));
+  const isSubmitDisabled = loading || hasEmailError;
 
   const seoTitle = mode === "forgot" ? "Reset Password | PortAI"
     : mode === "otp" ? "Verify Code | PortAI"
@@ -343,21 +300,6 @@ const AuthPage = ({ onAuth }: { onAuth: () => void }) => {
                 {hasEmailError && <p className="mt-1 text-xs text-loss">{emailError}</p>}
               </div>
 
-              {mode === "signup" && (
-                <div>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <input type="text" value={username} onChange={(e) => checkUsername(e.target.value)} placeholder={t("chooseDisplayNamePh")} className={cn("h-11 w-full rounded-lg border bg-card pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring", usernameStatus === "taken" ? "border-loss" : usernameStatus === "available" ? "border-gain" : "border-border")} />
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      {usernameStatus === "checking" && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-                      {usernameStatus === "available" && <Check className="h-4 w-4 text-gain" />}
-                      {usernameStatus === "taken" && <XIcon className="h-4 w-4 text-loss" />}
-                    </div>
-                  </div>
-                  {usernameStatus === "taken" && <p className="mt-1 text-xs text-loss">{t("displayNameTaken")}</p>}
-                  {usernameStatus === "available" && <p className="mt-1 text-xs text-gain">{t("displayNameAvailable")}</p>}
-                </div>
-              )}
 
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

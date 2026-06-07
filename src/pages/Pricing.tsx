@@ -28,13 +28,12 @@ const Pricing = () => {
 
   const freeTierFeatures = [
     t("featFreeAnalyses"), t("featFreeChat"), t("featFreeImg"),
-    t("featFreeWatch"), t("featFreeQuiz"), t("featForumAccess"),
+    t("featFreeWatch"), t("featFreeQuiz"),
   ];
   const plusTierFeatures = [
     t("featPlusQuiz"), t("featPlusChat"), t("featPlusImg"),
     t("featPlusWatch"), t("featPlusDeepDive"),
     "Advanced AI models (Balanced, Reasoning, Creative) — 5 messages/day each",
-    t("featForumAccess"),
   ];
   const proTierFeatures = [
     t("featProEverything"),
