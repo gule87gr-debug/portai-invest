@@ -245,6 +245,7 @@ const SettingsPage = () => {
             <input value={userEmail} readOnly className="h-10 w-full rounded-lg border border-border bg-muted/30 px-4 text-sm text-muted-foreground cursor-not-allowed" />
             <p className="mt-1 text-xs text-muted-foreground">{t("emailCannotChange")}</p>
           </div>
+        </div>
 
         {/* Subscription Management */}
         <div className="rounded-xl border border-border bg-card p-6">
