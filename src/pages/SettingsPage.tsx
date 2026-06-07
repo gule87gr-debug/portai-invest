@@ -126,13 +126,6 @@ const SettingsPage = () => {
     syncLang();
   }, [language]);
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setProfile((prev) => ({ ...prev, avatar: reader.result as string }));
-    reader.readAsDataURL(file);
-  };
 
   const handleLogout = async () => { await supabase.auth.signOut(); };
 
