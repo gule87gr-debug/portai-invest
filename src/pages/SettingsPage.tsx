@@ -829,21 +829,6 @@ const SettingsPage = () => {
         </div>
 
 
-        <div className="rounded-xl border border-border bg-card p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {profile.anonymous ? <EyeOff className="h-5 w-5 text-primary" /> : <Eye className="h-5 w-5 text-muted-foreground" />}
-              <div>
-                <h3 className="font-semibold">{t("anonymousMode")}</h3>
-                <p className="text-xs text-muted-foreground">{t("hideNameAvatar")}</p>
-              </div>
-            </div>
-            <button onClick={() => setProfile((prev) => ({ ...prev, anonymous: !prev.anonymous }))} className={cn("relative h-6 w-11 rounded-full transition-colors", profile.anonymous ? "bg-primary" : "bg-muted")}>
-              <span className={cn("absolute top-0.5 h-5 w-5 rounded-full bg-foreground transition-transform", profile.anonymous ? "left-[22px]" : "left-0.5")} />
-            </button>
-          </div>
-          {profile.anonymous && <p className="mt-3 text-sm text-muted-foreground">{t("appearAs")} <span className="font-medium text-foreground">"{t("anonymousTrader")}"</span></p>}
-        </div>
 
         {/* Take the Tour */}
         <div className="rounded-xl border border-border bg-card p-6">
