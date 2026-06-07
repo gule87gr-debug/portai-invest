@@ -20,6 +20,7 @@ export const UpgradeModal = ({
   const navigate = useNavigate();
   let t: (k: string) => string;
   try { t = useLanguage().t; } catch { t = (k) => k; }
+  const { isTrialPro, trialDaysLeft } = useSubscription();
 
   if (!open) return null;
 
