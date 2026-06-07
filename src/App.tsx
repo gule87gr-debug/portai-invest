@@ -104,7 +104,7 @@ const AppWithLanguage = () => {
           <Route path="/news" element={<NewsPage />} />
           <Route path="/chat" element={<AIChat />} />
           <Route path="/quiz" element={<Quiz />} />
-          <Route path="/forum" element={<Forum />} />
+          <Route path="/forum" element={<Navigate to="/dashboard" replace />} />
           <Route path="/watchlists" element={<Watchlists />} />
           <Route path="/stock/:ticker" element={<StockDetail />} />
           <Route path="/settings" element={<SettingsPage />} />
