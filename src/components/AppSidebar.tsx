@@ -90,7 +90,6 @@ export const AppSidebar = () => {
           {navKeys.map(({ to, icon: Icon, key, tour }) => {
             const [path, hash] = to.split("#");
             const active = location.pathname === path && (!hash || location.hash === `#${hash}`);
-            const isPulse = key === "forum";
             return (
               <NavLink
                 key={to}
@@ -104,19 +103,8 @@ export const AppSidebar = () => {
                     : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 )}
               >
-                <span className="relative">
-                  <Icon className="h-4.5 w-4.5" />
-                  {isPulse && (
-                    <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-loss opacity-75" />
-                      <span className="relative inline-flex h-2 w-2 rounded-full bg-loss" />
-                    </span>
-                  )}
-                </span>
+                <Icon className="h-4.5 w-4.5" />
                 <span className="flex-1">{t(key)}</span>
-                {isPulse && (
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-loss">Live</span>
-                )}
               </NavLink>
             );
           })}
