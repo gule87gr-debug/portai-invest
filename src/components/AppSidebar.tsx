@@ -1,4 +1,4 @@
-import { MessageCircle, Sparkles, MessageSquare, Eye, Settings, TrendingUp, Menu, X, LogOut, Search, Shield, Newspaper } from "lucide-react";
+import { MessageCircle, Sparkles, Eye, Settings, TrendingUp, Menu, X, LogOut, Search, Shield, Newspaper } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
@@ -13,7 +13,6 @@ const navKeys = [
   { to: "/news", icon: Newspaper, key: "news", tour: "nav-news" },
   { to: "/chat", icon: MessageCircle, key: "aiChat", tour: "nav-chat" },
   { to: "/quiz", icon: Sparkles, key: "quiz", tour: "nav-quiz" },
-  { to: "/forum", icon: MessageSquare, key: "forum", tour: "nav-forum" },
   { to: "/watchlists", icon: Eye, key: "watchlists", tour: "nav-watchlists" },
   { to: "/settings", icon: Settings, key: "settings", tour: "" },
 ];
