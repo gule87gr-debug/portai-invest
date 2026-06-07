@@ -1,7 +1,8 @@
-import { Crown, X, Check } from "lucide-react";
+import { Crown, X, Check, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { TrialActivation } from "@/components/TrialActivation";
+import { useSubscription } from "@/hooks/useSubscription";
 
 interface UpgradeModalProps {
   open: boolean;
