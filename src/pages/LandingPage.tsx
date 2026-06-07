@@ -11,7 +11,6 @@ const supportingFeatures = [
   { icon: Brain, key: "aiChat", descKey: "supF2Desc" as const },
   { icon: Sparkles, key: "quiz", descKey: "supF3Desc" as const },
   { icon: Eye, key: "watchlists", descKey: "supF4Desc" as const },
-  { icon: MessageSquare, key: "forum", descKey: "supF5Desc" as const },
   { icon: Globe, key: "settings", descKey: "supF6Desc" as const },
 ];
 
