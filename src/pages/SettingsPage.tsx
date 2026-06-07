@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { TrialActivation } from "@/components/TrialActivation";
 
 const SettingsPage = () => {
-  const { profile, setProfile, setShowTutorial } = useApp();
+  const { profile, setShowTutorial } = useApp();
   const navigate = useNavigate();
   usePageTitle("Settings | PortAI");
   const { tier, isPaid, isPaying, isTrialPro, isPlus, isPro, trialDaysLeft, trialEndsAt, subscriptionEnd, cancelAtPeriodEnd, subscriptionId, subscriptionStatus, scheduledTier, scheduledStart, scheduledChangesCount, loading: subLoading, refresh } = useSubscription();
