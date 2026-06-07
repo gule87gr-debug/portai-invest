@@ -126,6 +126,12 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
             )}
           </div>
           <button
+            onClick={onLogIn ?? onGetStarted}
+            className="rounded-lg border border-border bg-card px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-foreground transition-all duration-200 hover:bg-accent hover:border-primary/30 active:scale-[0.97]"
+          >
+            {t("logIn")}
+          </button>
+          <button
             onClick={onGetStarted}
             className="rounded-lg bg-primary px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97]"
           >
