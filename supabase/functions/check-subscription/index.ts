@@ -151,6 +151,29 @@ serve(async (req) => {
       cancelAtPeriodEnd = best.cancel_at_period_end;
       subscriptionId = best.id;
       subscriptionStatus = best.status;
+
+      // The user now has a paid subscription. End any active free trial immediately
+      // and mark the trial as used so it cannot be re-taken later.
+      try {
+        const { data: trialRow } = await supabaseClient
+          .from("user_settings")
+          .select("pro_trial_active, trial_used")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (trialRow && (trialRow.pro_trial_active || !trialRow.trial_used)) {
+          await supabaseClient
+            .from("user_settings")
+            .update({ pro_trial_active: false, trial_used: true })
+            .eq("user_id", user.id);
+          await supabaseClient.from("trial_audit_log").insert({
+            user_id: user.id,
+            user_email: user.email ?? "",
+            action: "ended_for_paid_subscription",
+          });
+        }
+      } catch (e) {
+        console.warn("[check-subscription] failed to end trial after paid sub:", (e as Error).message);
+      }
     } else {
       // Fall back to most recent canceled/incomplete sub for status info
       const fallback = subscriptions.data[0];
