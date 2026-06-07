@@ -55,22 +55,20 @@ serve(async (req) => {
       !!providedDebugSecret &&
       providedDebugSecret === debugSecret;
 
+    // Unauthenticated / stale-token callers get a benign "free" response (status 200)
+    // so the client doesn't throw FunctionsHttpError during auth-lock races.
+    const unauthenticated = () =>
+      new Response(
+        JSON.stringify({ subscribed: false, tier: "free" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
+      );
+
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Authentication required" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 401,
-      });
-    }
+    if (!authHeader) return unauthenticated();
 
     const token = authHeader.replace("Bearer ", "");
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError || !userData.user?.email) {
-      return new Response(JSON.stringify({ error: "Authentication required" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 401,
-      });
-    }
+    if (userError || !userData.user?.email) return unauthenticated();
     const user = userData.user;
 
     // Admin bypass: looked up via DB so it's configurable in the admin panel.
