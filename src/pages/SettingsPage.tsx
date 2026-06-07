@@ -240,69 +240,11 @@ const SettingsPage = () => {
               </span>
             )}
           </div>
-          <div className="mb-6 flex items-center gap-5">
-            <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-              {profile.avatar ? (
-                <img src={profile.avatar} alt="Avatar" className="h-20 w-20 rounded-full object-cover border-2 border-border" />
-              ) : (
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-secondary">
-                  <User className="h-8 w-8 text-muted-foreground" />
-                </div>
-              )}
-              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Camera className="h-5 w-5 text-foreground" />
-              </div>
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
-            </div>
-            <div>
-              <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 rounded-lg border border-border bg-accent/50 px-4 py-2 text-sm font-medium transition-colors hover:bg-accent">
-                <Upload className="h-4 w-4" /> {t("uploadPhoto")}
-              </button>
-              <p className="mt-1 text-xs text-muted-foreground">{t("avatarRecommendation")}</p>
-            </div>
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-muted-foreground">{t("email")}</label>
+            <input value={userEmail} readOnly className="h-10 w-full rounded-lg border border-border bg-muted/30 px-4 text-sm text-muted-foreground cursor-not-allowed" />
+            <p className="mt-1 text-xs text-muted-foreground">{t("emailCannotChange")}</p>
           </div>
-          <div className="space-y-4">
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-muted-foreground">{t("displayName")}</label>
-              <div className="relative">
-                <input
-                  value={editingName}
-                  onChange={(e) => setEditingName(e.target.value)}
-                  onBlur={() => {
-                    if (nameStatus === "available" && editingName.trim() !== savedName) {
-                      setProfile((prev) => ({ ...prev, name: editingName.trim() }));
-                      setSavedName(editingName.trim());
-                      setNameStatus("idle");
-                    } else if (nameStatus !== "available") {
-                      setEditingName(savedName);
-                      setNameStatus("idle");
-                    }
-                  }}
-                  className={cn(
-                    "h-10 w-full rounded-lg border bg-accent/30 px-4 pr-10 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring",
-                    nameStatus === "taken" ? "border-loss" : nameStatus === "available" ? "border-gain" : "border-border"
-                  )}
-                />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  {nameStatus === "checking" && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-                  {nameStatus === "available" && <Check className="h-4 w-4 text-gain" />}
-                  {nameStatus === "taken" && <XIcon className="h-4 w-4 text-loss" />}
-                </div>
-              </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {nameStatus === "taken" && <span className="text-loss">{t("displayNameTaken")}</span>}
-                {nameStatus === "available" && <span className="text-gain">{t("displayNameAvailable")}</span>}
-                {nameStatus === "checking" && t("checkingAvailability")}
-                {nameStatus === "idle" && t("changesSaveAuto")}
-              </p>
-            </div>
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-muted-foreground">{t("email")}</label>
-              <input value={userEmail} readOnly className="h-10 w-full rounded-lg border border-border bg-muted/30 px-4 text-sm text-muted-foreground cursor-not-allowed" />
-              <p className="mt-1 text-xs text-muted-foreground">{t("emailCannotChange")}</p>
-            </div>
-          </div>
-        </div>
 
         {/* Subscription Management */}
         <div className="rounded-xl border border-border bg-card p-6">
