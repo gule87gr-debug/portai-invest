@@ -368,7 +368,7 @@ export const StockNewsFeed = () => {
                 return (
                   <a
                     key={`${item.link}-${i}`}
-                    href={item.link}
+                    href={/^https?:\/\//i.test(item.link) ? item.link : "#"}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group block rounded-xl border border-border bg-card/60 p-4 hover:bg-accent/30 hover:border-primary/40 transition-all duration-200 hover:-translate-y-0.5"
