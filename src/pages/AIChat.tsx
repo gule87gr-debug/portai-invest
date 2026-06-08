@@ -402,7 +402,7 @@ const AIChat = () => {
 
         {imagePreview && (
           <div className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-card p-2">
-            <img src={imagePreview} alt="Preview" className="h-16 w-16 rounded-lg object-cover" />
+            <img src={imagePreview} alt="Uploaded image preview" className="h-16 w-16 rounded-lg object-cover" />
             <p className="flex-1 text-xs text-muted-foreground">{t("imageAttached")}</p>
             <button onClick={() => setImagePreview(null)} aria-label="Remove attached image" className="text-muted-foreground hover:text-loss">
               <X className="h-4 w-4" />

@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 
 const URL = "https://portai-invest.com/compare/seeking-alpha-vs-motley-fool";
-const TITLE = "Seeking Alpha vs The Motley Fool: Bias & Credibility Compared (2026)";
+const TITLE = "Seeking Alpha vs Motley Fool: Bias Compared";
 const DESCRIPTION =
-  "An in-depth bias and credibility comparison of Seeking Alpha and The Motley Fool — editorial model, conflict-of-interest exposure, accuracy track record and how to read their stock recommendations.";
+  "Bias and credibility comparison of Seeking Alpha and The Motley Fool — editorial model, conflicts of interest, accuracy and how to read each one.";
 
 const articleJsonLd = {
   "@context": "https://schema.org",
