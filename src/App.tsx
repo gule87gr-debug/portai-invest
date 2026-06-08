@@ -67,6 +67,7 @@ const DataCompliance = lazyWithRetry(() => import("./pages/DataCompliance"));
 const IPPolicy = lazyWithRetry(() => import("./pages/IPPolicy"));
 const AdminPage = lazyWithRetry(() => import("./pages/Admin"));
 const SeekingAlphaVsMotleyFool = lazyWithRetry(() => import("./pages/SeekingAlphaVsMotleyFool"));
+const BestStockAdvisorServices = lazyWithRetry(() => import("./pages/BestStockAdvisorServices"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -209,6 +210,7 @@ const App = () => (
               <Route path="/ip-policy" element={<IPPolicy />} />
               <Route path="/unsubscribe" element={<Unsubscribe />} />
               <Route path="/compare/seeking-alpha-vs-motley-fool" element={<SeekingAlphaVsMotleyFool />} />
+              <Route path="/compare/best-stock-advisor-services" element={<BestStockAdvisorServices />} />
               <Route path="*" element={<AppRoutes />} />
             </Routes>
           </Suspense>
