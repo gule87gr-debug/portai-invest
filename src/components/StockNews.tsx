@@ -63,7 +63,7 @@ export const StockNews = ({ ticker, height = 400 }: { ticker: string; height?: n
       {news.map((item, i) => (
         <a
           key={i}
-          href={item.link}
+          href={/^https?:\/\//i.test(item.link) ? item.link : "#"}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-start gap-3 p-3 hover:bg-accent/30 transition-colors group"
