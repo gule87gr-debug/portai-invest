@@ -52,7 +52,7 @@ export const AppSidebar = () => {
   return (
     <>
       {!open && (
-        <div className="fixed left-4 top-4 z-50 flex items-center gap-2">
+        <div className="fixed left-4 top-6 z-50 flex items-center gap-2">
           <button
             onClick={() => setOpen(true)}
             aria-label="Open navigation menu"
