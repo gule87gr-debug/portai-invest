@@ -55,8 +55,8 @@ export const Sparkline = ({ width = 80, height = 28, className = "", seed = "def
         fill="none"
         stroke={color}
         strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+      strokeLinecap="butt"
+      strokeLinejoin="miter"
       />
     </svg>
   );

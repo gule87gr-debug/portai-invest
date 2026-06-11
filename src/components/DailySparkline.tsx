@@ -106,8 +106,8 @@ export const DailySparkline = ({
         fill="none"
         stroke={color}
         strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+      strokeLinecap="butt"
+      strokeLinejoin="miter"
       />
     </svg>
   );
