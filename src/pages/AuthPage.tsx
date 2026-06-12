@@ -336,6 +336,8 @@ const AuthPage = ({ onAuth, initialMode = "signup" }: { onAuth: () => void; init
                 )}
               </div>
             )}
+            {success && <p className="text-sm text-gain">{success}</p>}
+
 
             <button onClick={handle} disabled={isSubmitDisabled} className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : mode === "signup" ? t("createAccount") : t("logIn")}
