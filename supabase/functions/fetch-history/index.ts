@@ -13,10 +13,11 @@ const CACHE_TTL = 60 * 1000;
 type Range = "1D" | "1W" | "1M" | "3M" | "1Y" | "ALL";
 
 function rangeToParams(range: Range): { range: string; interval: string } {
+  // Mirrors Yahoo Finance's web chart granularity
   switch (range) {
-    case "1D": return { range: "1d", interval: "5m" };
-    case "1W": return { range: "5d", interval: "30m" };
-    case "1M": return { range: "1mo", interval: "1d" };
+    case "1D": return { range: "1d", interval: "1m" };
+    case "1W": return { range: "5d", interval: "5m" };
+    case "1M": return { range: "1mo", interval: "30m" };
     case "3M": return { range: "3mo", interval: "1d" };
     case "1Y": return { range: "1y", interval: "1d" };
     case "ALL": return { range: "max", interval: "1wk" };
