@@ -32,7 +32,7 @@ const COMPARE_COLORS = [
 
 const MAX_COMPARE = COMPARE_COLORS.length;
 
-interface Point { t: number; c: number; o?: number | null; h?: number | null; l?: number | null; }
+interface Point { t: number; c: number; o?: number | null; h?: number | null; l?: number | null; v?: number | null; }
 interface HistoryResponse {
   symbol: string;
   range: ChartRange;
@@ -43,28 +43,40 @@ interface HistoryResponse {
 
 type ChartKind = "line" | "candle";
 
-// Custom candle shape for Recharts <Bar shape={...}>
+// Custom candle shape. Used with <Bar dataKey={(d)=>[d.l,d.h]} shape={<Candle />} />
+// so Recharts gives us y/height covering the [low, high] range — no yAxis access needed.
 const Candle = (props: any) => {
-  const { x, y, width, height, payload, yAxis } = props;
+  const { x, y, width, height, payload } = props;
   if (!payload || payload.o == null || payload.h == null || payload.l == null || payload.c == null) return null;
-  const scale = yAxis?.scale;
-  if (!scale) return null;
-  const isUp = payload.c >= payload.o;
+  const { o, h, l, c } = payload;
+  const isUp = c >= o;
   const color = isUp ? "hsl(var(--primary))" : "hsl(0 72% 60%)";
-  const yHigh = scale(payload.h);
-  const yLow = scale(payload.l);
-  const yOpen = scale(payload.o);
-  const yClose = scale(payload.c);
+  const range = h - l;
+  // Map a price to a y-pixel inside [y, y+height] (high → y, low → y+height)
+  const priceToY = (p: number) => (range > 0 ? y + ((h - p) / range) * height : y + height / 2);
+  const yHigh = y;
+  const yLow = y + height;
+  const yOpen = priceToY(o);
+  const yClose = priceToY(c);
   const bodyTop = Math.min(yOpen, yClose);
   const bodyH = Math.max(1, Math.abs(yClose - yOpen));
   const cx = x + width / 2;
-  const bodyW = Math.max(1, Math.min(width * 0.7, 10));
+  const bodyW = Math.max(2, Math.min(width * 0.7, 12));
   return (
     <g>
-      <line x1={cx} x2={cx} y1={yHigh} y2={yLow} stroke={color} strokeWidth={1} />
+      <line x1={cx} x2={cx} y1={yHigh} y2={yLow} stroke={color} strokeWidth={1.2} />
       <rect x={cx - bodyW / 2} y={bodyTop} width={bodyW} height={bodyH} fill={color} stroke={color} />
     </g>
   );
+};
+
+const VolumeBar = (props: any) => {
+  const { x, y, width, height, payload } = props;
+  if (!payload) return null;
+  const isUp = (payload.c ?? 0) >= (payload.o ?? 0);
+  const color = isUp ? "hsl(var(--primary))" : "hsl(0 72% 60%)";
+  const w = Math.max(1, Math.min(width * 0.7, 12));
+  return <rect x={x + width / 2 - w / 2} y={y} width={w} height={height} fill={color} opacity={0.55} />;
 };
 
 interface CompareItem {
