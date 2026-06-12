@@ -71,7 +71,11 @@ const AuthPage = ({ onAuth, initialMode = "signup" }: { onAuth: () => void; init
     setError("");
 
     if (mode === "signup") {
-      const { data, error: authError } = await supabase.auth.signUp({ email, password });
+      const { data, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: `${window.location.origin}/` },
+      });
       if (authError) {
         if (authError.message.toLowerCase().includes("already registered") || authError.message.toLowerCase().includes("already been registered")) {
           setEmailInUse(true);
@@ -82,13 +86,15 @@ const AuthPage = ({ onAuth, initialMode = "signup" }: { onAuth: () => void; init
         setLoading(false);
         return;
       }
-      if (data.user) {
+      // When email confirmation is required, no session is returned.
+      // The user must click the verification link in their inbox before logging in.
+      const needsConfirmation = !data.session;
+      if (data.user && !needsConfirmation) {
         const defaultName = email.trim().split("@")[0] || "User";
         await supabase.from("user_settings").insert({
           user_id: data.user.id,
           display_name: defaultName,
         });
-        // Send welcome email
         supabase.functions.invoke("send-transactional-email", {
           body: {
             templateName: "welcome",
@@ -96,17 +102,21 @@ const AuthPage = ({ onAuth, initialMode = "signup" }: { onAuth: () => void; init
             idempotencyKey: `welcome-${data.user.id}`,
             templateData: { displayName: defaultName },
           },
-        }).catch(() => {}); // Fire-and-forget
-      }
-      onAuth();
-    } else {
-      const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
-      if (authError) {
-        setError(authError.message);
-        setLoading(false);
-      } else {
+        }).catch(() => {});
         onAuth();
+      } else {
+        setLoading(false);
+        setSuccess(`We sent a verification link to ${email.trim()}. Please confirm your email to finish creating your account.`);
+        setPassword("");
       }
+      return;
+    }
+    const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+    if (authError) {
+      setError(authError.message);
+      setLoading(false);
+    } else {
+      onAuth();
     }
   };
 
@@ -326,6 +336,8 @@ const AuthPage = ({ onAuth, initialMode = "signup" }: { onAuth: () => void; init
                 )}
               </div>
             )}
+            {success && <p className="text-sm text-gain">{success}</p>}
+
 
             <button onClick={handle} disabled={isSubmitDisabled} className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : mode === "signup" ? t("createAccount") : t("logIn")}

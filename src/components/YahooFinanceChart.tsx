@@ -2,9 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   AreaChart, Area, LineChart, Line, XAxis, YAxis, Tooltip, Legend,
-  ResponsiveContainer, ReferenceLine,
+  ResponsiveContainer, ReferenceLine, ComposedChart, Bar,
 } from "recharts";
-import { Loader2, AlertTriangle, Plus, X, Search, Lock, GitCompareArrows } from "lucide-react";
+import { Loader2, AlertTriangle, Plus, X, Search, Lock, GitCompareArrows, LineChart as LineIcon, CandlestickChart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { searchAssets, type AssetEntry } from "@/lib/stockDatabase";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -32,7 +32,7 @@ const COMPARE_COLORS = [
 
 const MAX_COMPARE = COMPARE_COLORS.length;
 
-interface Point { t: number; c: number; }
+interface Point { t: number; c: number; o?: number | null; h?: number | null; l?: number | null; }
 interface HistoryResponse {
   symbol: string;
   range: ChartRange;
@@ -40,6 +40,32 @@ interface HistoryResponse {
   points: Point[];
   meta?: { previousClose?: number | null };
 }
+
+type ChartKind = "line" | "candle";
+
+// Custom candle shape for Recharts <Bar shape={...}>
+const Candle = (props: any) => {
+  const { x, y, width, height, payload, yAxis } = props;
+  if (!payload || payload.o == null || payload.h == null || payload.l == null || payload.c == null) return null;
+  const scale = yAxis?.scale;
+  if (!scale) return null;
+  const isUp = payload.c >= payload.o;
+  const color = isUp ? "hsl(var(--primary))" : "hsl(0 72% 60%)";
+  const yHigh = scale(payload.h);
+  const yLow = scale(payload.l);
+  const yOpen = scale(payload.o);
+  const yClose = scale(payload.c);
+  const bodyTop = Math.min(yOpen, yClose);
+  const bodyH = Math.max(1, Math.abs(yClose - yOpen));
+  const cx = x + width / 2;
+  const bodyW = Math.max(1, Math.min(width * 0.7, 10));
+  return (
+    <g>
+      <line x1={cx} x2={cx} y1={yHigh} y2={yLow} stroke={color} strokeWidth={1} />
+      <rect x={cx - bodyW / 2} y={bodyTop} width={bodyW} height={bodyH} fill={color} stroke={color} />
+    </g>
+  );
+};
 
 interface CompareItem {
   ticker: string;
@@ -63,6 +89,7 @@ async function fetchSeries(ticker: string, type: string | undefined, range: Char
 
 export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceChartProps) => {
   const [range, setRange] = useState<ChartRange>("1M");
+  const [chartKind, setChartKind] = useState<ChartKind>("line");
   let t: (k: string) => string;
   try { t = useLanguage().t; } catch { t = (k) => k; }
   const { isPaid, loading: subLoading } = useSubscription();
@@ -239,23 +266,53 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
             <span className="rounded-md bg-muted px-2 py-0.5">{t("pctChangeLbl")}</span>
           )}
         </div>
-        <div className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5" role="tablist" aria-label={t("chartTimeframe")}>
-          {RANGES.map((r) => (
-            <button
-              key={r}
-              role="tab"
-              aria-selected={range === r}
-              onClick={() => setRange(r)}
-              className={cn(
-                "px-2.5 py-1 text-xs font-mono rounded-md transition-colors",
-                range === r
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {rangeLabel(r)}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          {!isCompare && (
+            <div className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5" role="tablist" aria-label="Chart type">
+              <button
+                role="tab"
+                aria-selected={chartKind === "line"}
+                onClick={() => setChartKind("line")}
+                title="Line"
+                className={cn(
+                  "px-2 py-1 rounded-md transition-colors",
+                  chartKind === "line" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <LineIcon className="h-3.5 w-3.5" />
+              </button>
+              <button
+                role="tab"
+                aria-selected={chartKind === "candle"}
+                onClick={() => setChartKind("candle")}
+                title="Candlestick"
+                className={cn(
+                  "px-2 py-1 rounded-md transition-colors",
+                  chartKind === "candle" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <CandlestickChart className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
+          <div className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5" role="tablist" aria-label={t("chartTimeframe")}>
+            {RANGES.map((r) => (
+              <button
+                key={r}
+                role="tab"
+                aria-selected={range === r}
+                onClick={() => setRange(r)}
+                className={cn(
+                  "px-2.5 py-1 text-xs font-mono rounded-md transition-colors",
+                  range === r
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {rangeLabel(r)}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -351,7 +408,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
             <span>{error}</span>
           </div>
         )}
-        {!loading && !error && !isCompare && primary?.points && primary.points.length > 0 && (
+        {!loading && !error && !isCompare && primary?.points && primary.points.length > 0 && chartKind === "line" && (
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={primary.points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
               <defs>
@@ -372,6 +429,41 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
               />
               <Area type="linear" dataKey="c" stroke={stroke} strokeWidth={2} fill="url(#chartFill)" isAnimationActive={true} animationDuration={1200} animationEasing="ease-out" />
             </AreaChart>
+          </ResponsiveContainer>
+        )}
+        {!loading && !error && !isCompare && primary?.points && primary.points.length > 0 && chartKind === "candle" && (
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart data={primary.points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+              <XAxis dataKey="t" tickFormatter={formatDate} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={40} />
+              <YAxis
+                domain={[
+                  (dataMin: number) => dataMin * 0.999,
+                  (dataMax: number) => dataMax * 1.001,
+                ]}
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+                width={50}
+                tickFormatter={(v) => Number(v).toFixed(2)}
+                orientation="right"
+              />
+              {stats && (
+                <ReferenceLine y={stats.ref} stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" strokeOpacity={0.4} />
+              )}
+              <Tooltip
+                contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
+                labelFormatter={(t) => new Date(Number(t)).toLocaleString()}
+                formatter={(_value: number, _name, item: any) => {
+                  const p = item?.payload;
+                  if (!p) return ["", ""];
+                  return [
+                    `O ${Number(p.o ?? 0).toFixed(2)}  H ${Number(p.h ?? 0).toFixed(2)}  L ${Number(p.l ?? 0).toFixed(2)}  C ${Number(p.c ?? 0).toFixed(2)}`,
+                    "OHLC",
+                  ];
+                }}
+              />
+              <Bar dataKey="c" shape={<Candle />} isAnimationActive={false} />
+            </ComposedChart>
           </ResponsiveContainer>
         )}
         {!loading && !error && isCompare && compareData.length > 0 && (
