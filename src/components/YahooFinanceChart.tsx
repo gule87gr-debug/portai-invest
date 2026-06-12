@@ -308,6 +308,19 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
               </button>
             </div>
           )}
+          {!isCompare && chartKind === "candle" && (
+            <button
+              type="button"
+              onClick={() => setShowVolume((v) => !v)}
+              title={showVolume ? "Hide volume" : "Show volume"}
+              className={cn(
+                "rounded-md border border-border px-2 py-1 text-[11px] font-mono transition-colors",
+                showVolume ? "bg-primary/15 text-primary border-primary/40" : "bg-muted/40 text-muted-foreground hover:text-foreground"
+              )}
+            >
+              VOL
+            </button>
+          )}
           <div className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5" role="tablist" aria-label={t("chartTimeframe")}>
             {RANGES.map((r) => (
               <button
