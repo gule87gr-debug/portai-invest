@@ -105,6 +105,7 @@ serve(async (req) => {
     const opens: (number | null)[] = quote.open || [];
     const highs: (number | null)[] = quote.high || [];
     const lows: (number | null)[] = quote.low || [];
+    const volumes: (number | null)[] = quote.volume || [];
 
     const points = timestamps
       .map((t, i) => ({
@@ -113,6 +114,7 @@ serve(async (req) => {
         o: opens[i],
         h: highs[i],
         l: lows[i],
+        v: volumes[i] ?? null,
       }))
       .filter((p) => p.c != null);
 
