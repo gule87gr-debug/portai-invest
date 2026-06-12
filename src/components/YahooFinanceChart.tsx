@@ -2,9 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   AreaChart, Area, LineChart, Line, XAxis, YAxis, Tooltip, Legend,
-  ResponsiveContainer, ReferenceLine,
+  ResponsiveContainer, ReferenceLine, ComposedChart, Bar,
 } from "recharts";
-import { Loader2, AlertTriangle, Plus, X, Search, Lock, GitCompareArrows } from "lucide-react";
+import { Loader2, AlertTriangle, Plus, X, Search, Lock, GitCompareArrows, LineChart as LineIcon, CandlestickChart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { searchAssets, type AssetEntry } from "@/lib/stockDatabase";
 import { useSubscription } from "@/hooks/useSubscription";
