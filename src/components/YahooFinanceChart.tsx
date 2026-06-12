@@ -408,7 +408,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
             <span>{error}</span>
           </div>
         )}
-        {!loading && !error && !isCompare && primary?.points && primary.points.length > 0 && (
+        {!loading && !error && !isCompare && primary?.points && primary.points.length > 0 && chartKind === "line" && (
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={primary.points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
               <defs>
@@ -429,6 +429,41 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
               />
               <Area type="linear" dataKey="c" stroke={stroke} strokeWidth={2} fill="url(#chartFill)" isAnimationActive={true} animationDuration={1200} animationEasing="ease-out" />
             </AreaChart>
+          </ResponsiveContainer>
+        )}
+        {!loading && !error && !isCompare && primary?.points && primary.points.length > 0 && chartKind === "candle" && (
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart data={primary.points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+              <XAxis dataKey="t" tickFormatter={formatDate} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={40} />
+              <YAxis
+                domain={[
+                  (dataMin: number) => dataMin * 0.999,
+                  (dataMax: number) => dataMax * 1.001,
+                ]}
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+                width={50}
+                tickFormatter={(v) => Number(v).toFixed(2)}
+                orientation="right"
+              />
+              {stats && (
+                <ReferenceLine y={stats.ref} stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" strokeOpacity={0.4} />
+              )}
+              <Tooltip
+                contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
+                labelFormatter={(t) => new Date(Number(t)).toLocaleString()}
+                formatter={(_value: number, _name, item: any) => {
+                  const p = item?.payload;
+                  if (!p) return ["", ""];
+                  return [
+                    `O ${Number(p.o ?? 0).toFixed(2)}  H ${Number(p.h ?? 0).toFixed(2)}  L ${Number(p.l ?? 0).toFixed(2)}  C ${Number(p.c ?? 0).toFixed(2)}`,
+                    "OHLC",
+                  ];
+                }}
+              />
+              <Bar dataKey="c" shape={<Candle />} isAnimationActive={false} />
+            </ComposedChart>
           </ResponsiveContainer>
         )}
         {!loading && !error && isCompare && compareData.length > 0 && (
