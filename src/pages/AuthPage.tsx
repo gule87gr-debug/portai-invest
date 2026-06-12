@@ -91,6 +91,7 @@ const AuthPage = ({ onAuth, initialMode = "signup" }: { onAuth: () => void; init
   useEffect(() => {
     return () => {
       if (cooldownRef.current) clearInterval(cooldownRef.current);
+      if (verifyCooldownRef.current) clearInterval(verifyCooldownRef.current);
     };
   }, []);
 
