@@ -155,13 +155,23 @@ const AuthPage = ({ onAuth, initialMode = "signup" }: { onAuth: () => void; init
       } else {
         setLoading(false);
         setSuccess(`We sent a verification link to ${email.trim()}. Please confirm your email to finish creating your account.`);
+        setPendingVerificationEmail(email.trim());
+        setVerifyResendStatus({ kind: "idle", msg: "" });
+        startVerifyCooldown(60);
         setPassword("");
       }
       return;
     }
     const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
     if (authError) {
-      setError(authError.message);
+      const m = authError.message.toLowerCase();
+      if (m.includes("not confirmed") || m.includes("email not confirmed") || m.includes("confirm your email")) {
+        setPendingVerificationEmail(email.trim());
+        setVerifyResendStatus({ kind: "idle", msg: "" });
+        setError("Your email isn't verified yet. Check your inbox for the verification link or resend it below.");
+      } else {
+        setError(authError.message);
+      }
       setLoading(false);
     } else {
       onAuth();
