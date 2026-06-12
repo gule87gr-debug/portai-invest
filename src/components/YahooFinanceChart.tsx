@@ -32,7 +32,7 @@ const COMPARE_COLORS = [
 
 const MAX_COMPARE = COMPARE_COLORS.length;
 
-interface Point { t: number; c: number; }
+interface Point { t: number; c: number; o?: number | null; h?: number | null; l?: number | null; }
 interface HistoryResponse {
   symbol: string;
   range: ChartRange;
@@ -40,6 +40,32 @@ interface HistoryResponse {
   points: Point[];
   meta?: { previousClose?: number | null };
 }
+
+type ChartKind = "line" | "candle";
+
+// Custom candle shape for Recharts <Bar shape={...}>
+const Candle = (props: any) => {
+  const { x, y, width, height, payload, yAxis } = props;
+  if (!payload || payload.o == null || payload.h == null || payload.l == null || payload.c == null) return null;
+  const scale = yAxis?.scale;
+  if (!scale) return null;
+  const isUp = payload.c >= payload.o;
+  const color = isUp ? "hsl(var(--primary))" : "hsl(0 72% 60%)";
+  const yHigh = scale(payload.h);
+  const yLow = scale(payload.l);
+  const yOpen = scale(payload.o);
+  const yClose = scale(payload.c);
+  const bodyTop = Math.min(yOpen, yClose);
+  const bodyH = Math.max(1, Math.abs(yClose - yOpen));
+  const cx = x + width / 2;
+  const bodyW = Math.max(1, Math.min(width * 0.7, 10));
+  return (
+    <g>
+      <line x1={cx} x2={cx} y1={yHigh} y2={yLow} stroke={color} strokeWidth={1} />
+      <rect x={cx - bodyW / 2} y={bodyTop} width={bodyW} height={bodyH} fill={color} stroke={color} />
+    </g>
+  );
+};
 
 interface CompareItem {
   ticker: string;
