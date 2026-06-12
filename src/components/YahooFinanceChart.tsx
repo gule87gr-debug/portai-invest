@@ -32,7 +32,7 @@ const COMPARE_COLORS = [
 
 const MAX_COMPARE = COMPARE_COLORS.length;
 
-interface Point { t: number; c: number; o?: number | null; h?: number | null; l?: number | null; }
+interface Point { t: number; c: number; o?: number | null; h?: number | null; l?: number | null; v?: number | null; }
 interface HistoryResponse {
   symbol: string;
   range: ChartRange;
@@ -43,28 +43,40 @@ interface HistoryResponse {
 
 type ChartKind = "line" | "candle";
 
-// Custom candle shape for Recharts <Bar shape={...}>
+// Custom candle shape. Used with <Bar dataKey={(d)=>[d.l,d.h]} shape={<Candle />} />
+// so Recharts gives us y/height covering the [low, high] range — no yAxis access needed.
 const Candle = (props: any) => {
-  const { x, y, width, height, payload, yAxis } = props;
+  const { x, y, width, height, payload } = props;
   if (!payload || payload.o == null || payload.h == null || payload.l == null || payload.c == null) return null;
-  const scale = yAxis?.scale;
-  if (!scale) return null;
-  const isUp = payload.c >= payload.o;
+  const { o, h, l, c } = payload;
+  const isUp = c >= o;
   const color = isUp ? "hsl(var(--primary))" : "hsl(0 72% 60%)";
-  const yHigh = scale(payload.h);
-  const yLow = scale(payload.l);
-  const yOpen = scale(payload.o);
-  const yClose = scale(payload.c);
+  const range = h - l;
+  // Map a price to a y-pixel inside [y, y+height] (high → y, low → y+height)
+  const priceToY = (p: number) => (range > 0 ? y + ((h - p) / range) * height : y + height / 2);
+  const yHigh = y;
+  const yLow = y + height;
+  const yOpen = priceToY(o);
+  const yClose = priceToY(c);
   const bodyTop = Math.min(yOpen, yClose);
   const bodyH = Math.max(1, Math.abs(yClose - yOpen));
   const cx = x + width / 2;
-  const bodyW = Math.max(1, Math.min(width * 0.7, 10));
+  const bodyW = Math.max(2, Math.min(width * 0.7, 12));
   return (
     <g>
-      <line x1={cx} x2={cx} y1={yHigh} y2={yLow} stroke={color} strokeWidth={1} />
+      <line x1={cx} x2={cx} y1={yHigh} y2={yLow} stroke={color} strokeWidth={1.2} />
       <rect x={cx - bodyW / 2} y={bodyTop} width={bodyW} height={bodyH} fill={color} stroke={color} />
     </g>
   );
+};
+
+const VolumeBar = (props: any) => {
+  const { x, y, width, height, payload } = props;
+  if (!payload) return null;
+  const isUp = (payload.c ?? 0) >= (payload.o ?? 0);
+  const color = isUp ? "hsl(var(--primary))" : "hsl(0 72% 60%)";
+  const w = Math.max(1, Math.min(width * 0.7, 12));
+  return <rect x={x + width / 2 - w / 2} y={y} width={w} height={height} fill={color} opacity={0.55} />;
 };
 
 interface CompareItem {
@@ -90,6 +102,7 @@ async function fetchSeries(ticker: string, type: string | undefined, range: Char
 export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceChartProps) => {
   const [range, setRange] = useState<ChartRange>("1M");
   const [chartKind, setChartKind] = useState<ChartKind>("line");
+  const [showVolume, setShowVolume] = useState(true);
   let t: (k: string) => string;
   try { t = useLanguage().t; } catch { t = (k) => k; }
   const { isPaid, loading: subLoading } = useSubscription();
@@ -295,6 +308,19 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
               </button>
             </div>
           )}
+          {!isCompare && chartKind === "candle" && (
+            <button
+              type="button"
+              onClick={() => setShowVolume((v) => !v)}
+              title={showVolume ? "Hide volume" : "Show volume"}
+              className={cn(
+                "rounded-md border border-border px-2 py-1 text-[11px] font-mono transition-colors",
+                showVolume ? "bg-primary/15 text-primary border-primary/40" : "bg-muted/40 text-muted-foreground hover:text-foreground"
+              )}
+            >
+              VOL
+            </button>
+          )}
           <div className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5" role="tablist" aria-label={t("chartTimeframe")}>
             {RANGES.map((r) => (
               <button
@@ -432,39 +458,81 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
           </ResponsiveContainer>
         )}
         {!loading && !error && !isCompare && primary?.points && primary.points.length > 0 && chartKind === "candle" && (
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={primary.points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-              <XAxis dataKey="t" tickFormatter={formatDate} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={40} />
-              <YAxis
-                domain={[
-                  (dataMin: number) => dataMin * 0.999,
-                  (dataMax: number) => dataMax * 1.001,
-                ]}
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
-                axisLine={false}
-                tickLine={false}
-                width={50}
-                tickFormatter={(v) => Number(v).toFixed(2)}
-                orientation="right"
-              />
-              {stats && (
-                <ReferenceLine y={stats.ref} stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" strokeOpacity={0.4} />
-              )}
-              <Tooltip
-                contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
-                labelFormatter={(t) => new Date(Number(t)).toLocaleString()}
-                formatter={(_value: number, _name, item: any) => {
-                  const p = item?.payload;
-                  if (!p) return ["", ""];
-                  return [
-                    `O ${Number(p.o ?? 0).toFixed(2)}  H ${Number(p.h ?? 0).toFixed(2)}  L ${Number(p.l ?? 0).toFixed(2)}  C ${Number(p.c ?? 0).toFixed(2)}`,
-                    "OHLC",
-                  ];
-                }}
-              />
-              <Bar dataKey="c" shape={<Candle />} isAnimationActive={false} />
-            </ComposedChart>
-          </ResponsiveContainer>
+          <div className="flex h-full w-full flex-col">
+            <div className={cn("w-full", showVolume ? "h-[72%]" : "h-full")}>
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={primary.points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+                  <XAxis
+                    dataKey="t"
+                    tickFormatter={formatDate}
+                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                    minTickGap={40}
+                    hide={showVolume}
+                  />
+                  <YAxis
+                    domain={[
+                      (dataMin: number) => dataMin * 0.999,
+                      (dataMax: number) => dataMax * 1.001,
+                    ]}
+                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                    width={50}
+                    tickFormatter={(v) => Number(v).toFixed(2)}
+                    orientation="right"
+                  />
+                  {stats && (
+                    <ReferenceLine y={stats.ref} stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" strokeOpacity={0.4} />
+                  )}
+                  <Tooltip
+                    contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
+                    labelFormatter={(t) => new Date(Number(t)).toLocaleString()}
+                    formatter={(_value: any, _name, item: any) => {
+                      const p = item?.payload;
+                      if (!p) return ["", ""];
+                      return [
+                        `O ${Number(p.o ?? 0).toFixed(2)}  H ${Number(p.h ?? 0).toFixed(2)}  L ${Number(p.l ?? 0).toFixed(2)}  C ${Number(p.c ?? 0).toFixed(2)}`,
+                        "OHLC",
+                      ];
+                    }}
+                  />
+                  <Bar dataKey={(d: any) => [d.l, d.h]} shape={<Candle />} isAnimationActive={false} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+            {showVolume && (
+              <div className="h-[28%] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart data={primary.points} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
+                    <XAxis dataKey="t" tickFormatter={formatDate} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={40} />
+                    <YAxis
+                      domain={[0, "auto"]}
+                      tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                      axisLine={false}
+                      tickLine={false}
+                      width={50}
+                      orientation="right"
+                      tickFormatter={(v) => {
+                        const n = Number(v);
+                        if (n >= 1e9) return `${(n / 1e9).toFixed(1)}B`;
+                        if (n >= 1e6) return `${(n / 1e6).toFixed(1)}M`;
+                        if (n >= 1e3) return `${(n / 1e3).toFixed(1)}K`;
+                        return String(n);
+                      }}
+                    />
+                    <Tooltip
+                      contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
+                      labelFormatter={(t) => new Date(Number(t)).toLocaleString()}
+                      formatter={(value: any) => [Number(value).toLocaleString(), "Volume"]}
+                    />
+                    <Bar dataKey="v" shape={<VolumeBar />} isAnimationActive={false} />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
         )}
         {!loading && !error && isCompare && compareData.length > 0 && (
           <ResponsiveContainer width="100%" height="100%">

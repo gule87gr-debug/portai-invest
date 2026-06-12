@@ -25,6 +25,53 @@ const AuthPage = ({ onAuth, initialMode = "signup" }: { onAuth: () => void; init
   const [otpCode, setOtpCode] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState("");
+  const [verifyResendCooldown, setVerifyResendCooldown] = useState(0);
+  const [verifyResendStatus, setVerifyResendStatus] = useState<{ kind: "idle" | "ok" | "err"; msg: string }>({ kind: "idle", msg: "" });
+  const verifyCooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const startVerifyCooldown = useCallback((seconds = 60) => {
+    setVerifyResendCooldown(seconds);
+    if (verifyCooldownRef.current) clearInterval(verifyCooldownRef.current);
+    verifyCooldownRef.current = setInterval(() => {
+      setVerifyResendCooldown((prev) => {
+        if (prev <= 1) {
+          clearInterval(verifyCooldownRef.current!);
+          verifyCooldownRef.current = null;
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  const handleResendVerification = async () => {
+    if (verifyResendCooldown > 0) return;
+    const target = (pendingVerificationEmail || email).trim();
+    if (!target || !emailRegex.test(target)) {
+      setVerifyResendStatus({ kind: "err", msg: "Enter a valid email address first." });
+      return;
+    }
+    setVerifyResendStatus({ kind: "idle", msg: "" });
+    startVerifyCooldown(60);
+    const { error: resendError } = await supabase.auth.resend({
+      type: "signup",
+      email: target,
+      options: { emailRedirectTo: `${window.location.origin}/` },
+    });
+    if (resendError) {
+      const m = resendError.message?.toLowerCase() || "";
+      if (m.includes("already") && m.includes("confirmed")) {
+        setVerifyResendStatus({ kind: "ok", msg: "This email is already verified — please log in." });
+      } else if (m.includes("rate") || m.includes("too many") || m.includes("seconds")) {
+        setVerifyResendStatus({ kind: "err", msg: "Too many requests. Please wait before trying again." });
+      } else {
+        setVerifyResendStatus({ kind: "err", msg: resendError.message });
+      }
+    } else {
+      setVerifyResendStatus({ kind: "ok", msg: `Verification email re-sent to ${target}.` });
+    }
+  };
 
   const startCooldown = useCallback(() => {
     setResendCooldown(30);
@@ -44,6 +91,7 @@ const AuthPage = ({ onAuth, initialMode = "signup" }: { onAuth: () => void; init
   useEffect(() => {
     return () => {
       if (cooldownRef.current) clearInterval(cooldownRef.current);
+      if (verifyCooldownRef.current) clearInterval(verifyCooldownRef.current);
     };
   }, []);
 
@@ -107,13 +155,23 @@ const AuthPage = ({ onAuth, initialMode = "signup" }: { onAuth: () => void; init
       } else {
         setLoading(false);
         setSuccess(`We sent a verification link to ${email.trim()}. Please confirm your email to finish creating your account.`);
+        setPendingVerificationEmail(email.trim());
+        setVerifyResendStatus({ kind: "idle", msg: "" });
+        startVerifyCooldown(60);
         setPassword("");
       }
       return;
     }
     const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
     if (authError) {
-      setError(authError.message);
+      const m = authError.message.toLowerCase();
+      if (m.includes("not confirmed") || m.includes("email not confirmed") || m.includes("confirm your email")) {
+        setPendingVerificationEmail(email.trim());
+        setVerifyResendStatus({ kind: "idle", msg: "" });
+        setError("Your email isn't verified yet. Check your inbox for the verification link or resend it below.");
+      } else {
+        setError(authError.message);
+      }
       setLoading(false);
     } else {
       onAuth();
@@ -337,6 +395,33 @@ const AuthPage = ({ onAuth, initialMode = "signup" }: { onAuth: () => void; init
               </div>
             )}
             {success && <p className="text-sm text-gain">{success}</p>}
+
+            {pendingVerificationEmail && (
+              <div className="rounded-lg border border-border bg-card/60 p-3 space-y-2">
+                <p className="text-xs text-muted-foreground">
+                  Didn't get the email? Check spam, then click below to resend the verification link to{" "}
+                  <span className="text-foreground font-medium">{pendingVerificationEmail}</span>.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleResendVerification}
+                  disabled={verifyResendCooldown > 0}
+                  className="flex h-9 w-full items-center justify-center gap-2 rounded-md border border-primary/40 bg-primary/10 text-xs font-medium text-primary transition-colors hover:bg-primary/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <RefreshCw className={cn("h-3.5 w-3.5", verifyResendCooldown === 0 && "")} />
+                  {verifyResendCooldown > 0
+                    ? `Resend available in ${verifyResendCooldown}s`
+                    : "Resend verification email"}
+                </button>
+                {verifyResendStatus.msg && (
+                  <p className={cn("text-xs", verifyResendStatus.kind === "ok" ? "text-gain" : "text-loss")}>
+                    {verifyResendStatus.msg}
+                  </p>
+                )}
+              </div>
+            )}
+
+
 
 
             <button onClick={handle} disabled={isSubmitDisabled} className="flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
