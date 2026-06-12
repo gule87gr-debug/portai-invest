@@ -266,23 +266,53 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
             <span className="rounded-md bg-muted px-2 py-0.5">{t("pctChangeLbl")}</span>
           )}
         </div>
-        <div className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5" role="tablist" aria-label={t("chartTimeframe")}>
-          {RANGES.map((r) => (
-            <button
-              key={r}
-              role="tab"
-              aria-selected={range === r}
-              onClick={() => setRange(r)}
-              className={cn(
-                "px-2.5 py-1 text-xs font-mono rounded-md transition-colors",
-                range === r
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {rangeLabel(r)}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          {!isCompare && (
+            <div className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5" role="tablist" aria-label="Chart type">
+              <button
+                role="tab"
+                aria-selected={chartKind === "line"}
+                onClick={() => setChartKind("line")}
+                title="Line"
+                className={cn(
+                  "px-2 py-1 rounded-md transition-colors",
+                  chartKind === "line" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <LineIcon className="h-3.5 w-3.5" />
+              </button>
+              <button
+                role="tab"
+                aria-selected={chartKind === "candle"}
+                onClick={() => setChartKind("candle")}
+                title="Candlestick"
+                className={cn(
+                  "px-2 py-1 rounded-md transition-colors",
+                  chartKind === "candle" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <CandlestickChart className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
+          <div className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5" role="tablist" aria-label={t("chartTimeframe")}>
+            {RANGES.map((r) => (
+              <button
+                key={r}
+                role="tab"
+                aria-selected={range === r}
+                onClick={() => setRange(r)}
+                className={cn(
+                  "px-2.5 py-1 text-xs font-mono rounded-md transition-colors",
+                  range === r
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {rangeLabel(r)}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
