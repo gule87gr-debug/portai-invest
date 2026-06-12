@@ -25,6 +25,53 @@ const AuthPage = ({ onAuth, initialMode = "signup" }: { onAuth: () => void; init
   const [otpCode, setOtpCode] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState("");
+  const [verifyResendCooldown, setVerifyResendCooldown] = useState(0);
+  const [verifyResendStatus, setVerifyResendStatus] = useState<{ kind: "idle" | "ok" | "err"; msg: string }>({ kind: "idle", msg: "" });
+  const verifyCooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const startVerifyCooldown = useCallback((seconds = 60) => {
+    setVerifyResendCooldown(seconds);
+    if (verifyCooldownRef.current) clearInterval(verifyCooldownRef.current);
+    verifyCooldownRef.current = setInterval(() => {
+      setVerifyResendCooldown((prev) => {
+        if (prev <= 1) {
+          clearInterval(verifyCooldownRef.current!);
+          verifyCooldownRef.current = null;
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  const handleResendVerification = async () => {
+    if (verifyResendCooldown > 0) return;
+    const target = (pendingVerificationEmail || email).trim();
+    if (!target || !emailRegex.test(target)) {
+      setVerifyResendStatus({ kind: "err", msg: "Enter a valid email address first." });
+      return;
+    }
+    setVerifyResendStatus({ kind: "idle", msg: "" });
+    startVerifyCooldown(60);
+    const { error: resendError } = await supabase.auth.resend({
+      type: "signup",
+      email: target,
+      options: { emailRedirectTo: `${window.location.origin}/` },
+    });
+    if (resendError) {
+      const m = resendError.message?.toLowerCase() || "";
+      if (m.includes("already") && m.includes("confirmed")) {
+        setVerifyResendStatus({ kind: "ok", msg: "This email is already verified — please log in." });
+      } else if (m.includes("rate") || m.includes("too many") || m.includes("seconds")) {
+        setVerifyResendStatus({ kind: "err", msg: "Too many requests. Please wait before trying again." });
+      } else {
+        setVerifyResendStatus({ kind: "err", msg: resendError.message });
+      }
+    } else {
+      setVerifyResendStatus({ kind: "ok", msg: `Verification email re-sent to ${target}.` });
+    }
+  };
 
   const startCooldown = useCallback(() => {
     setResendCooldown(30);
