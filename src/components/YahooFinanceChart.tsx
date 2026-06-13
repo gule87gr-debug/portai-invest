@@ -79,6 +79,75 @@ const VolumeBar = (props: any) => {
   return <rect x={x + width / 2 - w / 2} y={y} width={w} height={height} fill={color} opacity={0.55} />;
 };
 
+const fmtVol = (n: number) => {
+  if (n >= 1e9) return `${(n / 1e9).toFixed(2)}B`;
+  if (n >= 1e6) return `${(n / 1e6).toFixed(2)}M`;
+  if (n >= 1e3) return `${(n / 1e3).toFixed(2)}K`;
+  return n.toLocaleString();
+};
+
+const fmtTs = (t: number) => {
+  const d = new Date(t);
+  return d.toLocaleString(undefined, {
+    month: "short", day: "numeric", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  });
+};
+
+// Yahoo-style OHLC tooltip
+const OHLCTooltip = ({ active, payload, currency }: any) => {
+  if (!active || !payload?.length) return null;
+  const p = payload[0]?.payload;
+  if (!p) return null;
+  const o = Number(p.o ?? 0), h = Number(p.h ?? 0), l = Number(p.l ?? 0), c = Number(p.c ?? 0);
+  const isUp = c >= o;
+  const diff = c - o;
+  const pct = o ? (diff / o) * 100 : 0;
+  const cur = currency || "USD";
+  const Row = ({ k, v, cls = "" }: { k: string; v: string; cls?: string }) => (
+    <div className="flex justify-between gap-4">
+      <span className="text-muted-foreground">{k}</span>
+      <span className={`font-mono tabular-nums font-semibold ${cls}`}>{v}</span>
+    </div>
+  );
+  return (
+    <div className="rounded-lg border border-border bg-popover/95 backdrop-blur-sm px-3 py-2 text-[11px] shadow-xl min-w-[180px]">
+      <div className="mb-1.5 text-[10px] text-muted-foreground">{fmtTs(p.t)}</div>
+      <div className="space-y-0.5">
+        <Row k="Open" v={o.toFixed(2)} />
+        <Row k="High" v={h.toFixed(2)} cls="text-emerald-400" />
+        <Row k="Low" v={l.toFixed(2)} cls="text-red-400" />
+        <Row k="Close" v={c.toFixed(2)} cls={isUp ? "text-emerald-400" : "text-red-400"} />
+        <Row
+          k="Change"
+          v={`${diff >= 0 ? "+" : ""}${diff.toFixed(2)} (${pct >= 0 ? "+" : ""}${pct.toFixed(2)}%)`}
+          cls={isUp ? "text-emerald-400" : "text-red-400"}
+        />
+        {p.v != null && <Row k="Volume" v={fmtVol(Number(p.v))} />}
+        <div className="mt-1 pt-1 border-t border-border/60 text-[9px] text-muted-foreground text-right">{cur}</div>
+      </div>
+    </div>
+  );
+};
+
+const VolumeTooltip = ({ active, payload }: any) => {
+  if (!active || !payload?.length) return null;
+  const p = payload[0]?.payload;
+  if (!p) return null;
+  const isUp = (p.c ?? 0) >= (p.o ?? 0);
+  return (
+    <div className="rounded-lg border border-border bg-popover/95 backdrop-blur-sm px-3 py-2 text-[11px] shadow-xl">
+      <div className="text-[10px] text-muted-foreground mb-1">{fmtTs(p.t)}</div>
+      <div className="flex justify-between gap-4">
+        <span className="text-muted-foreground">Volume</span>
+        <span className={`font-mono tabular-nums font-semibold ${isUp ? "text-emerald-400" : "text-red-400"}`}>
+          {fmtVol(Number(p.v ?? 0))}
+        </span>
+      </div>
+    </div>
+  );
+};
+
 interface CompareItem {
   ticker: string;
   type?: string;
@@ -487,16 +556,8 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
                     <ReferenceLine y={stats.ref} stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" strokeOpacity={0.4} />
                   )}
                   <Tooltip
-                    contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
-                    labelFormatter={(t) => new Date(Number(t)).toLocaleString()}
-                    formatter={(_value: any, _name, item: any) => {
-                      const p = item?.payload;
-                      if (!p) return ["", ""];
-                      return [
-                        `O ${Number(p.o ?? 0).toFixed(2)}  H ${Number(p.h ?? 0).toFixed(2)}  L ${Number(p.l ?? 0).toFixed(2)}  C ${Number(p.c ?? 0).toFixed(2)}`,
-                        "OHLC",
-                      ];
-                    }}
+                    cursor={{ stroke: "hsl(var(--muted-foreground))", strokeDasharray: "3 3", strokeOpacity: 0.5 }}
+                    content={<OHLCTooltip currency={primary.currency} />}
                   />
                   <Bar dataKey={(d: any) => [d.l, d.h]} shape={<Candle />} isAnimationActive={false} />
                 </ComposedChart>
@@ -523,9 +584,8 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
                       }}
                     />
                     <Tooltip
-                      contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
-                      labelFormatter={(t) => new Date(Number(t)).toLocaleString()}
-                      formatter={(value: any) => [Number(value).toLocaleString(), "Volume"]}
+                      cursor={{ stroke: "hsl(var(--muted-foreground))", strokeDasharray: "3 3", strokeOpacity: 0.5 }}
+                      content={<VolumeTooltip />}
                     />
                     <Bar dataKey="v" shape={<VolumeBar />} isAnimationActive={false} />
                   </ComposedChart>

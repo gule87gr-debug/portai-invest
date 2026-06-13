@@ -52,6 +52,7 @@ const AIChat = lazyWithRetry(() => import("./pages/AIChat"));
 const Quiz = lazyWithRetry(() => import("./pages/Quiz"));
 
 const Watchlists = lazyWithRetry(() => import("./pages/Watchlists"));
+const AlertsPage = lazyWithRetry(() => import("./pages/AlertsPage"));
 const StockDetail = lazyWithRetry(() => import("./pages/StockDetail"));
 const SettingsPage = lazyWithRetry(() => import("./pages/SettingsPage"));
 const AuthPage = lazyWithRetry(() => import("./pages/AuthPage"));
@@ -108,6 +109,7 @@ const AppWithLanguage = () => {
           <Route path="/quiz" element={<Quiz />} />
           <Route path="/forum" element={<Navigate to="/dashboard" replace />} />
           <Route path="/watchlists" element={<Watchlists />} />
+          <Route path="/alerts" element={<AlertsPage />} />
           <Route path="/stock/:ticker" element={<StockDetail />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/pricing" element={<Pricing />} />

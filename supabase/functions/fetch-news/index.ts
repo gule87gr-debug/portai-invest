@@ -73,6 +73,10 @@ const regionQueries: Record<string, string> = {
   oceania: "Australia stocks OR ASX OR New Zealand stocks OR NZX",
 };
 
+// Simple in-memory cache shared across warm invocations (5 min TTL)
+const CACHE_TTL_MS = 5 * 60 * 1000;
+const newsCache = new Map<string, { ts: number; items: NewsItem[] }>();
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -127,6 +131,14 @@ Deno.serve(async (req) => {
     const encodedQuery = encodeURIComponent(query);
     const rssUrl = `https://news.google.com/rss/search?q=${encodedQuery}+when:7d&hl=en-US&gl=US&ceid=US:en`;
 
+    // Cache hit?
+    const cached = newsCache.get(rssUrl);
+    if (cached && Date.now() - cached.ts < CACHE_TTL_MS) {
+      return new Response(JSON.stringify({ success: true, items: cached.items, cached: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "public, max-age=300" },
+      });
+    }
+
     console.log("Fetching news for:", query);
 
     // Retry up to 3 times with backoff for transient 5xx errors
@@ -158,8 +170,10 @@ Deno.serve(async (req) => {
 
     console.log(`Found ${items.length} news items`);
 
+    newsCache.set(rssUrl, { ts: Date.now(), items });
+
     return new Response(JSON.stringify({ success: true, items }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "public, max-age=300" },
     });
   } catch (error) {
     console.error("Error fetching news:", error);

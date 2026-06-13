@@ -102,6 +102,10 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
     }
     toast.success(`${ticker} ${direction === "above" ? t("risesAbove") : t("fallsBelow")} $${target}`);
     setPrice("");
+    // Opportunistically ask for browser push permission so users get desktop/mobile alerts
+    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") {
+      try { await Notification.requestPermission(); } catch { /* ignore */ }
+    }
     loadAlerts();
   };
 
@@ -235,8 +239,17 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
           </>
         )}
 
-        <DialogFooter className="text-[10px] text-muted-foreground">
-          {t("alertsCheckNote")}
+        <DialogFooter className="flex items-center justify-between text-[10px] text-muted-foreground sm:justify-between">
+          <span>{t("alertsCheckNote")}</span>
+          {userId && isPro && (
+            <button
+              type="button"
+              onClick={() => { setOpen(false); navigate("/alerts"); }}
+              className="text-primary hover:underline font-medium whitespace-nowrap"
+            >
+              View all alerts →
+            </button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
