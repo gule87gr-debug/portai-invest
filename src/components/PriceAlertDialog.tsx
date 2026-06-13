@@ -239,8 +239,17 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
           </>
         )}
 
-        <DialogFooter className="text-[10px] text-muted-foreground">
-          {t("alertsCheckNote")}
+        <DialogFooter className="flex items-center justify-between text-[10px] text-muted-foreground sm:justify-between">
+          <span>{t("alertsCheckNote")}</span>
+          {userId && isPro && (
+            <button
+              type="button"
+              onClick={() => { setOpen(false); navigate("/alerts"); }}
+              className="text-primary hover:underline font-medium whitespace-nowrap"
+            >
+              View all alerts →
+            </button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
