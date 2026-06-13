@@ -90,8 +90,9 @@ const SettingsPage = () => {
   };
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user?.email) setUserEmail(user.email);
+    // Use cached session (no network round-trip) — getUser() was adding noticeable delay
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user?.email) setUserEmail(session.user.email);
     });
   }, []);
 

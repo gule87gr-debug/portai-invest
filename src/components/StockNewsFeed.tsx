@@ -33,14 +33,32 @@ interface NewsItem {
   pubDate: string;
 }
 
+const NEWS_CACHE_KEY = "portai_news_cache_v1";
+const NEWS_CACHE_TTL_MS = 5 * 60 * 1000;
+
+type NewsCacheEntry = { ts: number; items: NewsItem[] };
+
+const readNewsCache = (key: string): NewsItem[] | null => {
+  try {
+    const raw = sessionStorage.getItem(`${NEWS_CACHE_KEY}:${key}`);
+    if (!raw) return null;
+    const parsed: NewsCacheEntry = JSON.parse(raw);
+    if (Date.now() - parsed.ts > NEWS_CACHE_TTL_MS) return null;
+    return parsed.items;
+  } catch { return null; }
+};
+const writeNewsCache = (key: string, items: NewsItem[]) => {
+  try { sessionStorage.setItem(`${NEWS_CACHE_KEY}:${key}`, JSON.stringify({ ts: Date.now(), items })); } catch { /* ignore */ }
+};
+
 export const StockNewsFeed = () => {
   const { t } = useLanguage();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedRegions, setSelectedRegions] = useState<AssetRegion[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortMode, setSortMode] = useState<SortMode>("newest");
-  const [news, setNews] = useState<NewsItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [news, setNews] = useState<NewsItem[]>(() => readNewsCache("default") || []);
+  const [loading, setLoading] = useState(() => !readNewsCache("default"));
   const [error, setError] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
 
@@ -80,7 +98,15 @@ export const StockNewsFeed = () => {
 
   const fetchNews = useCallback(
     async (cats: string[], regs: AssetRegion[], search: string) => {
-      setLoading(true);
+      const cacheKey = JSON.stringify({ cats, regs, search });
+      const cached = readNewsCache(cacheKey);
+      if (cached) {
+        setNews(cached);
+        setLoading(false);
+        setError("");
+      } else {
+        setLoading(true);
+      }
       setError("");
       try {
         const { data, error: fnError } = await supabase.functions.invoke("fetch-news", {
@@ -92,11 +118,16 @@ export const StockNewsFeed = () => {
           },
         });
         if (fnError) throw new Error(fnError.message);
-        setNews(data?.items || []);
+        const items = data?.items || [];
+        setNews(items);
+        writeNewsCache(cacheKey, items);
+        if (!cats.length && !regs.length && !search) writeNewsCache("default", items);
       } catch (e: any) {
         console.error("News fetch error:", e);
-        setError(e.message || "Failed to load news");
-        setNews([]);
+        if (!cached) {
+          setError(e.message || "Failed to load news");
+          setNews([]);
+        }
       } finally {
         setLoading(false);
       }
