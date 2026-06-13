@@ -102,6 +102,10 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
     }
     toast.success(`${ticker} ${direction === "above" ? t("risesAbove") : t("fallsBelow")} $${target}`);
     setPrice("");
+    // Opportunistically ask for browser push permission so users get desktop/mobile alerts
+    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") {
+      try { await Notification.requestPermission(); } catch { /* ignore */ }
+    }
     loadAlerts();
   };
 

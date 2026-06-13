@@ -82,7 +82,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },
         (payload) => {
           const n = payload.new as any;
-          setNotifications((prev) => [{
+          const mapped: Notification = {
             id: n.id,
             type: n.type,
             fromUser: n.from_user,
@@ -90,7 +90,22 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
             threadTitle: n.thread_title,
             read: n.read,
             createdAt: n.created_at,
-          }, ...prev].slice(0, 50));
+          };
+          setNotifications((prev) => [mapped, ...prev].slice(0, 50));
+
+          // Fire browser push notification if user granted permission
+          if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+            try {
+              const title = n.type === "price_alert" ? "📈 Price Alert" : `${n.from_user || "PortAI"}`;
+              const body = n.thread_title || "";
+              const notif = new Notification(title, { body, icon: "/icon-192.png", tag: n.id });
+              notif.onclick = () => {
+                window.focus();
+                if (n.type === "price_alert") window.location.href = "/alerts";
+                notif.close();
+              };
+            } catch { /* ignore */ }
+          }
         }
       )
       .subscribe();
