@@ -170,8 +170,10 @@ Deno.serve(async (req) => {
 
     console.log(`Found ${items.length} news items`);
 
+    newsCache.set(rssUrl, { ts: Date.now(), items });
+
     return new Response(JSON.stringify({ success: true, items }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "public, max-age=300" },
     });
   } catch (error) {
     console.error("Error fetching news:", error);
