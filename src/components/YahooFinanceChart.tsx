@@ -11,9 +11,9 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-export type ChartRange = "1D" | "1W" | "1M" | "3M" | "1Y" | "ALL";
+export type ChartRange = "1D" | "5D" | "1M" | "6M" | "YTD" | "1Y" | "5Y" | "ALL";
 
-const RANGES: ChartRange[] = ["1D", "1W", "1M", "3M", "1Y", "ALL"];
+const RANGES: ChartRange[] = ["1D", "5D", "1M", "6M", "YTD", "1Y", "5Y", "ALL"];
 
 const COMPARE_COLORS = [
   "hsl(210 90% 60%)",
@@ -296,9 +296,11 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
   const formatDate = (t: number) => {
     const d = new Date(t);
     if (range === "1D") return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    if (range === "1W") return d.toLocaleDateString([], { weekday: "short" });
-    if (range === "ALL" || range === "1Y") return d.toLocaleDateString([], { month: "short", year: "2-digit" });
-    return d.toLocaleDateString([], { month: "short", day: "numeric" });
+    if (range === "5D") return d.toLocaleDateString([], { weekday: "short", hour: "2-digit", minute: "2-digit" });
+    if (range === "1M") return d.toLocaleDateString([], { month: "short", day: "numeric" });
+    if (range === "6M" || range === "YTD" || range === "1Y") return d.toLocaleDateString([], { month: "short", day: "numeric" });
+    // 5Y, ALL
+    return d.toLocaleDateString([], { month: "short", year: "2-digit" });
   };
 
   const stroke = stats?.isUp ? "hsl(var(--primary))" : "hsl(0 72% 60%)";
@@ -328,12 +330,8 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
     setExtras((prev) => prev.filter((e) => e.ticker !== t));
   };
 
-  const rangeLabel = (r: ChartRange) => {
-    if (r === "ALL") return t("tfAll");
-    const num = r.replace(/[A-Z]/g, "");
-    const letter = r.endsWith("D") ? t("tfD") : r.endsWith("W") ? t("tfW") : r.endsWith("M") ? t("tfM") : r.endsWith("Y") ? t("tfY") : "";
-    return `${num}${letter}`;
-  };
+  // Yahoo Finance-style labels: 1D, 5D, 1M, 6M, YTD, 1Y, 5Y, All
+  const rangeLabel = (r: ChartRange) => (r === "ALL" ? "All" : r);
 
   return (
     <div className="w-full">
