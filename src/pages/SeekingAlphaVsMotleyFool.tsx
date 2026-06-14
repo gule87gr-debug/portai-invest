@@ -53,7 +53,7 @@ export default function SeekingAlphaVsMotleyFool() {
 
       <nav className="flex items-center justify-between px-6 py-5 max-w-4xl mx-auto">
         <Link to="/" className="flex items-center gap-2.5">
-          <img src="/logo.png" alt="PortAI logo" className="h-9 w-9 rounded-lg" />
+          <img src="/logo.png" alt="PortAI logo — AI Stock Bias Analysis Dashboard" className="h-9 w-9 rounded-lg" />
           <span className="text-lg font-bold text-foreground">PortAI</span>
         </Link>
         <Link to="/" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">

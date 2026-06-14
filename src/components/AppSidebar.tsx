@@ -76,7 +76,7 @@ export const AppSidebar = () => {
       >
         <div className="flex items-center justify-between px-5 py-5">
           <div className="flex items-center gap-2.5">
-            <img src="/logo.png" alt="PortAI logo" className="h-9 w-9 rounded-lg" />
+            <img src="/logo.png" alt="PortAI logo — AI Stock Bias Analysis Dashboard" className="h-9 w-9 rounded-lg" />
             <span className="text-lg font-bold text-foreground">PortAI</span>
           </div>
           {!tourLocked && (
