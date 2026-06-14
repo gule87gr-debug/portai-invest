@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   AreaChart, Area, LineChart, Line, XAxis, YAxis, Tooltip, Legend,
-  ResponsiveContainer, ReferenceLine, ComposedChart, Bar,
+  ResponsiveContainer, ReferenceLine, ComposedChart, Bar, CartesianGrid,
 } from "recharts";
 import { Loader2, AlertTriangle, Plus, X, Search, Lock, GitCompareArrows, LineChart as LineIcon, CandlestickChart } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -144,6 +144,31 @@ const VolumeTooltip = ({ active, payload }: any) => {
           {fmtVol(Number(p.v ?? 0))}
         </span>
       </div>
+    </div>
+  );
+};
+
+// Yahoo-style line tooltip — compact date + price card
+const LineTooltip = ({ active, payload, currency, prevClose }: any) => {
+  if (!active || !payload?.length) return null;
+  const p = payload[0]?.payload;
+  if (!p) return null;
+  const c = Number(p.c ?? 0);
+  const ref = Number(prevClose ?? p.c ?? 0);
+  const diff = c - ref;
+  const pct = ref ? (diff / ref) * 100 : 0;
+  const isUp = diff >= 0;
+  const cur = currency || "USD";
+  return (
+    <div className="rounded-lg border border-border bg-popover/95 backdrop-blur-sm px-3 py-2 text-[11px] shadow-xl min-w-[150px]">
+      <div className="mb-1 text-[10px] text-muted-foreground">{fmtTs(p.t)}</div>
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="font-mono tabular-nums text-[13px] font-semibold text-foreground">{c.toFixed(2)}</span>
+        <span className={`font-mono tabular-nums text-[11px] font-semibold ${isUp ? "text-emerald-400" : "text-red-400"}`}>
+          {diff >= 0 ? "+" : ""}{diff.toFixed(2)} ({pct >= 0 ? "+" : ""}{pct.toFixed(2)}%)
+        </span>
+      </div>
+      <div className="mt-0.5 text-right text-[9px] text-muted-foreground">{cur}</div>
     </div>
   );
 };
@@ -506,21 +531,21 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
             <AreaChart data={primary.points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
               <defs>
                 <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={stroke} stopOpacity={0.35} />
+                  <stop offset="0%" stopColor={stroke} stopOpacity={0.28} />
                   <stop offset="100%" stopColor={stroke} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="t" tickFormatter={formatDate} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={40} />
-              <YAxis domain={["auto", "auto"]} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} width={50} tickFormatter={(v) => Number(v).toFixed(2)} orientation="right" />
+              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} strokeDasharray="2 4" vertical={false} />
+              <XAxis dataKey="t" type="number" scale="time" domain={["dataMin", "dataMax"]} tickFormatter={formatDate} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={48} />
+              <YAxis domain={["auto", "auto"]} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} width={56} tickFormatter={(v) => Number(v).toFixed(2)} orientation="right" />
               {stats && (
-                <ReferenceLine y={stats.ref} stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" strokeOpacity={0.4} />
+                <ReferenceLine y={stats.ref} stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" strokeOpacity={0.45} />
               )}
               <Tooltip
-                contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
-                labelFormatter={(t) => new Date(Number(t)).toLocaleString()}
-                formatter={(value: number) => [`$${Number(value).toFixed(2)}`, "Price"]}
+                cursor={{ stroke: "hsl(var(--muted-foreground))", strokeDasharray: "3 3", strokeOpacity: 0.6 }}
+                content={<LineTooltip currency={primary.currency} prevClose={stats?.ref} />}
               />
-              <Area type="linear" dataKey="c" stroke={stroke} strokeWidth={2} fill="url(#chartFill)" isAnimationActive={true} animationDuration={1200} animationEasing="ease-out" />
+              <Area type="linear" dataKey="c" stroke={stroke} strokeWidth={1.6} fill="url(#chartFill)" isAnimationActive={true} animationDuration={1000} animationEasing="ease-out" dot={false} activeDot={{ r: 3, stroke: stroke, strokeWidth: 1, fill: "hsl(var(--background))" }} />
             </AreaChart>
           </ResponsiveContainer>
         )}
@@ -529,6 +554,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
             <div className={cn("w-full", showVolume ? "h-[72%]" : "h-full")}>
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={primary.points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+                  <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} strokeDasharray="2 4" vertical={false} />
                   <XAxis
                     dataKey="t"
                     tickFormatter={formatDate}
@@ -595,9 +621,10 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
         {!loading && !error && isCompare && compareData.length > 0 && (
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={compareData} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-              <XAxis dataKey="t" tickFormatter={formatDate} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={40} />
-              <YAxis domain={["auto", "auto"]} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} width={50} tickFormatter={(v) => `${Number(v).toFixed(1)}%`} orientation="right" />
-              <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" strokeOpacity={0.4} />
+              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} strokeDasharray="2 4" vertical={false} />
+              <XAxis dataKey="t" type="number" scale="time" domain={["dataMin", "dataMax"]} tickFormatter={formatDate} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={48} />
+              <YAxis domain={["auto", "auto"]} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} width={56} tickFormatter={(v) => `${Number(v).toFixed(1)}%`} orientation="right" />
+              <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" strokeOpacity={0.45} />
               <Tooltip
                 contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
                 labelFormatter={(t) => new Date(Number(t)).toLocaleString()}
