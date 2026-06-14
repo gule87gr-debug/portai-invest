@@ -554,6 +554,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
             <div className={cn("w-full", showVolume ? "h-[72%]" : "h-full")}>
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={primary.points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+                  <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} strokeDasharray="2 4" vertical={false} />
                   <XAxis
                     dataKey="t"
                     tickFormatter={formatDate}
@@ -620,9 +621,10 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
         {!loading && !error && isCompare && compareData.length > 0 && (
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={compareData} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-              <XAxis dataKey="t" tickFormatter={formatDate} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={40} />
-              <YAxis domain={["auto", "auto"]} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} width={50} tickFormatter={(v) => `${Number(v).toFixed(1)}%`} orientation="right" />
-              <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" strokeOpacity={0.4} />
+              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} strokeDasharray="2 4" vertical={false} />
+              <XAxis dataKey="t" type="number" scale="time" domain={["dataMin", "dataMax"]} tickFormatter={formatDate} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={48} />
+              <YAxis domain={["auto", "auto"]} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} width={56} tickFormatter={(v) => `${Number(v).toFixed(1)}%`} orientation="right" />
+              <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" strokeOpacity={0.45} />
               <Tooltip
                 contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
                 labelFormatter={(t) => new Date(Number(t)).toLocaleString()}
