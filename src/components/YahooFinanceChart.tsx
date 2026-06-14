@@ -531,21 +531,21 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
             <AreaChart data={primary.points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
               <defs>
                 <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={stroke} stopOpacity={0.35} />
+                  <stop offset="0%" stopColor={stroke} stopOpacity={0.28} />
                   <stop offset="100%" stopColor={stroke} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey="t" tickFormatter={formatDate} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={40} />
-              <YAxis domain={["auto", "auto"]} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} width={50} tickFormatter={(v) => Number(v).toFixed(2)} orientation="right" />
+              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} strokeDasharray="2 4" vertical={false} />
+              <XAxis dataKey="t" type="number" scale="time" domain={["dataMin", "dataMax"]} tickFormatter={formatDate} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={48} />
+              <YAxis domain={["auto", "auto"]} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} width={56} tickFormatter={(v) => Number(v).toFixed(2)} orientation="right" />
               {stats && (
-                <ReferenceLine y={stats.ref} stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" strokeOpacity={0.4} />
+                <ReferenceLine y={stats.ref} stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" strokeOpacity={0.45} />
               )}
               <Tooltip
-                contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
-                labelFormatter={(t) => new Date(Number(t)).toLocaleString()}
-                formatter={(value: number) => [`$${Number(value).toFixed(2)}`, "Price"]}
+                cursor={{ stroke: "hsl(var(--muted-foreground))", strokeDasharray: "3 3", strokeOpacity: 0.6 }}
+                content={<LineTooltip currency={primary.currency} prevClose={stats?.ref} />}
               />
-              <Area type="linear" dataKey="c" stroke={stroke} strokeWidth={2} fill="url(#chartFill)" isAnimationActive={true} animationDuration={1200} animationEasing="ease-out" />
+              <Area type="linear" dataKey="c" stroke={stroke} strokeWidth={1.6} fill="url(#chartFill)" isAnimationActive={true} animationDuration={1000} animationEasing="ease-out" dot={false} activeDot={{ r: 3, stroke: stroke, strokeWidth: 1, fill: "hsl(var(--background))" }} />
             </AreaChart>
           </ResponsiveContainer>
         )}
