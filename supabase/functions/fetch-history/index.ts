@@ -10,17 +10,19 @@ const corsHeaders = {
 const cache = new Map<string, { data: any; ts: number }>();
 const CACHE_TTL = 60 * 1000;
 
-type Range = "1D" | "1W" | "1M" | "3M" | "1Y" | "ALL";
+type Range = "1D" | "5D" | "1M" | "6M" | "YTD" | "1Y" | "5Y" | "ALL";
 
 function rangeToParams(range: Range): { range: string; interval: string } {
-  // Mirrors Yahoo Finance's web chart granularity
+  // Mirrors Yahoo Finance's web chart granularity (1D, 5D, 1M, 6M, YTD, 1Y, 5Y, Max)
   switch (range) {
-    case "1D": return { range: "1d", interval: "1m" };
-    case "1W": return { range: "5d", interval: "5m" };
-    case "1M": return { range: "1mo", interval: "30m" };
-    case "3M": return { range: "3mo", interval: "1d" };
-    case "1Y": return { range: "1y", interval: "1d" };
-    case "ALL": return { range: "max", interval: "1wk" };
+    case "1D":  return { range: "1d",  interval: "1m"  };
+    case "5D":  return { range: "5d",  interval: "5m"  };
+    case "1M":  return { range: "1mo", interval: "30m" };
+    case "6M":  return { range: "6mo", interval: "1d"  };
+    case "YTD": return { range: "ytd", interval: "1d"  };
+    case "1Y":  return { range: "1y",  interval: "1d"  };
+    case "5Y":  return { range: "5y",  interval: "1wk" };
+    case "ALL": return { range: "max", interval: "1mo" };
   }
 }
 
@@ -67,7 +69,7 @@ serve(async (req) => {
       });
     }
     const r = (range as string).toUpperCase() as Range;
-    const validRanges: Range[] = ["1D", "1W", "1M", "3M", "1Y", "ALL"];
+    const validRanges: Range[] = ["1D", "5D", "1M", "6M", "YTD", "1Y", "5Y", "ALL"];
     if (!validRanges.includes(r)) {
       return new Response(JSON.stringify({ error: "invalid range" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
