@@ -52,16 +52,30 @@ const StockDetail = () => {
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "WebPage",
-            name: `${symbol}${info.name ? ` — ${info.name}` : ""}`,
-            url: `https://portai-invest.com/stock/${symbol}`,
-            description: `Live ${symbol} price, AI-powered news bias analysis, technicals and chart for ${info.name || symbol}.`,
-            mainEntity: {
-              "@type": "Thing",
-              name: info.name || symbol,
-              identifier: symbol,
-              description: info.sector ? `${info.name || symbol} (${symbol}) — ${info.sector} sector asset tracked on PortAI.` : `${symbol} asset tracked on PortAI.`,
-            },
+            "@graph": [
+              {
+                "@type": "WebPage",
+                name: `${symbol}${info.name ? ` — ${info.name}` : ""}`,
+                url: `https://portai-invest.com/stock/${symbol}`,
+                description: `Live ${symbol} price, AI-powered news bias analysis, technicals and chart for ${info.name || symbol}.`,
+              },
+              {
+                "@type": "FinancialProduct",
+                name: info.name ? `${info.name} (${symbol})` : symbol,
+                identifier: symbol,
+                tickerSymbol: symbol,
+                category: assetEntry?.type === "crypto" ? "Cryptocurrency" : assetEntry?.type === "etf" ? "ETF" : "Stock",
+                description: info.sector
+                  ? `${info.name || symbol} (${symbol}) — ${info.sector} sector asset tracked on PortAI with live price, AI bias analysis and technicals.`
+                  : `${symbol} asset tracked on PortAI with live price, AI bias analysis and technicals.`,
+                url: `https://portai-invest.com/stock/${symbol}`,
+                provider: {
+                  "@type": "Organization",
+                  name: "PortAI",
+                  url: "https://portai-invest.com",
+                },
+              },
+            ],
           }),
         }}
       />
