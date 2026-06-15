@@ -549,7 +549,11 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
                 </linearGradient>
               </defs>
               <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} strokeDasharray="2 4" vertical={false} />
-              <XAxis dataKey="t" type="number" scale="time" domain={["dataMin", "dataMax"]} tickFormatter={formatDate} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={48} />
+              {range === "1D" || range === "5D" ? (
+                <XAxis dataKey="t" type="category" tickFormatter={(v) => formatDate(Number(v))} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={48} interval="preserveStartEnd" />
+              ) : (
+                <XAxis dataKey="t" type="number" scale="time" domain={["dataMin", "dataMax"]} tickFormatter={formatDate} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={48} />
+              )}
               <YAxis domain={["auto", "auto"]} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} axisLine={false} tickLine={false} width={56} tickFormatter={(v) => Number(v).toFixed(2)} orientation="right" />
               {stats && (
                 <ReferenceLine y={stats.ref} stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" strokeOpacity={0.45} />
