@@ -148,19 +148,19 @@ const VolumeTooltip = ({ active, payload }: any) => {
   );
 };
 
-// Yahoo-style line tooltip — compact date + price card
-const LineTooltip = ({ active, payload, currency, prevClose }: any) => {
+// Yahoo-style line tooltip — date + price + change vs reference (prev close on 1D, range start otherwise)
+const LineTooltip = ({ active, payload, currency, refPrice }: any) => {
   if (!active || !payload?.length) return null;
   const p = payload[0]?.payload;
   if (!p) return null;
   const c = Number(p.c ?? 0);
-  const ref = Number(prevClose ?? p.c ?? 0);
+  const ref = Number(refPrice ?? p.c ?? 0);
   const diff = c - ref;
   const pct = ref ? (diff / ref) * 100 : 0;
   const isUp = diff >= 0;
   const cur = currency || "USD";
   return (
-    <div className="rounded-lg border border-border bg-popover/95 backdrop-blur-sm px-3 py-2 text-[11px] shadow-xl min-w-[150px]">
+    <div className="rounded-lg border border-border bg-popover/95 backdrop-blur-sm px-3 py-2 text-[11px] shadow-xl min-w-[170px]">
       <div className="mb-1 text-[10px] text-muted-foreground">{fmtTs(p.t)}</div>
       <div className="flex items-baseline justify-between gap-3">
         <span className="font-mono tabular-nums text-[13px] font-semibold text-foreground">{c.toFixed(2)}</span>
@@ -172,6 +172,7 @@ const LineTooltip = ({ active, payload, currency, prevClose }: any) => {
     </div>
   );
 };
+
 
 interface CompareItem {
   ticker: string;
