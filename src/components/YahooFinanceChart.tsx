@@ -595,8 +595,9 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
                   )}
                   <Tooltip
                     cursor={{ stroke: "hsl(var(--muted-foreground))", strokeDasharray: "3 3", strokeOpacity: 0.5 }}
-                    content={<OHLCTooltip currency={primary.currency} />}
+                    content={<OHLCTooltip currency={primary.currency} refPrice={range === "1D" ? stats?.ref : stats?.first} />}
                   />
+
                   <Bar dataKey={(d: any) => [d.l, d.h]} shape={<Candle />} isAnimationActive={false} />
                 </ComposedChart>
               </ResponsiveContainer>
