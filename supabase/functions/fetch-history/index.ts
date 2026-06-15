@@ -16,8 +16,8 @@ function rangeToParams(range: Range): { range: string; interval: string } {
   // Mirrors Yahoo Finance's web chart granularity (1D, 5D, 1M, 6M, YTD, 1Y, 5Y, Max)
   switch (range) {
     case "1D":  return { range: "1d",  interval: "1m"  };
-    case "5D":  return { range: "5d",  interval: "5m"  };
-    case "1M":  return { range: "1mo", interval: "30m" };
+    case "5D":  return { range: "5d",  interval: "15m" };
+    case "1M":  return { range: "1mo", interval: "1d"  };
     case "6M":  return { range: "6mo", interval: "1d"  };
     case "YTD": return { range: "ytd", interval: "1d"  };
     case "1Y":  return { range: "1y",  interval: "1d"  };

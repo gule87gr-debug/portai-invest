@@ -95,7 +95,7 @@ const fmtTs = (t: number) => {
 };
 
 // Yahoo-style OHLC tooltip
-const OHLCTooltip = ({ active, payload, currency }: any) => {
+const OHLCTooltip = ({ active, payload, currency, refPrice }: any) => {
   if (!active || !payload?.length) return null;
   const p = payload[0]?.payload;
   if (!p) return null;
@@ -103,6 +103,10 @@ const OHLCTooltip = ({ active, payload, currency }: any) => {
   const isUp = c >= o;
   const diff = c - o;
   const pct = o ? (diff / o) * 100 : 0;
+  const ref = Number(refPrice ?? 0);
+  const rDiff = ref ? c - ref : 0;
+  const rPct = ref ? (rDiff / ref) * 100 : 0;
+  const rUp = rDiff >= 0;
   const cur = currency || "USD";
   const Row = ({ k, v, cls = "" }: { k: string; v: string; cls?: string }) => (
     <div className="flex justify-between gap-4">
@@ -111,7 +115,7 @@ const OHLCTooltip = ({ active, payload, currency }: any) => {
     </div>
   );
   return (
-    <div className="rounded-lg border border-border bg-popover/95 backdrop-blur-sm px-3 py-2 text-[11px] shadow-xl min-w-[180px]">
+    <div className="rounded-lg border border-border bg-popover/95 backdrop-blur-sm px-3 py-2 text-[11px] shadow-xl min-w-[200px]">
       <div className="mb-1.5 text-[10px] text-muted-foreground">{fmtTs(p.t)}</div>
       <div className="space-y-0.5">
         <Row k="Open" v={o.toFixed(2)} />
@@ -123,12 +127,20 @@ const OHLCTooltip = ({ active, payload, currency }: any) => {
           v={`${diff >= 0 ? "+" : ""}${diff.toFixed(2)} (${pct >= 0 ? "+" : ""}${pct.toFixed(2)}%)`}
           cls={isUp ? "text-emerald-400" : "text-red-400"}
         />
+        {ref > 0 && (
+          <Row
+            k="From start"
+            v={`${rDiff >= 0 ? "+" : ""}${rDiff.toFixed(2)} (${rPct >= 0 ? "+" : ""}${rPct.toFixed(2)}%)`}
+            cls={rUp ? "text-emerald-400" : "text-red-400"}
+          />
+        )}
         {p.v != null && <Row k="Volume" v={fmtVol(Number(p.v))} />}
         <div className="mt-1 pt-1 border-t border-border/60 text-[9px] text-muted-foreground text-right">{cur}</div>
       </div>
     </div>
   );
 };
+
 
 const VolumeTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
@@ -148,19 +160,19 @@ const VolumeTooltip = ({ active, payload }: any) => {
   );
 };
 
-// Yahoo-style line tooltip — compact date + price card
-const LineTooltip = ({ active, payload, currency, prevClose }: any) => {
+// Yahoo-style line tooltip — date + price + change vs reference (prev close on 1D, range start otherwise)
+const LineTooltip = ({ active, payload, currency, refPrice }: any) => {
   if (!active || !payload?.length) return null;
   const p = payload[0]?.payload;
   if (!p) return null;
   const c = Number(p.c ?? 0);
-  const ref = Number(prevClose ?? p.c ?? 0);
+  const ref = Number(refPrice ?? p.c ?? 0);
   const diff = c - ref;
   const pct = ref ? (diff / ref) * 100 : 0;
   const isUp = diff >= 0;
   const cur = currency || "USD";
   return (
-    <div className="rounded-lg border border-border bg-popover/95 backdrop-blur-sm px-3 py-2 text-[11px] shadow-xl min-w-[150px]">
+    <div className="rounded-lg border border-border bg-popover/95 backdrop-blur-sm px-3 py-2 text-[11px] shadow-xl min-w-[170px]">
       <div className="mb-1 text-[10px] text-muted-foreground">{fmtTs(p.t)}</div>
       <div className="flex items-baseline justify-between gap-3">
         <span className="font-mono tabular-nums text-[13px] font-semibold text-foreground">{c.toFixed(2)}</span>
@@ -172,6 +184,7 @@ const LineTooltip = ({ active, payload, currency, prevClose }: any) => {
     </div>
   );
 };
+
 
 interface CompareItem {
   ticker: string;
@@ -543,8 +556,9 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
               )}
               <Tooltip
                 cursor={{ stroke: "hsl(var(--muted-foreground))", strokeDasharray: "3 3", strokeOpacity: 0.6 }}
-                content={<LineTooltip currency={primary.currency} prevClose={stats?.ref} />}
+                content={<LineTooltip currency={primary.currency} refPrice={range === "1D" ? stats?.ref : stats?.first} />}
               />
+
               <Area type="linear" dataKey="c" stroke={stroke} strokeWidth={1.6} fill="url(#chartFill)" isAnimationActive={true} animationDuration={1000} animationEasing="ease-out" dot={false} activeDot={{ r: 3, stroke: stroke, strokeWidth: 1, fill: "hsl(var(--background))" }} />
             </AreaChart>
           </ResponsiveContainer>
@@ -581,8 +595,9 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
                   )}
                   <Tooltip
                     cursor={{ stroke: "hsl(var(--muted-foreground))", strokeDasharray: "3 3", strokeOpacity: 0.5 }}
-                    content={<OHLCTooltip currency={primary.currency} />}
+                    content={<OHLCTooltip currency={primary.currency} refPrice={range === "1D" ? stats?.ref : stats?.first} />}
                   />
+
                   <Bar dataKey={(d: any) => [d.l, d.h]} shape={<Candle />} isAnimationActive={false} />
                 </ComposedChart>
               </ResponsiveContainer>
