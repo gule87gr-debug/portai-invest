@@ -88,7 +88,7 @@ serve(async (req) => {
     }
 
     const params = rangeToParams(r);
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=${params.interval}&range=${params.range}`;
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=${params.interval}&range=${params.range}&includePrePost=${params.includePrePost}&events=div%2Csplit`;
     const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
     if (!res.ok) {
       return new Response(JSON.stringify({ error: "yahoo fetch failed", status: res.status }), {
