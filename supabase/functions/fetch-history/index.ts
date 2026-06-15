@@ -16,7 +16,7 @@ function rangeToParams(range: Range): { range: string; interval: string; include
   // Mirrors Yahoo Finance's web chart defaults exactly (1D, 5D, 1M, 6M, YTD, 1Y, 5Y, Max)
   switch (range) {
     case "1D":  return { range: "1d",  interval: "1m",   includePrePost: true  };
-    case "5D":  return { range: "5d",  interval: "30m",  includePrePost: true  };
+    case "5D":  return { range: "5d",  interval: "30m",  includePrePost: false };
     case "1M":  return { range: "1mo", interval: "1d",   includePrePost: false };
     case "6M":  return { range: "6mo", interval: "1d",   includePrePost: false };
     case "YTD": return { range: "ytd", interval: "1d",   includePrePost: false };
