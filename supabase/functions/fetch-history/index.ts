@@ -12,19 +12,20 @@ const CACHE_TTL = 60 * 1000;
 
 type Range = "1D" | "5D" | "1M" | "6M" | "YTD" | "1Y" | "5Y" | "ALL";
 
-function rangeToParams(range: Range): { range: string; interval: string } {
-  // Mirrors Yahoo Finance's web chart granularity (1D, 5D, 1M, 6M, YTD, 1Y, 5Y, Max)
+function rangeToParams(range: Range): { range: string; interval: string; includePrePost: boolean } {
+  // Mirrors Yahoo Finance's web chart defaults exactly (1D, 5D, 1M, 6M, YTD, 1Y, 5Y, Max)
   switch (range) {
-    case "1D":  return { range: "1d",  interval: "1m"  };
-    case "5D":  return { range: "5d",  interval: "15m" };
-    case "1M":  return { range: "1mo", interval: "1d"  };
-    case "6M":  return { range: "6mo", interval: "1d"  };
-    case "YTD": return { range: "ytd", interval: "1d"  };
-    case "1Y":  return { range: "1y",  interval: "1d"  };
-    case "5Y":  return { range: "5y",  interval: "1wk" };
-    case "ALL": return { range: "max", interval: "1mo" };
+    case "1D":  return { range: "1d",  interval: "1m",   includePrePost: true  };
+    case "5D":  return { range: "5d",  interval: "30m",  includePrePost: true  };
+    case "1M":  return { range: "1mo", interval: "1d",   includePrePost: false };
+    case "6M":  return { range: "6mo", interval: "1d",   includePrePost: false };
+    case "YTD": return { range: "ytd", interval: "1d",   includePrePost: false };
+    case "1Y":  return { range: "1y",  interval: "1d",   includePrePost: false };
+    case "5Y":  return { range: "5y",  interval: "1wk",  includePrePost: false };
+    case "ALL": return { range: "max", interval: "1mo",  includePrePost: false };
   }
 }
+
 
 function toYahooSymbol(ticker: string, type?: string): string {
   const upper = ticker.toUpperCase();
@@ -87,7 +88,7 @@ serve(async (req) => {
     }
 
     const params = rangeToParams(r);
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=${params.interval}&range=${params.range}`;
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=${params.interval}&range=${params.range}&includePrePost=${params.includePrePost}&events=div%2Csplit`;
     const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
     if (!res.ok) {
       return new Response(JSON.stringify({ error: "yahoo fetch failed", status: res.status }), {
