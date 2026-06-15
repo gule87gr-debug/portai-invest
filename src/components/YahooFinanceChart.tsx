@@ -556,8 +556,9 @@ export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceCh
               )}
               <Tooltip
                 cursor={{ stroke: "hsl(var(--muted-foreground))", strokeDasharray: "3 3", strokeOpacity: 0.6 }}
-                content={<LineTooltip currency={primary.currency} prevClose={stats?.ref} />}
+                content={<LineTooltip currency={primary.currency} refPrice={range === "1D" ? stats?.ref : stats?.first} />}
               />
+
               <Area type="linear" dataKey="c" stroke={stroke} strokeWidth={1.6} fill="url(#chartFill)" isAnimationActive={true} animationDuration={1000} animationEasing="ease-out" dot={false} activeDot={{ r: 3, stroke: stroke, strokeWidth: 1, fill: "hsl(var(--background))" }} />
             </AreaChart>
           </ResponsiveContainer>
