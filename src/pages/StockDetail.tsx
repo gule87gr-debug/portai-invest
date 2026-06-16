@@ -29,6 +29,9 @@ const StockDetail = () => {
   const { quotes, loading } = useQuotes(tickerList, typeMap);
   const quote = quotes[symbol];
 
+  const [rangeStats, setRangeStats] = useState<RangeStats | null>(null);
+  const handleStats = useCallback((s: RangeStats | null) => setRangeStats(s), []);
+
   let t: (key: string) => string;
   try {
     const lang = useLanguage();
@@ -37,8 +40,12 @@ const StockDetail = () => {
     t = (key: string) => key;
   }
 
-  const isPositive = quote && quote.change > 0;
-  const isNegative = quote && quote.change < 0;
+  const rangeLabelMap: Record<string, string> = { "1D": "1D", "5D": "5D", "1M": "1M", "6M": "6M", "YTD": "YTD", "1Y": "1Y", "5Y": "5Y", "ALL": "All" };
+  const displayChange = rangeStats ? rangeStats.diff : quote?.change ?? 0;
+  const displayPct = rangeStats ? rangeStats.pct : quote?.changePercent ?? 0;
+  const displayLabel = rangeStats ? rangeLabelMap[rangeStats.range] ?? rangeStats.range : t("today");
+  const isPositive = displayChange > 0;
+  const isNegative = displayChange < 0;
 
   return (
     <AppLayout>
