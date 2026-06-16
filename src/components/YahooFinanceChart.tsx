@@ -192,10 +192,13 @@ interface CompareItem {
   color: string;
 }
 
+export interface RangeStats { range: ChartRange; last: number; diff: number; pct: number; isUp: boolean; }
+
 interface YahooFinanceChartProps {
   ticker: string;
   type?: string;
   height?: number;
+  onStatsChange?: (s: RangeStats | null) => void;
 }
 
 async function fetchSeries(ticker: string, type: string | undefined, range: ChartRange) {
@@ -206,7 +209,7 @@ async function fetchSeries(ticker: string, type: string | undefined, range: Char
   return data as HistoryResponse;
 }
 
-export const YahooFinanceChart = ({ ticker, type, height = 360 }: YahooFinanceChartProps) => {
+export const YahooFinanceChart = ({ ticker, type, height = 360, onStatsChange }: YahooFinanceChartProps) => {
   const [range, setRange] = useState<ChartRange>("1M");
   const [chartKind, setChartKind] = useState<ChartKind>("line");
   const [showVolume, setShowVolume] = useState(true);
