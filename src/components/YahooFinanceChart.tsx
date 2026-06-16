@@ -334,6 +334,12 @@ export const YahooFinanceChart = ({ ticker, type, height = 360, onStatsChange }:
     return { first, last, ref, diff, pct, isUp: diff >= 0 };
   }, [primary]);
 
+  useEffect(() => {
+    if (!onStatsChange) return;
+    if (!stats) { onStatsChange(null); return; }
+    onStatsChange({ range, last: stats.last, diff: stats.diff, pct: stats.pct, isUp: stats.isUp });
+  }, [stats, range, onStatsChange]);
+
   const formatDate = (t: number) => {
     const d = new Date(t);
     if (range === "1D") return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
