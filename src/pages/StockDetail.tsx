@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { TradingViewTechnicalAnalysis } from "@/components/TradingViewWidgets";
-import { YahooFinanceChart } from "@/components/YahooFinanceChart";
+import { YahooFinanceChart, type RangeStats } from "@/components/YahooFinanceChart";
 import { StockNews } from "@/components/StockNews";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { PriceAlertDialog } from "@/components/PriceAlertDialog";
@@ -14,7 +14,7 @@ import { assetDatabase } from "@/lib/stockDatabase";
 import { useQuotes } from "@/hooks/useQuotes";
 import { ArrowLeft, Building2, Newspaper, BarChart3, TrendingUp, TrendingDown, Minus, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useMemo } from "react";
+import { useMemo, useState, useCallback } from "react";
 
 const StockDetail = () => {
   const { ticker } = useParams<{ ticker: string }>();
@@ -29,6 +29,9 @@ const StockDetail = () => {
   const { quotes, loading } = useQuotes(tickerList, typeMap);
   const quote = quotes[symbol];
 
+  const [rangeStats, setRangeStats] = useState<RangeStats | null>(null);
+  const handleStats = useCallback((s: RangeStats | null) => setRangeStats(s), []);
+
   let t: (key: string) => string;
   try {
     const lang = useLanguage();
@@ -37,8 +40,12 @@ const StockDetail = () => {
     t = (key: string) => key;
   }
 
-  const isPositive = quote && quote.change > 0;
-  const isNegative = quote && quote.change < 0;
+  const rangeLabelMap: Record<string, string> = { "1D": "1D", "5D": "5D", "1M": "1M", "6M": "6M", "YTD": "YTD", "1Y": "1Y", "5Y": "5Y", "ALL": "All" };
+  const displayChange = rangeStats ? rangeStats.diff : quote?.change ?? 0;
+  const displayPct = rangeStats ? rangeStats.pct : quote?.changePercent ?? 0;
+  const displayLabel = rangeStats ? rangeLabelMap[rangeStats.range] ?? rangeStats.range : t("today");
+  const isPositive = displayChange > 0;
+  const isNegative = displayChange < 0;
 
   return (
     <AppLayout>
@@ -127,8 +134,9 @@ const StockDetail = () => {
                    isNegative ? <TrendingDown className="h-3.5 w-3.5" /> :
                    <Minus className="h-3.5 w-3.5" />}
                   <span className="tnum font-mono">
-                    {quote.change >= 0 ? "+" : ""}{quote.change.toFixed(2)} ({quote.changePercent >= 0 ? "+" : ""}{quote.changePercent.toFixed(2)}%)
+                    {displayChange >= 0 ? "+" : ""}{displayChange.toFixed(2)} ({displayPct >= 0 ? "+" : ""}{displayPct.toFixed(2)}%)
                   </span>
+                  <span className="ml-1 text-xs font-medium opacity-80">{displayLabel}</span>
                 </div>
               </>
             ) : (
@@ -149,7 +157,7 @@ const StockDetail = () => {
       </div>
 
       <div className="mb-6 rounded-2xl border border-border bg-card p-6 sm:p-8">
-        <YahooFinanceChart ticker={symbol} type={assetEntry?.type} height={380} />
+        <YahooFinanceChart ticker={symbol} type={assetEntry?.type} height={380} onStatsChange={handleStats} />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
