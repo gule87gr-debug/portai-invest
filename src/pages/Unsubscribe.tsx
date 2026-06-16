@@ -56,7 +56,7 @@ const Unsubscribe = () => {
             <TrendingUp className="h-7 w-7 text-primary-foreground" />
           </div>
         </div>
-        <h1 className="text-2xl font-bold">PortAI</h1>
+        <h1 className="text-2xl font-bold">PortAI — Unsubscribe from Emails</h1>
 
         {status === "loading" && (
           <div className="flex flex-col items-center gap-3">
