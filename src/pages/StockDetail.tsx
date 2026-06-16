@@ -157,7 +157,7 @@ const StockDetail = () => {
       </div>
 
       <div className="mb-6 rounded-2xl border border-border bg-card p-6 sm:p-8">
-        <YahooFinanceChart ticker={symbol} type={assetEntry?.type} height={380} />
+        <YahooFinanceChart ticker={symbol} type={assetEntry?.type} height={380} onStatsChange={handleStats} />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
