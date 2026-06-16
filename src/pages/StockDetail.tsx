@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { TradingViewTechnicalAnalysis } from "@/components/TradingViewWidgets";
-import { YahooFinanceChart } from "@/components/YahooFinanceChart";
+import { YahooFinanceChart, type RangeStats } from "@/components/YahooFinanceChart";
 import { StockNews } from "@/components/StockNews";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { PriceAlertDialog } from "@/components/PriceAlertDialog";
@@ -14,7 +14,7 @@ import { assetDatabase } from "@/lib/stockDatabase";
 import { useQuotes } from "@/hooks/useQuotes";
 import { ArrowLeft, Building2, Newspaper, BarChart3, TrendingUp, TrendingDown, Minus, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useMemo } from "react";
+import { useMemo, useState, useCallback } from "react";
 
 const StockDetail = () => {
   const { ticker } = useParams<{ ticker: string }>();
