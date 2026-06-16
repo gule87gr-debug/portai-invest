@@ -134,8 +134,9 @@ const StockDetail = () => {
                    isNegative ? <TrendingDown className="h-3.5 w-3.5" /> :
                    <Minus className="h-3.5 w-3.5" />}
                   <span className="tnum font-mono">
-                    {quote.change >= 0 ? "+" : ""}{quote.change.toFixed(2)} ({quote.changePercent >= 0 ? "+" : ""}{quote.changePercent.toFixed(2)}%)
+                    {displayChange >= 0 ? "+" : ""}{displayChange.toFixed(2)} ({displayPct >= 0 ? "+" : ""}{displayPct.toFixed(2)}%)
                   </span>
+                  <span className="ml-1 text-xs font-medium opacity-80">{displayLabel}</span>
                 </div>
               </>
             ) : (
