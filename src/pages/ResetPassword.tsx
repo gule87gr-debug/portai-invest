@@ -31,7 +31,7 @@ const ResetPassword = ({ onComplete }: { onComplete: () => void }) => {
     <>
     <SEO
       title="Set New Password | PortAI"
-      description="Securely choose a new password for your PortAI account and regain access to your AI-powered portfolio tracker."
+      description="Securely choose a new password for your PortAI account."
       path="/reset-password"
     />
     <div className="flex min-h-screen items-center justify-center bg-background p-4">

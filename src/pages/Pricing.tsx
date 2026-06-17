@@ -137,7 +137,7 @@ const Pricing = () => {
           "@context": "https://schema.org",
           "@type": "Product",
           name: "PortAI",
-          description: "AI financial news bias checker and portfolio tracker subscription.",
+          description: "PortAI subscription plans.",
           brand: { "@type": "Brand", name: "PortAI" },
           offers: [
             { "@type": "Offer", name: "Free", price: "0", priceCurrency: "EUR", url: "https://portai-invest.com/pricing", availability: "https://schema.org/InStock" },
