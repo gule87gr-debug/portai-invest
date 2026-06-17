@@ -63,7 +63,7 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
   return (
     <TooltipProvider delayDuration={150}>
     <SEO
-      title="PortAI — AI Bias Checker & Portfolio Tracker"
+      title="PortAI"
       description="Track stocks, ETFs and crypto with AI-powered bias detection on financial news. Real-time portfolio tracking and trust scores for retail investors."
       path="/"
     />

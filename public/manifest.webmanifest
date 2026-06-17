@@ -1,5 +1,5 @@
 {
-  "name": "PortAI — AI Bias Checker & Portfolio Tracker",
+  "name": "PortAI",
   "short_name": "PortAI",
   "description": "Track stocks, ETFs and crypto with AI-powered bias detection on financial news.",
   "start_url": "/dashboard",
