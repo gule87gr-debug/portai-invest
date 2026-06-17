@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-const DEFAULT_TITLE = "PortAI — AI Bias Checker & Portfolio Tracker";
+const DEFAULT_TITLE = "PortAI";
 
 export const usePageTitle = (title: string) => {
   useEffect(() => {
