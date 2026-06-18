@@ -90,12 +90,12 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
       </div>
 
       {/* Nav */}
-      <nav className="flex items-center justify-between px-4 sm:px-6 py-4 max-w-6xl mx-auto">
-        <div className="flex items-center gap-2.5">
+      <nav className="flex flex-wrap items-center justify-between gap-y-2 px-4 sm:px-6 py-4 max-w-6xl mx-auto">
+        <div className="flex items-center gap-2.5 shrink-0">
           <img src="/logo.png" alt="PortAI logo — AI Stock Bias Analysis Dashboard" width={36} height={36} fetchPriority="high" decoding="async" className="h-9 w-9 rounded-lg" />
           <span className="text-lg font-bold text-foreground">PortAI</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-x-2 gap-y-1.5">
           {/* Language switcher */}
           <div className="relative">
             <button
