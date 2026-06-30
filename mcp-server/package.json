@@ -1,0 +1,28 @@
+{
+  "name": "mcp-local-tools",
+  "version": "1.0.0",
+  "description": "Local MCP server exposing web_search (Tavily) and read_file tools over STDIO.",
+  "type": "module",
+  "bin": {
+    "mcp-local-tools": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "dotenv": "^16.4.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
