@@ -138,6 +138,17 @@ const AppRoutes = () => {
         return;
       }
       setSession(session);
+      // If the user came back from login and there is a pending OAuth consent URL,
+      // send them back to it so external MCP client authorization can resume.
+      if (session) {
+        try {
+          const pending = sessionStorage.getItem("portai-post-auth-return");
+          if (pending && pending.startsWith("/.lovable/oauth/consent")) {
+            sessionStorage.removeItem("portai-post-auth-return");
+            window.location.href = pending;
+          }
+        } catch {}
+      }
     });
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
