@@ -69,7 +69,6 @@ const IPPolicy = lazyWithRetry(() => import("./pages/IPPolicy"));
 const AdminPage = lazyWithRetry(() => import("./pages/Admin"));
 const SeekingAlphaVsMotleyFool = lazyWithRetry(() => import("./pages/SeekingAlphaVsMotleyFool"));
 const BestStockAdvisorServices = lazyWithRetry(() => import("./pages/BestStockAdvisorServices"));
-const OAuthConsent = lazyWithRetry(() => import("./pages/OAuthConsent"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -138,17 +137,6 @@ const AppRoutes = () => {
         return;
       }
       setSession(session);
-      // If the user came back from login and there is a pending OAuth consent URL,
-      // send them back to it so external MCP client authorization can resume.
-      if (session) {
-        try {
-          const pending = sessionStorage.getItem("portai-post-auth-return");
-          if (pending && pending.startsWith("/.lovable/oauth/consent")) {
-            sessionStorage.removeItem("portai-post-auth-return");
-            window.location.href = pending;
-          }
-        } catch {}
-      }
     });
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -225,7 +213,6 @@ const App = () => (
               <Route path="/unsubscribe" element={<Unsubscribe />} />
               <Route path="/compare/seeking-alpha-vs-motley-fool" element={<SeekingAlphaVsMotleyFool />} />
               <Route path="/compare/best-stock-advisor-services" element={<BestStockAdvisorServices />} />
-              <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
               <Route path="*" element={<AppRoutes />} />
             </Routes>
           </Suspense>
