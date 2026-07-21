@@ -533,14 +533,6 @@ export const YahooFinanceChart = ({ ticker, type, height = 360, onStatsChange }:
             )}
           </div>
         )}
-        {stats && !loading && !error && !isCompare && (
-          <div className="ml-auto flex items-center gap-2 text-xs font-mono">
-            <span className="text-muted-foreground">{rangeLabel(range)} {t("rangeChange")}</span>
-            <span className={cn("font-semibold", stats.isUp ? "text-emerald-400" : "text-red-400")}>
-              {stats.diff >= 0 ? "+" : ""}{stats.diff.toFixed(2)} ({stats.pct >= 0 ? "+" : ""}{stats.pct.toFixed(2)}%)
-            </span>
-          </div>
-        )}
       </div>
 
       {/* Chart */}
