@@ -125,18 +125,18 @@ const StockDetail = () => {
                 <span className="text-4xl font-bold tnum font-mono spring-in inline-block">
                   ${quote.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
-                <div className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-sm font-semibold ${
-                  isPositive ? "bg-emerald-500/15 text-emerald-400" :
-                  isNegative ? "bg-red-500/15 text-red-400" :
-                  "bg-muted text-muted-foreground"
+                <div className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-base font-bold border ${
+                  isPositive ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40" :
+                  isNegative ? "bg-red-500/20 text-red-300 border-red-500/40" :
+                  "bg-muted text-muted-foreground border-border"
                 }`}>
-                  {isPositive ? <TrendingUp className="h-3.5 w-3.5" /> :
-                   isNegative ? <TrendingDown className="h-3.5 w-3.5" /> :
-                   <Minus className="h-3.5 w-3.5" />}
+                  {isPositive ? <TrendingUp className="h-4 w-4" /> :
+                   isNegative ? <TrendingDown className="h-4 w-4" /> :
+                   <Minus className="h-4 w-4" />}
                   <span className="tnum font-mono">
                     {displayChange >= 0 ? "+" : ""}{displayChange.toFixed(2)} ({displayPct >= 0 ? "+" : ""}{displayPct.toFixed(2)}%)
                   </span>
-                  <span className="ml-1 text-xs font-medium opacity-80">{displayLabel}</span>
+                  <span className="ml-1 text-xs font-semibold opacity-90">{displayLabel}</span>
                 </div>
               </>
             ) : (
