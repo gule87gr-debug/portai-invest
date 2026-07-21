@@ -435,7 +435,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360, onStatsChange }:
               VOL
             </button>
           )}
-          <div className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5" role="tablist" aria-label={t("chartTimeframe")}>
+          <div className="inline-flex flex-wrap rounded-lg border border-border bg-muted/40 p-0.5 max-w-full" role="tablist" aria-label={t("chartTimeframe")}>
             {RANGES.map((r) => (
               <button
                 key={r}
