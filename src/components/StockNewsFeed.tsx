@@ -193,11 +193,12 @@ export const StockNewsFeed = () => {
         <h2 className="text-lg font-semibold">{t("marketNewsFeed")}</h2>
         <button
           onClick={() => fetchNews(selectedCategories, selectedRegions, searchQuery)}
-          className="ml-auto flex items-center gap-1 text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full hover:bg-accent transition-colors"
+          className="ml-auto flex items-center gap-1.5 rounded-lg border border-primary/40 bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary hover:bg-primary/20 transition-colors disabled:opacity-60"
           disabled={loading}
+          aria-label={t("autoRefresh")}
         >
-          <RefreshCw className={cn("h-3 w-3", loading && "animate-spin")} />
-          {t("autoRefresh")}
+          <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+          <span>{t("autoRefresh")}</span>
         </button>
       </div>
 

@@ -141,23 +141,38 @@ Deno.serve(async (req) => {
 
     console.log("Fetching news for:", query);
 
-    // Retry up to 3 times with backoff for transient 5xx errors
+    // Retry up to 2 times with backoff and a per-attempt timeout so a slow
+    // upstream doesn't stall the whole function.
     let response: Response | null = null;
     let lastStatus = 0;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      response = await fetch(rssUrl, {
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; NewsBot/1.0)" },
-      });
-      if (response.ok) break;
-      lastStatus = response.status;
-      // Drain body to free resources before retrying
-      await response.text().catch(() => "");
-      response = null;
-      if (lastStatus < 500) break; // don't retry client errors
-      await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 4000);
+      try {
+        const r = await fetch(rssUrl, {
+          headers: { "User-Agent": "Mozilla/5.0 (compatible; NewsBot/1.0)" },
+          signal: ctrl.signal,
+        });
+        if (r.ok) { response = r; break; }
+        lastStatus = r.status;
+        await r.text().catch(() => "");
+        if (lastStatus < 500) break;
+      } catch (e) {
+        console.warn(`News fetch attempt ${attempt + 1} failed:`, (e as Error).message);
+      } finally {
+        clearTimeout(timer);
+      }
+      await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
     }
 
     if (!response) {
+      // Serve stale cache if available so the UI never shows an empty state
+      const stale = newsCache.get(rssUrl);
+      if (stale) {
+        return new Response(JSON.stringify({ success: true, items: stale.items, cached: true, stale: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       console.error(`RSS unavailable after retries (last status: ${lastStatus})`);
       return new Response(
         JSON.stringify({ success: false, error: "SERVICE_UNAVAILABLE", fallback: true, items: [] }),
