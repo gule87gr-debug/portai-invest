@@ -145,24 +145,26 @@ Deno.serve(async (req) => {
     // upstream doesn't stall the whole function.
     let response: Response | null = null;
     let lastStatus = 0;
-    for (let attempt = 0; attempt < 2; attempt++) {
+    for (let attempt = 0; attempt < 3; attempt++) {
       const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 4000);
+      const timer = setTimeout(() => ctrl.abort(), 9000);
       try {
         const r = await fetch(rssUrl, {
-          headers: { "User-Agent": "Mozilla/5.0 (compatible; NewsBot/1.0)" },
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
+            "Accept": "application/rss+xml, application/xml;q=0.9, */*;q=0.8",
+          },
           signal: ctrl.signal,
         });
         if (r.ok) { response = r; break; }
         lastStatus = r.status;
         await r.text().catch(() => "");
-        if (lastStatus < 500) break;
       } catch (e) {
         console.warn(`News fetch attempt ${attempt + 1} failed:`, (e as Error).message);
       } finally {
         clearTimeout(timer);
       }
-      await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
+      await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
     }
 
     if (!response) {
