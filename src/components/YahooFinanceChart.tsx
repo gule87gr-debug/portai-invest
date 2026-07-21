@@ -393,7 +393,7 @@ export const YahooFinanceChart = ({ ticker, type, height = 360, onStatsChange }:
             <span className="rounded-md bg-muted px-2 py-0.5">{t("pctChangeLbl")}</span>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto sm:justify-end">
           {!isCompare && (
             <div className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5" role="tablist" aria-label="Chart type">
               <button
