@@ -249,6 +249,38 @@ const Dashboard = () => {
               </div>
             </div>
 
+            {/* Why we're saying this — transparent reasoning */}
+            {result.reasoning && result.reasoning.length > 0 && (
+              <div className="rounded-xl border border-border bg-card p-5">
+                <div className="flex items-center gap-2 mb-1">
+                  <Search className="h-4 w-4 text-primary" />
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">{t("whyThisScore")}</h3>
+                </div>
+                <p className="text-xs text-muted-foreground mb-4">{t("whyThisScoreDesc")}</p>
+                <ul className="space-y-3">
+                  {result.reasoning.map((r, i) => (
+                    <li key={i} className="rounded-lg border border-border/60 bg-accent/20 p-3">
+                      {r.category && (
+                        <span className="inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary mb-2">
+                          {r.category}
+                        </span>
+                      )}
+                      {r.evidence && (
+                        <p className="text-xs italic text-foreground/90 mb-1.5 border-l-2 border-primary/40 pl-2.5">
+                          "{r.evidence}"
+                        </p>
+                      )}
+                      {r.explanation && (
+                        <p className="text-xs leading-relaxed text-muted-foreground">{r.explanation}</p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+
+
             {/* Pro-Level Deep Dive teaser */}
             <div className="rounded-xl border border-primary/30 bg-gradient-to-br from-primary/5 to-transparent p-5">
               <div className="flex items-center justify-between mb-3">
