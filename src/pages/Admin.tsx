@@ -273,7 +273,7 @@ const AdminPage = () => {
             </DialogTrigger>
             <DialogContent className="max-w-3xl">
               <DialogHeader>
-                <DialogTitle>Registered users{usersLoaded ? ` (${users.length})` : ""}</DialogTitle>
+                <DialogTitle>Registered users{usersLoaded ? ` (${users.length})` : userCount !== null ? ` (${userCount})` : ""}</DialogTitle>
                 <DialogDescription>All accounts that have signed up.</DialogDescription>
               </DialogHeader>
               <div className="flex items-center justify-between gap-2 mb-2">
