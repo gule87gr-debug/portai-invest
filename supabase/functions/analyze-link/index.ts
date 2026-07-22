@@ -666,6 +666,7 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
     }
 
     if (!analysis.redFlag) analysis.redFlag = "Unverified Claims";
+    if (!Array.isArray(analysis.reasoning)) analysis.reasoning = [];
     if (!analysis.hiddenAngle) analysis.hiddenAngle = analysis.summary?.slice(0, 220) ?? "";
     if (!analysis.proDeepDive || typeof analysis.proDeepDive !== "object") {
       analysis.proDeepDive = {
