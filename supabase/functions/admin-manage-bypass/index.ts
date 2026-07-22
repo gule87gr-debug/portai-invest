@@ -85,6 +85,13 @@ serve(async (req) => {
       return json({ audit: data ?? [] });
     }
 
+    if (action === "count_users") {
+      // Fast path: auth.admin.listUsers returns `total` even with perPage=1.
+      const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1 });
+      if (error) { console.error("admin-manage-bypass count_users error:", error); return json({ error: "Internal server error" }, 500); }
+      return json({ total: (data as any)?.total ?? data?.users?.length ?? 0 });
+    }
+
     if (action === "list_users") {
       // Paginate through ALL users (cap to avoid runaway loops).
       const perPage = 1000;
