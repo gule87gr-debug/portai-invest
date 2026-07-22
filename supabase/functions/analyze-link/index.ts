@@ -575,6 +575,9 @@ STEP 2 — If and only if the URL clearly points to a written news/analysis/opin
   "strengths": ["list", "of", "credibility", "strengths"],
   "redFlag": "ONE short tag (2-4 words) translated to ${langName}, equivalent to one of: Promotional Language | Conflict of Interest | One-Sided | Pump Pattern | Sensational Headline | Cherry-Picked Data | Unverified Claims | Objective Reporting",
   "hiddenAngle": "2-3 sentence Pro insight describing what the article is hiding, omitting, or downplaying. Be concrete.",
+  "reasoning": [
+    { "category": "<one of: Language | Framing | Sources | Bias | Topic | Omissions | Tone> (translated to ${langName})", "evidence": "the specific word, phrase, statistic, source citation, or structural pattern from the article that triggered this observation — quote it briefly if applicable", "explanation": "1-2 sentences in ${langName} explaining WHY this evidence pushed the trust score up or down, or revealed a bias/angle" }
+  ],
   "proDeepDive": {
     "stakeholderMotives": "2-3 sentences: who specifically benefits from THIS article's framing — name the institutions, insiders, analysts or funds whose positioning aligns with the narrative. Reference concrete incentives (recent insider trades, analyst price-target history, fund holdings) rather than generic 'institutions benefit' language.",
     "omittedDataPoints": "2-3 sentences: name the specific data the article skips — contradicting filings, recent regulatory headlines, peer comparisons, historical baselines, or guidance revisions that would weaken the thesis. Cite numbers or filing types where plausible.",
