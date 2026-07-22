@@ -262,7 +262,10 @@ const AdminPage = () => {
                   <Users className="h-5 w-5 text-primary" />
                   <div>
                     <p className="text-sm font-semibold">Registered users</p>
-                    <p className="text-xs text-muted-foreground">{usersLoaded ? `${users.length} total` : "Click to load"}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {userCount !== null ? `${userCount.toLocaleString()} total` : "Loading…"}
+                      <span className="ml-1 text-[10px] opacity-60">· live</span>
+                    </p>
                   </div>
                 </div>
                 <span className="text-xs text-muted-foreground">Open →</span>
