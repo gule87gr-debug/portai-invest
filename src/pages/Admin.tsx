@@ -17,6 +17,7 @@ const AdminPage = () => {
   const [admins, setAdmins] = useState<AdminRow[]>([]);
   const [audit, setAudit] = useState<AuditRow[]>([]);
   const [users, setUsers] = useState<UserRow[]>([]);
+  const [userCount, setUserCount] = useState<number | null>(null);
   const [userSearch, setUserSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [usersLoading, setUsersLoading] = useState(false);
