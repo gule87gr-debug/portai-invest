@@ -17,6 +17,7 @@ const AdminPage = () => {
   const [admins, setAdmins] = useState<AdminRow[]>([]);
   const [audit, setAudit] = useState<AuditRow[]>([]);
   const [users, setUsers] = useState<UserRow[]>([]);
+  const [userCount, setUserCount] = useState<number | null>(null);
   const [userSearch, setUserSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [usersLoading, setUsersLoading] = useState(false);
@@ -42,9 +43,18 @@ const AdminPage = () => {
     setUsersLoading(true);
     const { data, error } = await supabase.functions.invoke("admin-manage-bypass", { body: { action: "list_users" } });
     if (error) toast.error(error.message);
-    else setUsers(((data as any)?.users ?? []) as UserRow[]);
+    else {
+      const list = ((data as any)?.users ?? []) as UserRow[];
+      setUsers(list);
+      setUserCount(list.length);
+    }
     setUsersLoading(false);
     setUsersLoaded(true);
+  }, []);
+
+  const loadUserCount = useCallback(async () => {
+    const { data, error } = await supabase.functions.invoke("admin-manage-bypass", { body: { action: "count_users" } });
+    if (!error) setUserCount(Number((data as any)?.total ?? 0));
   }, []);
 
   const loadAudit = useCallback(async () => {
@@ -57,8 +67,19 @@ const AdminPage = () => {
   }, []);
 
   useEffect(() => {
-    if (isAdmin) loadAdmins();
-  }, [isAdmin, loadAdmins]);
+    if (!isAdmin) return;
+    loadAdmins();
+    loadUserCount();
+    // Poll live user count every 20s so newly signed-up users appear promptly.
+    const interval = window.setInterval(loadUserCount, 20_000);
+    // Refresh when tab regains focus.
+    const onFocus = () => loadUserCount();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [isAdmin, loadAdmins, loadUserCount]);
 
 
   const handleAdd = async () => {
@@ -241,7 +262,10 @@ const AdminPage = () => {
                   <Users className="h-5 w-5 text-primary" />
                   <div>
                     <p className="text-sm font-semibold">Registered users</p>
-                    <p className="text-xs text-muted-foreground">{usersLoaded ? `${users.length} total` : "Click to load"}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {userCount !== null ? `${userCount.toLocaleString()} total` : "Loading…"}
+                      <span className="ml-1 text-[10px] opacity-60">· live</span>
+                    </p>
                   </div>
                 </div>
                 <span className="text-xs text-muted-foreground">Open →</span>
@@ -249,7 +273,7 @@ const AdminPage = () => {
             </DialogTrigger>
             <DialogContent className="max-w-3xl">
               <DialogHeader>
-                <DialogTitle>Registered users{usersLoaded ? ` (${users.length})` : ""}</DialogTitle>
+                <DialogTitle>Registered users{usersLoaded ? ` (${users.length})` : userCount !== null ? ` (${userCount})` : ""}</DialogTitle>
                 <DialogDescription>All accounts that have signed up.</DialogDescription>
               </DialogHeader>
               <div className="flex items-center justify-between gap-2 mb-2">
