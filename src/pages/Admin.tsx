@@ -43,7 +43,11 @@ const AdminPage = () => {
     setUsersLoading(true);
     const { data, error } = await supabase.functions.invoke("admin-manage-bypass", { body: { action: "list_users" } });
     if (error) toast.error(error.message);
-    else setUsers(((data as any)?.users ?? []) as UserRow[]);
+    else {
+      const list = ((data as any)?.users ?? []) as UserRow[];
+      setUsers(list);
+      setUserCount(list.length);
+    }
     setUsersLoading(false);
     setUsersLoaded(true);
   }, []);
