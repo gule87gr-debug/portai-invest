@@ -730,6 +730,8 @@ const translations: Record<Language, Record<string, string>> = {
     quotaResets: "Tu cuota se reinicia a medianoche, o actualiza a Pro para análisis ilimitados.",
     upgradeToPro: "Actualizar a Pro", clearLink: "Borrar enlace", share: "Compartir", shareToX: "Compartir en X",
     proDeepDive: "Análisis Profundo Pro",
+    whyThisScore: "Por qué decimos esto",
+    whyThisScoreDesc: "Las señales concretas — lenguaje, enfoque, fuentes, omisiones — que dieron forma a este análisis.",
     stakeholderMotives: "Motivos de los implicados", stakeholderMotivesDesc: "Identifica quién se beneficia de esta narrativa: posicionamiento institucional, operaciones internas recientes e incentivos de analistas.",
     omittedDataPoints: "Datos omitidos", omittedDataPointsDesc: "Revela el contexto que el artículo omite: presentaciones contradictorias, titulares regulatorios y referencias históricas.",
     sentimentDivergence: "Divergencia de sentimiento", sentimentDivergenceDesc: "Compara el tono del artículo con señales sociales, flujo de opciones y cobertura de pares para detectar consenso fabricado.",
