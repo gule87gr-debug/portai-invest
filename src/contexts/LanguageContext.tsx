@@ -145,6 +145,8 @@ const translations: Record<Language, Record<string, string>> = {
     quotaResets: "Your quota resets at midnight, or upgrade to Pro for unlimited analyses.",
     upgradeToPro: "Upgrade to Pro", clearLink: "Clear link", share: "Share", shareToX: "Share to X",
     proDeepDive: "Pro-Level Deep Dive",
+    whyThisScore: "Why we're saying this",
+    whyThisScoreDesc: "The specific signals — language, framing, sources, omissions — that shaped this analysis.",
     stakeholderMotives: "Stakeholder Motives", stakeholderMotivesDesc: "Identifies who benefits from this narrative — institutional positioning, recent insider trades, and analyst incentives.",
     omittedDataPoints: "Omitted Data Points", omittedDataPointsDesc: "Surfaces material context the article skips: contradicting filings, regulatory headlines, and historical baselines.",
     sentimentDivergence: "Sentiment Divergence", sentimentDivergenceDesc: "Compares the article's tone to social, options-flow, and peer-coverage signals to flag manufactured consensus.",
