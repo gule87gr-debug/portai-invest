@@ -543,7 +543,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `OUTPUT LANGUAGE: ${langName}. Every human-readable string value in your JSON output — including but not limited to "title", "source", "summary", every item in "biases" and "strengths", "redFlag", "hiddenAngle", and every field inside "proDeepDive" (stakeholderMotives, omittedDataPoints, sentimentDivergence) — MUST be written in ${langName}. JSON keys, ticker symbols, and proper nouns stay in their original form; everything else MUST be translated. Never mix languages in a single value.
+            content: `OUTPUT LANGUAGE: ${langName}. Every human-readable string value in your JSON output — including but not limited to "title", "source", "summary", every item in "biases" and "strengths", "redFlag", "hiddenAngle", every "category"/"evidence"/"explanation" inside "reasoning", and every field inside "proDeepDive" (stakeholderMotives, omittedDataPoints, sentimentDivergence) — MUST be written in ${langName}. JSON keys, ticker symbols, and proper nouns stay in their original form; everything else MUST be translated. Never mix languages in a single value.
 
 You are a financial article credibility analyst. Given a URL, you must FIRST determine whether the URL points to an actual news/journalism article (or written analysis/opinion piece). You must respond with valid JSON only, no markdown.
 
@@ -575,12 +575,18 @@ STEP 2 — If and only if the URL clearly points to a written news/analysis/opin
   "strengths": ["list", "of", "credibility", "strengths"],
   "redFlag": "ONE short tag (2-4 words) translated to ${langName}, equivalent to one of: Promotional Language | Conflict of Interest | One-Sided | Pump Pattern | Sensational Headline | Cherry-Picked Data | Unverified Claims | Objective Reporting",
   "hiddenAngle": "2-3 sentence Pro insight describing what the article is hiding, omitting, or downplaying. Be concrete.",
+  "reasoning": [
+    { "category": "<one of: Language | Framing | Sources | Bias | Topic | Omissions | Tone> (translated to ${langName})", "evidence": "the specific word, phrase, statistic, source citation, or structural pattern from the article that triggered this observation — quote it briefly if applicable", "explanation": "1-2 sentences in ${langName} explaining WHY this evidence pushed the trust score up or down, or revealed a bias/angle" }
+  ],
   "proDeepDive": {
     "stakeholderMotives": "2-3 sentences: who specifically benefits from THIS article's framing — name the institutions, insiders, analysts or funds whose positioning aligns with the narrative. Reference concrete incentives (recent insider trades, analyst price-target history, fund holdings) rather than generic 'institutions benefit' language.",
     "omittedDataPoints": "2-3 sentences: name the specific data the article skips — contradicting filings, recent regulatory headlines, peer comparisons, historical baselines, or guidance revisions that would weaken the thesis. Cite numbers or filing types where plausible.",
     "sentimentDivergence": "2-3 sentences: contrast the article's tone with concrete counter-signals — options-flow skew, short interest trend, analyst dispersion, peer-coverage tone, or social-sentiment direction. Indicate whether consensus is genuine or manufactured."
   }
 }
+
+CRITICAL — "reasoning" requirement:
+The "reasoning" array MUST contain 3-5 entries that transparently explain "why we're saying this". Each entry must cite CONCRETE evidence from the article — a specific phrase, adjective, source citation, statistic, headline pattern, or structural choice — not vague generalities. Cover a mix of categories (Language, Framing, Sources, Bias, Topic, Omissions, Tone) so the user understands what triggered the trust score, the biases list, and the red flag. This section is what makes the analysis auditable.
 
 CRITICAL — proDeepDive depth requirement:
 The proDeepDive is the PAID Pro tier insight and MUST go meaningfully deeper than 'summary', 'biases', 'strengths', and 'hiddenAngle'. It must NOT restate or paraphrase any of those fields. It must add NEW analytical layers a free reader cannot see in the standard analysis. Each proDeepDive field must:
@@ -660,6 +666,7 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
     }
 
     if (!analysis.redFlag) analysis.redFlag = "Unverified Claims";
+    if (!Array.isArray(analysis.reasoning)) analysis.reasoning = [];
     if (!analysis.hiddenAngle) analysis.hiddenAngle = analysis.summary?.slice(0, 220) ?? "";
     if (!analysis.proDeepDive || typeof analysis.proDeepDive !== "object") {
       analysis.proDeepDive = {
