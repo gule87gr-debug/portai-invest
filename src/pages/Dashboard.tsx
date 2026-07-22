@@ -23,6 +23,11 @@ type AnalysisResult = {
   summary: string;
   biases: string[];
   strengths: string[];
+  reasoning?: Array<{
+    category?: string;
+    evidence?: string;
+    explanation?: string;
+  }>;
   proDeepDive?: {
     stakeholderMotives?: string;
     omittedDataPoints?: string;
