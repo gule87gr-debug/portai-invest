@@ -585,6 +585,9 @@ STEP 2 — If and only if the URL clearly points to a written news/analysis/opin
   }
 }
 
+CRITICAL — "reasoning" requirement:
+The "reasoning" array MUST contain 3-5 entries that transparently explain "why we're saying this". Each entry must cite CONCRETE evidence from the article — a specific phrase, adjective, source citation, statistic, headline pattern, or structural choice — not vague generalities. Cover a mix of categories (Language, Framing, Sources, Bias, Topic, Omissions, Tone) so the user understands what triggered the trust score, the biases list, and the red flag. This section is what makes the analysis auditable.
+
 CRITICAL — proDeepDive depth requirement:
 The proDeepDive is the PAID Pro tier insight and MUST go meaningfully deeper than 'summary', 'biases', 'strengths', and 'hiddenAngle'. It must NOT restate or paraphrase any of those fields. It must add NEW analytical layers a free reader cannot see in the standard analysis. Each proDeepDive field must:
   - Be specific to THIS article's subject (name the ticker, company, sector, event, or person explicitly).
