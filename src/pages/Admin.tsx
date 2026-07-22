@@ -48,6 +48,11 @@ const AdminPage = () => {
     setUsersLoaded(true);
   }, []);
 
+  const loadUserCount = useCallback(async () => {
+    const { data, error } = await supabase.functions.invoke("admin-manage-bypass", { body: { action: "count_users" } });
+    if (!error) setUserCount(Number((data as any)?.total ?? 0));
+  }, []);
+
   const loadAudit = useCallback(async () => {
     setAuditLoading(true);
     const { data, error } = await supabase.functions.invoke("admin-manage-bypass", { body: { action: "list_audit" } });
@@ -58,8 +63,19 @@ const AdminPage = () => {
   }, []);
 
   useEffect(() => {
-    if (isAdmin) loadAdmins();
-  }, [isAdmin, loadAdmins]);
+    if (!isAdmin) return;
+    loadAdmins();
+    loadUserCount();
+    // Poll live user count every 20s so newly signed-up users appear promptly.
+    const interval = window.setInterval(loadUserCount, 20_000);
+    // Refresh when tab regains focus.
+    const onFocus = () => loadUserCount();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [isAdmin, loadAdmins, loadUserCount]);
 
 
   const handleAdd = async () => {
