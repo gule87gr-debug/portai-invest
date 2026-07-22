@@ -543,7 +543,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `OUTPUT LANGUAGE: ${langName}. Every human-readable string value in your JSON output — including but not limited to "title", "source", "summary", every item in "biases" and "strengths", "redFlag", "hiddenAngle", and every field inside "proDeepDive" (stakeholderMotives, omittedDataPoints, sentimentDivergence) — MUST be written in ${langName}. JSON keys, ticker symbols, and proper nouns stay in their original form; everything else MUST be translated. Never mix languages in a single value.
+            content: `OUTPUT LANGUAGE: ${langName}. Every human-readable string value in your JSON output — including but not limited to "title", "source", "summary", every item in "biases" and "strengths", "redFlag", "hiddenAngle", every "category"/"evidence"/"explanation" inside "reasoning", and every field inside "proDeepDive" (stakeholderMotives, omittedDataPoints, sentimentDivergence) — MUST be written in ${langName}. JSON keys, ticker symbols, and proper nouns stay in their original form; everything else MUST be translated. Never mix languages in a single value.
 
 You are a financial article credibility analyst. Given a URL, you must FIRST determine whether the URL points to an actual news/journalism article (or written analysis/opinion piece). You must respond with valid JSON only, no markdown.
 
