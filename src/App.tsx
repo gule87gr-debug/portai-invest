@@ -69,6 +69,7 @@ const IPPolicy = lazyWithRetry(() => import("./pages/IPPolicy"));
 const AdminPage = lazyWithRetry(() => import("./pages/Admin"));
 const SeekingAlphaVsMotleyFool = lazyWithRetry(() => import("./pages/SeekingAlphaVsMotleyFool"));
 const BestStockAdvisorServices = lazyWithRetry(() => import("./pages/BestStockAdvisorServices"));
+const OAuthConsent = lazyWithRetry(() => import("./pages/OAuthConsent"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -213,6 +214,7 @@ const App = () => (
               <Route path="/unsubscribe" element={<Unsubscribe />} />
               <Route path="/compare/seeking-alpha-vs-motley-fool" element={<SeekingAlphaVsMotleyFool />} />
               <Route path="/compare/best-stock-advisor-services" element={<BestStockAdvisorServices />} />
+              <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
               <Route path="*" element={<AppRoutes />} />
             </Routes>
           </Suspense>

@@ -1,0 +1,181 @@
+{
+  "version": 1,
+  "sdk_version": "0.24.0",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://vejlgkyydezrnqrzwodp.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "portai-mcp",
+      "version": "0.1.0",
+      "title": "PortAI"
+    },
+    "tools": [
+      {
+        "name": "list_watchlists",
+        "title": "List watchlists",
+        "description": "List the signed-in user's PortAI watchlists with their tickers.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_watchlist",
+        "title": "Create watchlist",
+        "description": "Create a new PortAI watchlist for the signed-in user.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80,
+              "description": "Name of the watchlist."
+            },
+            "description": {
+              "description": "Optional description.",
+              "type": "string",
+              "maxLength": 500
+            }
+          },
+          "required": [
+            "name"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "add_stock_to_watchlist",
+        "title": "Add stock to watchlist",
+        "description": "Add a ticker to one of the signed-in user's PortAI watchlists.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "watchlist_id": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Target watchlist ID (from list_watchlists)."
+            },
+            "ticker": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20,
+              "description": "Ticker symbol, e.g. AAPL."
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "description": "Company/asset name."
+            },
+            "sector": {
+              "type": "string",
+              "maxLength": 80
+            }
+          },
+          "required": [
+            "watchlist_id",
+            "ticker",
+            "name"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_price_alerts",
+        "title": "List price alerts",
+        "description": "List the signed-in user's active PortAI price alerts.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_price_alert",
+        "title": "Create price alert",
+        "description": "Create a new PortAI price alert for the signed-in user.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "ticker": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20
+            },
+            "asset_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "asset_type": {
+              "type": "string",
+              "enum": [
+                "stock",
+                "crypto",
+                "etf",
+                "index"
+              ],
+              "description": "Asset category."
+            },
+            "direction": {
+              "type": "string",
+              "enum": [
+                "above",
+                "below"
+              ],
+              "description": "Trigger when price crosses above or below the target."
+            },
+            "target_price": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": [
+            "ticker",
+            "asset_name",
+            "asset_type",
+            "direction",
+            "target_price"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
