@@ -35,3 +35,5 @@ project_id = "vejlgkyydezrnqrzwodp"
     verify_jwt = false
   [functions.manage-trial]
     verify_jwt = false
+  [functions.mcp]
+    verify_jwt = false
