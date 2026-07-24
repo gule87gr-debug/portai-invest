@@ -57,8 +57,11 @@ const AdminPage = () => {
   }, []);
 
   useEffect(() => {
-    if (isAdmin) loadAdmins();
-  }, [isAdmin, loadAdmins]);
+    if (isAdmin) {
+      loadAdmins();
+      loadUsers();
+    }
+  }, [isAdmin, loadAdmins, loadUsers]);
 
 
   const handleAdd = async () => {

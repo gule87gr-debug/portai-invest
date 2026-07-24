@@ -66,36 +66,32 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const init = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return;
       setCurrentUserId(user.id);
 
-      await loadWatchlists(user.id);
-
-      const { data: settings } = await supabase
-        .from("user_settings")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
       const fallbackName = user.email?.split("@")[0] || "User";
+      // Optimistically show a name immediately so the UI doesn't wait on the DB.
+      setProfile({ name: fallbackName, email: user.email || "" });
+
+      // Fire watchlist + settings queries in parallel — they are independent.
+      const [, settingsRes] = await Promise.all([
+        loadWatchlists(user.id),
+        supabase.from("user_settings").select("display_name,language,tutorial_completed").eq("user_id", user.id).maybeSingle(),
+      ]);
+
+      const settings = settingsRes.data as any;
       if (settings) {
         setProfile({
-          name: (settings as any).display_name || fallbackName,
+          name: settings.display_name || fallbackName,
           email: user.email || "",
         });
-        if ((settings as any).language) {
-          setInitialLanguage((settings as any).language);
-        }
-        if (!(settings as any).tutorial_completed) {
-          setShowTutorial(true);
-        }
+        if (settings.language) setInitialLanguage(settings.language);
+        if (!settings.tutorial_completed) setShowTutorial(true);
       } else {
-        await supabase.from("user_settings").insert({
-          user_id: user.id,
-          display_name: fallbackName,
-        });
-        setProfile({ name: fallbackName, email: user.email || "" });
+        // Insert default row without blocking the UI.
+        supabase.from("user_settings").insert({ user_id: user.id, display_name: fallbackName }).then(() => {});
       }
     };
     init();
