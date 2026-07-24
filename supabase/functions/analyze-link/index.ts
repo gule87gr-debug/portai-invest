@@ -667,6 +667,23 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
 
     if (!analysis.redFlag) analysis.redFlag = "Unverified Claims";
     if (!Array.isArray(analysis.reasoning)) analysis.reasoning = [];
+    // Guarantee the "why we're saying this" section always renders: synthesize
+    // fallback entries from biases/strengths if the model omitted the reasoning.
+    if (analysis.reasoning.length === 0) {
+      const biases = Array.isArray(analysis.biases) ? analysis.biases : [];
+      const strengths = Array.isArray(analysis.strengths) ? analysis.strengths : [];
+      const fallback: Array<{ category: string; evidence: string; explanation: string }> = [];
+      biases.slice(0, 3).forEach((b: string) => fallback.push({
+        category: "Bias", evidence: String(b), explanation: "This pattern contributed to lowering the trust score.",
+      }));
+      strengths.slice(0, 2).forEach((s: string) => fallback.push({
+        category: "Strength", evidence: String(s), explanation: "This element supported the trust score.",
+      }));
+      if (fallback.length === 0) {
+        fallback.push({ category: "Summary", evidence: analysis.summary?.slice(0, 160) ?? "", explanation: "Overall assessment based on the article content." });
+      }
+      analysis.reasoning = fallback;
+    }
     if (!analysis.hiddenAngle) analysis.hiddenAngle = analysis.summary?.slice(0, 220) ?? "";
     if (!analysis.proDeepDive || typeof analysis.proDeepDive !== "object") {
       analysis.proDeepDive = {
