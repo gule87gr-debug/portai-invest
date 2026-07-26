@@ -207,8 +207,8 @@ const Dashboard = () => {
             {/* Header: title + source + score */}
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <h3 className="font-semibold text-sm leading-snug line-clamp-2">{result.title}</h3>
-                <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{result.source}</p>
+                <h3 className="font-semibold text-lg leading-snug line-clamp-2">{result.title}</h3>
+                <p className="text-sm text-muted-foreground mt-0.5 truncate">{result.source}</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <button
@@ -222,42 +222,42 @@ const Dashboard = () => {
                 >
                   <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                 </button>
-                <p className={cn("text-2xl font-bold font-mono tnum leading-none", trustColor(result.trustScore))}>
-                  {result.trustScore}<span className="text-xs text-muted-foreground">/10</span>
+                <p className={cn("text-3xl font-bold font-mono tnum leading-none", trustColor(result.trustScore))}>
+                  {result.trustScore}<span className="text-sm text-muted-foreground">/10</span>
                 </p>
               </div>
             </div>
 
             {/* Summary */}
-            <p className="mt-3 text-sm leading-relaxed text-foreground/90">{result.summary}</p>
+            <p className="mt-3 text-base leading-relaxed text-foreground/90">{result.summary}</p>
 
             {/* Biases + strengths, compact two columns */}
             <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <div className="rounded-lg border border-loss/20 bg-loss/5 p-2.5">
-                <p className="text-[11px] font-semibold text-loss mb-1">⚠️ {t("potentialBiases")}</p>
+              <div className="rounded-lg border border-loss/20 bg-loss/5 p-3">
+                <p className="text-sm font-semibold text-loss mb-1">⚠️ {t("potentialBiases")}</p>
                 <ul className="space-y-0.5">
-                  {result.biases.slice(0, 3).map((b, i) => <li key={i} className="text-[11px] leading-snug text-muted-foreground">• {b}</li>)}
+                  {result.biases.slice(0, 3).map((b, i) => <li key={i} className="text-sm leading-relaxed text-muted-foreground">• {b}</li>)}
                 </ul>
               </div>
-              <div className="rounded-lg border border-gain/20 bg-gain/5 p-2.5">
-                <p className="text-[11px] font-semibold text-gain mb-1">✅ {t("strengths")}</p>
+              <div className="rounded-lg border border-gain/20 bg-gain/5 p-3">
+                <p className="text-sm font-semibold text-gain mb-1">✅ {t("strengths")}</p>
                 <ul className="space-y-0.5">
-                  {result.strengths.slice(0, 3).map((s, i) => <li key={i} className="text-[11px] leading-snug text-muted-foreground">• {s}</li>)}
+                  {result.strengths.slice(0, 3).map((s, i) => <li key={i} className="text-sm leading-relaxed text-muted-foreground">• {s}</li>)}
                 </ul>
               </div>
             </div>
 
             {/* Why this score — collapsed into a compact details block */}
             {result.reasoning && result.reasoning.length > 0 && (
-              <details className="mt-3 rounded-lg border border-border/60 bg-accent/20 p-2.5">
-                <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-wider text-foreground">
+              <details className="mt-3 rounded-lg border border-border/60 bg-accent/20 p-3">
+                <summary className="cursor-pointer text-sm font-semibold uppercase tracking-wider text-foreground">
                   {t("whyThisScore")}
                 </summary>
                 <ul className="mt-2 space-y-2">
                   {result.reasoning.slice(0, 3).map((r, i) => (
                     <li key={i} className="border-l-2 border-primary/40 pl-2.5">
-                      {r.category && <span className="text-[10px] font-bold uppercase tracking-wider text-primary">{r.category}</span>}
-                      {r.explanation && <p className="text-[11px] leading-snug text-muted-foreground">{r.explanation}</p>}
+                      {r.category && <span className="text-xs font-bold uppercase tracking-wider text-primary">{r.category}</span>}
+                      {r.explanation && <p className="text-sm leading-relaxed text-muted-foreground">{r.explanation}</p>}
                     </li>
                   ))}
                 </ul>
@@ -267,8 +267,8 @@ const Dashboard = () => {
             {/* Pro deep dive */}
             {isPro ? (
               result.proDeepDive && (
-                <details className="mt-2 rounded-lg border border-primary/30 bg-primary/5 p-2.5">
-                  <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-wider text-primary">
+                <details className="mt-2 rounded-lg border border-primary/30 bg-primary/5 p-3">
+                  <summary className="cursor-pointer text-sm font-semibold uppercase tracking-wider text-primary">
                     {t("proDeepDive")}
                   </summary>
                   <div className="mt-2 space-y-1.5">
@@ -277,7 +277,7 @@ const Dashboard = () => {
                       [t("omittedDataPoints"), result.proDeepDive.omittedDataPoints],
                       [t("sentimentDivergence"), result.proDeepDive.sentimentDivergence],
                     ].filter(([, v]) => !!v).map(([label, body]) => (
-                      <p key={label as string} className="text-[11px] leading-snug text-muted-foreground">
+                      <p key={label as string} className="text-sm leading-relaxed text-muted-foreground">
                         <span className="font-semibold text-foreground">{label}: </span>{body}
                       </p>
                     ))}
@@ -287,7 +287,7 @@ const Dashboard = () => {
             ) : (
               <button
                 onClick={() => setShowUpgrade(true)}
-                className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-xs font-semibold text-primary hover:bg-primary/10 transition-colors"
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10 transition-colors"
               >
                 <Lock className="h-3.5 w-3.5" /> {t("unlockDeepDive")}
               </button>
