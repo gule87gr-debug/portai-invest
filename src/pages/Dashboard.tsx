@@ -9,7 +9,7 @@ import { TrendingStocks } from "@/components/TrendingStocks";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSubscription, trackAnalysis } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
-import { Link as LinkIcon, Search, Globe, ShieldCheck, FileText, AlertCircle, Loader2, Crown, Lock, Sparkles, X } from "lucide-react";
+import { Link as LinkIcon, Search, Globe, ShieldCheck, FileText, AlertCircle, Loader2, Crown, Lock, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
