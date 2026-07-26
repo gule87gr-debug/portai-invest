@@ -203,135 +203,95 @@ const Dashboard = () => {
         {error && !limitReached && <p className="mt-3 text-sm text-loss">{error}</p>}
 
         {result && (
-          <div className="mt-6 space-y-4 animate-fade-in">
-            <div className={cn("rounded-xl border p-5", trustBorder(result.trustScore))}>
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h3 className="font-semibold text-base">{result.title}</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">{t("source")}: {result.source}</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => {
-                      const text = `📊 AI Analysis: "${result.title}" — Trust Score: ${result.trustScore}/10\n\n${result.summary.slice(0, 200)}...\n\nAnalyzed on @PortAI_Invest 👉 https://portai-invest.com`;
-                      window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer,width=550,height=420");
-                    }}
-                    className="flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
-                    aria-label={t("shareToX")}
-                    title={t("shareToX")}
-                  >
-                    <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                    {t("share")}
-                  </button>
-                  <div className="text-center spring-in">
-                    <p className={cn("text-4xl font-bold font-mono tnum", trustColor(result.trustScore))}>{result.trustScore}<span className="text-sm text-muted-foreground">/10</span></p>
-                    <p className="metric-label mt-1">{t("trustScore")}</p>
-                  </div>
-                </div>
+          <div className={cn("mt-5 rounded-xl border p-4 animate-fade-in", trustBorder(result.trustScore))}>
+            {/* Header: title + source + score */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h3 className="font-semibold text-sm leading-snug line-clamp-2">{result.title}</h3>
+                <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{result.source}</p>
               </div>
-              <div className="rounded-lg bg-accent/30 p-3 mb-3">
-                <p className="text-xs font-semibold text-muted-foreground mb-1">📝 {t("summary")}</p>
-                <p className="text-sm leading-relaxed">{result.summary}</p>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="rounded-lg border border-loss/20 bg-loss/5 p-3">
-                  <p className="text-xs font-semibold text-loss mb-2">⚠️ {t("potentialBiases")}</p>
-                  <ul className="space-y-1">
-                    {result.biases.map((b, i) => <li key={i} className="text-xs text-muted-foreground">• {b}</li>)}
-                  </ul>
-                </div>
-                <div className="rounded-lg border border-gain/20 bg-gain/5 p-3">
-                  <p className="text-xs font-semibold text-gain mb-2">✅ {t("strengths")}</p>
-                  <ul className="space-y-1">
-                    {result.strengths.map((s, i) => <li key={i} className="text-xs text-muted-foreground">• {s}</li>)}
-                  </ul>
-                </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => {
+                    const text = `📊 AI Analysis: "${result.title}" — Trust Score: ${result.trustScore}/10\n\nAnalyzed on @PortAI_Invest 👉 https://portai-invest.com`;
+                    window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer,width=550,height=420");
+                  }}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={t("shareToX")}
+                  title={t("shareToX")}
+                >
+                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </button>
+                <p className={cn("text-2xl font-bold font-mono tnum leading-none", trustColor(result.trustScore))}>
+                  {result.trustScore}<span className="text-xs text-muted-foreground">/10</span>
+                </p>
               </div>
             </div>
 
-            {/* Why we're saying this — transparent reasoning */}
+            {/* Summary */}
+            <p className="mt-3 text-sm leading-relaxed text-foreground/90">{result.summary}</p>
+
+            {/* Biases + strengths, compact two columns */}
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="rounded-lg border border-loss/20 bg-loss/5 p-2.5">
+                <p className="text-[11px] font-semibold text-loss mb-1">⚠️ {t("potentialBiases")}</p>
+                <ul className="space-y-0.5">
+                  {result.biases.slice(0, 3).map((b, i) => <li key={i} className="text-[11px] leading-snug text-muted-foreground">• {b}</li>)}
+                </ul>
+              </div>
+              <div className="rounded-lg border border-gain/20 bg-gain/5 p-2.5">
+                <p className="text-[11px] font-semibold text-gain mb-1">✅ {t("strengths")}</p>
+                <ul className="space-y-0.5">
+                  {result.strengths.slice(0, 3).map((s, i) => <li key={i} className="text-[11px] leading-snug text-muted-foreground">• {s}</li>)}
+                </ul>
+              </div>
+            </div>
+
+            {/* Why this score — collapsed into a compact details block */}
             {result.reasoning && result.reasoning.length > 0 && (
-              <div className="rounded-xl border border-border bg-card p-5">
-                <div className="flex items-center gap-2 mb-1">
-                  <Search className="h-4 w-4 text-primary" />
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">{t("whyThisScore")}</h3>
-                </div>
-                <p className="text-xs text-muted-foreground mb-4">{t("whyThisScoreDesc")}</p>
-                <ul className="space-y-3">
-                  {result.reasoning.map((r, i) => (
-                    <li key={i} className="rounded-lg border border-border/60 bg-accent/20 p-3">
-                      {r.category && (
-                        <span className="inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary mb-2">
-                          {r.category}
-                        </span>
-                      )}
-                      {r.evidence && (
-                        <p className="text-xs italic text-foreground/90 mb-1.5 border-l-2 border-primary/40 pl-2.5">
-                          "{r.evidence}"
-                        </p>
-                      )}
-                      {r.explanation && (
-                        <p className="text-xs leading-relaxed text-muted-foreground">{r.explanation}</p>
-                      )}
+              <details className="mt-3 rounded-lg border border-border/60 bg-accent/20 p-2.5">
+                <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-wider text-foreground">
+                  {t("whyThisScore")}
+                </summary>
+                <ul className="mt-2 space-y-2">
+                  {result.reasoning.slice(0, 3).map((r, i) => (
+                    <li key={i} className="border-l-2 border-primary/40 pl-2.5">
+                      {r.category && <span className="text-[10px] font-bold uppercase tracking-wider text-primary">{r.category}</span>}
+                      {r.explanation && <p className="text-[11px] leading-snug text-muted-foreground">{r.explanation}</p>}
                     </li>
                   ))}
                 </ul>
-              </div>
+              </details>
             )}
 
-
-
-            {/* Pro-Level Deep Dive teaser */}
-            <div className="rounded-xl border border-primary/30 bg-gradient-to-br from-primary/5 to-transparent p-5">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-foreground">{t("proDeepDive")}</h3>
-                </div>
-                {isPro && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">
-                    <Crown className="h-2.5 w-2.5" /> PRO
-                  </span>
-                )}
-              </div>
-              <div className="relative">
-                <ul className={cn("space-y-2.5", !isPro && "select-none pointer-events-none")} aria-hidden={!isPro}>
-                  {[
-                    {
-                      label: t("stakeholderMotives"),
-                      body: result.proDeepDive?.stakeholderMotives || t("stakeholderMotivesDesc"),
-                    },
-                    {
-                      label: t("omittedDataPoints"),
-                      body: result.proDeepDive?.omittedDataPoints || t("omittedDataPointsDesc"),
-                    },
-                    {
-                      label: t("sentimentDivergence"),
-                      body: result.proDeepDive?.sentimentDivergence || t("sentimentDivergenceDesc"),
-                    },
-                  ].map((it) => (
-                    <li key={it.label} className="flex items-start gap-2.5 text-sm">
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                      <div>
-                        <p className="font-semibold text-foreground">{it.label}</p>
-                        <p className={cn("text-xs leading-relaxed text-muted-foreground", !isPro && "blur-[5px]")}>{it.body}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-                {!isPro && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <button
-                      onClick={() => setShowUpgrade(true)}
-                      className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors active:scale-[0.97]"
-                    >
-                      <Lock className="h-4 w-4" />
-                      {t("unlockDeepDive")}
-                    </button>
+            {/* Pro deep dive */}
+            {isPro ? (
+              result.proDeepDive && (
+                <details className="mt-2 rounded-lg border border-primary/30 bg-primary/5 p-2.5">
+                  <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-wider text-primary">
+                    {t("proDeepDive")}
+                  </summary>
+                  <div className="mt-2 space-y-1.5">
+                    {[
+                      [t("stakeholderMotives"), result.proDeepDive.stakeholderMotives],
+                      [t("omittedDataPoints"), result.proDeepDive.omittedDataPoints],
+                      [t("sentimentDivergence"), result.proDeepDive.sentimentDivergence],
+                    ].filter(([, v]) => !!v).map(([label, body]) => (
+                      <p key={label as string} className="text-[11px] leading-snug text-muted-foreground">
+                        <span className="font-semibold text-foreground">{label}: </span>{body}
+                      </p>
+                    ))}
                   </div>
-                )}
-              </div>
-            </div>
+                </details>
+              )
+            ) : (
+              <button
+                onClick={() => setShowUpgrade(true)}
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-xs font-semibold text-primary hover:bg-primary/10 transition-colors"
+              >
+                <Lock className="h-3.5 w-3.5" /> {t("unlockDeepDive")}
+              </button>
+            )}
           </div>
         )}
 
