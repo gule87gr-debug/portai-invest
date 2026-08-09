@@ -639,8 +639,17 @@ STEP 2 — If and only if the URL clearly points to a written news/analysis/opin
   "strengths": ["list", "of", "credibility", "strengths"],
   "redFlag": "ONE short tag (2-4 words) translated to ${langName}, equivalent to one of: Promotional Language | Conflict of Interest | One-Sided | Pump Pattern | Sensational Headline | Cherry-Picked Data | Unverified Claims | Objective Reporting",
   "hiddenAngle": "2-3 sentence Pro insight describing what the article is hiding, omitting, or downplaying. Be concrete.",
+  "misinformationRisk": "one of: low | medium | high (keep these exact English values)",
+  "factualIssues": [
+    { "claim": "the specific factual claim made in the article", "status": "one of: accurate | unsupported | misleading | false (keep these exact English values)", "explanation": "1-2 sentences in ${langName} explaining what is right or wrong with the claim and what the evidence actually shows" }
+  ],
+  "crossCheck": {
+    "verdict": "one of: corroborated | partially_corroborated | contradicted | uncorroborated | no_coverage (keep these exact English values)",
+    "summary": "2-3 sentences in ${langName} comparing this article against the independent coverage listed below: do other outlets report the same facts, different numbers, or nothing at all?",
+    "sources": [ { "source": "outlet name", "title": "headline", "agreement": "one of: agrees | differs | contradicts (keep these exact English values)" } ]
+  },
   "reasoning": [
-    { "category": "<one of: Language | Framing | Sources | Bias | Topic | Omissions | Tone> (translated to ${langName})", "evidence": "the specific word, phrase, statistic, source citation, or structural pattern from the article that triggered this observation — quote it briefly if applicable", "explanation": "1-2 sentences in ${langName} explaining WHY this evidence pushed the trust score up or down, or revealed a bias/angle" }
+    { "category": "<one of: Language | Framing | Sources | Bias | Topic | Omissions | Tone | Accuracy | Cross-check> (translated to ${langName}, except keep Cross-check recognizable)", "evidence": "the specific word, phrase, statistic, source citation, structural pattern, or corroborating/contradicting outlet headline that triggered this observation — quote it briefly", "explanation": "1-2 sentences in ${langName} explaining WHY this evidence pushed the trust score up or down, or revealed a bias, factual error, or corroboration gap" }
   ],
   "proDeepDive": {
     "stakeholderMotives": "2-3 sentences: who specifically benefits from THIS article's framing — name the institutions, insiders, analysts or funds whose positioning aligns with the narrative. Reference concrete incentives (recent insider trades, analyst price-target history, fund holdings) rather than generic 'institutions benefit' language.",
@@ -649,8 +658,14 @@ STEP 2 — If and only if the URL clearly points to a written news/analysis/opin
   }
 }
 
+CRITICAL — misinformation requirement:
+You are not only a bias detector, you are a misinformation detector. Evaluate the FACTUAL accuracy of the article's central claims, not just its tone. Populate "factualIssues" with 2-4 of the article's most consequential checkable claims and judge each one. Flag fabricated statistics, misattributed quotes, stale data presented as current, causal claims unsupported by the cited data, and pump-and-dump or scam patterns. Set "misinformationRisk" accordingly: "high" when central claims are false or fabricated, "medium" when key claims are unsupported/misleading, "low" when claims are verifiable and consistent with the record.
+
+CRITICAL — cross-source verification requirement:
+Below you are given independent coverage of the same story from other outlets, retrieved from a live news index. You MUST use it. Compare the article's claims, numbers, and framing against that coverage and fill in "crossCheck". If several credible outlets report the same facts, say so and let it raise the trust score. If the numbers or conclusions diverge, or if NO other outlet is reporting this story at all, treat that as a serious credibility signal and lower the score. List up to 4 of the supplied outlets in "crossCheck.sources" with their agreement level — only use outlets from the supplied list, never invent sources or URLs.
+
 CRITICAL — "reasoning" requirement:
-The "reasoning" array MUST contain 3-5 entries that transparently explain "why we're saying this". Each entry must cite CONCRETE evidence from the article — a specific phrase, adjective, source citation, statistic, headline pattern, or structural choice — not vague generalities. Cover a mix of categories (Language, Framing, Sources, Bias, Topic, Omissions, Tone) so the user understands what triggered the trust score, the biases list, and the red flag. This section is what makes the analysis auditable.
+The "reasoning" array MUST contain 4-6 entries that transparently explain "why we're saying this". Each entry must cite CONCRETE evidence — a specific phrase, adjective, source citation, statistic, headline pattern, structural choice, or a named outlet from the cross-source list. At least ONE entry MUST use category "Accuracy" (factual correctness of a claim) and at least ONE MUST use category "Cross-check" (what other outlets do or do not confirm, naming them). Cover a mix of the remaining categories so the user understands what triggered the trust score, the biases list, and the red flag. This section is what makes the analysis auditable.
 
 CRITICAL — proDeepDive depth requirement:
 The proDeepDive is the PAID Pro tier insight and MUST go meaningfully deeper than 'summary', 'biases', 'strengths', and 'hiddenAngle'. It must NOT restate or paraphrase any of those fields. It must add NEW analytical layers a free reader cannot see in the standard analysis. Each proDeepDive field must:
