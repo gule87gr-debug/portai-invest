@@ -584,8 +584,17 @@ serve(async (req) => {
       }
     }
 
+    // ---- Cross-source corroboration (independent coverage of the same story) ----
+    let articleHost = "";
+    try { articleHost = normalizeHost(new URL(url).hostname); } catch { /* noop */ }
+    const crossSources = await fetchCrossSources(deriveQuery(url, (pre as { metaTitle?: string }).metaTitle), articleHost);
+    const crossSourceBlock = crossSources.length
+      ? crossSources.map((c, i) => `${i + 1}. [${c.source || "Unknown outlet"}] ${c.title}${c.date ? ` (${c.date})` : ""}`).join("\n")
+      : "No independent coverage of this story was found in the news index.";
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
