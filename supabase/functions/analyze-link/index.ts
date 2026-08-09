@@ -198,71 +198,6 @@ type PreCheck =
   | { ok: true; metaTitle?: string; metaType?: string; metaDescription?: string }
   | { ok: false; reason: string };
 
-// ---------- Cross-source corroboration ----------
-// Looks up other outlets covering the same story so the AI can judge whether
-// the article's claims are independently corroborated or contradicted.
-type CorroborationHit = { source: string; title: string; url: string; published?: string };
-
-function decodeEntities(s: string): string {
-  return s
-    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;|&apos;/g, "'")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&nbsp;/g, " ")
-    .replace(/<[^>]+>/g, "")
-    .trim();
-}
-
-function corroborationQuery(title: string): string {
-  // Trim publisher suffixes ("... - Reuters") and keep the most meaningful words.
-  const cleaned = title.split(/\s+[-|–—]\s+/)[0];
-  return cleaned.split(/\s+/).slice(0, 14).join(" ");
-}
-
-async function fetchCorroboration(title: string, excludeHost: string): Promise<CorroborationHit[]> {
-  const q = corroborationQuery(title || "");
-  if (q.length < 12) return [];
-  const feed = `https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=en-US&gl=US&ceid=US:en`;
-  try {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 6000);
-    const res = await fetch(feed, {
-      signal: ctrl.signal,
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
-        Accept: "application/rss+xml,application/xml;q=0.9,*/*;q=0.8",
-      },
-    });
-    clearTimeout(timer);
-    if (!res.ok) return [];
-    const xml = await res.text();
-    const items = xml.split(/<item>/i).slice(1, 14);
-    const hits: CorroborationHit[] = [];
-    const seen = new Set<string>();
-    for (const raw of items) {
-      const itemTitle = decodeEntities(raw.match(/<title>([\s\S]*?)<\/title>/i)?.[1] ?? "");
-      const link = decodeEntities(raw.match(/<link>([\s\S]*?)<\/link>/i)?.[1] ?? "");
-      const source = decodeEntities(raw.match(/<source[^>]*>([\s\S]*?)<\/source>/i)?.[1] ?? "");
-      const published = decodeEntities(raw.match(/<pubDate>([\s\S]*?)<\/pubDate>/i)?.[1] ?? "");
-      if (!itemTitle || !source) continue;
-      const key = source.toLowerCase();
-      if (seen.has(key)) continue;
-      if (excludeHost && key && excludeHost.includes(key.split(" ")[0].toLowerCase())) continue;
-      seen.add(key);
-      hits.push({ source: source.slice(0, 80), title: itemTitle.slice(0, 200), url: link.slice(0, 500), published });
-      if (hits.length >= 6) break;
-    }
-    return hits;
-  } catch {
-    return [];
-  }
-}
-
-
-
 function isPrivateOrLocalHost(hostname: string): boolean {
   if (!hostname) return true;
   const h = hostname.toLowerCase().replace(/^\[|\]$/g, "");
@@ -594,30 +529,8 @@ serve(async (req) => {
       }
     }
 
-    // ---- Cross-source corroboration: what other outlets say about this story ----
-    let corroborationHits: CorroborationHit[] = [];
-    try {
-      const seedTitle = (pre.metaTitle || "").trim() ||
-        decodeURIComponent(new URL(url).pathname.split("/").filter(Boolean).pop() || "")
-          .replace(/[-_]+/g, " ")
-          .replace(/\.(html?|php|amp)$/i, "");
-      corroborationHits = await fetchCorroboration(
-        seedTitle,
-        new URL(url).hostname.toLowerCase().replace(/^www\./, ""),
-      );
-    } catch {
-      corroborationHits = [];
-    }
-
-    const corroborationBlock = corroborationHits.length
-      ? corroborationHits
-          .map((h, i) => `${i + 1}. [${h.source}] ${h.title}${h.published ? ` (${h.published})` : ""} — ${h.url}`)
-          .join("\n")
-      : "NO independent coverage of this story was found in a live news search.";
-
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
-
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -632,7 +545,7 @@ serve(async (req) => {
             role: "system",
             content: `OUTPUT LANGUAGE: ${langName}. Every human-readable string value in your JSON output — including but not limited to "title", "source", "summary", every item in "biases" and "strengths", "redFlag", "hiddenAngle", every "category"/"evidence"/"explanation" inside "reasoning", and every field inside "proDeepDive" (stakeholderMotives, omittedDataPoints, sentimentDivergence) — MUST be written in ${langName}. JSON keys, ticker symbols, and proper nouns stay in their original form; everything else MUST be translated. Never mix languages in a single value.
 
-You are a financial article credibility, bias AND misinformation analyst. Given a URL, you must FIRST determine whether the URL points to an actual news/journalism article (or written analysis/opinion piece). You must respond with valid JSON only, no markdown.
+You are a financial article credibility analyst. Given a URL, you must FIRST determine whether the URL points to an actual news/journalism article (or written analysis/opinion piece). You must respond with valid JSON only, no markdown.
 
 STEP 1 — Classification (REQUIRED):
 Set "isArticle" to false when the URL clearly points to any of:
@@ -665,34 +578,12 @@ STEP 2 — If and only if the URL clearly points to a written news/analysis/opin
   "reasoning": [
     { "category": "<one of: Language | Framing | Sources | Bias | Topic | Omissions | Tone> (translated to ${langName})", "evidence": "the specific word, phrase, statistic, source citation, or structural pattern from the article that triggered this observation — quote it briefly if applicable", "explanation": "1-2 sentences in ${langName} explaining WHY this evidence pushed the trust score up or down, or revealed a bias/angle" }
   ],
-  "misinformation": {
-    "riskLevel": "<one of: Low | Medium | High, translated to ${langName}>",
-    "verdict": "1-2 sentences in ${langName} stating whether the article's core claims appear factually accurate, misleading, unverifiable, or false, and why.",
-    "claims": [
-      { "claim": "a specific factual/numeric claim the article makes (paraphrased briefly in ${langName})", "verdict": "<one of: Supported | Disputed | Unverified | False, translated to ${langName}>", "note": "1 sentence in ${langName} explaining what corroborates or contradicts it, naming the outlet or data source when possible" }
-    ]
-  },
-  "corroboration": {
-    "status": "<one of: Widely corroborated | Partially corroborated | Contradicted | No independent coverage found, translated to ${langName}>",
-    "note": "1-2 sentences in ${langName} explaining how the other outlets' coverage compares to this article — same facts? different numbers? nobody else reporting it?",
-    "sources": [
-      { "source": "outlet name exactly as given in the CROSS-SOURCE COVERAGE list", "title": "that outlet's headline", "url": "that outlet's URL", "stance": "<one of: Confirms | Partially confirms | Contradicts | Unrelated, translated to ${langName}>" }
-    ]
-  },
   "proDeepDive": {
     "stakeholderMotives": "2-3 sentences: who specifically benefits from THIS article's framing — name the institutions, insiders, analysts or funds whose positioning aligns with the narrative. Reference concrete incentives (recent insider trades, analyst price-target history, fund holdings) rather than generic 'institutions benefit' language.",
     "omittedDataPoints": "2-3 sentences: name the specific data the article skips — contradicting filings, recent regulatory headlines, peer comparisons, historical baselines, or guidance revisions that would weaken the thesis. Cite numbers or filing types where plausible.",
     "sentimentDivergence": "2-3 sentences: contrast the article's tone with concrete counter-signals — options-flow skew, short interest trend, analyst dispersion, peer-coverage tone, or social-sentiment direction. Indicate whether consensus is genuine or manufactured."
   }
 }
-
-CRITICAL — misinformation & corroboration requirements:
-- You are NOT only a bias detector. You must also assess FACTUAL VERACITY: fabricated or unsourced statistics, misattributed quotes, stale data presented as current, causal claims unsupported by evidence, missing/undisclosed conflicts, and known misinformation patterns (pump-and-dump, fake acquisition/bankruptcy rumours, AI-generated content).
-- "misinformation.claims" MUST contain 2-4 of the article's most consequential factual claims, each with its own verdict.
-- Use the CROSS-SOURCE COVERAGE list supplied in the user message as your evidence base for corroboration. Only list outlets from that list in "corroboration.sources" (up to 4) — never invent outlets, headlines, or URLs.
-- If the list says no independent coverage was found, set corroboration.status accordingly, keep "sources" as an empty array, and treat an uncorroborated exclusive/sensational claim as a meaningful risk factor.
-- Corroboration and factual risk MUST influence "trustScore": strong independent confirmation raises it; contradiction by higher-trust outlets or unverifiable sensational claims lowers it.
-
 
 CRITICAL — "reasoning" requirement:
 The "reasoning" array MUST contain 3-5 entries that transparently explain "why we're saying this". Each entry must cite CONCRETE evidence from the article — a specific phrase, adjective, source citation, statistic, headline pattern, or structural choice — not vague generalities. Cover a mix of categories (Language, Framing, Sources, Bias, Topic, Omissions, Tone) so the user understands what triggered the trust score, the biases list, and the red flag. This section is what makes the analysis auditable.
@@ -717,15 +608,7 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
           },
           {
             role: "user",
-            content: `Analyze this financial article URL for credibility, bias AND factual accuracy (misinformation). Respond entirely in ${langName}.
-
-URL: ${url}
-PAGE TITLE: ${pre.metaTitle || "(unavailable)"}
-PAGE DESCRIPTION: ${pre.metaDescription || "(unavailable)"}
-
-CROSS-SOURCE COVERAGE (live news search for the same story, from other outlets — use this to verify the article's claims):
-${corroborationBlock}`,
-
+            content: `Analyze this financial article URL for credibility and bias. Respond entirely in ${langName}. URL: ${url}`,
           },
         ],
       }),
@@ -801,48 +684,7 @@ ${corroborationBlock}`,
       }
       analysis.reasoning = fallback;
     }
-    // ---- Misinformation / corroboration normalization ----
-    if (!analysis.misinformation || typeof analysis.misinformation !== "object") {
-      analysis.misinformation = { riskLevel: "Medium", verdict: "", claims: [] };
-    }
-    if (!Array.isArray(analysis.misinformation.claims)) analysis.misinformation.claims = [];
-    analysis.misinformation.claims = analysis.misinformation.claims.slice(0, 4).map((c: Record<string, unknown>) => ({
-      claim: String(c?.claim ?? "").slice(0, 240),
-      verdict: String(c?.verdict ?? "Unverified").slice(0, 40),
-      note: String(c?.note ?? "").slice(0, 300),
-    })).filter((c: { claim: string }) => c.claim.length > 0);
-    if (!analysis.misinformation.verdict) {
-      analysis.misinformation.verdict = corroborationHits.length
-        ? "Core claims could not be individually verified; compare with the corroborating coverage below."
-        : "No independent coverage of this story was found, so its claims remain unverified.";
-    }
-    if (!analysis.corroboration || typeof analysis.corroboration !== "object") {
-      analysis.corroboration = { status: "", note: "", sources: [] };
-    }
-    // Only keep sources that came from the real live search — never model-invented URLs.
-    const modelSources = Array.isArray(analysis.corroboration.sources) ? analysis.corroboration.sources : [];
-    const stanceByUrl = new Map<string, string>(
-      modelSources.map((s: Record<string, unknown>) => [String(s?.url ?? ""), String(s?.stance ?? "")]),
-    );
-    analysis.corroboration.sources = corroborationHits.slice(0, 4).map((h) => ({
-      source: h.source,
-      title: h.title,
-      url: h.url,
-      stance: stanceByUrl.get(h.url) || "",
-    }));
-    if (!analysis.corroboration.status) {
-      analysis.corroboration.status = corroborationHits.length
-        ? (corroborationHits.length >= 3 ? "Widely corroborated" : "Partially corroborated")
-        : "No independent coverage found";
-    }
-    if (!analysis.corroboration.note) {
-      analysis.corroboration.note = corroborationHits.length
-        ? `${corroborationHits.length} other outlet(s) are covering this story.`
-        : "A live news search found no other outlet reporting this story.";
-    }
-
     if (!analysis.hiddenAngle) analysis.hiddenAngle = analysis.summary?.slice(0, 220) ?? "";
-
     if (!analysis.proDeepDive || typeof analysis.proDeepDive !== "object") {
       analysis.proDeepDive = {
         stakeholderMotives: "Deep-dive parsing unavailable for this article. Re-run analysis to generate stakeholder context.",
