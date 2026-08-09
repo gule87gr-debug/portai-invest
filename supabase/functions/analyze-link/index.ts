@@ -665,12 +665,34 @@ STEP 2 — If and only if the URL clearly points to a written news/analysis/opin
   "reasoning": [
     { "category": "<one of: Language | Framing | Sources | Bias | Topic | Omissions | Tone> (translated to ${langName})", "evidence": "the specific word, phrase, statistic, source citation, or structural pattern from the article that triggered this observation — quote it briefly if applicable", "explanation": "1-2 sentences in ${langName} explaining WHY this evidence pushed the trust score up or down, or revealed a bias/angle" }
   ],
+  "misinformation": {
+    "riskLevel": "<one of: Low | Medium | High, translated to ${langName}>",
+    "verdict": "1-2 sentences in ${langName} stating whether the article's core claims appear factually accurate, misleading, unverifiable, or false, and why.",
+    "claims": [
+      { "claim": "a specific factual/numeric claim the article makes (paraphrased briefly in ${langName})", "verdict": "<one of: Supported | Disputed | Unverified | False, translated to ${langName}>", "note": "1 sentence in ${langName} explaining what corroborates or contradicts it, naming the outlet or data source when possible" }
+    ]
+  },
+  "corroboration": {
+    "status": "<one of: Widely corroborated | Partially corroborated | Contradicted | No independent coverage found, translated to ${langName}>",
+    "note": "1-2 sentences in ${langName} explaining how the other outlets' coverage compares to this article — same facts? different numbers? nobody else reporting it?",
+    "sources": [
+      { "source": "outlet name exactly as given in the CROSS-SOURCE COVERAGE list", "title": "that outlet's headline", "url": "that outlet's URL", "stance": "<one of: Confirms | Partially confirms | Contradicts | Unrelated, translated to ${langName}>" }
+    ]
+  },
   "proDeepDive": {
     "stakeholderMotives": "2-3 sentences: who specifically benefits from THIS article's framing — name the institutions, insiders, analysts or funds whose positioning aligns with the narrative. Reference concrete incentives (recent insider trades, analyst price-target history, fund holdings) rather than generic 'institutions benefit' language.",
     "omittedDataPoints": "2-3 sentences: name the specific data the article skips — contradicting filings, recent regulatory headlines, peer comparisons, historical baselines, or guidance revisions that would weaken the thesis. Cite numbers or filing types where plausible.",
     "sentimentDivergence": "2-3 sentences: contrast the article's tone with concrete counter-signals — options-flow skew, short interest trend, analyst dispersion, peer-coverage tone, or social-sentiment direction. Indicate whether consensus is genuine or manufactured."
   }
 }
+
+CRITICAL — misinformation & corroboration requirements:
+- You are NOT only a bias detector. You must also assess FACTUAL VERACITY: fabricated or unsourced statistics, misattributed quotes, stale data presented as current, causal claims unsupported by evidence, missing/undisclosed conflicts, and known misinformation patterns (pump-and-dump, fake acquisition/bankruptcy rumours, AI-generated content).
+- "misinformation.claims" MUST contain 2-4 of the article's most consequential factual claims, each with its own verdict.
+- Use the CROSS-SOURCE COVERAGE list supplied in the user message as your evidence base for corroboration. Only list outlets from that list in "corroboration.sources" (up to 4) — never invent outlets, headlines, or URLs.
+- If the list says no independent coverage was found, set corroboration.status accordingly, keep "sources" as an empty array, and treat an uncorroborated exclusive/sensational claim as a meaningful risk factor.
+- Corroboration and factual risk MUST influence "trustScore": strong independent confirmation raises it; contradiction by higher-trust outlets or unverifiable sensational claims lowers it.
+
 
 CRITICAL — "reasoning" requirement:
 The "reasoning" array MUST contain 3-5 entries that transparently explain "why we're saying this". Each entry must cite CONCRETE evidence from the article — a specific phrase, adjective, source citation, statistic, headline pattern, or structural choice — not vague generalities. Cover a mix of categories (Language, Framing, Sources, Bias, Topic, Omissions, Tone) so the user understands what triggered the trust score, the biases list, and the red flag. This section is what makes the analysis auditable.
