@@ -23,6 +23,17 @@ type AnalysisResult = {
   summary: string;
   biases: string[];
   strengths: string[];
+  misinformationRisk?: "low" | "medium" | "high";
+  factualIssues?: Array<{
+    claim: string;
+    status: "accurate" | "unsupported" | "misleading" | "false";
+    explanation?: string;
+  }>;
+  crossCheck?: {
+    verdict?: "corroborated" | "partially_corroborated" | "contradicted" | "uncorroborated" | "no_coverage";
+    summary?: string;
+    sources?: Array<{ source: string; title: string; agreement?: "agrees" | "differs" | "contradicts" }>;
+  };
   reasoning?: Array<{
     category?: string;
     evidence?: string;
