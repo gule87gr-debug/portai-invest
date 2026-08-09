@@ -28,12 +28,23 @@ type AnalysisResult = {
     evidence?: string;
     explanation?: string;
   }>;
+  misinformation?: {
+    riskLevel?: string;
+    verdict?: string;
+    claims?: Array<{ claim?: string; verdict?: string; note?: string }>;
+  };
+  corroboration?: {
+    status?: string;
+    note?: string;
+    sources?: Array<{ source?: string; title?: string; url?: string; stance?: string }>;
+  };
   proDeepDive?: {
     stakeholderMotives?: string;
     omittedDataPoints?: string;
     sentimentDivergence?: string;
   };
 };
+
 
 const FREE_DAILY_ANALYSES = 1;
 
