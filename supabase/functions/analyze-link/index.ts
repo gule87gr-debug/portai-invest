@@ -421,6 +421,61 @@ async function preCheckArticle(urlStr: string): Promise<PreCheck> {
   }
 }
 
+// ---------- Cross-source corroboration ----------
+// Derives a search query from the article's title (or URL slug) and pulls
+// independent coverage from Google News RSS so the model can compare claims
+// against what other outlets are reporting.
+function deriveQuery(urlStr: string, metaTitle?: string): string {
+  const t = (metaTitle || "").replace(/\s*[|\-–—]\s*[^|\-–—]{0,40}$/, "").trim();
+  if (t.length >= 15) return t.slice(0, 160);
+  try {
+    const path = new URL(urlStr).pathname;
+    const slug = path.split("/").filter(Boolean).pop() || "";
+    return slug.replace(/\.(html?|amp)$/i, "").replace(/[-_]+/g, " ").replace(/\b\d{6,}\b/g, "").trim().slice(0, 160);
+  } catch {
+    return "";
+  }
+}
+
+type CrossSource = { source: string; title: string; date?: string };
+
+async function fetchCrossSources(query: string, excludeHost: string): Promise<CrossSource[]> {
+  if (!query || query.length < 8) return [];
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 6000);
+    const res = await fetch(
+      `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-US&gl=US&ceid=US:en`,
+      {
+        signal: ctrl.signal,
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+          Accept: "application/rss+xml,application/xml;q=0.9,*/*;q=0.8",
+        },
+      },
+    );
+    clearTimeout(timer);
+    if (!res.ok) return [];
+    const xml = (await res.text()).slice(0, 200_000);
+    const items = xml.split(/<item>/i).slice(1, 15);
+    const out: CrossSource[] = [];
+    for (const item of items) {
+      const title = (item.match(/<title>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/i)?.[1] || "")
+        .replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"').trim();
+      const source = (item.match(/<source[^>]*>([\s\S]*?)<\/source>/i)?.[1] || "").trim();
+      const date = (item.match(/<pubDate>([\s\S]*?)<\/pubDate>/i)?.[1] || "").trim();
+      if (!title) continue;
+      const src = source || (title.split(" - ").pop() || "").trim();
+      if (src && excludeHost && src.toLowerCase().replace(/\s+/g, "").includes(excludeHost.split(".")[0])) continue;
+      out.push({ source: src.slice(0, 60), title: title.replace(/\s+-\s+[^-]+$/, "").slice(0, 200), date: date.slice(0, 40) });
+      if (out.length >= 8) break;
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -529,8 +584,17 @@ serve(async (req) => {
       }
     }
 
+    // ---- Cross-source corroboration (independent coverage of the same story) ----
+    let articleHost = "";
+    try { articleHost = normalizeHost(new URL(url).hostname); } catch { /* noop */ }
+    const crossSources = await fetchCrossSources(deriveQuery(url, (pre as { metaTitle?: string }).metaTitle), articleHost);
+    const crossSourceBlock = crossSources.length
+      ? crossSources.map((c, i) => `${i + 1}. [${c.source || "Unknown outlet"}] ${c.title}${c.date ? ` (${c.date})` : ""}`).join("\n")
+      : "No independent coverage of this story was found in the news index.";
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -575,8 +639,17 @@ STEP 2 — If and only if the URL clearly points to a written news/analysis/opin
   "strengths": ["list", "of", "credibility", "strengths"],
   "redFlag": "ONE short tag (2-4 words) translated to ${langName}, equivalent to one of: Promotional Language | Conflict of Interest | One-Sided | Pump Pattern | Sensational Headline | Cherry-Picked Data | Unverified Claims | Objective Reporting",
   "hiddenAngle": "2-3 sentence Pro insight describing what the article is hiding, omitting, or downplaying. Be concrete.",
+  "misinformationRisk": "one of: low | medium | high (keep these exact English values)",
+  "factualIssues": [
+    { "claim": "the specific factual claim made in the article", "status": "one of: accurate | unsupported | misleading | false (keep these exact English values)", "explanation": "1-2 sentences in ${langName} explaining what is right or wrong with the claim and what the evidence actually shows" }
+  ],
+  "crossCheck": {
+    "verdict": "one of: corroborated | partially_corroborated | contradicted | uncorroborated | no_coverage (keep these exact English values)",
+    "summary": "2-3 sentences in ${langName} comparing this article against the independent coverage listed below: do other outlets report the same facts, different numbers, or nothing at all?",
+    "sources": [ { "source": "outlet name", "title": "headline", "agreement": "one of: agrees | differs | contradicts (keep these exact English values)" } ]
+  },
   "reasoning": [
-    { "category": "<one of: Language | Framing | Sources | Bias | Topic | Omissions | Tone> (translated to ${langName})", "evidence": "the specific word, phrase, statistic, source citation, or structural pattern from the article that triggered this observation — quote it briefly if applicable", "explanation": "1-2 sentences in ${langName} explaining WHY this evidence pushed the trust score up or down, or revealed a bias/angle" }
+    { "category": "<one of: Language | Framing | Sources | Bias | Topic | Omissions | Tone | Accuracy | Cross-check> (translated to ${langName}, except keep Cross-check recognizable)", "evidence": "the specific word, phrase, statistic, source citation, structural pattern, or corroborating/contradicting outlet headline that triggered this observation — quote it briefly", "explanation": "1-2 sentences in ${langName} explaining WHY this evidence pushed the trust score up or down, or revealed a bias, factual error, or corroboration gap" }
   ],
   "proDeepDive": {
     "stakeholderMotives": "2-3 sentences: who specifically benefits from THIS article's framing — name the institutions, insiders, analysts or funds whose positioning aligns with the narrative. Reference concrete incentives (recent insider trades, analyst price-target history, fund holdings) rather than generic 'institutions benefit' language.",
@@ -585,8 +658,14 @@ STEP 2 — If and only if the URL clearly points to a written news/analysis/opin
   }
 }
 
+CRITICAL — misinformation requirement:
+You are not only a bias detector, you are a misinformation detector. Evaluate the FACTUAL accuracy of the article's central claims, not just its tone. Populate "factualIssues" with 2-4 of the article's most consequential checkable claims and judge each one. Flag fabricated statistics, misattributed quotes, stale data presented as current, causal claims unsupported by the cited data, and pump-and-dump or scam patterns. Set "misinformationRisk" accordingly: "high" when central claims are false or fabricated, "medium" when key claims are unsupported/misleading, "low" when claims are verifiable and consistent with the record.
+
+CRITICAL — cross-source verification requirement:
+Below you are given independent coverage of the same story from other outlets, retrieved from a live news index. You MUST use it. Compare the article's claims, numbers, and framing against that coverage and fill in "crossCheck". If several credible outlets report the same facts, say so and let it raise the trust score. If the numbers or conclusions diverge, or if NO other outlet is reporting this story at all, treat that as a serious credibility signal and lower the score. List up to 4 of the supplied outlets in "crossCheck.sources" with their agreement level — only use outlets from the supplied list, never invent sources or URLs.
+
 CRITICAL — "reasoning" requirement:
-The "reasoning" array MUST contain 3-5 entries that transparently explain "why we're saying this". Each entry must cite CONCRETE evidence from the article — a specific phrase, adjective, source citation, statistic, headline pattern, or structural choice — not vague generalities. Cover a mix of categories (Language, Framing, Sources, Bias, Topic, Omissions, Tone) so the user understands what triggered the trust score, the biases list, and the red flag. This section is what makes the analysis auditable.
+The "reasoning" array MUST contain 4-6 entries that transparently explain "why we're saying this". Each entry must cite CONCRETE evidence — a specific phrase, adjective, source citation, statistic, headline pattern, structural choice, or a named outlet from the cross-source list. At least ONE entry MUST use category "Accuracy" (factual correctness of a claim) and at least ONE MUST use category "Cross-check" (what other outlets do or do not confirm, naming them). Cover a mix of the remaining categories so the user understands what triggered the trust score, the biases list, and the red flag. This section is what makes the analysis auditable.
 
 CRITICAL — proDeepDive depth requirement:
 The proDeepDive is the PAID Pro tier insight and MUST go meaningfully deeper than 'summary', 'biases', 'strengths', and 'hiddenAngle'. It must NOT restate or paraphrase any of those fields. It must add NEW analytical layers a free reader cannot see in the standard analysis. Each proDeepDive field must:
@@ -608,7 +687,14 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
           },
           {
             role: "user",
-            content: `Analyze this financial article URL for credibility and bias. Respond entirely in ${langName}. URL: ${url}`,
+            content: `Analyze this financial article URL for credibility, bias AND factual accuracy. Respond entirely in ${langName}.
+
+URL: ${url}
+${(pre as { metaTitle?: string }).metaTitle ? `Page title: ${(pre as { metaTitle?: string }).metaTitle}` : ""}
+${(pre as { metaDescription?: string }).metaDescription ? `Page description: ${(pre as { metaDescription?: string }).metaDescription}` : ""}
+
+INDEPENDENT COVERAGE OF THE SAME STORY (live news index, use this for cross-source verification):
+${crossSourceBlock}`,
           },
         ],
       }),
@@ -684,6 +770,58 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
       }
       analysis.reasoning = fallback;
     }
+
+    // ---- Misinformation + cross-source normalisation ----
+    const RISKS = new Set(["low", "medium", "high"]);
+    if (!RISKS.has(String(analysis.misinformationRisk || "").toLowerCase())) {
+      analysis.misinformationRisk = "medium";
+    } else {
+      analysis.misinformationRisk = String(analysis.misinformationRisk).toLowerCase();
+    }
+    if (!Array.isArray(analysis.factualIssues)) analysis.factualIssues = [];
+    analysis.factualIssues = analysis.factualIssues.slice(0, 5).map((f: Record<string, unknown>) => ({
+      claim: String(f?.claim ?? "").slice(0, 300),
+      status: ["accurate", "unsupported", "misleading", "false"].includes(String(f?.status ?? "").toLowerCase())
+        ? String(f.status).toLowerCase() : "unsupported",
+      explanation: String(f?.explanation ?? "").slice(0, 500),
+    })).filter((f: { claim: string }) => f.claim);
+
+    const cc = (analysis.crossCheck && typeof analysis.crossCheck === "object") ? analysis.crossCheck : {};
+    const VERDICTS = ["corroborated", "partially_corroborated", "contradicted", "uncorroborated", "no_coverage"];
+    analysis.crossCheck = {
+      verdict: VERDICTS.includes(String(cc.verdict ?? "").toLowerCase())
+        ? String(cc.verdict).toLowerCase()
+        : (crossSources.length ? "uncorroborated" : "no_coverage"),
+      summary: String(cc.summary ?? (crossSources.length
+        ? "Independent coverage was retrieved but could not be compared automatically."
+        : "No other outlet appears to be reporting this story, which limits verification.")).slice(0, 600),
+      sources: (Array.isArray(cc.sources) ? cc.sources : crossSources.slice(0, 4).map((c) => ({ source: c.source, title: c.title, agreement: "agrees" })))
+        .slice(0, 4)
+        .map((s: Record<string, unknown>) => ({
+          source: String(s?.source ?? "").slice(0, 60),
+          title: String(s?.title ?? "").slice(0, 200),
+          agreement: ["agrees", "differs", "contradicts"].includes(String(s?.agreement ?? "").toLowerCase())
+            ? String(s.agreement).toLowerCase() : "agrees",
+        }))
+        .filter((s: { source: string; title: string }) => s.source || s.title),
+    };
+
+    // Guarantee the "why we're saying this" section always covers accuracy and
+    // cross-source verification, even when the model omits those categories.
+    const cats = analysis.reasoning.map((r: { category?: string }) => String(r?.category ?? "").toLowerCase());
+    if (!cats.some((c: string) => c.includes("accur")) && analysis.factualIssues.length > 0) {
+      const f = analysis.factualIssues[0];
+      analysis.reasoning.push({ category: "Accuracy", evidence: f.claim, explanation: f.explanation });
+    }
+    if (!cats.some((c: string) => c.includes("cross"))) {
+      analysis.reasoning.push({
+        category: "Cross-check",
+        evidence: analysis.crossCheck.sources.map((s: { source: string }) => s.source).filter(Boolean).join(", ")
+          || "No independent coverage found",
+        explanation: analysis.crossCheck.summary,
+      });
+    }
+
     if (!analysis.hiddenAngle) analysis.hiddenAngle = analysis.summary?.slice(0, 220) ?? "";
     if (!analysis.proDeepDive || typeof analysis.proDeepDive !== "object") {
       analysis.proDeepDive = {
