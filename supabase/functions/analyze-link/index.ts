@@ -198,6 +198,71 @@ type PreCheck =
   | { ok: true; metaTitle?: string; metaType?: string; metaDescription?: string }
   | { ok: false; reason: string };
 
+// ---------- Cross-source corroboration ----------
+// Looks up other outlets covering the same story so the AI can judge whether
+// the article's claims are independently corroborated or contradicted.
+type CorroborationHit = { source: string; title: string; url: string; published?: string };
+
+function decodeEntities(s: string): string {
+  return s
+    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&nbsp;/g, " ")
+    .replace(/<[^>]+>/g, "")
+    .trim();
+}
+
+function corroborationQuery(title: string): string {
+  // Trim publisher suffixes ("... - Reuters") and keep the most meaningful words.
+  const cleaned = title.split(/\s+[-|–—]\s+/)[0];
+  return cleaned.split(/\s+/).slice(0, 14).join(" ");
+}
+
+async function fetchCorroboration(title: string, excludeHost: string): Promise<CorroborationHit[]> {
+  const q = corroborationQuery(title || "");
+  if (q.length < 12) return [];
+  const feed = `https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=en-US&gl=US&ceid=US:en`;
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 6000);
+    const res = await fetch(feed, {
+      signal: ctrl.signal,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+        Accept: "application/rss+xml,application/xml;q=0.9,*/*;q=0.8",
+      },
+    });
+    clearTimeout(timer);
+    if (!res.ok) return [];
+    const xml = await res.text();
+    const items = xml.split(/<item>/i).slice(1, 14);
+    const hits: CorroborationHit[] = [];
+    const seen = new Set<string>();
+    for (const raw of items) {
+      const itemTitle = decodeEntities(raw.match(/<title>([\s\S]*?)<\/title>/i)?.[1] ?? "");
+      const link = decodeEntities(raw.match(/<link>([\s\S]*?)<\/link>/i)?.[1] ?? "");
+      const source = decodeEntities(raw.match(/<source[^>]*>([\s\S]*?)<\/source>/i)?.[1] ?? "");
+      const published = decodeEntities(raw.match(/<pubDate>([\s\S]*?)<\/pubDate>/i)?.[1] ?? "");
+      if (!itemTitle || !source) continue;
+      const key = source.toLowerCase();
+      if (seen.has(key)) continue;
+      if (excludeHost && key && excludeHost.includes(key.split(" ")[0].toLowerCase())) continue;
+      seen.add(key);
+      hits.push({ source: source.slice(0, 80), title: itemTitle.slice(0, 200), url: link.slice(0, 500), published });
+      if (hits.length >= 6) break;
+    }
+    return hits;
+  } catch {
+    return [];
+  }
+}
+
+
+
 function isPrivateOrLocalHost(hostname: string): boolean {
   if (!hostname) return true;
   const h = hostname.toLowerCase().replace(/^\[|\]$/g, "");
