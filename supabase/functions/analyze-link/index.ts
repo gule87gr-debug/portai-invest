@@ -717,7 +717,15 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
           },
           {
             role: "user",
-            content: `Analyze this financial article URL for credibility and bias. Respond entirely in ${langName}. URL: ${url}`,
+            content: `Analyze this financial article URL for credibility, bias AND factual accuracy (misinformation). Respond entirely in ${langName}.
+
+URL: ${url}
+PAGE TITLE: ${pre.metaTitle || "(unavailable)"}
+PAGE DESCRIPTION: ${pre.metaDescription || "(unavailable)"}
+
+CROSS-SOURCE COVERAGE (live news search for the same story, from other outlets — use this to verify the article's claims):
+${corroborationBlock}`,
+
           },
         ],
       }),
