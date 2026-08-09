@@ -770,6 +770,58 @@ ${crossSourceBlock}`,
       }
       analysis.reasoning = fallback;
     }
+
+    // ---- Misinformation + cross-source normalisation ----
+    const RISKS = new Set(["low", "medium", "high"]);
+    if (!RISKS.has(String(analysis.misinformationRisk || "").toLowerCase())) {
+      analysis.misinformationRisk = "medium";
+    } else {
+      analysis.misinformationRisk = String(analysis.misinformationRisk).toLowerCase();
+    }
+    if (!Array.isArray(analysis.factualIssues)) analysis.factualIssues = [];
+    analysis.factualIssues = analysis.factualIssues.slice(0, 5).map((f: Record<string, unknown>) => ({
+      claim: String(f?.claim ?? "").slice(0, 300),
+      status: ["accurate", "unsupported", "misleading", "false"].includes(String(f?.status ?? "").toLowerCase())
+        ? String(f.status).toLowerCase() : "unsupported",
+      explanation: String(f?.explanation ?? "").slice(0, 500),
+    })).filter((f: { claim: string }) => f.claim);
+
+    const cc = (analysis.crossCheck && typeof analysis.crossCheck === "object") ? analysis.crossCheck : {};
+    const VERDICTS = ["corroborated", "partially_corroborated", "contradicted", "uncorroborated", "no_coverage"];
+    analysis.crossCheck = {
+      verdict: VERDICTS.includes(String(cc.verdict ?? "").toLowerCase())
+        ? String(cc.verdict).toLowerCase()
+        : (crossSources.length ? "uncorroborated" : "no_coverage"),
+      summary: String(cc.summary ?? (crossSources.length
+        ? "Independent coverage was retrieved but could not be compared automatically."
+        : "No other outlet appears to be reporting this story, which limits verification.")).slice(0, 600),
+      sources: (Array.isArray(cc.sources) ? cc.sources : crossSources.slice(0, 4).map((c) => ({ source: c.source, title: c.title, agreement: "agrees" })))
+        .slice(0, 4)
+        .map((s: Record<string, unknown>) => ({
+          source: String(s?.source ?? "").slice(0, 60),
+          title: String(s?.title ?? "").slice(0, 200),
+          agreement: ["agrees", "differs", "contradicts"].includes(String(s?.agreement ?? "").toLowerCase())
+            ? String(s.agreement).toLowerCase() : "agrees",
+        }))
+        .filter((s: { source: string; title: string }) => s.source || s.title),
+    };
+
+    // Guarantee the "why we're saying this" section always covers accuracy and
+    // cross-source verification, even when the model omits those categories.
+    const cats = analysis.reasoning.map((r: { category?: string }) => String(r?.category ?? "").toLowerCase());
+    if (!cats.some((c: string) => c.includes("accur")) && analysis.factualIssues.length > 0) {
+      const f = analysis.factualIssues[0];
+      analysis.reasoning.push({ category: "Accuracy", evidence: f.claim, explanation: f.explanation });
+    }
+    if (!cats.some((c: string) => c.includes("cross"))) {
+      analysis.reasoning.push({
+        category: "Cross-check",
+        evidence: analysis.crossCheck.sources.map((s: { source: string }) => s.source).filter(Boolean).join(", ")
+          || "No independent coverage found",
+        explanation: analysis.crossCheck.summary,
+      });
+    }
+
     if (!analysis.hiddenAngle) analysis.hiddenAngle = analysis.summary?.slice(0, 220) ?? "";
     if (!analysis.proDeepDive || typeof analysis.proDeepDive !== "object") {
       analysis.proDeepDive = {
