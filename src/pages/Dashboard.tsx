@@ -137,6 +137,13 @@ const Dashboard = () => {
 
   const trustColor = (score: number) => score >= 7 ? "text-gain" : score >= 5 ? "text-warning" : "text-loss";
   const trustBorder = (score: number) => score >= 7 ? "border-gain/40" : score >= 5 ? "border-warning/40" : "border-loss/40";
+  const riskStyles = (level?: string) => {
+    const l = (level ?? "").toLowerCase();
+    if (/high|alto|élevé|hoch|alta/.test(l)) return "border-loss/40 bg-loss/5 text-loss";
+    if (/low|bajo|faible|niedrig|baixo|basso/.test(l)) return "border-gain/40 bg-gain/5 text-gain";
+    return "border-warning/40 bg-warning/5 text-warning";
+  };
+
   const remaining = Math.max(0, FREE_DAILY_ANALYSES - dailyAnalysesUsed);
 
 
