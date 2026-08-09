@@ -258,20 +258,109 @@ const Dashboard = () => {
               </div>
             </div>
 
+            {/* Misinformation risk + cross-source verification */}
+            {(result.misinformationRisk || result.crossCheck) && (
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {result.misinformationRisk && (
+                  <span className={cn(
+                    "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold",
+                    result.misinformationRisk === "high" ? "border-loss/40 bg-loss/10 text-loss"
+                      : result.misinformationRisk === "medium" ? "border-warning/40 bg-warning/10 text-warning"
+                      : "border-gain/40 bg-gain/10 text-gain",
+                  )}>
+                    <AlertCircle className="h-3.5 w-3.5" />
+                    {t("misinformationRisk")}: {t(result.misinformationRisk === "high" ? "riskHigh" : result.misinformationRisk === "medium" ? "riskMedium" : "riskLow")}
+                  </span>
+                )}
+                {result.crossCheck?.verdict && (
+                  <span className={cn(
+                    "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold",
+                    result.crossCheck.verdict === "corroborated" ? "border-gain/40 bg-gain/10 text-gain"
+                      : result.crossCheck.verdict === "contradicted" ? "border-loss/40 bg-loss/10 text-loss"
+                      : "border-border bg-accent/30 text-muted-foreground",
+                  )}>
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    {t(
+                      result.crossCheck.verdict === "corroborated" ? "ccCorroborated"
+                        : result.crossCheck.verdict === "partially_corroborated" ? "ccPartially"
+                        : result.crossCheck.verdict === "contradicted" ? "ccContradicted"
+                        : result.crossCheck.verdict === "no_coverage" ? "ccNoCoverage"
+                        : "ccUncorroborated",
+                    )}
+                  </span>
+                )}
+              </div>
+            )}
+
             {/* Why this score — collapsed into a compact details block */}
-            {result.reasoning && result.reasoning.length > 0 && (
+            {((result.reasoning && result.reasoning.length > 0) || (result.factualIssues && result.factualIssues.length > 0) || result.crossCheck) && (
               <details className="mt-3 rounded-lg border border-border/60 bg-accent/20 p-3">
                 <summary className="cursor-pointer text-sm font-semibold uppercase tracking-wider text-foreground">
                   {t("whyThisScore")}
                 </summary>
-                <ul className="mt-2 space-y-2">
-                  {result.reasoning.slice(0, 3).map((r, i) => (
-                    <li key={i} className="border-l-2 border-primary/40 pl-2.5">
-                      {r.category && <span className="text-xs font-bold uppercase tracking-wider text-primary">{r.category}</span>}
-                      {r.explanation && <p className="text-sm leading-relaxed text-muted-foreground">{r.explanation}</p>}
-                    </li>
-                  ))}
-                </ul>
+
+                {result.reasoning && result.reasoning.length > 0 && (
+                  <ul className="mt-2 space-y-2">
+                    {result.reasoning.slice(0, 6).map((r, i) => (
+                      <li key={i} className="border-l-2 border-primary/40 pl-2.5">
+                        {r.category && <span className="text-xs font-bold uppercase tracking-wider text-primary">{r.category}</span>}
+                        {r.evidence && <p className="text-sm italic leading-relaxed text-foreground/80">“{r.evidence}”</p>}
+                        {r.explanation && <p className="text-sm leading-relaxed text-muted-foreground">{r.explanation}</p>}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {/* Claim-level accuracy */}
+                {result.factualIssues && result.factualIssues.length > 0 && (
+                  <div className="mt-3 border-t border-border/60 pt-3">
+                    <p className="text-xs font-bold uppercase tracking-wider text-foreground">{t("factCheckClaims")}</p>
+                    <ul className="mt-2 space-y-2">
+                      {result.factualIssues.slice(0, 4).map((f, i) => (
+                        <li key={i} className="text-sm leading-relaxed">
+                          <span className={cn(
+                            "mr-2 rounded px-1.5 py-0.5 text-[11px] font-bold uppercase",
+                            f.status === "accurate" ? "bg-gain/15 text-gain"
+                              : f.status === "false" ? "bg-loss/15 text-loss"
+                              : "bg-warning/15 text-warning",
+                          )}>
+                            {t(f.status === "accurate" ? "stAccurate" : f.status === "false" ? "stFalse" : f.status === "misleading" ? "stMisleading" : "stUnsupported")}
+                          </span>
+                          <span className="text-foreground/90">{f.claim}</span>
+                          {f.explanation && <p className="mt-0.5 text-sm text-muted-foreground">{f.explanation}</p>}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Cross-source verification */}
+                {result.crossCheck && (result.crossCheck.summary || (result.crossCheck.sources?.length ?? 0) > 0) && (
+                  <div className="mt-3 border-t border-border/60 pt-3">
+                    <p className="text-xs font-bold uppercase tracking-wider text-foreground">{t("crossCheckTitle")}</p>
+                    {result.crossCheck.summary && (
+                      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{result.crossCheck.summary}</p>
+                    )}
+                    {(result.crossCheck.sources?.length ?? 0) > 0 && (
+                      <ul className="mt-2 space-y-1">
+                        {result.crossCheck.sources!.slice(0, 4).map((s, i) => (
+                          <li key={i} className="text-sm leading-relaxed text-muted-foreground">
+                            <span className="font-semibold text-foreground">{s.source}</span>
+                            {s.agreement && (
+                              <span className={cn(
+                                "mx-1.5 text-xs font-semibold",
+                                s.agreement === "contradicts" ? "text-loss" : s.agreement === "differs" ? "text-warning" : "text-gain",
+                              )}>
+                                ({t(s.agreement === "contradicts" ? "agContradicts" : s.agreement === "differs" ? "agDiffers" : "agAgrees")})
+                              </span>
+                            )}
+                            {s.title && <span>— {s.title}</span>}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
               </details>
             )}
 
