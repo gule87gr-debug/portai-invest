@@ -258,6 +258,67 @@ const Dashboard = () => {
               </div>
             </div>
 
+            {/* Misinformation / fact check */}
+            {result.misinformation && (result.misinformation.verdict || (result.misinformation.claims?.length ?? 0) > 0) && (
+              <div className={cn("mt-3 rounded-lg border p-3", riskStyles(result.misinformation.riskLevel))}>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-semibold">🔎 {t("factCheckTitle")}</p>
+                  {result.misinformation.riskLevel && (
+                    <span className="rounded-full border border-current/30 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider">
+                      {t("misinfoRisk")}: {result.misinformation.riskLevel}
+                    </span>
+                  )}
+                </div>
+                {result.misinformation.verdict && (
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{result.misinformation.verdict}</p>
+                )}
+                {(result.misinformation.claims?.length ?? 0) > 0 && (
+                  <ul className="mt-2 space-y-1.5">
+                    {result.misinformation.claims!.slice(0, 4).map((c, i) => (
+                      <li key={i} className="text-sm leading-relaxed">
+                        <span className="font-semibold text-foreground">{c.verdict}</span>
+                        <span className="text-muted-foreground"> — {c.claim}{c.note ? ` (${c.note})` : ""}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+
+            {/* Cross-source verification */}
+            {result.corroboration && (result.corroboration.note || (result.corroboration.sources?.length ?? 0) > 0) && (
+              <div className="mt-3 rounded-lg border border-border/60 bg-accent/20 p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-foreground">🌐 {t("crossSourceTitle")}</p>
+                  {result.corroboration.status && (
+                    <span className="rounded-full border border-border px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      {result.corroboration.status}
+                    </span>
+                  )}
+                </div>
+                {result.corroboration.note && (
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{result.corroboration.note}</p>
+                )}
+                {(result.corroboration.sources?.length ?? 0) > 0 && (
+                  <ul className="mt-2 space-y-1">
+                    {result.corroboration.sources!.slice(0, 4).map((s, i) => (
+                      <li key={i} className="text-sm leading-relaxed">
+                        {s.url && /^https?:\/\//i.test(s.url) ? (
+                          <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                            {s.source}
+                          </a>
+                        ) : (
+                          <span className="font-semibold text-foreground">{s.source}</span>
+                        )}
+                        <span className="text-muted-foreground"> — {s.title}{s.stance ? ` · ${s.stance}` : ""}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+
+
             {/* Why this score — collapsed into a compact details block */}
             {result.reasoning && result.reasoning.length > 0 && (
               <details className="mt-3 rounded-lg border border-border/60 bg-accent/20 p-3">
