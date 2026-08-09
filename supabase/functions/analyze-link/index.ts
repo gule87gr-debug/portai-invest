@@ -594,8 +594,30 @@ serve(async (req) => {
       }
     }
 
+    // ---- Cross-source corroboration: what other outlets say about this story ----
+    let corroborationHits: CorroborationHit[] = [];
+    try {
+      const seedTitle = (pre.metaTitle || "").trim() ||
+        decodeURIComponent(new URL(url).pathname.split("/").filter(Boolean).pop() || "")
+          .replace(/[-_]+/g, " ")
+          .replace(/\.(html?|php|amp)$/i, "");
+      corroborationHits = await fetchCorroboration(
+        seedTitle,
+        new URL(url).hostname.toLowerCase().replace(/^www\./, ""),
+      );
+    } catch {
+      corroborationHits = [];
+    }
+
+    const corroborationBlock = corroborationHits.length
+      ? corroborationHits
+          .map((h, i) => `${i + 1}. [${h.source}] ${h.title}${h.published ? ` (${h.published})` : ""} — ${h.url}`)
+          .join("\n")
+      : "NO independent coverage of this story was found in a live news search.";
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
