@@ -421,6 +421,61 @@ async function preCheckArticle(urlStr: string): Promise<PreCheck> {
   }
 }
 
+// ---------- Cross-source corroboration ----------
+// Derives a search query from the article's title (or URL slug) and pulls
+// independent coverage from Google News RSS so the model can compare claims
+// against what other outlets are reporting.
+function deriveQuery(urlStr: string, metaTitle?: string): string {
+  const t = (metaTitle || "").replace(/\s*[|\-–—]\s*[^|\-–—]{0,40}$/, "").trim();
+  if (t.length >= 15) return t.slice(0, 160);
+  try {
+    const path = new URL(urlStr).pathname;
+    const slug = path.split("/").filter(Boolean).pop() || "";
+    return slug.replace(/\.(html?|amp)$/i, "").replace(/[-_]+/g, " ").replace(/\b\d{6,}\b/g, "").trim().slice(0, 160);
+  } catch {
+    return "";
+  }
+}
+
+type CrossSource = { source: string; title: string; date?: string };
+
+async function fetchCrossSources(query: string, excludeHost: string): Promise<CrossSource[]> {
+  if (!query || query.length < 8) return [];
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 6000);
+    const res = await fetch(
+      `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-US&gl=US&ceid=US:en`,
+      {
+        signal: ctrl.signal,
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+          Accept: "application/rss+xml,application/xml;q=0.9,*/*;q=0.8",
+        },
+      },
+    );
+    clearTimeout(timer);
+    if (!res.ok) return [];
+    const xml = (await res.text()).slice(0, 200_000);
+    const items = xml.split(/<item>/i).slice(1, 15);
+    const out: CrossSource[] = [];
+    for (const item of items) {
+      const title = (item.match(/<title>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/i)?.[1] || "")
+        .replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"').trim();
+      const source = (item.match(/<source[^>]*>([\s\S]*?)<\/source>/i)?.[1] || "").trim();
+      const date = (item.match(/<pubDate>([\s\S]*?)<\/pubDate>/i)?.[1] || "").trim();
+      if (!title) continue;
+      const src = source || (title.split(" - ").pop() || "").trim();
+      if (src && excludeHost && src.toLowerCase().replace(/\s+/g, "").includes(excludeHost.split(".")[0])) continue;
+      out.push({ source: src.slice(0, 60), title: title.replace(/\s+-\s+[^-]+$/, "").slice(0, 200), date: date.slice(0, 40) });
+      if (out.length >= 8) break;
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
