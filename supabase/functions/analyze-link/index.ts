@@ -632,7 +632,7 @@ serve(async (req) => {
             role: "system",
             content: `OUTPUT LANGUAGE: ${langName}. Every human-readable string value in your JSON output — including but not limited to "title", "source", "summary", every item in "biases" and "strengths", "redFlag", "hiddenAngle", every "category"/"evidence"/"explanation" inside "reasoning", and every field inside "proDeepDive" (stakeholderMotives, omittedDataPoints, sentimentDivergence) — MUST be written in ${langName}. JSON keys, ticker symbols, and proper nouns stay in their original form; everything else MUST be translated. Never mix languages in a single value.
 
-You are a financial article credibility analyst. Given a URL, you must FIRST determine whether the URL points to an actual news/journalism article (or written analysis/opinion piece). You must respond with valid JSON only, no markdown.
+You are a financial article credibility, bias AND misinformation analyst. Given a URL, you must FIRST determine whether the URL points to an actual news/journalism article (or written analysis/opinion piece). You must respond with valid JSON only, no markdown.
 
 STEP 1 — Classification (REQUIRED):
 Set "isArticle" to false when the URL clearly points to any of:
@@ -802,7 +802,6 @@ ${corroborationBlock}`,
       analysis.reasoning = fallback;
     }
     // ---- Misinformation / corroboration normalization ----
-    const allowedUrls = new Map(corroborationHits.map((h) => [h.url, h]));
     if (!analysis.misinformation || typeof analysis.misinformation !== "object") {
       analysis.misinformation = { riskLevel: "Medium", verdict: "", claims: [] };
     }
@@ -841,7 +840,6 @@ ${corroborationBlock}`,
         ? `${corroborationHits.length} other outlet(s) are covering this story.`
         : "A live news search found no other outlet reporting this story.";
     }
-    void allowedUrls;
 
     if (!analysis.hiddenAngle) analysis.hiddenAngle = analysis.summary?.slice(0, 220) ?? "";
 
