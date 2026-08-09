@@ -801,7 +801,50 @@ ${corroborationBlock}`,
       }
       analysis.reasoning = fallback;
     }
+    // ---- Misinformation / corroboration normalization ----
+    const allowedUrls = new Map(corroborationHits.map((h) => [h.url, h]));
+    if (!analysis.misinformation || typeof analysis.misinformation !== "object") {
+      analysis.misinformation = { riskLevel: "Medium", verdict: "", claims: [] };
+    }
+    if (!Array.isArray(analysis.misinformation.claims)) analysis.misinformation.claims = [];
+    analysis.misinformation.claims = analysis.misinformation.claims.slice(0, 4).map((c: Record<string, unknown>) => ({
+      claim: String(c?.claim ?? "").slice(0, 240),
+      verdict: String(c?.verdict ?? "Unverified").slice(0, 40),
+      note: String(c?.note ?? "").slice(0, 300),
+    })).filter((c: { claim: string }) => c.claim.length > 0);
+    if (!analysis.misinformation.verdict) {
+      analysis.misinformation.verdict = corroborationHits.length
+        ? "Core claims could not be individually verified; compare with the corroborating coverage below."
+        : "No independent coverage of this story was found, so its claims remain unverified.";
+    }
+    if (!analysis.corroboration || typeof analysis.corroboration !== "object") {
+      analysis.corroboration = { status: "", note: "", sources: [] };
+    }
+    // Only keep sources that came from the real live search — never model-invented URLs.
+    const modelSources = Array.isArray(analysis.corroboration.sources) ? analysis.corroboration.sources : [];
+    const stanceByUrl = new Map<string, string>(
+      modelSources.map((s: Record<string, unknown>) => [String(s?.url ?? ""), String(s?.stance ?? "")]),
+    );
+    analysis.corroboration.sources = corroborationHits.slice(0, 4).map((h) => ({
+      source: h.source,
+      title: h.title,
+      url: h.url,
+      stance: stanceByUrl.get(h.url) || "",
+    }));
+    if (!analysis.corroboration.status) {
+      analysis.corroboration.status = corroborationHits.length
+        ? (corroborationHits.length >= 3 ? "Widely corroborated" : "Partially corroborated")
+        : "No independent coverage found";
+    }
+    if (!analysis.corroboration.note) {
+      analysis.corroboration.note = corroborationHits.length
+        ? `${corroborationHits.length} other outlet(s) are covering this story.`
+        : "A live news search found no other outlet reporting this story.";
+    }
+    void allowedUrls;
+
     if (!analysis.hiddenAngle) analysis.hiddenAngle = analysis.summary?.slice(0, 220) ?? "";
+
     if (!analysis.proDeepDive || typeof analysis.proDeepDive !== "object") {
       analysis.proDeepDive = {
         stakeholderMotives: "Deep-dive parsing unavailable for this article. Re-run analysis to generate stakeholder context.",
