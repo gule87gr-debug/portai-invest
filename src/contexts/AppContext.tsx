@@ -41,13 +41,35 @@ const writeWatchlistCache = (userId: string, data: WatchlistData[]) => {
   try { localStorage.setItem(`${WL_CACHE_KEY}-${userId}`, JSON.stringify(data)); } catch { /* ignore */ }
 };
 
+const PROFILE_CACHE_KEY = "portai-profile-cache";
+const LANG_CACHE_KEY = "portai-language-cache";
+
+// Synchronous reads so the very first render already shows the user's data.
+const cachedProfile = (): UserProfile | null => {
+  try {
+    const raw = localStorage.getItem(PROFILE_CACHE_KEY);
+    return raw ? (JSON.parse(raw) as UserProfile) : null;
+  } catch { return null; }
+};
+const cachedWatchlists = (): WatchlistData[] | null => {
+  try {
+    const key = Object.keys(localStorage).find((k) => k.startsWith(WL_CACHE_KEY));
+    return key ? (JSON.parse(localStorage.getItem(key) as string) as WatchlistData[]) : null;
+  } catch { return null; }
+};
+
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [watchlists, setWatchlists] = useState<WatchlistData[]>([]);
-  const [watchlistsLoaded, setWatchlistsLoaded] = useState(false);
+  const initialWatchlists = cachedWatchlists();
+  const initialProfile = cachedProfile();
+  const [watchlists, setWatchlists] = useState<WatchlistData[]>(initialWatchlists ?? []);
+  const [watchlistsLoaded, setWatchlistsLoaded] = useState(!!initialWatchlists);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [profile, setProfile] = useState<UserProfile>({ name: "Guest User", email: "" });
-  const [initialLanguage, setInitialLanguage] = useState("en");
+  const [profile, setProfile] = useState<UserProfile>(initialProfile ?? { name: "Guest User", email: "" });
+  const [initialLanguage, setInitialLanguage] = useState(() => {
+    try { return localStorage.getItem(LANG_CACHE_KEY) || "en"; } catch { return "en"; }
+  });
   const [showTutorial, setShowTutorial] = useState(false);
+
 
   const loadWatchlists = async (userId: string) => {
     const { data: wlData } = await supabase
