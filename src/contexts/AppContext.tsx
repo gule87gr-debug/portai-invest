@@ -17,6 +17,7 @@ type AppState = {
   moveStock: (listId: string, ticker: string, direction: "up" | "down") => void;
   reorderStocks: (listId: string, fromIndex: number, toIndex: number) => Promise<void>;
   deleteWatchlist: (listId: string) => void;
+  renameWatchlist: (listId: string, name: string) => Promise<void>;
   watchlistsLoaded: boolean;
   profile: UserProfile;
   currentUserId: string | null;
