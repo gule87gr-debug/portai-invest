@@ -127,6 +127,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setWatchlists((prev) => prev.filter((w) => w.id !== id));
   };
 
+  const renameWatchlist = async (id: string, name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    setWatchlists((prev) => prev.map((w) => (w.id === id ? { ...w, name: trimmed } : w)));
+    await supabase.from("watchlists").update({ name: trimmed } as any).eq("id", id);
+  };
+
   const addStockToWatchlist = async (listId: string, stock: Stock) => {
     const list = watchlists.find((w) => w.id === listId);
     if (!list || list.stocks.find((s) => s.ticker === stock.ticker)) return;
@@ -193,7 +200,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AppContext.Provider value={{ watchlists, setWatchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, moveStock, reorderStocks, deleteWatchlist, watchlistsLoaded, profile, currentUserId, initialLanguage, showTutorial, setShowTutorial }}>
+    <AppContext.Provider value={{ watchlists, setWatchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, moveStock, reorderStocks, deleteWatchlist, renameWatchlist, watchlistsLoaded, profile, currentUserId, initialLanguage, showTutorial, setShowTutorial }}>
       {children}
     </AppContext.Provider>
   );
