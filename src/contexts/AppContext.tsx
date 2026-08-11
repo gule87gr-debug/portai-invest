@@ -143,11 +143,28 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       }
     };
     init();
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event !== "SIGNED_OUT") return;
+      try {
+        Object.keys(localStorage)
+          .filter((k) => k.startsWith(WL_CACHE_KEY) || k === PROFILE_CACHE_KEY)
+          .forEach((k) => localStorage.removeItem(k));
+      } catch { /* ignore */ }
+      setWatchlists([]);
+      setWatchlistsLoaded(false);
+      setProfile({ name: "Guest User", email: "" });
+      setCurrentUserId(null);
+    });
+    return () => sub.subscription.unsubscribe();
   }, []);
 
   // Keep the instant-paint cache in sync with local mutations.
   useEffect(() => {
     if (!currentUserId || !watchlistsLoaded) return;
+    writeWatchlistCache(currentUserId, watchlists);
+  }, [watchlists, currentUserId, watchlistsLoaded]);
+
     writeWatchlistCache(currentUserId, watchlists);
   }, [watchlists, currentUserId, watchlistsLoaded]);
 
