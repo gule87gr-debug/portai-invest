@@ -90,11 +90,13 @@ Deno.serve(async (req) => {
       categories: catList,
       regions: regionList,
       search,
+      ticker,
     }: {
       category?: string;
       categories?: string[];
       regions?: string[];
       search?: string;
+      ticker?: string;
     } = body;
 
     // Validate against allow-lists; ignore unknown keys
@@ -129,10 +131,26 @@ Deno.serve(async (req) => {
     }
 
     const encodedQuery = encodeURIComponent(query);
-    const rssUrl = `https://news.google.com/rss/search?q=${encodedQuery}+when:7d&hl=en-US&gl=US&ceid=US:en`;
+    const cacheKey = query;
+
+    // Primary source + generic fallbacks (used only when the primary fails).
+    const primaryUrls = [
+      `https://news.google.com/rss/search?q=${encodedQuery}+when:7d&hl=en-US&gl=US&ceid=US:en`,
+      `https://news.google.com/rss/search?q=${encodedQuery}&hl=en-US&gl=US&ceid=US:en`,
+    ];
+    const safeTicker = typeof ticker === "string" ? ticker.replace(/[^A-Za-z0-9.\-]/g, "").slice(0, 12) : "";
+    const fallbackUrls = safeTicker
+      ? [`https://feeds.finance.yahoo.com/rss/2.0/headline?s=${encodeURIComponent(safeTicker)}&region=US&lang=en-US`]
+      : searchTrim
+      ? []
+      : [
+          "https://feeds.content.dowjones.io/public/rss/mw_topstories",
+          "https://finance.yahoo.com/news/rssindex",
+          "https://www.cnbc.com/id/10000664/device/rss/rss.html",
+        ];
 
     // Cache hit?
-    const cached = newsCache.get(rssUrl);
+    const cached = newsCache.get(cacheKey);
     if (cached && Date.now() - cached.ts < CACHE_TTL_MS) {
       return new Response(JSON.stringify({ success: true, items: cached.items, cached: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "public, max-age=300" },
@@ -141,57 +159,70 @@ Deno.serve(async (req) => {
 
     console.log("Fetching news for:", query);
 
-    // Retry up to 2 times with backoff and a per-attempt timeout so a slow
-    // upstream doesn't stall the whole function.
-    let response: Response | null = null;
-    let lastStatus = 0;
-    for (let attempt = 0; attempt < 3; attempt++) {
+    const fetchFeed = async (url: string, timeoutMs: number): Promise<NewsItem[]> => {
       const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 9000);
+      const timer = setTimeout(() => ctrl.abort(), timeoutMs);
       try {
-        const r = await fetch(rssUrl, {
+        const r = await fetch(url, {
           headers: {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
             "Accept": "application/rss+xml, application/xml;q=0.9, */*;q=0.8",
           },
           signal: ctrl.signal,
         });
-        if (r.ok) { response = r; break; }
-        lastStatus = r.status;
-        await r.text().catch(() => "");
+        if (!r.ok) return [];
+        return parseRSSItems(await r.text());
       } catch (e) {
-        console.warn(`News fetch attempt ${attempt + 1} failed:`, (e as Error).message);
+        console.warn("Feed failed:", url, (e as Error).message);
+        return [];
       } finally {
         clearTimeout(timer);
       }
-      await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
+    };
+
+    // Hit both Google variants in parallel with a tight timeout so a slow
+    // upstream can never stall the request beyond ~4s.
+    const primaryResults = await Promise.all(primaryUrls.map((u) => fetchFeed(u, 3000)));
+    let items = primaryResults.find((r) => r.length > 0) ?? [];
+
+    // Only pay for fallbacks when the primary produced nothing.
+    if (!items.length) {
+      const fallbackResults = await Promise.all(fallbackUrls.map((u) => fetchFeed(u, 3000)));
+      const merged: NewsItem[] = [];
+      const seen = new Set<string>();
+      for (const list of fallbackResults) {
+        for (const it of list) {
+          if (seen.has(it.title)) continue;
+          seen.add(it.title);
+          merged.push(it);
+        }
+      }
+      items = merged;
     }
 
-    if (!response) {
-      // Serve stale cache if available so the UI never shows an empty state
-      const stale = newsCache.get(rssUrl);
+    items = items.slice(0, 25);
+
+    if (!items.length) {
+      const stale = newsCache.get(cacheKey);
       if (stale) {
         return new Response(JSON.stringify({ success: true, items: stale.items, cached: true, stale: true }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      console.error(`RSS unavailable after retries (last status: ${lastStatus})`);
       return new Response(
         JSON.stringify({ success: false, error: "SERVICE_UNAVAILABLE", fallback: true, items: [] }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const xml = await response.text();
-    const items = parseRSSItems(xml).slice(0, 25);
-
     console.log(`Found ${items.length} news items`);
 
-    newsCache.set(rssUrl, { ts: Date.now(), items });
+    newsCache.set(cacheKey, { ts: Date.now(), items });
 
     return new Response(JSON.stringify({ success: true, items }), {
       headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "public, max-age=300" },
     });
+
   } catch (error) {
     console.error("Error fetching news:", error);
     return new Response(

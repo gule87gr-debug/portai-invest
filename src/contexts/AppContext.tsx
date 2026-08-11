@@ -32,22 +32,44 @@ const WL_CACHE_KEY = "portai-watchlists-cache";
 
 const readWatchlistCache = (userId: string): WatchlistData[] | null => {
   try {
-    const raw = sessionStorage.getItem(`${WL_CACHE_KEY}-${userId}`);
+    const raw = localStorage.getItem(`${WL_CACHE_KEY}-${userId}`);
     return raw ? (JSON.parse(raw) as WatchlistData[]) : null;
   } catch { return null; }
 };
 
 const writeWatchlistCache = (userId: string, data: WatchlistData[]) => {
-  try { sessionStorage.setItem(`${WL_CACHE_KEY}-${userId}`, JSON.stringify(data)); } catch { /* ignore */ }
+  try { localStorage.setItem(`${WL_CACHE_KEY}-${userId}`, JSON.stringify(data)); } catch { /* ignore */ }
+};
+
+const PROFILE_CACHE_KEY = "portai-profile-cache";
+const LANG_CACHE_KEY = "portai-language-cache";
+
+// Synchronous reads so the very first render already shows the user's data.
+const cachedProfile = (): UserProfile | null => {
+  try {
+    const raw = localStorage.getItem(PROFILE_CACHE_KEY);
+    return raw ? (JSON.parse(raw) as UserProfile) : null;
+  } catch { return null; }
+};
+const cachedWatchlists = (): WatchlistData[] | null => {
+  try {
+    const key = Object.keys(localStorage).find((k) => k.startsWith(WL_CACHE_KEY));
+    return key ? (JSON.parse(localStorage.getItem(key) as string) as WatchlistData[]) : null;
+  } catch { return null; }
 };
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [watchlists, setWatchlists] = useState<WatchlistData[]>([]);
-  const [watchlistsLoaded, setWatchlistsLoaded] = useState(false);
+  const initialWatchlists = cachedWatchlists();
+  const initialProfile = cachedProfile();
+  const [watchlists, setWatchlists] = useState<WatchlistData[]>(initialWatchlists ?? []);
+  const [watchlistsLoaded, setWatchlistsLoaded] = useState(!!initialWatchlists);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [profile, setProfile] = useState<UserProfile>({ name: "Guest User", email: "" });
-  const [initialLanguage, setInitialLanguage] = useState("en");
+  const [profile, setProfile] = useState<UserProfile>(initialProfile ?? { name: "Guest User", email: "" });
+  const [initialLanguage, setInitialLanguage] = useState(() => {
+    try { return localStorage.getItem(LANG_CACHE_KEY) || "en"; } catch { return "en"; }
+  });
   const [showTutorial, setShowTutorial] = useState(false);
+
 
   const loadWatchlists = async (userId: string) => {
     const { data: wlData } = await supabase
@@ -88,8 +110,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       setCurrentUserId(user.id);
 
       const fallbackName = user.email?.split("@")[0] || "User";
-      // Optimistically show a name immediately so the UI doesn't wait on the DB.
-      setProfile({ name: fallbackName, email: user.email || "" });
+      // Only overwrite the cached name if we don't have one yet.
+      setProfile((prev) => (prev.email ? { ...prev, email: user.email || prev.email } : { name: fallbackName, email: user.email || "" }));
 
       // Paint cached watchlists instantly, then refresh in the background.
       const cached = readWatchlistCache(user.id);
@@ -106,11 +128,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
       const settings = settingsRes.data as any;
       if (settings) {
-        setProfile({
-          name: settings.display_name || fallbackName,
-          email: user.email || "",
-        });
-        if (settings.language) setInitialLanguage(settings.language);
+        const nextProfile = { name: settings.display_name || fallbackName, email: user.email || "" };
+        setProfile(nextProfile);
+        try { localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(nextProfile)); } catch { /* ignore */ }
+        if (settings.language) {
+          setInitialLanguage(settings.language);
+          try { localStorage.setItem(LANG_CACHE_KEY, settings.language); } catch { /* ignore */ }
+        }
+
         if (!settings.tutorial_completed) setShowTutorial(true);
       } else {
         // Insert default row without blocking the UI.
@@ -118,6 +143,20 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       }
     };
     init();
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event !== "SIGNED_OUT") return;
+      try {
+        Object.keys(localStorage)
+          .filter((k) => k.startsWith(WL_CACHE_KEY) || k === PROFILE_CACHE_KEY)
+          .forEach((k) => localStorage.removeItem(k));
+      } catch { /* ignore */ }
+      setWatchlists([]);
+      setWatchlistsLoaded(false);
+      setProfile({ name: "Guest User", email: "" });
+      setCurrentUserId(null);
+    });
+    return () => sub.subscription.unsubscribe();
   }, []);
 
   // Keep the instant-paint cache in sync with local mutations.
@@ -125,6 +164,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     if (!currentUserId || !watchlistsLoaded) return;
     writeWatchlistCache(currentUserId, watchlists);
   }, [watchlists, currentUserId, watchlistsLoaded]);
+
+
 
 
 
