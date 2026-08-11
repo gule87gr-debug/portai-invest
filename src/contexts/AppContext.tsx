@@ -120,6 +120,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     init();
   }, []);
 
+  // Keep the instant-paint cache in sync with local mutations.
+  useEffect(() => {
+    if (!currentUserId || !watchlistsLoaded) return;
+    writeWatchlistCache(currentUserId, watchlists);
+  }, [watchlists, currentUserId, watchlistsLoaded]);
+
+
+
 
   const addWatchlist = async (w: WatchlistData) => {
     if (!currentUserId) return;
