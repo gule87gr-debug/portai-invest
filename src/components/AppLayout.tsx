@@ -4,6 +4,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { TrialEndingBanner } from "./TrialEndingBanner";
 import { TrialEndedModal } from "./TrialEndedModal";
 import { FirstVisitPaywall } from "./FirstVisitPaywall";
+import { TickerSearch } from "./TickerSearch";
 
 export const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const { t } = useLanguage();
@@ -13,6 +14,7 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
       <div className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto w-full flex flex-col">
         <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
           <div className="mx-auto max-w-6xl lg:max-w-[1400px] xl:max-w-[1600px] 2xl:max-w-[1800px] px-3 sm:px-6 lg:px-10 xl:px-14 pb-6 pt-28 lg:pt-20 overflow-x-hidden">
+            <TickerSearch className="mb-4 sm:max-w-md" />
             <TrialEndingBanner />
             {children}
           </div>
