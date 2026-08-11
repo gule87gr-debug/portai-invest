@@ -28,6 +28,19 @@ type AppState = {
 
 const AppContext = createContext<AppState | null>(null);
 
+const WL_CACHE_KEY = "portai-watchlists-cache";
+
+const readWatchlistCache = (userId: string): WatchlistData[] | null => {
+  try {
+    const raw = sessionStorage.getItem(`${WL_CACHE_KEY}-${userId}`);
+    return raw ? (JSON.parse(raw) as WatchlistData[]) : null;
+  } catch { return null; }
+};
+
+const writeWatchlistCache = (userId: string, data: WatchlistData[]) => {
+  try { sessionStorage.setItem(`${WL_CACHE_KEY}-${userId}`, JSON.stringify(data)); } catch { /* ignore */ }
+};
+
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [watchlists, setWatchlists] = useState<WatchlistData[]>([]);
   const [watchlistsLoaded, setWatchlistsLoaded] = useState(false);
@@ -39,14 +52,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const loadWatchlists = async (userId: string) => {
     const { data: wlData } = await supabase
       .from("watchlists")
-      .select("*")
+      .select("id,name,description,created_at")
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
 
     if (wlData && wlData.length > 0) {
       const { data: stocksData } = await supabase
         .from("watchlist_stocks")
-        .select("*")
+        .select("watchlist_id,ticker,name,sector,signal,created_at")
         .in("watchlist_id", wlData.map((w: any) => w.id))
         .order("created_at", { ascending: false });
 
@@ -59,8 +72,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           .map((s: any) => ({ ticker: s.ticker, name: s.name, sector: s.sector, signal: s.signal, createdAt: s.created_at })),
       }));
       setWatchlists(mapped);
+      writeWatchlistCache(userId, mapped);
     } else {
       setWatchlists([]);
+      writeWatchlistCache(userId, []);
     }
     setWatchlistsLoaded(true);
   };
@@ -75,6 +90,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       const fallbackName = user.email?.split("@")[0] || "User";
       // Optimistically show a name immediately so the UI doesn't wait on the DB.
       setProfile({ name: fallbackName, email: user.email || "" });
+
+      // Paint cached watchlists instantly, then refresh in the background.
+      const cached = readWatchlistCache(user.id);
+      if (cached) {
+        setWatchlists(cached);
+        setWatchlistsLoaded(true);
+      }
 
       // Fire watchlist + settings queries in parallel — they are independent.
       const [, settingsRes] = await Promise.all([
@@ -97,6 +119,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
     init();
   }, []);
+
+  // Keep the instant-paint cache in sync with local mutations.
+  useEffect(() => {
+    if (!currentUserId || !watchlistsLoaded) return;
+    writeWatchlistCache(currentUserId, watchlists);
+  }, [watchlists, currentUserId, watchlistsLoaded]);
+
+
+
 
   const addWatchlist = async (w: WatchlistData) => {
     if (!currentUserId) return;

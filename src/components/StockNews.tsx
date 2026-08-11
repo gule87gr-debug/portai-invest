@@ -13,11 +13,30 @@ interface NewsItem {
 
 const STOP_WORDS = new Set(["inc", "corp", "corporation", "company", "co", "ltd", "plc", "the", "group", "holdings", "sa", "nv", "ag", "etf", "fund", "trust", "index", "class"]);
 
+const NEWS_TTL_MS = 5 * 60 * 1000;
+const cacheKey = (t: string) => `portai-stock-news-${t.toUpperCase()}`;
+
+const readCached = (t: string): NewsItem[] | null => {
+  try {
+    const raw = sessionStorage.getItem(cacheKey(t));
+    if (!raw) return null;
+    const { ts, items } = JSON.parse(raw) as { ts: number; items: NewsItem[] };
+    if (Date.now() - ts > NEWS_TTL_MS) return null;
+    return items;
+  } catch { return null; }
+};
+
 export const StockNews = ({ ticker, height = 400 }: { ticker: string; height?: number }) => {
-  const [news, setNews] = useState<NewsItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [news, setNews] = useState<NewsItem[]>(() => readCached(ticker) ?? []);
+  const [loading, setLoading] = useState(() => readCached(ticker) === null);
 
   const fetchNews = useCallback(async () => {
+    const cached = readCached(ticker);
+    if (cached) {
+      setNews(cached);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const entry = assetDatabase.find((a) => a.ticker.toUpperCase() === ticker.toUpperCase());
@@ -46,6 +65,9 @@ export const StockNews = ({ ticker, height = 400 }: { ticker: string; height?: n
       });
 
       setNews(relevant);
+      try {
+        sessionStorage.setItem(cacheKey(ticker), JSON.stringify({ ts: Date.now(), items: relevant }));
+      } catch { /* storage unavailable */ }
     } catch {
       setNews([]);
     } finally {
@@ -54,6 +76,7 @@ export const StockNews = ({ ticker, height = 400 }: { ticker: string; height?: n
   }, [ticker]);
 
   useEffect(() => { fetchNews(); }, [fetchNews]);
+
 
   const formatTimeAgo = (dateStr: string) => {
     try {
