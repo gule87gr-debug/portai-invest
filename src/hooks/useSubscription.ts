@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useCallback, useEffect, useSyncExternalStore, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export type SubscriptionTier = "free" | "plus" | "pro";
@@ -39,165 +39,237 @@ type SubscriptionState = {
 
 const FREE_DAILY_ANALYSES = 1;
 
-export const useSubscription = (): SubscriptionState => {
-  const [tier, setTier] = useState<SubscriptionTier>("free");
-  const [paidTier, setPaidTier] = useState<SubscriptionTier>("free");
-  const [loading, setLoading] = useState(true);
-  const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null);
-  const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(false);
-  const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
-  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
-  const [scheduledTier, setScheduledTier] = useState<SubscriptionTier | null>(null);
-  const [scheduledStart, setScheduledStart] = useState<string | null>(null);
-  const [scheduledChangesCount, setScheduledChangesCount] = useState(0);
-  const [dailyAnalysesUsed, setDailyAnalysesUsed] = useState(0);
+/* ------------------------------------------------------------------ *
+ * Module-level store: one network round-trip shared by every consumer *
+ * ------------------------------------------------------------------ */
 
-  const [trialActive, setTrialActive] = useState(false);
-  const [trialUsed, setTrialUsed] = useState(false);
-  const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null);
-  const [proTourCompleted, setProTourCompleted] = useState(false);
-  const expireInFlight = useRef(false);
+type Snapshot = {
+  paidTier: SubscriptionTier;
+  loading: boolean;
+  subscriptionEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+  subscriptionId: string | null;
+  subscriptionStatus: string | null;
+  scheduledTier: SubscriptionTier | null;
+  scheduledStart: string | null;
+  scheduledChangesCount: number;
+  dailyAnalysesUsed: number;
+  trialActive: boolean;
+  trialUsed: boolean;
+  trialEndsAt: string | null;
+  proTourCompleted: boolean;
+};
 
-  const resetToFree = useCallback(() => {
-    setTier("free");
-    setPaidTier("free");
-    setSubscriptionEnd(null);
-    setCancelAtPeriodEnd(false);
-    setSubscriptionId(null);
-    setSubscriptionStatus(null);
-    setScheduledTier(null);
-    setScheduledStart(null);
-    setScheduledChangesCount(0);
-    setDailyAnalysesUsed(0);
-    setTrialActive(false);
-    setTrialUsed(false);
-    setTrialEndsAt(null);
-    setProTourCompleted(false);
-  }, []);
+const emptySnapshot: Snapshot = {
+  paidTier: "free",
+  loading: true,
+  subscriptionEnd: null,
+  cancelAtPeriodEnd: false,
+  subscriptionId: null,
+  subscriptionStatus: null,
+  scheduledTier: null,
+  scheduledStart: null,
+  scheduledChangesCount: 0,
+  dailyAnalysesUsed: 0,
+  trialActive: false,
+  trialUsed: false,
+  trialEndsAt: null,
+  proTourCompleted: false,
+};
 
-  const checkSubscription = useCallback(async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        resetToFree();
-        setLoading(false);
-        return;
-      }
-      const { data, error } = await supabase.functions.invoke("check-subscription", {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-      if (error) {
-        resetToFree();
-        setLoading(false);
-        return;
-      }
-      const nextTier: SubscriptionTier = data?.tier ?? (data?.subscribed ? "pro" : "free");
-      setPaidTier(nextTier);
-      setSubscriptionEnd(data?.subscription_end ?? null);
-      setCancelAtPeriodEnd(data?.cancel_at_period_end ?? false);
-      setSubscriptionId(data?.subscription_id ?? null);
-      setSubscriptionStatus(data?.subscription_status ?? null);
-      setScheduledTier((data?.scheduled_tier as SubscriptionTier | null) ?? null);
-      setScheduledStart(data?.scheduled_start ?? null);
-      setScheduledChangesCount(data?.scheduled_changes_count ?? 0);
-    } catch {
-      resetToFree();
-    }
-    setLoading(false);
-  }, [resetToFree]);
+let snapshot: Snapshot = emptySnapshot;
+const listeners = new Set<() => void>();
+const CACHE_PREFIX = "portai-sub-cache";
 
-  const loadTrial = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const { data } = await supabase
+const emit = () => listeners.forEach((l) => l());
+
+const setSnapshot = (patch: Partial<Snapshot>) => {
+  const next = { ...snapshot, ...patch };
+  // Recompute trial validity against the clock on every write so a banner
+  // never lingers past its expiry.
+  next.trialActive =
+    next.trialActive && !!next.trialEndsAt && new Date(next.trialEndsAt).getTime() > Date.now();
+  snapshot = next;
+  emit();
+};
+
+const persist = (userId: string) => {
+  try {
+    sessionStorage.setItem(`${CACHE_PREFIX}-${userId}`, JSON.stringify({ ...snapshot, loading: false }));
+  } catch { /* storage unavailable */ }
+};
+
+const hydrate = (userId: string): boolean => {
+  try {
+    const raw = sessionStorage.getItem(`${CACHE_PREFIX}-${userId}`);
+    if (!raw) return false;
+    const cached = JSON.parse(raw) as Snapshot;
+    setSnapshot({ ...cached, loading: false });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+let inFlight: Promise<void> | null = null;
+let started = false;
+let expireInFlight = false;
+let timer: ReturnType<typeof setInterval> | null = null;
+
+const resetToFree = () => {
+  snapshot = { ...emptySnapshot, loading: false };
+  emit();
+};
+
+const loadAll = async (): Promise<void> => {
+  const { data: { session } } = await supabase.auth.getSession();
+  const user = session?.user;
+  if (!user || !session?.access_token) {
+    resetToFree();
+    return;
+  }
+
+  const today = new Date().toISOString().split("T")[0];
+
+  const [subRes, trialRes, usageRes] = await Promise.allSettled([
+    supabase.functions.invoke("check-subscription", {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    }),
+    supabase
       .from("user_settings")
       .select("pro_trial_active, trial_used, trial_end_date, pro_tour_completed")
       .eq("user_id", user.id)
-      .maybeSingle();
-    if (!data) {
-      setTrialActive(false);
-      setTrialUsed(false);
-      setTrialEndsAt(null);
-      setProTourCompleted(false);
-      return;
-    }
-    setTrialUsed(!!data.trial_used);
-    setTrialEndsAt(data.trial_end_date ?? null);
-    setProTourCompleted(!!data.pro_tour_completed);
-
-    const stillActive =
-      !!data.pro_trial_active &&
-      !!data.trial_end_date &&
-      new Date(data.trial_end_date).getTime() > Date.now();
-    setTrialActive(stillActive);
-
-    // Auto-expire on the client (idempotent on the server)
-    if (data.pro_trial_active && data.trial_end_date && !stillActive && !expireInFlight.current) {
-      expireInFlight.current = true;
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.access_token) {
-          await supabase.functions.invoke("manage-trial", {
-            body: { action: "expire" },
-            headers: { Authorization: `Bearer ${session.access_token}` },
-          });
-        }
-      } finally {
-        expireInFlight.current = false;
-      }
-    }
-  }, []);
-
-  const loadDailyUsage = useCallback(async () => {
-    const today = new Date().toISOString().split("T")[0];
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const { count } = await supabase
+      .maybeSingle(),
+    supabase
       .from("analysis_usage")
-      .select("*", { count: "exact", head: true })
+      .select("id", { count: "exact", head: true })
       .eq("user_id", user.id)
-      .eq("used_date", today);
-    setDailyAnalysesUsed(count ?? 0);
-  }, []);
+      .eq("used_date", today),
+  ]);
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    await Promise.all([checkSubscription(), loadDailyUsage(), loadTrial()]);
-  }, [checkSubscription, loadDailyUsage, loadTrial]);
+  const patch: Partial<Snapshot> = { loading: false };
 
+  if (subRes.status === "fulfilled" && !subRes.value.error) {
+    const data = subRes.value.data as any;
+    patch.paidTier = (data?.tier ?? (data?.subscribed ? "pro" : "free")) as SubscriptionTier;
+    patch.subscriptionEnd = data?.subscription_end ?? null;
+    patch.cancelAtPeriodEnd = data?.cancel_at_period_end ?? false;
+    patch.subscriptionId = data?.subscription_id ?? null;
+    patch.subscriptionStatus = data?.subscription_status ?? null;
+    patch.scheduledTier = (data?.scheduled_tier as SubscriptionTier | null) ?? null;
+    patch.scheduledStart = data?.scheduled_start ?? null;
+    patch.scheduledChangesCount = data?.scheduled_changes_count ?? 0;
+  }
+
+  let needsExpire = false;
+  if (trialRes.status === "fulfilled") {
+    const data = trialRes.value.data as any;
+    if (data) {
+      patch.trialUsed = !!data.trial_used;
+      patch.trialEndsAt = data.trial_end_date ?? null;
+      patch.proTourCompleted = !!data.pro_tour_completed;
+      const stillActive =
+        !!data.pro_trial_active &&
+        !!data.trial_end_date &&
+        new Date(data.trial_end_date).getTime() > Date.now();
+      patch.trialActive = stillActive;
+      needsExpire = !!data.pro_trial_active && !!data.trial_end_date && !stillActive;
+    } else {
+      patch.trialUsed = false;
+      patch.trialEndsAt = null;
+      patch.trialActive = false;
+      patch.proTourCompleted = false;
+    }
+  }
+
+  if (usageRes.status === "fulfilled") {
+    patch.dailyAnalysesUsed = usageRes.value.count ?? 0;
+  }
+
+  setSnapshot(patch);
+  persist(user.id);
+
+  // Fire-and-forget server-side expiry; UI already reflects the expired state.
+  if (needsExpire && !expireInFlight) {
+    expireInFlight = true;
+    supabase.functions
+      .invoke("manage-trial", {
+        body: { action: "expire" },
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      .catch(() => {})
+      .finally(() => { expireInFlight = false; });
+  }
+};
+
+const refreshStore = (): Promise<void> => {
+  if (inFlight) return inFlight;
+  inFlight = loadAll()
+    .catch(() => { setSnapshot({ loading: false }); })
+    .finally(() => { inFlight = null; });
+  return inFlight;
+};
+
+const start = () => {
+  if (started) return;
+  started = true;
+
+  // Paint instantly from the session cache while the network refresh runs.
+  supabase.auth.getSession().then(({ data }) => {
+    const uid = data.session?.user?.id;
+    if (uid) hydrate(uid);
+    else resetToFree();
+  });
+
+  refreshStore();
+
+  timer = setInterval(() => { refreshStore(); }, 60000);
+
+  supabase.auth.onAuthStateChange((event) => {
+    if (event === "SIGNED_OUT") {
+      try {
+        Object.keys(sessionStorage)
+          .filter((k) => k.startsWith(CACHE_PREFIX))
+          .forEach((k) => sessionStorage.removeItem(k));
+      } catch { /* ignore */ }
+      resetToFree();
+    } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+      refreshStore();
+    }
+  });
+
+  if (typeof window !== "undefined") {
+    window.addEventListener("beforeunload", () => { if (timer) clearInterval(timer); });
+  }
+};
+
+const subscribe = (cb: () => void) => {
+  listeners.add(cb);
+  return () => { listeners.delete(cb); };
+};
+
+const getSnapshot = () => snapshot;
+
+export const useSubscription = (): SubscriptionState => {
+  const s = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => { start(); }, []);
+
+  // Local clock check so an expiring trial banner disappears without waiting
+  // on the next network refresh.
   useEffect(() => {
-    refresh();
-    const interval = setInterval(() => {
-      checkSubscription();
-      loadTrial();
-    }, 60000);
-    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_OUT") {
-        resetToFree();
-        setLoading(false);
-      } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
-        refresh();
-      }
-    });
-    return () => {
-      clearInterval(interval);
-      sub.subscription.unsubscribe();
-    };
-  }, [refresh, checkSubscription, loadTrial, resetToFree]);
+    if (!s.trialActive || !s.trialEndsAt) return;
+    const ms = new Date(s.trialEndsAt).getTime() - Date.now();
+    if (ms <= 0) { setSnapshot({}); return; }
+    if (ms < 2147483647) {
+      const to = setTimeout(() => setSnapshot({}), ms + 500);
+      return () => clearTimeout(to);
+    }
+    return () => { if (tickRef.current) clearInterval(tickRef.current); };
+  }, [s.trialActive, s.trialEndsAt]);
 
-  // Effective tier: paid wins; otherwise trial promotes free→pro
-  const effectiveTier: SubscriptionTier =
-    paidTier !== "free" ? paidTier : trialActive ? "pro" : "free";
-
-  // Keep `tier` in sync without an effect dependency loop
-  useEffect(() => {
-    setTier(effectiveTier);
-  }, [effectiveTier]);
-
-  const trialDaysLeft = trialEndsAt
-    ? Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
-    : null;
-  const trialEndingToday = trialActive && trialDaysLeft !== null && trialDaysLeft <= 1;
+  const refresh = useCallback(async () => { await refreshStore(); }, []);
 
   const activateTrial = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -208,54 +280,55 @@ export const useSubscription = (): SubscriptionState => {
     });
     if (error) return { ok: false, error: error.message };
     if ((data as any)?.error) return { ok: false, error: (data as any).error };
-    await loadTrial();
+    await refreshStore();
     return { ok: true };
-  }, [loadTrial]);
+  }, []);
 
   const markProTourCompleted = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    setProTourCompleted(true);
-    await supabase
-      .from("user_settings")
-      .update({ pro_tour_completed: true })
-      .eq("user_id", user.id);
+    setSnapshot({ proTourCompleted: true });
+    persist(user.id);
+    await supabase.from("user_settings").update({ pro_tour_completed: true }).eq("user_id", user.id);
   }, []);
+
+  const effectiveTier: SubscriptionTier =
+    s.paidTier !== "free" ? s.paidTier : s.trialActive ? "pro" : "free";
+
+  const trialDaysLeft = s.trialEndsAt
+    ? Math.max(0, Math.ceil((new Date(s.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : null;
 
   const isPro = effectiveTier === "pro";
   const isPlus = effectiveTier === "plus";
   const isPaid = isPro || isPlus;
-  const isPaying = paidTier !== "free";
-  const isTrialPro = trialActive && paidTier === "free";
 
   return {
     tier: effectiveTier,
     isPro,
     isPlus,
     isPaid,
-    isPaying,
-    isTrialPro,
-    // Plus & Pro both grant these:
+    isPaying: s.paidTier !== "free",
+    isTrialPro: s.trialActive && s.paidTier === "free",
     hasUnlimitedChat: isPaid,
     hasUnlimitedWatchlists: isPaid,
     hasFullQuiz: isPaid,
-    loading,
-    subscriptionEnd,
-    cancelAtPeriodEnd,
-    subscriptionId,
-    subscriptionStatus,
-    scheduledTier,
-    scheduledStart,
-    scheduledChangesCount,
-    dailyAnalysesUsed,
-    // Only Pro gets unlimited article analyses; Plus uses free limit
-    canAnalyze: isPro || dailyAnalysesUsed < FREE_DAILY_ANALYSES,
-    trialActive,
-    trialUsed,
-    trialEndsAt,
+    loading: s.loading,
+    subscriptionEnd: s.subscriptionEnd,
+    cancelAtPeriodEnd: s.cancelAtPeriodEnd,
+    subscriptionId: s.subscriptionId,
+    subscriptionStatus: s.subscriptionStatus,
+    scheduledTier: s.scheduledTier,
+    scheduledStart: s.scheduledStart,
+    scheduledChangesCount: s.scheduledChangesCount,
+    dailyAnalysesUsed: s.dailyAnalysesUsed,
+    canAnalyze: isPro || s.dailyAnalysesUsed < FREE_DAILY_ANALYSES,
+    trialActive: s.trialActive,
+    trialUsed: s.trialUsed,
+    trialEndsAt: s.trialEndsAt,
     trialDaysLeft,
-    trialEndingToday,
-    proTourCompleted,
+    trialEndingToday: s.trialActive && trialDaysLeft !== null && trialDaysLeft <= 1,
+    proTourCompleted: s.proTourCompleted,
     activateTrial,
     markProTourCompleted,
     refresh,
