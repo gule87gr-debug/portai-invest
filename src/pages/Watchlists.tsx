@@ -13,7 +13,7 @@ import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
 import { generateSparklineData } from "@/components/Sparkline";
 import { DailySparkline } from "@/components/DailySparkline";
 import { useQuotes } from "@/hooks/useQuotes";
-import { Plus, Trash2, Search, X, ChevronDown, Eye, Filter, GripVertical } from "lucide-react";
+import { Plus, Trash2, Search, X, ChevronDown, Eye, Filter, GripVertical, Pencil, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { DraggableStockList } from "@/components/DraggableStockList";
@@ -22,7 +22,7 @@ const FREE_MAX_WATCHLISTS = 1;
 const FREE_MAX_STOCKS = 5;
 
 const Watchlists = () => {
-  const { watchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, reorderStocks, deleteWatchlist, watchlistsLoaded } = useApp();
+  const { watchlists, addWatchlist, addStockToWatchlist, removeStockFromWatchlist, reorderStocks, deleteWatchlist, renameWatchlist, watchlistsLoaded } = useApp();
   const { t } = useLanguage();
   const { hasUnlimitedWatchlists } = useSubscription();
   usePageTitle("Stock Watchlists | PortAI");
@@ -37,6 +37,8 @@ const Watchlists = () => {
   const [showRegionPicker, setShowRegionPicker] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeMsg, setUpgradeMsg] = useState("");
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
   const navigate = useNavigate();
 
   const active = watchlists[activeIdx] || watchlists[0];
@@ -79,6 +81,12 @@ const Watchlists = () => {
     if (!newListName.trim()) return;
     addWatchlist({ id: `wl-${Date.now()}`, name: newListName.trim(), stocks: [], desc: "Custom watchlist" });
     setNewListName(""); setShowNewList(false); setActiveIdx(0);
+  };
+
+  const startRename = (id: string, current: string) => { setRenamingId(id); setRenameValue(current); };
+  const commitRename = async () => {
+    if (renamingId && renameValue.trim()) await renameWatchlist(renamingId, renameValue);
+    setRenamingId(null); setRenameValue("");
   };
 
   const handleAddStock = (asset: AssetEntry) => {
@@ -274,8 +282,23 @@ const Watchlists = () => {
           <div className="mt-2 rounded-xl border border-border bg-card p-2 space-y-1 animate-fade-in">
             {watchlists.map((list, i) => (
               <div key={list.id} className="flex items-center justify-between">
-                <button onClick={() => { setActiveIdx(i); setShowListPicker(false); }} className={cn("flex-1 rounded-lg px-3 py-2 text-left text-sm transition-colors", activeIdx === i ? "bg-primary/15 text-primary font-semibold" : "hover:bg-accent/50")}>
-                  {list.name} <span className="text-xs text-muted-foreground ml-1">({list.stocks.length})</span>
+                {renamingId === list.id ? (
+                  <input
+                    value={renameValue}
+                    onChange={(e) => setRenameValue(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") commitRename(); if (e.key === "Escape") setRenamingId(null); }}
+                    onBlur={commitRename}
+                    autoFocus
+                    aria-label="Watchlist name"
+                    className="flex-1 h-9 rounded-lg border border-border bg-accent/30 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                ) : (
+                  <button onClick={() => { setActiveIdx(i); setShowListPicker(false); }} className={cn("flex-1 rounded-lg px-3 py-2 text-left text-sm transition-colors", activeIdx === i ? "bg-primary/15 text-primary font-semibold" : "hover:bg-accent/50")}>
+                    {list.name} <span className="text-xs text-muted-foreground ml-1">({list.stocks.length})</span>
+                  </button>
+                )}
+                <button onClick={() => (renamingId === list.id ? commitRename() : startRename(list.id, list.name))} aria-label={`Rename watchlist: ${list.name}`} className="p-1 text-muted-foreground hover:text-primary">
+                  {renamingId === list.id ? <Check className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
                 </button>
                 <button onClick={() => { deleteWatchlist(list.id); if (activeIdx >= watchlists.length - 1) setActiveIdx(Math.max(0, activeIdx - 1)); }} aria-label={`Delete watchlist: ${list.name}`} className="p-1 text-muted-foreground hover:text-loss">
                   <Trash2 className="h-3.5 w-3.5" />
@@ -290,9 +313,25 @@ const Watchlists = () => {
         <div className="hidden sm:block w-60 shrink-0 space-y-3">
           {watchlists.map((list, i) => (
             <div key={list.id} className="relative">
-              <button onClick={() => setActiveIdx(i)} className={cn("w-full rounded-xl border p-4 pr-10 text-left transition-all", activeIdx === i ? "border-primary bg-primary/10" : "border-border bg-card hover:bg-accent/50")}>
-                <p className="font-semibold text-sm">{list.name}</p>
+              <button onClick={() => setActiveIdx(i)} className={cn("w-full rounded-xl border p-4 pr-16 text-left transition-all", activeIdx === i ? "border-primary bg-primary/10" : "border-border bg-card hover:bg-accent/50")}>
+                {renamingId === list.id ? (
+                  <input
+                    value={renameValue}
+                    onChange={(e) => setRenameValue(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => { if (e.key === "Enter") commitRename(); if (e.key === "Escape") setRenamingId(null); }}
+                    onBlur={commitRename}
+                    autoFocus
+                    aria-label="Watchlist name"
+                    className="w-full h-8 rounded-md border border-border bg-background px-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                ) : (
+                  <p className="font-semibold text-sm truncate">{list.name}</p>
+                )}
                 <p className="mt-0.5 text-xs text-muted-foreground">{list.stocks.length} {t("items")}</p>
+              </button>
+              <button onClick={() => (renamingId === list.id ? commitRename() : startRename(list.id, list.name))} aria-label={`Rename watchlist: ${list.name}`} className="absolute top-2 right-8 text-muted-foreground hover:text-primary transition-colors">
+                {renamingId === list.id ? <Check className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
               </button>
               <button onClick={() => { deleteWatchlist(list.id); if (activeIdx >= watchlists.length - 1) setActiveIdx(Math.max(0, activeIdx - 1)); }} aria-label={`Delete watchlist: ${list.name}`} className="absolute top-2 right-2 text-muted-foreground hover:text-loss transition-colors">
                 <Trash2 className="h-3.5 w-3.5" />
