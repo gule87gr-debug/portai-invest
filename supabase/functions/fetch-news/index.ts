@@ -90,11 +90,13 @@ Deno.serve(async (req) => {
       categories: catList,
       regions: regionList,
       search,
+      ticker,
     }: {
       category?: string;
       categories?: string[];
       regions?: string[];
       search?: string;
+      ticker?: string;
     } = body;
 
     // Validate against allow-lists; ignore unknown keys
@@ -136,8 +138,11 @@ Deno.serve(async (req) => {
       `https://news.google.com/rss/search?q=${encodedQuery}+when:7d&hl=en-US&gl=US&ceid=US:en`,
       `https://news.google.com/rss/search?q=${encodedQuery}&hl=en-US&gl=US&ceid=US:en`,
     ];
-    const fallbackUrls = searchTrim
-      ? [`https://feeds.finance.yahoo.com/rss/2.0/headline?s=${encodeURIComponent(searchTrim.replace(/["]/g, "").split(" ")[0])}&region=US&lang=en-US`]
+    const safeTicker = typeof ticker === "string" ? ticker.replace(/[^A-Za-z0-9.\-]/g, "").slice(0, 12) : "";
+    const fallbackUrls = safeTicker
+      ? [`https://feeds.finance.yahoo.com/rss/2.0/headline?s=${encodeURIComponent(safeTicker)}&region=US&lang=en-US`]
+      : searchTrim
+      ? []
       : [
           "https://feeds.content.dowjones.io/public/rss/mw_topstories",
           "https://finance.yahoo.com/news/rssindex",
@@ -177,12 +182,12 @@ Deno.serve(async (req) => {
 
     // Hit both Google variants in parallel with a tight timeout so a slow
     // upstream can never stall the request beyond ~4s.
-    const primaryResults = await Promise.all(primaryUrls.map((u) => fetchFeed(u, 4000)));
+    const primaryResults = await Promise.all(primaryUrls.map((u) => fetchFeed(u, 3000)));
     let items = primaryResults.find((r) => r.length > 0) ?? [];
 
     // Only pay for fallbacks when the primary produced nothing.
     if (!items.length) {
-      const fallbackResults = await Promise.all(fallbackUrls.map((u) => fetchFeed(u, 3500)));
+      const fallbackResults = await Promise.all(fallbackUrls.map((u) => fetchFeed(u, 3000)));
       const merged: NewsItem[] = [];
       const seen = new Set<string>();
       for (const list of fallbackResults) {
