@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { ExternalLink, Loader2, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { assetDatabase } from "@/lib/stockDatabase";
 
 interface NewsItem {
   title: string;
