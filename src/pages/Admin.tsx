@@ -144,9 +144,9 @@ const AdminPage = () => {
             <button
               onClick={runStripeAudit}
               disabled={stripeLoading}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-50"
+              className="refresh-btn inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-50"
             >
-              {stripeLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+              <RefreshCw className={`refresh-icon h-3 w-3 ${stripeLoading ? "is-spinning" : ""}`} />
               Run audit
             </button>
           </div>
@@ -263,8 +263,8 @@ const AdminPage = () => {
                   onChange={(e) => setUserSearch(e.target.value)}
                   className="w-full sm:w-64 rounded-md border border-border bg-background px-3 py-1.5 text-xs"
                 />
-                <button onClick={loadUsers} disabled={usersLoading} className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-accent shrink-0 disabled:opacity-50">
-                  <RefreshCw className={`h-3 w-3 ${usersLoading ? "animate-spin" : ""}`} /> Refresh
+                <button onClick={loadUsers} disabled={usersLoading} className="refresh-btn inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-accent shrink-0 disabled:opacity-50">
+                  <RefreshCw className={`refresh-icon h-3 w-3 ${usersLoading ? "is-spinning" : ""}`} /> Refresh
                 </button>
               </div>
               {usersLoading ? (
@@ -335,8 +335,8 @@ const AdminPage = () => {
                 <DialogDescription>Last 100 admin-bypass events.</DialogDescription>
               </DialogHeader>
               <div className="flex justify-end mb-2">
-                <button onClick={loadAudit} disabled={auditLoading} className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-accent disabled:opacity-50">
-                  <RefreshCw className={`h-3 w-3 ${auditLoading ? "animate-spin" : ""}`} /> Refresh
+                <button onClick={loadAudit} disabled={auditLoading} className="refresh-btn inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs hover:bg-accent disabled:opacity-50">
+                  <RefreshCw className={`refresh-icon h-3 w-3 ${auditLoading ? "is-spinning" : ""}`} /> Refresh
                 </button>
               </div>
               {auditLoading ? (
