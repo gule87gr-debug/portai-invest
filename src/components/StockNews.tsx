@@ -45,7 +45,7 @@ export const StockNews = ({ ticker, height = 400 }: { ticker: string; height?: n
       const search = name ? `"${name.replace(/[^\p{L}\p{N}\s&.\-]/gu, "")}" OR "${cleanTicker} stock"` : `"${cleanTicker} stock"`;
 
       const { data } = await supabase.functions.invoke("fetch-news", {
-        body: { search },
+        body: { search, ticker: cleanTicker },
       });
 
       const items: NewsItem[] = data?.items || [];
