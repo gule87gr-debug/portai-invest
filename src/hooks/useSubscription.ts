@@ -95,13 +95,13 @@ const setSnapshot = (patch: Partial<Snapshot>) => {
 
 const persist = (userId: string) => {
   try {
-    sessionStorage.setItem(`${CACHE_PREFIX}-${userId}`, JSON.stringify({ ...snapshot, loading: false }));
+    localStorage.setItem(`${CACHE_PREFIX}-${userId}`, JSON.stringify({ ...snapshot, loading: false }));
   } catch { /* storage unavailable */ }
 };
 
 const hydrate = (userId: string): boolean => {
   try {
-    const raw = sessionStorage.getItem(`${CACHE_PREFIX}-${userId}`);
+    const raw = localStorage.getItem(`${CACHE_PREFIX}-${userId}`);
     if (!raw) return false;
     const cached = JSON.parse(raw) as Snapshot;
     setSnapshot({ ...cached, loading: false });
@@ -110,6 +110,18 @@ const hydrate = (userId: string): boolean => {
     return false;
   }
 };
+
+// Synchronously restore the last known snapshot at module load so the first
+// paint already has the right tier/trial state (no spinner, no banner flash).
+try {
+  const key = Object.keys(localStorage).find((k) => k.startsWith(CACHE_PREFIX));
+  if (key) {
+    const cached = JSON.parse(localStorage.getItem(key) as string) as Snapshot;
+    snapshot = { ...emptySnapshot, ...cached, loading: false };
+    snapshot.trialActive =
+      snapshot.trialActive && !!snapshot.trialEndsAt && new Date(snapshot.trialEndsAt).getTime() > Date.now();
+  }
+} catch { /* storage unavailable */ }
 
 let inFlight: Promise<void> | null = null;
 let started = false;
@@ -228,9 +240,9 @@ const start = () => {
   supabase.auth.onAuthStateChange((event) => {
     if (event === "SIGNED_OUT") {
       try {
-        Object.keys(sessionStorage)
+        Object.keys(localStorage)
           .filter((k) => k.startsWith(CACHE_PREFIX))
-          .forEach((k) => sessionStorage.removeItem(k));
+          .forEach((k) => localStorage.removeItem(k));
       } catch { /* ignore */ }
       resetToFree();
     } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {

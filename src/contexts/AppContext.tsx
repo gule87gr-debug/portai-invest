@@ -32,13 +32,13 @@ const WL_CACHE_KEY = "portai-watchlists-cache";
 
 const readWatchlistCache = (userId: string): WatchlistData[] | null => {
   try {
-    const raw = sessionStorage.getItem(`${WL_CACHE_KEY}-${userId}`);
+    const raw = localStorage.getItem(`${WL_CACHE_KEY}-${userId}`);
     return raw ? (JSON.parse(raw) as WatchlistData[]) : null;
   } catch { return null; }
 };
 
 const writeWatchlistCache = (userId: string, data: WatchlistData[]) => {
-  try { sessionStorage.setItem(`${WL_CACHE_KEY}-${userId}`, JSON.stringify(data)); } catch { /* ignore */ }
+  try { localStorage.setItem(`${WL_CACHE_KEY}-${userId}`, JSON.stringify(data)); } catch { /* ignore */ }
 };
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
