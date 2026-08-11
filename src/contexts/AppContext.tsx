@@ -110,8 +110,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       setCurrentUserId(user.id);
 
       const fallbackName = user.email?.split("@")[0] || "User";
-      // Optimistically show a name immediately so the UI doesn't wait on the DB.
-      setProfile({ name: fallbackName, email: user.email || "" });
+      // Only overwrite the cached name if we don't have one yet.
+      setProfile((prev) => (prev.email ? { ...prev, email: user.email || prev.email } : { name: fallbackName, email: user.email || "" }));
 
       // Paint cached watchlists instantly, then refresh in the background.
       const cached = readWatchlistCache(user.id);
@@ -128,11 +128,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
       const settings = settingsRes.data as any;
       if (settings) {
-        setProfile({
-          name: settings.display_name || fallbackName,
-          email: user.email || "",
-        });
-        if (settings.language) setInitialLanguage(settings.language);
+        const nextProfile = { name: settings.display_name || fallbackName, email: user.email || "" };
+        setProfile(nextProfile);
+        try { localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(nextProfile)); } catch { /* ignore */ }
+        if (settings.language) {
+          setInitialLanguage(settings.language);
+          try { localStorage.setItem(LANG_CACHE_KEY, settings.language); } catch { /* ignore */ }
+        }
+
         if (!settings.tutorial_completed) setShowTutorial(true);
       } else {
         // Insert default row without blocking the UI.
