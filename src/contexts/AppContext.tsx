@@ -165,8 +165,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     writeWatchlistCache(currentUserId, watchlists);
   }, [watchlists, currentUserId, watchlistsLoaded]);
 
-    writeWatchlistCache(currentUserId, watchlists);
-  }, [watchlists, currentUserId, watchlistsLoaded]);
+
 
 
 
