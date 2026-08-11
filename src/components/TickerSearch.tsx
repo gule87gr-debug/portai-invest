@@ -63,7 +63,7 @@ export const TickerSearch = ({ className }: { className?: string }) => {
         </kbd>
       </button>
 
-      <CommandDialog open={open} onOpenChange={setOpen}>
+      <CommandDialog open={open} onOpenChange={setOpen} shouldFilter={false}>
         <CommandInput
           value={query}
           onValueChange={setQuery}
