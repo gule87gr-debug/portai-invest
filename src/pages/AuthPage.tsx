@@ -338,9 +338,9 @@ const AuthPage = ({ onAuth, initialMode = "signup" }: { onAuth: () => void; init
               <button
                 onClick={handleResendCode}
                 disabled={resendCooldown > 0 || loading}
-                className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors disabled:text-muted-foreground disabled:cursor-not-allowed"
+                className="refresh-btn flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 disabled:text-muted-foreground disabled:cursor-not-allowed"
               >
-                <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
+                <RefreshCw className={cn("refresh-icon h-3.5 w-3.5", loading && "is-spinning")} />
                 {resendCooldown > 0 ? t("resendInSec").replace("{n}", String(resendCooldown)) : t("resendCodeBtn")}
               </button>
             </div>
@@ -406,9 +406,9 @@ const AuthPage = ({ onAuth, initialMode = "signup" }: { onAuth: () => void; init
                   type="button"
                   onClick={handleResendVerification}
                   disabled={verifyResendCooldown > 0}
-                  className="flex h-9 w-full items-center justify-center gap-2 rounded-md border border-primary/40 bg-primary/10 text-xs font-medium text-primary transition-colors hover:bg-primary/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="refresh-btn flex h-9 w-full items-center justify-center gap-2 rounded-md border border-primary/40 bg-primary/10 text-xs font-medium text-primary hover:bg-primary/20 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  <RefreshCw className={cn("h-3.5 w-3.5", verifyResendCooldown === 0 && "")} />
+                  <RefreshCw className="refresh-icon h-3.5 w-3.5" />
                   {verifyResendCooldown > 0
                     ? `Resend available in ${verifyResendCooldown}s`
                     : "Resend verification email"}
