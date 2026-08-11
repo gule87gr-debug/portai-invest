@@ -259,7 +259,7 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
         <div className="py-10 px-6">
           <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
             {[
-              { value: "10,000+", label: lt("statGlobalAssets"), icon: BarChart3 },
+              { value: "7,000+", label: lt("statGlobalAssets"), icon: BarChart3 },
               { value: "6", label: lt("statLanguages"), icon: Globe },
               { value: "AI", label: lt("statBiasFact"), icon: ShieldCheck },
               { value: "24/7", label: lt("statAdvisor247"), icon: Brain },
@@ -642,7 +642,7 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
                         "name": "What assets and markets can I track?",
                         "acceptedAnswer": {
                           "@type": "Answer",
-                          "text": "You can track 10,000+ stocks, ETFs and cryptocurrencies across 20+ countries, including the S&P 500, NASDAQ, FTSE, DAX, Nikkei and major crypto pairs."
+                          "text": "You can track 7,000+ stocks, ETFs and cryptocurrencies across 20+ countries, including the S&P 500, NASDAQ, FTSE, DAX, Nikkei and major crypto pairs."
                         }
                       },
                       {
