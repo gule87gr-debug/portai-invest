@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { ExternalLink, Loader2, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { assetDatabase } from "@/lib/stockDatabase";
 
 interface NewsItem {
   title: string;
@@ -10,6 +11,8 @@ interface NewsItem {
   pubDate: string;
 }
 
+const STOP_WORDS = new Set(["inc", "corp", "corporation", "company", "co", "ltd", "plc", "the", "group", "holdings", "sa", "nv", "ag", "etf", "fund", "trust", "index", "class"]);
+
 export const StockNews = ({ ticker, height = 400 }: { ticker: string; height?: number }) => {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,10 +20,32 @@ export const StockNews = ({ ticker, height = 400 }: { ticker: string; height?: n
   const fetchNews = useCallback(async () => {
     setLoading(true);
     try {
+      const entry = assetDatabase.find((a) => a.ticker.toUpperCase() === ticker.toUpperCase());
+      const name = entry?.name || "";
+      const cleanTicker = ticker.replace(/[^A-Za-z0-9.\-]/g, "");
+      const search = name ? `"${name.replace(/[^\p{L}\p{N}\s&.\-]/gu, "")}" OR "${cleanTicker} stock"` : `"${cleanTicker} stock"`;
+
       const { data } = await supabase.functions.invoke("fetch-news", {
-        body: { category: "all", ticker },
+        body: { search },
       });
-      setNews(data?.items || []);
+
+      const items: NewsItem[] = data?.items || [];
+      const nameWords = name
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}\s]/gu, " ")
+        .split(/\s+/)
+        .filter((w) => w.length > 2 && !STOP_WORDS.has(w));
+      const tickerRe = new RegExp(`\\b${cleanTicker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
+
+      const relevant = items.filter((item) => {
+        const title = item.title.toLowerCase();
+        if (tickerRe.test(item.title)) return true;
+        if (!nameWords.length) return false;
+        const hits = nameWords.filter((w) => title.includes(w)).length;
+        return hits >= Math.min(2, nameWords.length);
+      });
+
+      setNews(relevant);
     } catch {
       setNews([]);
     } finally {
