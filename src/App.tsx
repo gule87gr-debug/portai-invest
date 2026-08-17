@@ -69,6 +69,7 @@ const IPPolicy = lazyWithRetry(() => import("./pages/IPPolicy"));
 const AdminPage = lazyWithRetry(() => import("./pages/Admin"));
 const SeekingAlphaVsMotleyFool = lazyWithRetry(() => import("./pages/SeekingAlphaVsMotleyFool"));
 const BestStockAdvisorServices = lazyWithRetry(() => import("./pages/BestStockAdvisorServices"));
+const DetectPumpAndDump = lazyWithRetry(() => import("./pages/DetectPumpAndDump"));
 const OAuthConsent = lazyWithRetry(() => import("./pages/OAuthConsent"));
 
 const queryClient = new QueryClient({
