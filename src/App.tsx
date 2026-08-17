@@ -215,6 +215,7 @@ const App = () => (
               <Route path="/unsubscribe" element={<Unsubscribe />} />
               <Route path="/compare/seeking-alpha-vs-motley-fool" element={<SeekingAlphaVsMotleyFool />} />
               <Route path="/compare/best-stock-advisor-services" element={<BestStockAdvisorServices />} />
+              <Route path="/blog/how-to-detect-pump-and-dump-schemes" element={<DetectPumpAndDump />} />
               <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
               <Route path="*" element={<AppRoutes />} />
             </Routes>
