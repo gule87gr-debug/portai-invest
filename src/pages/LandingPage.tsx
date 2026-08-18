@@ -476,26 +476,52 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
 
 
       <RevealSection>
-        <section id="why-portai" aria-labelledby="why-portai-heading" className="px-4 sm:px-6 py-14 max-w-3xl mx-auto">
-          <h2 id="why-portai-heading" className="editorial-heading text-3xl sm:text-4xl text-foreground mb-6 text-center" style={{ textWrap: "balance" as any }}>
+        <LiveAnalysisDemo onGetStarted={onGetStarted} />
+      </RevealSection>
+
+      <RevealSection>
+        <ExtensionShowcase />
+      </RevealSection>
+
+      <RevealSection>
+        <section id="why-portai" aria-labelledby="why-portai-heading" className="px-4 sm:px-6 py-14 max-w-5xl mx-auto border-t border-border">
+          <h2 id="why-portai-heading" className="editorial-heading text-3xl sm:text-4xl text-foreground mb-3 text-center" style={{ textWrap: "balance" as any }}>
             Why PortAI?
           </h2>
-          <h3 className="text-base sm:text-lg font-semibold text-primary mb-4 text-center">
-            Beyond price — the truth behind every move.
-          </h3>
-          <p className="mb-6 text-sm sm:text-base leading-relaxed text-foreground/90 text-center max-w-2xl mx-auto">
-            Traditional portfolio trackers only show you the price. PortAI uses AI sentiment analysis to reveal the truth behind financial news bias. Whether you are tracking the S&amp;P 500 or looking for crypto market insights, our AI ensures you never trade on hype.
+          <p className="text-center text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-10">
+            Traditional trackers show the price. PortAI shows the narrative moving it.
           </p>
-          <div className="space-y-5 text-sm sm:text-base leading-relaxed text-muted-foreground">
-            <p>
-              Today&apos;s retail investor is drowning in financial reporting. Outlets like The Motley Fool, CNBC, Yahoo Finance, and Seeking Alpha publish thousands of articles every week — many of them written to chase clicks, push affiliate stocks, or amplify positions taken by sell-side desks. Without an objective filter, even disciplined investors end up rotating capital based on narrative rather than evidence, and biased financial reporting quietly becomes the largest hidden risk in their portfolio.
-            </p>
-            <p>
-              Traditional portfolio trackers were never designed to solve this. They show you what your assets are doing, but they cannot tell you <em>why</em> a stock just ran 8% on a Monday morning, whether the catalyst is durable, or whether the bullish coverage you are reading omits a regulatory filing, an insider sale, or a contradicting earnings transcript. That gap — between price action and the narrative driving it — is exactly where retail investors get hurt.
-            </p>
-            <p>
-              PortAI closes that gap. We use Large Language Models to read each article you paste, score its trust and bias, surface omitted data points, and compare its sentiment against social, options-flow, and peer-coverage signals. The result is an objective sentiment analysis layered on top of a real-time stock and crypto portfolio tracker — so you can verify the story before you trade the chart, in plain English, in 6 languages, every single day.
-            </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-4">Ordinary tracker</p>
+              <ul className="space-y-3">
+                {[
+                  "Shows what moved, never why",
+                  "Headlines arrive unfiltered",
+                  "Omitted filings stay omitted",
+                  "You verify everything by hand",
+                ].map((x) => (
+                  <li key={x} className="flex gap-2.5 text-sm text-muted-foreground">
+                    <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-loss" /> {x}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="rounded-2xl border border-foreground/25 bg-card p-6">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-foreground mb-4">With PortAI</p>
+              <ul className="space-y-3">
+                {[
+                  "Trust and bias score on every article",
+                  "Speculative framing flagged instantly",
+                  "Missing context surfaced automatically",
+                  "Claims cross-checked against other sources",
+                ].map((x) => (
+                  <li key={x} className="flex gap-2.5 text-sm text-foreground/90">
+                    <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5 text-gain" /> {x}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </section>
       </RevealSection>
