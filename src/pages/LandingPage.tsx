@@ -5,6 +5,9 @@ import { useLanguage, type Language } from "@/contexts/LanguageContext";
 import { useLandingT } from "@/lib/landingI18n";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import LiveAnalysisDemo from "@/components/landing/LiveAnalysisDemo";
+import ExtensionShowcase from "@/components/landing/ExtensionShowcase";
+import TransparencyTrust from "@/components/landing/TransparencyTrust";
 
 const supportingFeatures = [
   { icon: LayoutDashboard, key: "marketIntelligence", descKey: "supF1Desc" as const },
