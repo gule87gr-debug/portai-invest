@@ -652,6 +652,13 @@ serve(async (req) => {
       }
     }
 
+    // ---- Article body fallback (many publishers 403 direct bot fetches) ----
+    let articleBody = ((pre as { bodyText?: string }).bodyText || "").trim();
+    if (articleBody.length < 400) {
+      const fallback = await fetchArticleTextFallback(url);
+      if (fallback.length > articleBody.length) articleBody = fallback;
+    }
+
     // ---- Cross-source corroboration (independent coverage of the same story) ----
     let articleHost = "";
     try { articleHost = normalizeHost(new URL(url).hostname); } catch { /* noop */ }
@@ -659,6 +666,7 @@ serve(async (req) => {
     const crossSourceBlock = crossSources.length
       ? crossSources.map((c, i) => `${i + 1}. [${c.source || "Unknown outlet"}] ${c.title}${c.date ? ` (${c.date})` : ""}`).join("\n")
       : "No independent coverage of this story was found in the news index.";
+
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
