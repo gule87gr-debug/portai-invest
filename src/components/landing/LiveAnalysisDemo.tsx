@@ -160,14 +160,18 @@ const LiveAnalysisDemo = ({ onGetStarted }: { onGetStarted: () => void }) => {
         </div>
       </div>
 
-      {/* Product visual placeholders */}
+      {/* Real product screenshots */}
       <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {["Real-time article scan", "Watchlist bias alerts", "Trust score history"].map((label) => (
+        {DEMO_LOOPS.map(({ label, src, alt }) => (
           <figure key={label} className="rounded-2xl border border-border bg-card overflow-hidden">
-            <div className="aspect-video bg-gradient-to-br from-muted/60 to-background flex items-center justify-center">
-              <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
-                demo loop
-              </span>
+            <div className="aspect-video overflow-hidden bg-background">
+              <img
+                src={src}
+                alt={alt}
+                loading="lazy"
+                decoding="async"
+                className="h-full w-full object-cover object-left-top"
+              />
             </div>
             <figcaption className="px-4 py-3 text-xs text-muted-foreground border-t border-border">
               {label}
@@ -175,6 +179,7 @@ const LiveAnalysisDemo = ({ onGetStarted }: { onGetStarted: () => void }) => {
           </figure>
         ))}
       </div>
+
     </section>
   );
 };
