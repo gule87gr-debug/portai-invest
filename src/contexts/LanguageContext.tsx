@@ -5,7 +5,7 @@ export type Language = "en" | "es" | "fr" | "pt" | "de" | "it";
 const translations: Record<Language, Record<string, string>> = {
   en: {
     // Nav
-    home: "Home", dashboard: "Dashboard", aiChat: "AI Chat", quiz: "Quiz", forum: "Media Pulse", watchlists: "Watchlists", settings: "Settings", news: "News", articleAnalyzer: "Analyze", new: "NEW",
+    home: "Home", dashboard: "Dashboard", aiChat: "Sentry", quiz: "Quiz", forum: "Media Pulse", watchlists: "Watchlists", settings: "Settings", news: "News", articleAnalyzer: "Analyze", new: "NEW",
     // Landing
     landingBanner: "Limited time: Plus 40% OFF (€8.99) · Pro 36% OFF (€15.99)",
     heroBadge: "AI-Powered Bias Shield",
@@ -43,10 +43,10 @@ const translations: Record<Language, Record<string, string>> = {
     potentialBiases: "Potential Biases",
     strengths: "Strengths",
     // AI Chat
-    aiFinancialAdvisor: "AI Financial Advisor", poweredByAI: "Powered by AI · Educational use only",
+    aiFinancialAdvisor: "Sentry", poweredByAI: "Your AI market analyst · Educational use only",
     history: "History", newChat: "New Chat", chatHistory: "Chat History", noSavedChats: "No saved chats yet.",
     askAnything: "Ask anything about finance, investing, markets...",
-    welcomeMessage: "Hello! I'm your AI financial advisor. Ask me anything about investing, markets, or portfolio strategies.",
+    welcomeMessage: "Hi, I'm Sentry — PortAI's market analyst. Ask me anything about investing, markets, or portfolio strategies.",
     suggestETF: "What's the difference between ETFs and mutual funds?",
     suggestDiversify: "How should I diversify my portfolio?",
     suggestPE: "Explain P/E ratio and how to use it",
@@ -622,7 +622,7 @@ const translations: Record<Language, Record<string, string>> = {
     rationaleTpl: "A {risk}, {profit} portfolio designed for a {time} horizon. Tailored for {exp} investors. This allocation balances risk and reward to target {ret} annual returns.",
   },
   es: {
-    home: "Inicio", dashboard: "Panel", aiChat: "Chat IA", quiz: "Cuestionario", forum: "Pulso Media", watchlists: "Listas", settings: "Ajustes", news: "Noticias", articleAnalyzer: "Analizar", new: "NUEVO",
+    home: "Inicio", dashboard: "Panel", aiChat: "Sentry", quiz: "Cuestionario", forum: "Pulso Media", watchlists: "Listas", settings: "Ajustes", news: "Noticias", articleAnalyzer: "Analizar", new: "NUEVO",
     // Landing
     landingBanner: "Tiempo limitado: Plus 40% OFF (€8,99) · Pro 36% OFF (€15,99)",
     heroBadge: "Escudo IA contra el sesgo",
@@ -655,10 +655,10 @@ const translations: Record<Language, Record<string, string>> = {
     biasDetectionDesc: "Señala lenguaje promocional, divulgaciones faltantes y posibles conflictos de interés",
     pasteArticleUrl: "Pega la URL del artículo (ej. https://cnbc.com/article/...)",
     source: "Fuente", summary: "Resumen", potentialBiases: "Sesgos Potenciales", strengths: "Fortalezas",
-    aiFinancialAdvisor: "Asesor Financiero IA", poweredByAI: "Con IA · Solo uso educativo",
+    aiFinancialAdvisor: "Sentry", poweredByAI: "Tu analista de mercados IA · Solo uso educativo",
     history: "Historial", newChat: "Nuevo Chat", chatHistory: "Historial de Chats", noSavedChats: "Sin chats guardados.",
     askAnything: "Pregunta sobre finanzas, inversiones, mercados...",
-    welcomeMessage: "¡Hola! Soy tu asesor financiero IA. Pregúntame sobre inversiones, mercados o estrategias de portafolio.",
+    welcomeMessage: "¡Hola! Soy Sentry, el analista de mercados de PortAI. Pregúntame sobre inversiones, mercados o estrategias de portafolio.",
     suggestETF: "¿Cuál es la diferencia entre ETFs y fondos mutuos?",
     suggestDiversify: "¿Cómo debo diversificar mi portafolio?",
     suggestPE: "Explica el ratio P/E y cómo usarlo",
@@ -1190,7 +1190,7 @@ const translations: Record<Language, Record<string, string>> = {
     rationaleTpl: "Una cartera {risk} y {profit} diseñada para un horizonte {time}. Pensada para inversores {exp}. Esta asignación equilibra riesgo y recompensa con un objetivo de {ret} de retornos anuales.",
   },
   fr: {
-    home: "Accueil", dashboard: "Tableau de bord", aiChat: "Chat IA", quiz: "Quiz", forum: "Pulse Média", watchlists: "Listes", settings: "Paramètres", news: "Actualités", articleAnalyzer: "Analyser", new: "NOUVEAU",
+    home: "Accueil", dashboard: "Tableau de bord", aiChat: "Sentry", quiz: "Quiz", forum: "Pulse Média", watchlists: "Listes", settings: "Paramètres", news: "Actualités", articleAnalyzer: "Analyser", new: "NOUVEAU",
     // Landing
     landingBanner: "Durée limitée : Plus -40% (8,99 €) · Pro -36% (15,99 €)",
     heroBadge: "Bouclier IA contre les biais",
@@ -1223,10 +1223,10 @@ const translations: Record<Language, Record<string, string>> = {
     biasDetectionDesc: "Signale le langage promotionnel, les divulgations manquantes et les conflits d'intérêts potentiels",
     pasteArticleUrl: "Collez l'URL de l'article (ex. https://cnbc.com/article/...)",
     source: "Source", summary: "Résumé", potentialBiases: "Biais Potentiels", strengths: "Points Forts",
-    aiFinancialAdvisor: "Conseiller Financier IA", poweredByAI: "Alimenté par IA · Usage éducatif uniquement",
+    aiFinancialAdvisor: "Sentry", poweredByAI: "Votre analyste de marché IA · Usage éducatif uniquement",
     history: "Historique", newChat: "Nouveau Chat", chatHistory: "Historique des Chats", noSavedChats: "Aucun chat sauvegardé.",
     askAnything: "Posez vos questions sur la finance, l'investissement...",
-    welcomeMessage: "Bonjour ! Je suis votre conseiller financier IA. Posez-moi des questions sur l'investissement, les marchés ou les stratégies de portefeuille.",
+    welcomeMessage: "Bonjour ! Je suis Sentry, l'analyste de marché de PortAI. Posez-moi des questions sur l'investissement, les marchés ou les stratégies de portefeuille.",
     suggestETF: "Quelle est la différence entre les ETF et les fonds communs ?",
     suggestDiversify: "Comment diversifier mon portefeuille ?",
     suggestPE: "Expliquez le ratio P/E et comment l'utiliser",
@@ -1758,7 +1758,7 @@ const translations: Record<Language, Record<string, string>> = {
     rationaleTpl: "Un portefeuille {risk}, {profit} conçu pour un horizon {time}. Adapté aux investisseurs {exp}. Cette allocation équilibre risque et rendement pour cibler {ret} de rendements annuels.",
   },
   pt: {
-    home: "Início", dashboard: "Painel", aiChat: "Chat IA", quiz: "Quiz", forum: "Pulso Media", watchlists: "Listas", settings: "Configurações", news: "Notícias", articleAnalyzer: "Analisar", new: "NOVO",
+    home: "Início", dashboard: "Painel", aiChat: "Sentry", quiz: "Quiz", forum: "Pulso Media", watchlists: "Listas", settings: "Configurações", news: "Notícias", articleAnalyzer: "Analisar", new: "NOVO",
     // Landing
     landingBanner: "Por tempo limitado: Plus 40% OFF (€8,99) · Pro 36% OFF (€15,99)",
     heroBadge: "Escudo IA contra o viés",
@@ -1791,10 +1791,10 @@ const translations: Record<Language, Record<string, string>> = {
     biasDetectionDesc: "Sinaliza linguagem promocional, divulgações ausentes e potenciais conflitos de interesse",
     pasteArticleUrl: "Cole a URL do artigo (ex. https://cnbc.com/article/...)",
     source: "Fonte", summary: "Resumo", potentialBiases: "Vieses Potenciais", strengths: "Pontos Fortes",
-    aiFinancialAdvisor: "Consultor Financeiro IA", poweredByAI: "Com IA · Apenas uso educativo",
+    aiFinancialAdvisor: "Sentry", poweredByAI: "O seu analista de mercado IA · Apenas uso educativo",
     history: "Histórico", newChat: "Novo Chat", chatHistory: "Histórico de Chats", noSavedChats: "Nenhum chat salvo.",
     askAnything: "Pergunte sobre finanças, investimentos, mercados...",
-    welcomeMessage: "Olá! Sou seu consultor financeiro IA. Pergunte sobre investimentos, mercados ou estratégias de portfólio.",
+    welcomeMessage: "Olá! Sou o Sentry, o analista de mercado da PortAI. Pergunte sobre investimentos, mercados ou estratégias de portfólio.",
     suggestETF: "Qual a diferença entre ETFs e fundos mútuos?",
     suggestDiversify: "Como devo diversificar meu portfólio?",
     suggestPE: "Explique o índice P/L e como usá-lo",
@@ -2326,7 +2326,7 @@ const translations: Record<Language, Record<string, string>> = {
     rationaleTpl: "Uma carteira {risk}, {profit} para um horizonte {time}. Adaptada a investidores {exp}. Esta alocação equilibra risco e retorno visando retornos anuais de {ret}.",
   },
   de: {
-    home: "Startseite", dashboard: "Dashboard", aiChat: "KI-Chat", quiz: "Quiz", forum: "Medien-Puls", watchlists: "Beobachtungslisten", settings: "Einstellungen", news: "News", articleAnalyzer: "Analysieren", new: "NEU",
+    home: "Startseite", dashboard: "Dashboard", aiChat: "Sentry", quiz: "Quiz", forum: "Medien-Puls", watchlists: "Beobachtungslisten", settings: "Einstellungen", news: "News", articleAnalyzer: "Analysieren", new: "NEU",
     // Landing
     landingBanner: "Nur kurze Zeit: Plus 40% RABATT (8,99 €) · Pro 36% RABATT (15,99 €)",
     heroBadge: "KI-Schild gegen Voreingenommenheit",
@@ -2359,10 +2359,10 @@ const translations: Record<Language, Record<string, string>> = {
     biasDetectionDesc: "Erkennt werbliche Sprache, fehlende Offenlegungen und potenzielle Interessenkonflikte",
     pasteArticleUrl: "Artikel-URL einfügen (z.B. https://cnbc.com/article/...)",
     source: "Quelle", summary: "Zusammenfassung", potentialBiases: "Potenzielle Verzerrungen", strengths: "Stärken",
-    aiFinancialAdvisor: "KI-Finanzberater", poweredByAI: "KI-gestützt · Nur für Bildungszwecke",
+    aiFinancialAdvisor: "Sentry", poweredByAI: "Ihr KI-Marktanalyst · Nur für Bildungszwecke",
     history: "Verlauf", newChat: "Neuer Chat", chatHistory: "Chatverlauf", noSavedChats: "Keine gespeicherten Chats.",
     askAnything: "Fragen Sie alles über Finanzen, Investitionen, Märkte...",
-    welcomeMessage: "Hallo! Ich bin Ihr KI-Finanzberater. Fragen Sie mich zu Investitionen, Märkten oder Portfoliostrategien.",
+    welcomeMessage: "Hallo! Ich bin Sentry, der Marktanalyst von PortAI. Fragen Sie mich zu Investitionen, Märkten oder Portfoliostrategien.",
     suggestETF: "Was ist der Unterschied zwischen ETFs und Investmentfonds?",
     suggestDiversify: "Wie sollte ich mein Portfolio diversifizieren?",
     suggestPE: "Erklären Sie das KGV und wie man es nutzt",
@@ -2894,7 +2894,7 @@ const translations: Record<Language, Record<string, string>> = {
     rationaleTpl: "Ein {risk}, {profit} Portfolio für einen {time} Horizont. Zugeschnitten auf {exp} Anleger. Diese Allokation balanciert Risiko und Rendite mit Zielrenditen von {ret} pro Jahr.",
   },
   it: {
-    home: "Home", dashboard: "Dashboard", aiChat: "Chat IA", quiz: "Quiz", forum: "Polso Media", watchlists: "Liste", settings: "Impostazioni", news: "Notizie", articleAnalyzer: "Analizza", new: "NUOVO",
+    home: "Home", dashboard: "Dashboard", aiChat: "Sentry", quiz: "Quiz", forum: "Polso Media", watchlists: "Liste", settings: "Impostazioni", news: "Notizie", articleAnalyzer: "Analizza", new: "NUOVO",
     // Landing
     landingBanner: "Tempo limitato: Plus 40% OFF (€8,99) · Pro 36% OFF (€15,99)",
     heroBadge: "Scudo IA anti-bias",
@@ -2927,10 +2927,10 @@ const translations: Record<Language, Record<string, string>> = {
     biasDetectionDesc: "Segnala linguaggio promozionale, divulgazioni mancanti e potenziali conflitti di interesse",
     pasteArticleUrl: "Incolla l'URL dell'articolo (es. https://cnbc.com/article/...)",
     source: "Fonte", summary: "Riepilogo", potentialBiases: "Bias Potenziali", strengths: "Punti di Forza",
-    aiFinancialAdvisor: "Consulente Finanziario IA", poweredByAI: "Alimentato dall'IA · Solo uso educativo",
+    aiFinancialAdvisor: "Sentry", poweredByAI: "Il tuo analista di mercato IA · Solo uso educativo",
     history: "Cronologia", newChat: "Nuova Chat", chatHistory: "Cronologia Chat", noSavedChats: "Nessuna chat salvata.",
     askAnything: "Chiedi qualsiasi cosa su finanza, investimenti, mercati...",
-    welcomeMessage: "Ciao! Sono il tuo consulente finanziario IA. Chiedimi di investimenti, mercati o strategie di portafoglio.",
+    welcomeMessage: "Ciao! Sono Sentry, l'analista di mercato di PortAI. Chiedimi di investimenti, mercati o strategie di portafoglio.",
     suggestETF: "Qual è la differenza tra ETF e fondi comuni?",
     suggestDiversify: "Come dovrei diversificare il mio portafoglio?",
     suggestPE: "Spiega il rapporto P/E e come usarlo",
