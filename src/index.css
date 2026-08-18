@@ -72,53 +72,53 @@
   }
 
   .light {
-    --background: 40 20% 97%;
-    --foreground: 220 40% 10%;
+    --background: 0 0% 98%;
+    --foreground: 0 0% 8%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 40% 10%;
+    --card-foreground: 0 0% 8%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 40% 10%;
+    --popover-foreground: 0 0% 8%;
 
-    --primary: 153 64% 42%;
+    --primary: 0 0% 12%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 40 15% 91%;
-    --secondary-foreground: 220 20% 50%;
+    --secondary: 0 0% 93%;
+    --secondary-foreground: 0 0% 35%;
 
-    --muted: 40 15% 91%;
-    --muted-foreground: 220 20% 32%;
+    --muted: 0 0% 93%;
+    --muted-foreground: 0 0% 38%;
 
-    --accent: 40 15% 91%;
-    --accent-foreground: 220 40% 10%;
+    --accent: 0 0% 91%;
+    --accent-foreground: 0 0% 8%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 0% 25%;
     --destructive-foreground: 0 0% 100%;
 
-    --warning: 40 90% 50%;
-    --warning-foreground: 220 40% 10%;
+    --warning: 0 0% 45%;
+    --warning-foreground: 0 0% 100%;
 
-    --success: 168 100% 35%;
+    --success: 0 0% 20%;
     --success-foreground: 0 0% 100%;
 
     --gain: 168 100% 35%;
     --loss: 0 84% 60%;
 
-    --highlight: 153 64% 42%;
+    --highlight: 0 0% 20%;
 
-    --border: 40 20% 85%;
-    --input: 40 20% 85%;
-    --ring: 153 64% 42%;
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
+    --ring: 0 0% 40%;
 
-    --sidebar-background: 40 20% 97%;
-    --sidebar-foreground: 220 15% 45%;
-    --sidebar-primary: 153 64% 42%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 40%;
+    --sidebar-primary: 0 0% 12%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 40 15% 91%;
-    --sidebar-accent-foreground: 220 40% 10%;
-    --sidebar-border: 40 20% 85%;
-    --sidebar-ring: 153 64% 42%;
+    --sidebar-accent: 0 0% 93%;
+    --sidebar-accent-foreground: 0 0% 8%;
+    --sidebar-border: 0 0% 85%;
+    --sidebar-ring: 0 0% 40%;
 
     --trust-high: 168 100% 35%;
     --trust-medium: 40 90% 50%;
@@ -130,6 +130,7 @@
     --chart-4: 40 90% 50%;
     --chart-5: 0 84% 60%;
   }
+
 }
 
 @layer base {
