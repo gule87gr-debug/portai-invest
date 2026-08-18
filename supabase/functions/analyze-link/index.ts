@@ -226,6 +226,30 @@ function extractArticleText(html: string): string {
   return text.slice(0, 14_000);
 }
 
+/**
+ * Last-resort body retrieval for publishers that block direct bot fetches
+ * (CNBC, WSJ, Bloomberg all 403 server-side requests). Uses a public
+ * text-extraction proxy that renders the page and returns plain text, so the
+ * model still analyses the real article instead of only the headline.
+ */
+async function fetchArticleTextFallback(url: string): Promise<string> {
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 9000);
+    const res = await fetch(`https://r.jina.ai/${url}`, {
+      signal: ctrl.signal,
+      headers: { Accept: "text/plain", "X-Return-Format": "text" },
+    });
+    clearTimeout(timer);
+    if (!res.ok) return "";
+    const text = (await res.text()).replace(/\r/g, "").trim();
+    if (text.length < 400) return "";
+    return text.slice(0, 14_000);
+  } catch {
+    return "";
+  }
+}
+
 function decodeEntities(s: string): string {
   return s
     .replace(/&nbsp;/g, " ")
@@ -652,6 +676,13 @@ serve(async (req) => {
       }
     }
 
+    // ---- Article body fallback (many publishers 403 direct bot fetches) ----
+    let articleBody = ((pre as { bodyText?: string }).bodyText || "").trim();
+    if (articleBody.length < 400) {
+      const fallback = await fetchArticleTextFallback(url);
+      if (fallback.length > articleBody.length) articleBody = fallback;
+    }
+
     // ---- Cross-source corroboration (independent coverage of the same story) ----
     let articleHost = "";
     try { articleHost = normalizeHost(new URL(url).hostname); } catch { /* noop */ }
@@ -659,6 +690,7 @@ serve(async (req) => {
     const crossSourceBlock = crossSources.length
       ? crossSources.map((c, i) => `${i + 1}. [${c.source || "Unknown outlet"}] ${c.title}${c.date ? ` (${c.date})` : ""}`).join("\n")
       : "No independent coverage of this story was found in the news index.";
+
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -770,7 +802,7 @@ ${(pre as { metaTitle?: string }).metaTitle ? `Page title: ${(pre as { metaTitle
 ${(pre as { metaDescription?: string }).metaDescription ? `Page description: ${(pre as { metaDescription?: string }).metaDescription}` : ""}
 
 ARTICLE TEXT (extracted from the page — this is the primary evidence):
-${(pre as { bodyText?: string }).bodyText?.trim() || "[Could not retrieve the article body. Analyse only the title/description above and the independent coverage below, and state this limitation in the summary.]"}
+${articleBody || "[Could not retrieve the article body. Analyse only the title/description above and the independent coverage below, and state this limitation in the summary.]"}
 
 INDEPENDENT COVERAGE OF THE SAME STORY (live news index, use this for cross-source verification):
 ${crossSourceBlock}`,
