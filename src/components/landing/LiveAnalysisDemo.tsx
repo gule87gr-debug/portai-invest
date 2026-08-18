@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { AlertTriangle, ArrowRight, Check, Cpu, Link2, Loader2, Play, RotateCcw } from "lucide-react";
+import { DEMO_LOOPS } from "./DemoLoops";
+
 
 const SAMPLE_HEADLINE = "CNBC headline: Nvidia to $250?";
 
