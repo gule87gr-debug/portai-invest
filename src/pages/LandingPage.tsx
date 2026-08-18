@@ -372,7 +372,7 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
                 was: null as string | null,
                 badge: null as string | null,
                 highlight: false,
-                features: [lt("free1"), lt("free2"), lt("free3")],
+                features: [lt("free1"), lt("free2"), lt("free3"), lt("free4"), lt("free5")],
                 cta: lt("startFree"),
               },
               {
@@ -383,7 +383,7 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
                 was: "€14.99",
                 badge: lt("off40"),
                 highlight: false,
-                features: [lt("plus1"), lt("plus2"), lt("plus3")],
+                features: [lt("plus1"), lt("plus2"), lt("plus3"), lt("plus4"), lt("plus5")],
                 cta: lt("upgradePlus"),
               },
               {
@@ -394,7 +394,7 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
                 was: "€24.99",
                 badge: lt("off36"),
                 highlight: true,
-                features: [lt("pro1"), lt("pro2"), lt("pro3")],
+                features: [lt("pro1"), lt("pro2"), lt("pro3"), lt("pro5")],
                 cta: lt("goPro"),
               },
             ].map((tier) => (
