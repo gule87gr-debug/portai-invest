@@ -360,62 +360,116 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
             {lt("pricingDesc")}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {/* Free */}
-            <article className="rounded-2xl border border-border bg-card p-6 flex flex-col">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-1">{lt("observer")}</p>
-              <h3 className="text-2xl font-bold text-foreground mb-1">{lt("freeName")}</h3>
-              <div className="text-3xl font-bold font-mono text-foreground mb-4">€0<span className="text-sm text-muted-foreground font-normal">/mo</span></div>
-              <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary/70 mt-0.5 shrink-0" /> {lt("free1")}</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary/70 mt-0.5 shrink-0" /> {lt("free2")}</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary/70 mt-0.5 shrink-0" /> {lt("free3")}</li>
-              </ul>
-              <button onClick={onGetStarted} className="w-full rounded-xl border border-border py-2.5 text-sm font-semibold text-foreground hover:bg-accent transition-colors">{lt("startFree")}</button>
-            </article>
+            {[
+              {
+                icon: Eye,
+                kicker: lt("observer"),
+                name: lt("freeName"),
+                price: "€0",
+                was: null as string | null,
+                badge: null as string | null,
+                highlight: false,
+                features: [lt("free1"), lt("free2"), lt("free3")],
+                cta: lt("startFree"),
+              },
+              {
+                icon: Sparkles,
+                kicker: lt("shield"),
+                name: lt("plusName"),
+                price: "€8.99",
+                was: "€14.99",
+                badge: lt("off40"),
+                highlight: false,
+                features: [lt("plus1"), lt("plus2"), lt("plus3")],
+                cta: lt("upgradePlus"),
+              },
+              {
+                icon: Crown,
+                kicker: lt("alphaSuite"),
+                name: lt("proName"),
+                price: "€15.99",
+                was: "€24.99",
+                badge: lt("off36"),
+                highlight: true,
+                features: [lt("pro1"), lt("pro2"), lt("pro3")],
+                cta: lt("goPro"),
+              },
+            ].map((tier) => (
+              <article
+                key={tier.name}
+                className={`relative rounded-2xl border bg-card p-6 flex flex-col card-hover ${
+                  tier.highlight ? "border-foreground/40 shadow-2xl" : "border-border"
+                }`}
+              >
+                {tier.highlight && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground whitespace-nowrap">
+                    <Crown className="h-3 w-3" /> {lt("mostPopular")}
+                  </span>
+                )}
 
-            {/* Plus */}
-            <article className="rounded-2xl border border-border bg-card p-6 flex flex-col">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-1">{lt("shield")}</p>
-              <h3 className="text-2xl font-bold text-foreground mb-1 flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" /> {lt("plusName")}</h3>
-              <div className="mb-1"><span className="inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">{lt("off40")}</span></div>
-              <div className="text-3xl font-bold font-mono text-foreground mb-4">€8.99<span className="text-base text-muted-foreground font-normal line-through ml-2">€14.99</span><span className="text-sm text-muted-foreground font-normal">/mo</span></div>
-              <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("plus1")}</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("plus2")}</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("plus3")}</li>
-              </ul>
-              <button onClick={onGetStarted} className="w-full rounded-xl bg-primary/10 border border-primary/40 text-primary py-2.5 text-sm font-semibold hover:bg-primary/15 transition-colors">{lt("upgradePlus")}</button>
-            </article>
+                <div className="flex items-center gap-2.5 mb-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-muted/40">
+                    <tier.icon className="h-5 w-5 text-foreground/80" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{tier.kicker}</p>
+                    <h3 className="text-xl font-bold text-foreground leading-tight">{tier.name}</h3>
+                  </div>
+                  {tier.badge && (
+                    <span className="ml-auto rounded-full border border-border bg-muted/50 px-2 py-0.5 text-[10px] font-bold text-foreground">
+                      {tier.badge}
+                    </span>
+                  )}
+                </div>
 
-            {/* Pro */}
-            <article className="rounded-xl border border-primary/60 bg-card p-6 flex flex-col relative">
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground whitespace-nowrap">
-                <Crown className="h-3 w-3" /> {lt("mostPopular")}
-              </span>
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-1">{lt("alphaSuite")}</p>
-              <h3 className="text-2xl font-bold text-foreground mb-1 flex items-center gap-2"><Crown className="h-5 w-5 text-primary" /> {lt("proName")}</h3>
-              <div className="mb-1"><span className="inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">{lt("off36")}</span></div>
-              <div className="text-3xl font-bold font-mono text-foreground mb-4">€15.99<span className="text-base text-muted-foreground font-normal line-through ml-2">€24.99</span><span className="text-sm text-muted-foreground font-normal">/mo</span></div>
-              <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("pro1")}</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("pro2")}</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("pro3")}</li>
-               <li className="flex gap-2 items-center"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> <span className="inline-flex items-center gap-1">{lt("pro4Label")}
-                 <Tooltip>
-                   <TooltipTrigger asChild>
-                     <button type="button" aria-label={lt("pro4AriaLabel")} className="inline-flex items-center text-primary/80 hover:text-primary transition-colors">
-                       <Info className="h-3.5 w-3.5" />
-                     </button>
-                   </TooltipTrigger>
-                   <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
-                     {lt("pro4Tooltip")}
-                   </TooltipContent>
-                 </Tooltip>
-               </span></li>
-              </ul>
-              <button onClick={onGetStarted} className="w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground btn-glow hover:bg-primary/90 transition-colors">{lt("goPro")}</button>
-              <p className="mt-2 text-center text-[11px] text-muted-foreground">{lt("cancelAnytime")}</p>
-            </article>
+                <div className="flex items-baseline gap-2 mb-5">
+                  <span className="text-3xl font-bold font-mono text-foreground">{tier.price}</span>
+                  {tier.was && <span className="text-sm text-muted-foreground line-through">{tier.was}</span>}
+                  <span className="text-sm text-muted-foreground">/mo</span>
+                </div>
+
+                <ul className="space-y-2.5 text-sm text-muted-foreground mb-6 flex-1">
+                  {tier.features.map((f) => (
+                    <li key={f} className="flex gap-2.5 items-start">
+                      <CheckCircle2 className="h-4 w-4 text-foreground/70 mt-0.5 shrink-0" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                  {tier.highlight && (
+                    <li className="flex gap-2.5 items-start">
+                      <CheckCircle2 className="h-4 w-4 text-foreground/70 mt-0.5 shrink-0" />
+                      <span className="inline-flex items-center gap-1">
+                        {lt("pro4Label")}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button type="button" aria-label={lt("pro4AriaLabel")} className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors">
+                              <Info className="h-3.5 w-3.5" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
+                            {lt("pro4Tooltip")}
+                          </TooltipContent>
+                        </Tooltip>
+                      </span>
+                    </li>
+                  )}
+                </ul>
+
+                <button
+                  onClick={onGetStarted}
+                  className={`w-full rounded-xl py-2.5 text-sm font-semibold transition-colors ${
+                    tier.highlight
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90 btn-glow"
+                      : "border border-border text-foreground hover:bg-accent"
+                  }`}
+                >
+                  {tier.cta}
+                </button>
+                {tier.highlight && (
+                  <p className="mt-2 text-center text-[11px] text-muted-foreground">{lt("cancelAnytime")}</p>
+                )}
+              </article>
+            ))}
           </div>
         </section>
       </RevealSection>
