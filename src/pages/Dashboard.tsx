@@ -94,12 +94,18 @@ const Dashboard = () => {
       setShowUpgrade(true);
       return;
     }
+    // Users often paste a bare domain ("portai-invest.com"); the backend needs
+    // a full http(s) URL, so add the scheme before sending.
+    const normalizedUrl = /^https?:\/\//i.test(url.trim())
+      ? url.trim()
+      : `https://${url.trim().replace(/^\/+/, "")}`;
     setIsAnalyzing(true);
     setResult(null);
     setError("");
     setLimitReached(false);
     try {
-      const { data, error: fnError } = await supabase.functions.invoke("analyze-link", { body: { url: url.trim(), language: (typeof window !== "undefined" ? localStorage.getItem("portai.language") : null) || "en" } });
+      const { data, error: fnError } = await supabase.functions.invoke("analyze-link", { body: { url: normalizedUrl, language: (typeof window !== "undefined" ? localStorage.getItem("portai.language") : null) || "en" } });
+
       if (fnError) {
         // Edge function returned non-2xx — surface limit-reached specifically
         const msg = String(fnError.message || "");
