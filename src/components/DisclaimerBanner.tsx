@@ -14,7 +14,7 @@ export const DisclaimerBanner = () => {
         <span className="font-semibold text-warning">{t("notFinancialAdvice")}</span>
         <span className="text-muted-foreground"> — {t("disclaimerText")}</span>
       </p>
-      <button onClick={() => setVisible(false)} className="ml-auto shrink-0 text-muted-foreground hover:text-foreground transition-colors">
+      <button aria-label="Dismiss disclaimer" onClick={() => setVisible(false)} className="ml-auto shrink-0 text-muted-foreground hover:text-foreground transition-colors">
         <X className="h-4 w-4" />
       </button>
     </div>
