@@ -1,11 +1,25 @@
+import sentryMark from "@/assets/sentry-mark.png.asset.json";
+
+/**
+ * Sentry logo rendered as a currentColor mask so it blends with the
+ * Lucide icons in the sidebar (same size, same coloring).
+ */
 export const SentryMenuIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-    <path
-      d="M5 6.5h9.5L9.5 12H17L5.5 18.5"
-      stroke="currentColor"
-      strokeWidth="2.4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
+  <span
+    role="img"
+    aria-hidden="true"
+    className={className}
+    style={{
+      display: "inline-block",
+      backgroundColor: "currentColor",
+      WebkitMaskImage: `url(${sentryMark.url})`,
+      maskImage: `url(${sentryMark.url})`,
+      WebkitMaskRepeat: "no-repeat",
+      maskRepeat: "no-repeat",
+      WebkitMaskPosition: "center",
+      maskPosition: "center",
+      WebkitMaskSize: "contain",
+      maskSize: "contain",
+    }}
+  />
 );
