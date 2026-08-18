@@ -233,9 +233,17 @@ const Dashboard = () => {
                 >
                   <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                 </button>
-                <p className={cn("text-3xl font-bold font-mono tnum leading-none", trustColor(result.trustScore))}>
-                  {result.trustScore}<span className="text-sm text-muted-foreground">/10</span>
-                </p>
+                <div className={cn(
+                  "flex items-baseline gap-0.5 rounded-xl px-3 py-1.5 border",
+                  result.trustScore >= 7
+                    ? "bg-gain/15 border-gain/40 text-gain"
+                    : result.trustScore >= 5
+                      ? "bg-warning/15 border-warning/40 text-warning"
+                      : "bg-loss/15 border-loss/40 text-loss"
+                )}>
+                  <span className="text-3xl font-bold font-mono tnum leading-none">{result.trustScore}</span>
+                  <span className="text-sm opacity-80">/10</span>
+                </div>
               </div>
             </div>
 
