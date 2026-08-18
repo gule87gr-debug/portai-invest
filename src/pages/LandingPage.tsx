@@ -5,6 +5,9 @@ import { useLanguage, type Language } from "@/contexts/LanguageContext";
 import { useLandingT } from "@/lib/landingI18n";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import LiveAnalysisDemo from "@/components/landing/LiveAnalysisDemo";
+import ExtensionShowcase from "@/components/landing/ExtensionShowcase";
+import TransparencyTrust from "@/components/landing/TransparencyTrust";
 
 const supportingFeatures = [
   { icon: LayoutDashboard, key: "marketIntelligence", descKey: "supF1Desc" as const },
@@ -142,23 +145,24 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
 
       {/* Hero — editorial, single voice */}
       <header className="px-4 sm:px-6 pt-20 sm:pt-28 pb-16 max-w-4xl mx-auto">
-        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-8">
+        <div className="flex items-center justify-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-8">
           <span className="h-px w-8 bg-border" />
-          <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-          <span>{lt("heroTagline")}</span>
+          <ShieldCheck className="h-3.5 w-3.5 text-foreground/70" />
+          <span>The Bloomberg Terminal for retail investors</span>
+          <span className="h-px w-8 bg-border" />
         </div>
 
         <h1
           className="editorial-heading text-center text-foreground text-[2.75rem] sm:text-6xl lg:text-[5rem]"
           style={{ lineHeight: "1.04" }}
         >
-          {lt("heroH1part1")} {lt("heroH1part2")} {lt("heroH1part3")}
+          Never trade on manipulated headlines again.
         </h1>
 
         <p className="sr-only">{lt("heroSrDesc")}</p>
 
-        <p className="mt-8 text-base sm:text-lg text-muted-foreground max-w-2xl leading-relaxed">
-          {lt("heroDesc")}
+        <p className="mt-8 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto text-center leading-relaxed">
+          Institutional-grade bias detection, trust scores and real-time tracking for 7,000+ stocks, ETFs and crypto — without the €20,000 terminal.
         </p>
 
         {/* Analyzer input */}
@@ -359,88 +363,168 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
             {lt("pricingDesc")}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {/* Free */}
-            <article className="rounded-2xl border border-border bg-card p-6 flex flex-col">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-1">{lt("observer")}</p>
-              <h3 className="text-2xl font-bold text-foreground mb-1">{lt("freeName")}</h3>
-              <div className="text-3xl font-bold font-mono text-foreground mb-4">€0<span className="text-sm text-muted-foreground font-normal">/mo</span></div>
-              <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary/70 mt-0.5 shrink-0" /> {lt("free1")}</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary/70 mt-0.5 shrink-0" /> {lt("free2")}</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary/70 mt-0.5 shrink-0" /> {lt("free3")}</li>
-              </ul>
-              <button onClick={onGetStarted} className="w-full rounded-xl border border-border py-2.5 text-sm font-semibold text-foreground hover:bg-accent transition-colors">{lt("startFree")}</button>
-            </article>
+            {[
+              {
+                icon: Eye,
+                kicker: lt("observer"),
+                name: lt("freeName"),
+                price: "€0",
+                was: null as string | null,
+                badge: null as string | null,
+                highlight: false,
+                features: [lt("free1"), lt("free2"), lt("free3")],
+                cta: lt("startFree"),
+              },
+              {
+                icon: Sparkles,
+                kicker: lt("shield"),
+                name: lt("plusName"),
+                price: "€8.99",
+                was: "€14.99",
+                badge: lt("off40"),
+                highlight: false,
+                features: [lt("plus1"), lt("plus2"), lt("plus3")],
+                cta: lt("upgradePlus"),
+              },
+              {
+                icon: Crown,
+                kicker: lt("alphaSuite"),
+                name: lt("proName"),
+                price: "€15.99",
+                was: "€24.99",
+                badge: lt("off36"),
+                highlight: true,
+                features: [lt("pro1"), lt("pro2"), lt("pro3")],
+                cta: lt("goPro"),
+              },
+            ].map((tier) => (
+              <article
+                key={tier.name}
+                className={`relative rounded-2xl border bg-card p-6 flex flex-col card-hover ${
+                  tier.highlight ? "border-foreground/40 shadow-2xl" : "border-border"
+                }`}
+              >
+                {tier.highlight && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground whitespace-nowrap">
+                    <Crown className="h-3 w-3" /> {lt("mostPopular")}
+                  </span>
+                )}
 
-            {/* Plus */}
-            <article className="rounded-2xl border border-border bg-card p-6 flex flex-col">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-1">{lt("shield")}</p>
-              <h3 className="text-2xl font-bold text-foreground mb-1 flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" /> {lt("plusName")}</h3>
-              <div className="mb-1"><span className="inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">{lt("off40")}</span></div>
-              <div className="text-3xl font-bold font-mono text-foreground mb-4">€8.99<span className="text-base text-muted-foreground font-normal line-through ml-2">€14.99</span><span className="text-sm text-muted-foreground font-normal">/mo</span></div>
-              <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("plus1")}</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("plus2")}</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("plus3")}</li>
-              </ul>
-              <button onClick={onGetStarted} className="w-full rounded-xl bg-primary/10 border border-primary/40 text-primary py-2.5 text-sm font-semibold hover:bg-primary/15 transition-colors">{lt("upgradePlus")}</button>
-            </article>
+                <div className="flex items-center gap-2.5 mb-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-muted/40">
+                    <tier.icon className="h-5 w-5 text-foreground/80" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{tier.kicker}</p>
+                    <h3 className="text-xl font-bold text-foreground leading-tight">{tier.name}</h3>
+                  </div>
+                  {tier.badge && (
+                    <span className="ml-auto rounded-full border border-border bg-muted/50 px-2 py-0.5 text-[10px] font-bold text-foreground">
+                      {tier.badge}
+                    </span>
+                  )}
+                </div>
 
-            {/* Pro */}
-            <article className="rounded-xl border border-primary/60 bg-card p-6 flex flex-col relative">
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground whitespace-nowrap">
-                <Crown className="h-3 w-3" /> {lt("mostPopular")}
-              </span>
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-1">{lt("alphaSuite")}</p>
-              <h3 className="text-2xl font-bold text-foreground mb-1 flex items-center gap-2"><Crown className="h-5 w-5 text-primary" /> {lt("proName")}</h3>
-              <div className="mb-1"><span className="inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">{lt("off36")}</span></div>
-              <div className="text-3xl font-bold font-mono text-foreground mb-4">€15.99<span className="text-base text-muted-foreground font-normal line-through ml-2">€24.99</span><span className="text-sm text-muted-foreground font-normal">/mo</span></div>
-              <ul className="space-y-2 text-sm text-muted-foreground mb-6 flex-1">
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("pro1")}</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("pro2")}</li>
-                <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {lt("pro3")}</li>
-               <li className="flex gap-2 items-center"><CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" /> <span className="inline-flex items-center gap-1">{lt("pro4Label")}
-                 <Tooltip>
-                   <TooltipTrigger asChild>
-                     <button type="button" aria-label={lt("pro4AriaLabel")} className="inline-flex items-center text-primary/80 hover:text-primary transition-colors">
-                       <Info className="h-3.5 w-3.5" />
-                     </button>
-                   </TooltipTrigger>
-                   <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
-                     {lt("pro4Tooltip")}
-                   </TooltipContent>
-                 </Tooltip>
-               </span></li>
-              </ul>
-              <button onClick={onGetStarted} className="w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground btn-glow hover:bg-primary/90 transition-colors">{lt("goPro")}</button>
-              <p className="mt-2 text-center text-[11px] text-muted-foreground">{lt("cancelAnytime")}</p>
-            </article>
+                <div className="flex items-baseline gap-2 mb-5">
+                  <span className="text-3xl font-bold font-mono text-foreground">{tier.price}</span>
+                  {tier.was && <span className="text-sm text-muted-foreground line-through">{tier.was}</span>}
+                  <span className="text-sm text-muted-foreground">/mo</span>
+                </div>
+
+                <ul className="space-y-2.5 text-sm text-muted-foreground mb-6 flex-1">
+                  {tier.features.map((f) => (
+                    <li key={f} className="flex gap-2.5 items-start">
+                      <CheckCircle2 className="h-4 w-4 text-foreground/70 mt-0.5 shrink-0" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                  {tier.highlight && (
+                    <li className="flex gap-2.5 items-start">
+                      <CheckCircle2 className="h-4 w-4 text-foreground/70 mt-0.5 shrink-0" />
+                      <span className="inline-flex items-center gap-1">
+                        {lt("pro4Label")}
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button type="button" aria-label={lt("pro4AriaLabel")} className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors">
+                              <Info className="h-3.5 w-3.5" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
+                            {lt("pro4Tooltip")}
+                          </TooltipContent>
+                        </Tooltip>
+                      </span>
+                    </li>
+                  )}
+                </ul>
+
+                <button
+                  onClick={onGetStarted}
+                  className={`w-full rounded-xl py-2.5 text-sm font-semibold transition-colors ${
+                    tier.highlight
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90 btn-glow"
+                      : "border border-border text-foreground hover:bg-accent"
+                  }`}
+                >
+                  {tier.cta}
+                </button>
+                {tier.highlight && (
+                  <p className="mt-2 text-center text-[11px] text-muted-foreground">{lt("cancelAnytime")}</p>
+                )}
+              </article>
+            ))}
           </div>
         </section>
       </RevealSection>
 
 
       <RevealSection>
-        <section id="why-portai" aria-labelledby="why-portai-heading" className="px-4 sm:px-6 py-14 max-w-3xl mx-auto">
-          <h2 id="why-portai-heading" className="editorial-heading text-3xl sm:text-4xl text-foreground mb-6 text-center" style={{ textWrap: "balance" as any }}>
+        <LiveAnalysisDemo onGetStarted={onGetStarted} />
+      </RevealSection>
+
+      <RevealSection>
+        <ExtensionShowcase />
+      </RevealSection>
+
+      <RevealSection>
+        <section id="why-portai" aria-labelledby="why-portai-heading" className="px-4 sm:px-6 py-14 max-w-5xl mx-auto border-t border-border">
+          <h2 id="why-portai-heading" className="editorial-heading text-3xl sm:text-4xl text-foreground mb-3 text-center" style={{ textWrap: "balance" as any }}>
             Why PortAI?
           </h2>
-          <h3 className="text-base sm:text-lg font-semibold text-primary mb-4 text-center">
-            Beyond price — the truth behind every move.
-          </h3>
-          <p className="mb-6 text-sm sm:text-base leading-relaxed text-foreground/90 text-center max-w-2xl mx-auto">
-            Traditional portfolio trackers only show you the price. PortAI uses AI sentiment analysis to reveal the truth behind financial news bias. Whether you are tracking the S&amp;P 500 or looking for crypto market insights, our AI ensures you never trade on hype.
+          <p className="text-center text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-10">
+            Traditional trackers show the price. PortAI shows the narrative moving it.
           </p>
-          <div className="space-y-5 text-sm sm:text-base leading-relaxed text-muted-foreground">
-            <p>
-              Today&apos;s retail investor is drowning in financial reporting. Outlets like The Motley Fool, CNBC, Yahoo Finance, and Seeking Alpha publish thousands of articles every week — many of them written to chase clicks, push affiliate stocks, or amplify positions taken by sell-side desks. Without an objective filter, even disciplined investors end up rotating capital based on narrative rather than evidence, and biased financial reporting quietly becomes the largest hidden risk in their portfolio.
-            </p>
-            <p>
-              Traditional portfolio trackers were never designed to solve this. They show you what your assets are doing, but they cannot tell you <em>why</em> a stock just ran 8% on a Monday morning, whether the catalyst is durable, or whether the bullish coverage you are reading omits a regulatory filing, an insider sale, or a contradicting earnings transcript. That gap — between price action and the narrative driving it — is exactly where retail investors get hurt.
-            </p>
-            <p>
-              PortAI closes that gap. We use Large Language Models to read each article you paste, score its trust and bias, surface omitted data points, and compare its sentiment against social, options-flow, and peer-coverage signals. The result is an objective sentiment analysis layered on top of a real-time stock and crypto portfolio tracker — so you can verify the story before you trade the chart, in plain English, in 6 languages, every single day.
-            </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-4">Ordinary tracker</p>
+              <ul className="space-y-3">
+                {[
+                  "Shows what moved, never why",
+                  "Headlines arrive unfiltered",
+                  "Omitted filings stay omitted",
+                  "You verify everything by hand",
+                ].map((x) => (
+                  <li key={x} className="flex gap-2.5 text-sm text-muted-foreground">
+                    <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-loss" /> {x}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="rounded-2xl border border-foreground/25 bg-card p-6">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-foreground mb-4">With PortAI</p>
+              <ul className="space-y-3">
+                {[
+                  "Trust and bias score on every article",
+                  "Speculative framing flagged instantly",
+                  "Missing context surfaced automatically",
+                  "Claims cross-checked against other sources",
+                ].map((x) => (
+                  <li key={x} className="flex gap-2.5 text-sm text-foreground/90">
+                    <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5 text-gain" /> {x}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </section>
       </RevealSection>
@@ -530,6 +614,10 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
             ))}
           </div>
         </section>
+      </RevealSection>
+
+      <RevealSection>
+        <TransparencyTrust />
       </RevealSection>
 
       {/* FAQ — SEO crawlable */}
