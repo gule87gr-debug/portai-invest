@@ -802,7 +802,7 @@ ${(pre as { metaTitle?: string }).metaTitle ? `Page title: ${(pre as { metaTitle
 ${(pre as { metaDescription?: string }).metaDescription ? `Page description: ${(pre as { metaDescription?: string }).metaDescription}` : ""}
 
 ARTICLE TEXT (extracted from the page — this is the primary evidence):
-${(pre as { bodyText?: string }).bodyText?.trim() || "[Could not retrieve the article body. Analyse only the title/description above and the independent coverage below, and state this limitation in the summary.]"}
+${articleBody || "[Could not retrieve the article body. Analyse only the title/description above and the independent coverage below, and state this limitation in the summary.]"}
 
 INDEPENDENT COVERAGE OF THE SAME STORY (live news index, use this for cross-source verification):
 ${crossSourceBlock}`,
