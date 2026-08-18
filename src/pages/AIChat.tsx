@@ -4,7 +4,8 @@ import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SEO } from "@/components/SEO";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { Send, ShieldCheck, Plus, Trash2, MessageCircle, Image, X, Crown, Zap, Brain, Lightbulb, Gauge, ChevronDown, Bot } from "lucide-react";
+import sentryLogo from "@/assets/sentry-logo.png.asset.json";
+import { Send, Plus, Trash2, MessageCircle, Image, X, Crown, Zap, Brain, Lightbulb, Gauge, ChevronDown, Bot } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { cn } from "@/lib/utils";
@@ -286,9 +287,7 @@ const AIChat = () => {
       <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} title="Limit Reached" description={upgradeReason} />
       <div className="mb-4 flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <ShieldCheck className="h-5 w-5 text-primary-foreground" />
-          </div>
+          <img src={sentryLogo.url} alt="Sentry AI analyst logo" className="h-9 w-9 rounded-lg object-cover" />
           <div>
             <h1 className="text-lg sm:text-xl font-bold">Sentry<span className="ml-2 align-middle text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">AI analyst</span></h1>
             <p className="text-xs text-muted-foreground">{t("poweredByAI")}</p>
@@ -350,9 +349,7 @@ const AIChat = () => {
           {welcomeShown && (
             <>
               <div className="flex gap-3 animate-fade-in">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary">
-                  <ShieldCheck className="h-4 w-4 text-primary-foreground" />
-                </div>
+                <img src={sentryLogo.url} alt="Sentry" className="h-8 w-8 shrink-0 rounded-full object-cover" />
                 <div className="rounded-xl rounded-tl-none bg-card p-4 text-sm leading-relaxed text-foreground">
                   {t("welcomeMessage")}
                 </div>
@@ -370,9 +367,7 @@ const AIChat = () => {
           {messages.map((m, i) => (
             <div key={i} className={cn("flex gap-3 animate-fade-in", m.role === "user" ? "justify-end" : "")}>
               {m.role === "assistant" && (
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary">
-                  <ShieldCheck className="h-4 w-4 text-primary-foreground" />
-                </div>
+                <img src={sentryLogo.url} alt="Sentry" className="h-8 w-8 shrink-0 rounded-full object-cover" />
               )}
               <div className={cn("max-w-[85%] sm:max-w-[70%] rounded-xl p-4 text-sm leading-relaxed", m.role === "user" ? "bg-primary text-primary-foreground rounded-tr-none" : "bg-card text-foreground rounded-tl-none")}>
                 {m.imageUrl && (
@@ -385,9 +380,7 @@ const AIChat = () => {
 
           {isTyping && messages[messages.length - 1]?.role !== "assistant" && (
             <div className="flex gap-3 animate-fade-in">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary">
-                <ShieldCheck className="h-4 w-4 text-primary-foreground" />
-              </div>
+              <img src={sentryLogo.url} alt="Sentry" className="h-8 w-8 shrink-0 rounded-full object-cover" />
               <div className="rounded-xl rounded-tl-none bg-card px-4 py-3">
                 <div className="flex gap-1">
                   <span className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "0ms" }} />
