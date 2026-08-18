@@ -68,24 +68,24 @@ export const FirstVisitPaywall = () => {
   const freePerks = [
     tr("welcomeFreePerk1", "1 watchlist with up to 5 assets"),
     tr("welcomeFreePerk2", "1 article bias analysis per day"),
-    tr("welcomeFreePerk3", "Live news feed with trust scores"),
+    tr("welcomeFreePerk3", "10 AI chat messages + 3 image analyses per day"),
   ];
   const freeLimits = [
     tr("welcomeFreeLimit1", "No Pro Deep Dive on articles"),
-    tr("welcomeFreeLimit2", "Limited AI Chat messages per day"),
-    tr("welcomeFreeLimit3", "No real-time sentiment alerts"),
+    tr("welcomeFreeLimit2", "Quiz results locked"),
+    tr("welcomeFreeLimit3", "No price alerts"),
   ];
   const plusPerks = [
     tr("welcomePlusPerk1", "Unlimited watchlists & assets"),
     tr("welcomePlusPerk2", "Full quiz results & recommendations"),
-    tr("welcomePlusPerk3", "Advanced AI models (5 msgs/day each)"),
-    tr("welcomePlusPerk4", "Pro Deep Dive on every article"),
+    tr("welcomePlusPerk3", "Unlimited fast AI chat & image analyses"),
+    tr("welcomePlusPerk4", "Advanced AI models (5 msgs/day each)"),
   ];
   const proPerks = [
-    tr("welcomeProPerk1", "Unlimited article bias analyses"),
-    tr("welcomeProPerk2", "Unlimited AI chat on all models"),
-    tr("welcomeProPerk3", "Real-time sentiment alerts"),
-    tr("welcomeProPerk4", "Everything in Plus"),
+    tr("welcomeProPerk1", "Everything in Plus"),
+    tr("welcomeProPerk2", "Unlimited article analyses + Pro Deep Dive"),
+    tr("welcomeProPerk3", "Unlimited messages on all AI models"),
+    tr("welcomeProPerk4", "Price alerts & AI fact check"),
   ];
 
   return (
