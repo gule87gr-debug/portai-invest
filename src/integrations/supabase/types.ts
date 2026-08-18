@@ -146,6 +146,30 @@ export type Database = {
         }
         Relationships: []
       }
+      article_analysis_cache: {
+        Row: {
+          analysis: Json
+          cache_key: string
+          created_at: string
+          language: string
+          url: string
+        }
+        Insert: {
+          analysis: Json
+          cache_key: string
+          created_at?: string
+          language?: string
+          url: string
+        }
+        Update: {
+          analysis?: Json
+          cache_key?: string
+          created_at?: string
+          language?: string
+          url?: string
+        }
+        Relationships: []
+      }
       article_likes: {
         Row: {
           article_id: string
