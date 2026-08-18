@@ -195,8 +195,54 @@ function normalizeHost(host: string): string {
 }
 
 type PreCheck =
-  | { ok: true; metaTitle?: string; metaType?: string; metaDescription?: string }
+  | { ok: true; metaTitle?: string; metaType?: string; metaDescription?: string; bodyText?: string }
   | { ok: false; reason: string };
+
+/**
+ * Strips scripts/styles/markup from raw HTML and returns the readable article
+ * text. The analyzer feeds this to the model so scores reflect what the
+ * article actually says instead of being inferred from the URL alone.
+ */
+function extractArticleText(html: string): string {
+  if (!html) return "";
+  let body = html.split(/<body[^>]*>/i)[1] ?? html;
+  body = body
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, " ")
+    .replace(/<svg[\s\S]*?<\/svg>/gi, " ")
+    .replace(/<(nav|header|footer|aside|form)[\s\S]*?<\/\1>/gi, " ");
+
+  // Prefer paragraph content — it is overwhelmingly the article body.
+  const paragraphs = Array.from(body.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi))
+    .map((m) => m[1].replace(/<[^>]+>/g, " "))
+    .map((t) => decodeEntities(t).replace(/\s+/g, " ").trim())
+    .filter((t) => t.length > 40);
+
+  let text = paragraphs.join("\n\n");
+  if (text.length < 400) {
+    text = decodeEntities(body.replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
+  }
+  return text.slice(0, 14_000);
+}
+
+function decodeEntities(s: string): string {
+  return s
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&#(\d+);/g, (_m, d) => String.fromCharCode(Number(d)));
+}
+
+/** Stable cache key so re-analysing the same URL returns the same result. */
+async function analysisCacheKey(url: string, lang: string): Promise<string> {
+  const data = new TextEncoder().encode(`${url}::${lang}`);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
 
 function isPrivateOrLocalHost(hostname: string): boolean {
   if (!hostname) return true;
@@ -281,9 +327,6 @@ async function preCheckArticle(urlStr: string): Promise<PreCheck> {
   // without requiring a successful metadata fetch (many publishers 403 bots).
   const isKnownPublisher = isKnownPublisherHost(host);
   const hasPathHint = ARTICLE_PATH_HINTS.some((p) => p.test(path));
-  if (isKnownPublisher && (hasPathHint || path.length > 25)) {
-    return { ok: true };
-  }
 
   // Try to fetch metadata to confirm
   try {
@@ -414,7 +457,13 @@ async function preCheckArticle(urlStr: string): Promise<PreCheck> {
       };
     }
 
-    return { ok: true, metaTitle: metaTitle?.slice(0, 300), metaType, metaDescription: metaDescription?.slice(0, 500) };
+    return {
+      ok: true,
+      metaTitle: metaTitle?.slice(0, 300),
+      metaType,
+      metaDescription: metaDescription?.slice(0, 500),
+      bodyText: extractArticleText(html),
+    };
   } catch (_e) {
     // Network/timeout: don't hard-block — let the AI try, but flag as unknown
     return { ok: true };
