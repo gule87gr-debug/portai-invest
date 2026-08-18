@@ -1,4 +1,4 @@
-import { MessageCircle, Sparkles, Eye, Settings, TrendingUp, Menu, X, LogOut, Search, Shield, Newspaper } from "lucide-react";
+import { Sparkles, Eye, Settings, TrendingUp, Menu, X, LogOut, Search, Shield, Newspaper } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
@@ -7,11 +7,12 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { NotificationBell } from "@/components/NotificationBell";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
+import sentryLogo from "@/assets/sentry-logo.png.asset.json";
 
 const navKeys = [
   { to: "/dashboard", icon: Search, key: "articleAnalyzer", tour: "" },
   { to: "/news", icon: Newspaper, key: "news", tour: "nav-news" },
-  { to: "/chat", icon: MessageCircle, key: "aiChat", tour: "nav-chat" },
+  { to: "/chat", icon: null as any, logo: sentryLogo.url, key: "aiChat", tour: "nav-chat" },
   { to: "/quiz", icon: Sparkles, key: "quiz", tour: "nav-quiz" },
   { to: "/watchlists", icon: Eye, key: "watchlists", tour: "nav-watchlists" },
   { to: "/settings", icon: Settings, key: "settings", tour: "" },
