@@ -1,4 +1,4 @@
-import sentryMark from "@/assets/sentry-mark.png.asset.json";
+import sentryMark from "@/assets/sentry-mark.png";
 
 /**
  * Sentry logo rendered as a currentColor mask so it blends with the
