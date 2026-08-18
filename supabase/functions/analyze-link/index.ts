@@ -39,7 +39,26 @@ const TRUST_SCORES: Record<string, number> = {
   benzinga: 5, investorplace: 5, "fox business": 5,
   thestreet: 5, "the street": 5,
   reddit: 3, twitter: 3, x: 3, stocktwits: 3,
+  npr: 8, "abc news": 7, "cbs news": 7, "nbc news": 7, "usa today": 6,
+  "the globe and mail": 7, "financial post": 6, nasdaq: 6, quartz: 6, msn: 5,
+  "investing.com": 5, investing: 5, tipranks: 5, "simply wall st": 5,
+  gurufocus: 5, "insider monkey": 4, "24/7 wall st": 4, "mining.com": 6,
+  "the motley fool uk": 5, finbold: 4, coindesk: 5, cointelegraph: 4, newsbtc: 3,
+  "the street pro": 5,
 };
+
+const UNKNOWN_SOURCE_SCORE = 5;
+
+/** Same fallback the news feed uses for sources without a known domain. */
+function scoreForSourceName(source: string): number {
+  if (!source) return UNKNOWN_SOURCE_SCORE;
+  const key = source.toLowerCase().trim();
+  if (TRUST_SCORES[key] !== undefined) return TRUST_SCORES[key];
+  for (const [name, score] of Object.entries(TRUST_SCORES)) {
+    if (key.includes(name)) return score;
+  }
+  return UNKNOWN_SOURCE_SCORE;
+}
 
 // Maps URL hostnames to the canonical source name used in TRUST_SCORES.
 const DOMAIN_TO_SOURCE: Record<string, string> = {
@@ -82,6 +101,27 @@ const DOMAIN_TO_SOURCE: Record<string, string> = {
   "twitter.com": "twitter",
   "x.com": "x",
   "stocktwits.com": "stocktwits",
+  "npr.org": "npr",
+  "abcnews.go.com": "abc news",
+  "cbsnews.com": "cbs news",
+  "nbcnews.com": "nbc news",
+  "usatoday.com": "usa today",
+  "theglobeandmail.com": "the globe and mail",
+  "financialpost.com": "financial post",
+  "nasdaq.com": "nasdaq",
+  "qz.com": "quartz",
+  "msn.com": "msn",
+  "investing.com": "investing.com",
+  "tipranks.com": "tipranks",
+  "simplywall.st": "simply wall st",
+  "gurufocus.com": "gurufocus",
+  "insidermonkey.com": "insider monkey",
+  "247wallst.com": "24/7 wall st",
+  "mining.com": "mining.com",
+  "finbold.com": "finbold",
+  "coindesk.com": "coindesk",
+  "cointelegraph.com": "cointelegraph",
+  "newsbtc.com": "newsbtc",
 };
 
 function lookupKnownSource(urlStr: string): { source: string; score: number } | null {
@@ -263,7 +303,7 @@ function decodeEntities(s: string): string {
 
 /** Stable cache key so re-analysing the same URL returns the same result. */
 async function analysisCacheKey(url: string, lang: string): Promise<string> {
-  const data = new TextEncoder().encode(`${url}::${lang}`);
+  const data = new TextEncoder().encode(`v2::${url}::${lang}`);
   const digest = await crypto.subtle.digest("SHA-256", data);
   return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
@@ -950,6 +990,12 @@ ${crossSourceBlock}`,
       if (!analysis.source || /^https?:|\./i.test(analysis.source)) {
         analysis.source = known.source.replace(/\b\w/g, (c: string) => c.toUpperCase());
       }
+    } else {
+      // Unknown domain: fall back to the exact same source-name lookup the news
+      // feed badge uses, so the analyzer can never disagree with the feed.
+      let host = "";
+      try { host = new URL(url).hostname.replace(/^www\./, ""); } catch { /* ignore */ }
+      analysis.trustScore = scoreForSourceName(String(analysis.source || host));
     }
 
     // Persist the finished analysis so re-analysing this URL is deterministic.

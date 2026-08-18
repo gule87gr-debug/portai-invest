@@ -71,17 +71,45 @@ export const TRUST_SCORES: Record<string, number> = {
   twitter: 3,
   x: 3,
   "stocktwits": 3,
+
+  // additional publishers commonly seen in the news feed
+  "npr": 8,
+  "abc news": 7,
+  "cbs news": 7,
+  "nbc news": 7,
+  "usa today": 6,
+  "the globe and mail": 7,
+  "financial post": 6,
+  "nasdaq": 6,
+  "quartz": 6,
+  "msn": 5,
+  "investing.com": 5,
+  "investing": 5,
+  "tipranks": 5,
+  "simply wall st": 5,
+  "gurufocus": 5,
+  "insider monkey": 4,
+  "24/7 wall st": 4,
+  "mining.com": 6,
+  "the motley fool uk": 5,
+  "finbold": 4,
+  "coindesk": 5,
+  "cointelegraph": 4,
+  "newsbtc": 3,
+  "the street pro": 5,
 };
 
 /** Returns 1-10 trust score for a source name (case-insensitive, partial match). */
+export const UNKNOWN_SOURCE_SCORE = 5;
+
 export function getTrustScore(source: string): number {
-  if (!source) return 4;
+  if (!source) return UNKNOWN_SOURCE_SCORE;
   const key = source.toLowerCase().trim();
   if (TRUST_SCORES[key] !== undefined) return TRUST_SCORES[key];
   for (const [name, score] of Object.entries(TRUST_SCORES)) {
     if (key.includes(name)) return score;
   }
-  return 4;
+  return UNKNOWN_SOURCE_SCORE;
 }
 
 // Maps URL hostnames to the canonical source name used in TRUST_SCORES.
@@ -127,6 +155,27 @@ export const DOMAIN_TO_SOURCE: Record<string, string> = {
   "twitter.com": "twitter",
   "x.com": "x",
   "stocktwits.com": "stocktwits",
+  "npr.org": "npr",
+  "abcnews.go.com": "abc news",
+  "cbsnews.com": "cbs news",
+  "nbcnews.com": "nbc news",
+  "usatoday.com": "usa today",
+  "theglobeandmail.com": "the globe and mail",
+  "financialpost.com": "financial post",
+  "nasdaq.com": "nasdaq",
+  "qz.com": "quartz",
+  "msn.com": "msn",
+  "investing.com": "investing.com",
+  "tipranks.com": "tipranks",
+  "simplywall.st": "simply wall st",
+  "gurufocus.com": "gurufocus",
+  "insidermonkey.com": "insider monkey",
+  "247wallst.com": "24/7 wall st",
+  "mining.com": "mining.com",
+  "finbold.com": "finbold",
+  "coindesk.com": "coindesk",
+  "cointelegraph.com": "cointelegraph",
+  "newsbtc.com": "newsbtc",
 };
 
 /** Resolves a known publisher (and its score) from an article URL. */
