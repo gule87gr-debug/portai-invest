@@ -4,7 +4,7 @@ import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SEO } from "@/components/SEO";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { Send, Sparkles, Plus, Trash2, MessageCircle, Image, X, Crown, Zap, Brain, Lightbulb, Gauge, ChevronDown, Bot } from "lucide-react";
+import { Send, ShieldCheck, Plus, Trash2, MessageCircle, Image, X, Crown, Zap, Brain, Lightbulb, Gauge, ChevronDown, Bot } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { cn } from "@/lib/utils";
@@ -108,7 +108,7 @@ const FREE_IMG_WINDOW_HOURS = 24;
 
 const AIChat = () => {
   const { t } = useLanguage();
-  usePageTitle("AI Financial Advisor | PortAI");
+  usePageTitle("Sentry — AI Market Analyst | PortAI");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -279,18 +279,18 @@ const AIChat = () => {
   return (
     <AppLayout>
       <SEO
-        title="AI Financial Advisor — PortAI"
-        description="Chat with an AI financial advisor about stocks, ETFs and crypto. Ask market questions and analyze charts with image uploads."
+        title="Sentry — AI Market Analyst | PortAI"
+        description="Chat with Sentry, PortAI's AI market analyst, about stocks, ETFs and crypto. Ask market questions and analyze charts with image uploads."
         path="/chat"
       />
       <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} title="Limit Reached" description={upgradeReason} />
       <div className="mb-4 flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <Sparkles className="h-5 w-5 text-primary-foreground" />
+            <ShieldCheck className="h-5 w-5 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-lg sm:text-xl font-bold">{t("aiFinancialAdvisor")}</h1>
+            <h1 className="text-lg sm:text-xl font-bold">Sentry<span className="ml-2 align-middle text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">AI analyst</span></h1>
             <p className="text-xs text-muted-foreground">{t("poweredByAI")}</p>
           </div>
         </div>
@@ -351,7 +351,7 @@ const AIChat = () => {
             <>
               <div className="flex gap-3 animate-fade-in">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary">
-                  <Sparkles className="h-4 w-4 text-primary-foreground" />
+                  <ShieldCheck className="h-4 w-4 text-primary-foreground" />
                 </div>
                 <div className="rounded-xl rounded-tl-none bg-card p-4 text-sm leading-relaxed text-foreground">
                   {t("welcomeMessage")}
@@ -371,7 +371,7 @@ const AIChat = () => {
             <div key={i} className={cn("flex gap-3 animate-fade-in", m.role === "user" ? "justify-end" : "")}>
               {m.role === "assistant" && (
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary">
-                  <Sparkles className="h-4 w-4 text-primary-foreground" />
+                  <ShieldCheck className="h-4 w-4 text-primary-foreground" />
                 </div>
               )}
               <div className={cn("max-w-[85%] sm:max-w-[70%] rounded-xl p-4 text-sm leading-relaxed", m.role === "user" ? "bg-primary text-primary-foreground rounded-tr-none" : "bg-card text-foreground rounded-tl-none")}>
@@ -386,7 +386,7 @@ const AIChat = () => {
           {isTyping && messages[messages.length - 1]?.role !== "assistant" && (
             <div className="flex gap-3 animate-fade-in">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary">
-                <Sparkles className="h-4 w-4 text-primary-foreground" />
+                <ShieldCheck className="h-4 w-4 text-primary-foreground" />
               </div>
               <div className="rounded-xl rounded-tl-none bg-card px-4 py-3">
                 <div className="flex gap-1">
