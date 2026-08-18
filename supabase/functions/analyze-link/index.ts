@@ -226,6 +226,30 @@ function extractArticleText(html: string): string {
   return text.slice(0, 14_000);
 }
 
+/**
+ * Last-resort body retrieval for publishers that block direct bot fetches
+ * (CNBC, WSJ, Bloomberg all 403 server-side requests). Uses a public
+ * text-extraction proxy that renders the page and returns plain text, so the
+ * model still analyses the real article instead of only the headline.
+ */
+async function fetchArticleTextFallback(url: string): Promise<string> {
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 9000);
+    const res = await fetch(`https://r.jina.ai/${url}`, {
+      signal: ctrl.signal,
+      headers: { Accept: "text/plain", "X-Return-Format": "text" },
+    });
+    clearTimeout(timer);
+    if (!res.ok) return "";
+    const text = (await res.text()).replace(/\r/g, "").trim();
+    if (text.length < 400) return "";
+    return text.slice(0, 14_000);
+  } catch {
+    return "";
+  }
+}
+
 function decodeEntities(s: string): string {
   return s
     .replace(/&nbsp;/g, " ")
