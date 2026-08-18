@@ -616,6 +616,10 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
         </section>
       </RevealSection>
 
+      <RevealSection>
+        <TransparencyTrust />
+      </RevealSection>
+
       {/* FAQ — SEO crawlable */}
       <RevealSection>
         <section id="faq" aria-labelledby="faq-heading" className="px-4 sm:px-6 py-14 max-w-3xl mx-auto border-t border-border">
