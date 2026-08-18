@@ -142,23 +142,24 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
 
       {/* Hero — editorial, single voice */}
       <header className="px-4 sm:px-6 pt-20 sm:pt-28 pb-16 max-w-4xl mx-auto">
-        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-8">
+        <div className="flex items-center justify-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-8">
           <span className="h-px w-8 bg-border" />
-          <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-          <span>{lt("heroTagline")}</span>
+          <ShieldCheck className="h-3.5 w-3.5 text-foreground/70" />
+          <span>The Bloomberg Terminal for retail investors</span>
+          <span className="h-px w-8 bg-border" />
         </div>
 
         <h1
           className="editorial-heading text-center text-foreground text-[2.75rem] sm:text-6xl lg:text-[5rem]"
           style={{ lineHeight: "1.04" }}
         >
-          {lt("heroH1part1")} {lt("heroH1part2")} {lt("heroH1part3")}
+          Never trade on manipulated headlines again.
         </h1>
 
         <p className="sr-only">{lt("heroSrDesc")}</p>
 
-        <p className="mt-8 text-base sm:text-lg text-muted-foreground max-w-2xl leading-relaxed">
-          {lt("heroDesc")}
+        <p className="mt-8 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto text-center leading-relaxed">
+          Institutional-grade bias detection, trust scores and real-time tracking for 7,000+ stocks, ETFs and crypto — without the €20,000 terminal.
         </p>
 
         {/* Analyzer input */}
