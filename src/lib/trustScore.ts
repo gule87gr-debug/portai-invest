@@ -83,3 +83,79 @@ export function getTrustScore(source: string): number {
   }
   return 4;
 }
+
+// Maps URL hostnames to the canonical source name used in TRUST_SCORES.
+// Mirrors DOMAIN_TO_SOURCE in supabase/functions/analyze-link/index.ts so the
+// news-feed badge and the article analyzer can never disagree for a link.
+export const DOMAIN_TO_SOURCE: Record<string, string> = {
+  "reuters.com": "reuters",
+  "apnews.com": "associated press",
+  "ap.org": "associated press",
+  "sec.gov": "sec.gov",
+  "federalreserve.gov": "federal reserve",
+  "bloomberg.com": "bloomberg",
+  "ft.com": "financial times",
+  "wsj.com": "the wall street journal",
+  "economist.com": "the economist",
+  "nytimes.com": "the new york times",
+  "washingtonpost.com": "the washington post",
+  "cnbc.com": "cnbc",
+  "barrons.com": "barron's",
+  "marketwatch.com": "marketwatch",
+  "bbc.com": "bbc",
+  "bbc.co.uk": "bbc",
+  "theguardian.com": "the guardian",
+  "axios.com": "axios",
+  "morningstar.com": "morningstar",
+  "forbes.com": "forbes",
+  "fortune.com": "fortune",
+  "businessinsider.com": "business insider",
+  "finance.yahoo.com": "yahoo finance",
+  "yahoo.com": "yahoo finance",
+  "investopedia.com": "investopedia",
+  "cnn.com": "cnn",
+  "edition.cnn.com": "cnn",
+  "zacks.com": "zacks",
+  "kiplinger.com": "kiplinger",
+  "seekingalpha.com": "seeking alpha",
+  "fool.com": "the motley fool",
+  "benzinga.com": "benzinga",
+  "investorplace.com": "investorplace",
+  "foxbusiness.com": "fox business",
+  "thestreet.com": "thestreet",
+  "reddit.com": "reddit",
+  "twitter.com": "twitter",
+  "x.com": "x",
+  "stocktwits.com": "stocktwits",
+};
+
+/** Resolves a known publisher (and its score) from an article URL. */
+export function lookupKnownSource(urlStr: string): { source: string; score: number } | null {
+  try {
+    const host = new URL(urlStr).hostname.toLowerCase().replace(/^www\./, "");
+    if (DOMAIN_TO_SOURCE[host]) {
+      const src = DOMAIN_TO_SOURCE[host];
+      return { source: src, score: TRUST_SCORES[src] };
+    }
+    for (const [domain, src] of Object.entries(DOMAIN_TO_SOURCE)) {
+      if (host === domain || host.endsWith(`.${domain}`)) {
+        return { source: src, score: TRUST_SCORES[src] };
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+/**
+ * Score for a news item. Prefers the article URL's publisher domain (exactly
+ * what the analyzer keys off) and falls back to the RSS source label, so the
+ * badge shown in the feed matches the score returned when the same link is
+ * re-analyzed.
+ */
+export function getArticleTrustScore(link: string, source: string): number {
+  const known = link ? lookupKnownSource(link) : null;
+  if (known) return known.score;
+  return getTrustScore(source);
+}

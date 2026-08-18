@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { REGION_LABELS, REGION_FLAGS, REGION_LABEL_KEYS, AssetRegion } from "@/lib/stockDatabase";
-import { getTrustScore } from "@/lib/trustScore";
+import { getArticleTrustScore } from "@/lib/trustScore";
 
 const categories = [
   { key: "technology" },
@@ -85,7 +85,7 @@ export const StockNewsFeed = () => {
     if (sortMode === "newest") {
       list.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
     } else if (sortMode === "trust") {
-      list.sort((a, b) => getTrustScore(b.source) - getTrustScore(a.source));
+      list.sort((a, b) => getArticleTrustScore(b.link, b.source) - getArticleTrustScore(a.link, a.source));
     } else if (sortMode === "relevant") {
       list.sort((a, b) => {
         const diff = relevanceScore(b) - relevanceScore(a);
@@ -392,7 +392,7 @@ export const StockNewsFeed = () => {
               {sortedNews.map((item, i) => {
                 const sourceInitial = item.source?.[0]?.toUpperCase() || "N";
                 const sourceColor = ["bg-primary/20 text-primary", "bg-chart-3/20 text-chart-3", "bg-warning/20 text-warning", "bg-gain/20 text-gain"][i % 4];
-                const trust = getTrustScore(item.source);
+                const trust = getArticleTrustScore(item.link, item.source);
                 const trustTone =
                   trust >= 7 ? "text-gain bg-gain/15 border-gain/40" :
                   trust >= 5 ? "text-warning bg-warning/15 border-warning/40" :

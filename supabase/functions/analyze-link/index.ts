@@ -195,8 +195,54 @@ function normalizeHost(host: string): string {
 }
 
 type PreCheck =
-  | { ok: true; metaTitle?: string; metaType?: string; metaDescription?: string }
+  | { ok: true; metaTitle?: string; metaType?: string; metaDescription?: string; bodyText?: string }
   | { ok: false; reason: string };
+
+/**
+ * Strips scripts/styles/markup from raw HTML and returns the readable article
+ * text. The analyzer feeds this to the model so scores reflect what the
+ * article actually says instead of being inferred from the URL alone.
+ */
+function extractArticleText(html: string): string {
+  if (!html) return "";
+  let body = html.split(/<body[^>]*>/i)[1] ?? html;
+  body = body
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, " ")
+    .replace(/<svg[\s\S]*?<\/svg>/gi, " ")
+    .replace(/<(nav|header|footer|aside|form)[\s\S]*?<\/\1>/gi, " ");
+
+  // Prefer paragraph content — it is overwhelmingly the article body.
+  const paragraphs = Array.from(body.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi))
+    .map((m) => m[1].replace(/<[^>]+>/g, " "))
+    .map((t) => decodeEntities(t).replace(/\s+/g, " ").trim())
+    .filter((t) => t.length > 40);
+
+  let text = paragraphs.join("\n\n");
+  if (text.length < 400) {
+    text = decodeEntities(body.replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
+  }
+  return text.slice(0, 14_000);
+}
+
+function decodeEntities(s: string): string {
+  return s
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&#(\d+);/g, (_m, d) => String.fromCharCode(Number(d)));
+}
+
+/** Stable cache key so re-analysing the same URL returns the same result. */
+async function analysisCacheKey(url: string, lang: string): Promise<string> {
+  const data = new TextEncoder().encode(`${url}::${lang}`);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
 
 function isPrivateOrLocalHost(hostname: string): boolean {
   if (!hostname) return true;
@@ -281,9 +327,6 @@ async function preCheckArticle(urlStr: string): Promise<PreCheck> {
   // without requiring a successful metadata fetch (many publishers 403 bots).
   const isKnownPublisher = isKnownPublisherHost(host);
   const hasPathHint = ARTICLE_PATH_HINTS.some((p) => p.test(path));
-  if (isKnownPublisher && (hasPathHint || path.length > 25)) {
-    return { ok: true };
-  }
 
   // Try to fetch metadata to confirm
   try {
@@ -342,21 +385,21 @@ async function preCheckArticle(urlStr: string): Promise<PreCheck> {
       };
     }
 
-    // Read at most ~200KB of HTML head
+    // Read up to ~400KB of HTML so we get the full article body, not just <head>.
     const reader = res.body?.getReader();
     let html = "";
     if (reader) {
       const decoder = new TextDecoder();
       let total = 0;
-      while (total < 200_000) {
+      while (total < 400_000) {
         const { value, done } = await reader.read();
         if (done) break;
         total += value.length;
         html += decoder.decode(value, { stream: true });
-        if (html.includes("</head>")) break;
       }
       try { await reader.cancel(); } catch { /* noop */ }
     }
+
 
     const headHtml = html.split(/<\/head>/i)[0] || html;
 
@@ -414,7 +457,13 @@ async function preCheckArticle(urlStr: string): Promise<PreCheck> {
       };
     }
 
-    return { ok: true, metaTitle: metaTitle?.slice(0, 300), metaType, metaDescription: metaDescription?.slice(0, 500) };
+    return {
+      ok: true,
+      metaTitle: metaTitle?.slice(0, 300),
+      metaType,
+      metaDescription: metaDescription?.slice(0, 500),
+      bodyText: extractArticleText(html),
+    };
   } catch (_e) {
     // Network/timeout: don't hard-block — let the AI try, but flag as unknown
     return { ok: true };
@@ -568,6 +617,25 @@ serve(async (req) => {
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+    // ---- Deterministic cache: the same URL always returns the same analysis ----
+    const cacheKey = await analysisCacheKey(url, langCode || "en");
+    const { data: cachedRow } = await supabaseAdmin
+      .from("article_analysis_cache")
+      .select("analysis")
+      .eq("cache_key", cacheKey)
+      .maybeSingle();
+
+    if (cachedRow?.analysis) {
+      const cached = cachedRow.analysis as Record<string, unknown>;
+      if (!isPro) {
+        cached.hiddenAngle = null;
+        cached.proDeepDive = null;
+      }
+      return new Response(JSON.stringify({ success: true, analysis: cached, cached: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Enforce daily analysis limit for free users
     if (!isPro) {
       const today = new Date().toISOString().split("T")[0];
@@ -604,6 +672,10 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
+        // Deterministic sampling: re-analysing the same article must yield the
+        // same scores and reasoning.
+        temperature: 0,
+        top_p: 1,
         messages: [
           {
             role: "system",
@@ -683,7 +755,11 @@ Scoring guide:
 - 3-4: Social media, anonymous forums, unverified sources
 - 1-2: Known misinformation sources, pump-and-dump signals
 
-Analyze the URL domain, path structure, and any recognizable patterns to assess credibility even without fetching the page content.`,
+EVIDENCE RULES (non-negotiable):
+- The article's actual text is supplied below under "ARTICLE TEXT" whenever we could retrieve it. Base EVERY judgement — trust score, biases, red flag, factual issues, reasoning — on quotes and facts taken from that text plus the independent coverage list.
+- Every "evidence" field must quote a real phrase, number, or headline that appears in the supplied material. Never invent quotes, statistics, insiders, filings or outlets.
+- If no ARTICLE TEXT is supplied, say so explicitly in the summary, keep factualIssues limited to claims visible in the title/description, and do not fabricate article details.
+- Be reproducible: identical input must produce the identical score and the same reasoning.`,
           },
           {
             role: "user",
@@ -692,6 +768,9 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
 URL: ${url}
 ${(pre as { metaTitle?: string }).metaTitle ? `Page title: ${(pre as { metaTitle?: string }).metaTitle}` : ""}
 ${(pre as { metaDescription?: string }).metaDescription ? `Page description: ${(pre as { metaDescription?: string }).metaDescription}` : ""}
+
+ARTICLE TEXT (extracted from the page — this is the primary evidence):
+${(pre as { bodyText?: string }).bodyText?.trim() || "[Could not retrieve the article body. Analyse only the title/description above and the independent coverage below, and state this limitation in the summary.]"}
 
 INDEPENDENT COVERAGE OF THE SAME STORY (live news index, use this for cross-source verification):
 ${crossSourceBlock}`,
@@ -839,6 +918,15 @@ ${crossSourceBlock}`,
       if (!analysis.source || /^https?:|\./i.test(analysis.source)) {
         analysis.source = known.source.replace(/\b\w/g, (c: string) => c.toUpperCase());
       }
+    }
+
+    // Persist the finished analysis so re-analysing this URL is deterministic.
+    try {
+      await supabaseAdmin
+        .from("article_analysis_cache")
+        .upsert({ cache_key: cacheKey, url, language: langCode || "en", analysis }, { onConflict: "cache_key" });
+    } catch (e) {
+      console.error("Failed to cache analysis:", e);
     }
 
     // Record usage server-side AFTER successful analysis
