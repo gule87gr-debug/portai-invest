@@ -342,21 +342,21 @@ async function preCheckArticle(urlStr: string): Promise<PreCheck> {
       };
     }
 
-    // Read at most ~200KB of HTML head
+    // Read up to ~400KB of HTML so we get the full article body, not just <head>.
     const reader = res.body?.getReader();
     let html = "";
     if (reader) {
       const decoder = new TextDecoder();
       let total = 0;
-      while (total < 200_000) {
+      while (total < 400_000) {
         const { value, done } = await reader.read();
         if (done) break;
         total += value.length;
         html += decoder.decode(value, { stream: true });
-        if (html.includes("</head>")) break;
       }
       try { await reader.cancel(); } catch { /* noop */ }
     }
+
 
     const headHtml = html.split(/<\/head>/i)[0] || html;
 
