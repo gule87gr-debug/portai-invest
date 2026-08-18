@@ -617,6 +617,25 @@ serve(async (req) => {
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+    // ---- Deterministic cache: the same URL always returns the same analysis ----
+    const cacheKey = await analysisCacheKey(url, langCode || "en");
+    const { data: cachedRow } = await supabaseAdmin
+      .from("article_analysis_cache")
+      .select("analysis")
+      .eq("cache_key", cacheKey)
+      .maybeSingle();
+
+    if (cachedRow?.analysis) {
+      const cached = cachedRow.analysis as Record<string, unknown>;
+      if (!isPro) {
+        cached.hiddenAngle = null;
+        cached.proDeepDive = null;
+      }
+      return new Response(JSON.stringify({ success: true, analysis: cached, cached: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Enforce daily analysis limit for free users
     if (!isPro) {
       const today = new Date().toISOString().split("T")[0];
@@ -653,6 +672,10 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
+        // Deterministic sampling: re-analysing the same article must yield the
+        // same scores and reasoning.
+        temperature: 0,
+        top_p: 1,
         messages: [
           {
             role: "system",
@@ -732,7 +755,11 @@ Scoring guide:
 - 3-4: Social media, anonymous forums, unverified sources
 - 1-2: Known misinformation sources, pump-and-dump signals
 
-Analyze the URL domain, path structure, and any recognizable patterns to assess credibility even without fetching the page content.`,
+EVIDENCE RULES (non-negotiable):
+- The article's actual text is supplied below under "ARTICLE TEXT" whenever we could retrieve it. Base EVERY judgement — trust score, biases, red flag, factual issues, reasoning — on quotes and facts taken from that text plus the independent coverage list.
+- Every "evidence" field must quote a real phrase, number, or headline that appears in the supplied material. Never invent quotes, statistics, insiders, filings or outlets.
+- If no ARTICLE TEXT is supplied, say so explicitly in the summary, keep factualIssues limited to claims visible in the title/description, and do not fabricate article details.
+- Be reproducible: identical input must produce the identical score and the same reasoning.`,
           },
           {
             role: "user",
@@ -741,6 +768,9 @@ Analyze the URL domain, path structure, and any recognizable patterns to assess 
 URL: ${url}
 ${(pre as { metaTitle?: string }).metaTitle ? `Page title: ${(pre as { metaTitle?: string }).metaTitle}` : ""}
 ${(pre as { metaDescription?: string }).metaDescription ? `Page description: ${(pre as { metaDescription?: string }).metaDescription}` : ""}
+
+ARTICLE TEXT (extracted from the page — this is the primary evidence):
+${(pre as { bodyText?: string }).bodyText?.trim() || "[Could not retrieve the article body. Analyse only the title/description above and the independent coverage below, and state this limitation in the summary.]"}
 
 INDEPENDENT COVERAGE OF THE SAME STORY (live news index, use this for cross-source verification):
 ${crossSourceBlock}`,
@@ -888,6 +918,15 @@ ${crossSourceBlock}`,
       if (!analysis.source || /^https?:|\./i.test(analysis.source)) {
         analysis.source = known.source.replace(/\b\w/g, (c: string) => c.toUpperCase());
       }
+    }
+
+    // Persist the finished analysis so re-analysing this URL is deterministic.
+    try {
+      await supabaseAdmin
+        .from("article_analysis_cache")
+        .upsert({ cache_key: cacheKey, url, language: langCode || "en", analysis }, { onConflict: "cache_key" });
+    } catch (e) {
+      console.error("Failed to cache analysis:", e);
     }
 
     // Record usage server-side AFTER successful analysis
