@@ -88,7 +88,7 @@ export const AppSidebar = () => {
         </div>
 
         <nav className="mt-2 flex flex-1 flex-col gap-1 px-3">
-          {navKeys.map(({ to, icon: Icon, logo, key, tour }) => {
+          {navKeys.map(({ to, icon: Icon, key, tour }) => {
             const [path, hash] = to.split("#");
             const active = location.pathname === path && (!hash || location.hash === `#${hash}`);
             return (
@@ -104,11 +104,7 @@ export const AppSidebar = () => {
                     : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 )}
               >
-                {logo ? (
-                  <img src={logo} alt="" className="h-[18px] w-[18px] object-contain" />
-                ) : (
-                  <Icon className="h-4.5 w-4.5" />
-                )}
+                <Icon className="h-4.5 w-4.5" />
                 <span className="flex-1">{t(key)}</span>
               </NavLink>
             );
