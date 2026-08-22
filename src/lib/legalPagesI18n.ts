@@ -29,6 +29,7 @@ export type LegalPagesCopy = {
   privacy: LegalPageCopy;
   dataCompliance: LegalPageCopy;
   ipPolicy: LegalPageCopy;
+  accessibility: LegalPageCopy;
   // ToS shell (sections 1–8, 10–15). Section 9 stays in legalI18n.ts.
   tosIntro: LegalNode[];
   tosTail: LegalNode[];
@@ -366,6 +367,71 @@ const en: LegalPagesCopy = {
         "Email: legal@portai-invest.com",
         "Website: portai-invest.com",
       ]},
+    ],
+  },
+
+  accessibility: {
+    title: "Accessibility Statement",
+    pageTitleTag: "Accessibility Statement | PortAI",
+    lastUpdated: "August 22, 2026",
+    nodes: [
+      { type: "h2", text: "1. Our Commitment" },
+      { type: "p", text: "PortAI is committed to making our AI-powered investment platform accessible and usable for everyone, including people with disabilities. We aim to meet or exceed the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA standards and continue improving the accessibility of our product, content, and services." },
+
+      { type: "h2", text: "2. Accessibility Measures" },
+      { type: "p", text: "To support an inclusive experience, we have implemented the following measures:" },
+      { type: "ul", items: [
+        "Semantic HTML and ARIA landmarks to help screen-reader users navigate pages",
+        "Keyboard-accessible navigation and interactive controls throughout the platform",
+        "Descriptive labels on buttons, links, and form inputs, including icon-only controls",
+        "Color contrast that meets WCAG AA thresholds for text and interactive elements",
+        "Responsive layouts that adapt to zoom, magnification, and mobile screen readers",
+        "Focus indicators that make the current interactive element visible",
+        "A 'Skip to content' link for fast keyboard navigation past repeated menus",
+        "Reduced-motion support for users who prefer less animation",
+      ]},
+
+      { type: "h2", text: "3. Accessible Features" },
+      { type: "p", text: "Key areas of the platform have been built with accessibility in mind:" },
+      { type: "ul", items: [
+        "All charts and data visualizations expose their underlying values in text and tables where possible",
+        "Article analysis results are structured with headings and lists for easy screen-reader scanning",
+        "The navigation menu, search dialog, and settings are operable with keyboard and assistive technology",
+        "Form validation errors are associated with their inputs and announced clearly",
+        "Authentication, subscription, and billing flows are keyboard and screen-reader friendly",
+      ]},
+
+      { type: "h2", text: "4. Known Limitations" },
+      { type: "p", text: "Some third-party content and embedded widgets may not fully conform to WCAG 2.1 Level AA. Examples include:" },
+      { type: "ul", items: [
+        "Third-party chart and market-data widgets that manage their own rendering and focus",
+        "External news article content loaded via links or previews, which we do not control",
+        "Embedded videos or social-media content if added to our marketing pages in the future",
+      ]},
+      { type: "p", text: "When we become aware of accessibility issues in third-party components, we report them to the vendor and provide alternatives where feasible." },
+
+      { type: "h2", text: "5. Feedback and Assistance" },
+      { type: "p", text: "We welcome your feedback on accessibility. If you encounter barriers, need information in a different format, or have suggestions for improvement, please contact us:" },
+      { type: "ul", items: [
+        "Email: accessibility@portai-invest.com",
+        "Website: portai-invest.com",
+      ]},
+      { type: "p", text: "We aim to respond to accessibility inquiries within **5 business days** and resolve verifiable issues in a timely manner." },
+
+      { type: "h2", text: "6. Assessment and Testing" },
+      { type: "p", text: "Accessibility is evaluated through a combination of automated testing, manual keyboard navigation, and screen-reader checks. We review major updates and new features for accessibility before release and address issues as they are reported." },
+
+      { type: "h2", text: "7. Third-Party Tools and Assistive Technology" },
+      { type: "p", text: "PortAI is designed to work with modern browsers and assistive technologies, including:" },
+      { type: "ul", items: [
+        "Screen readers such as NVDA, JAWS, VoiceOver, and TalkBack",
+        "Keyboard-only navigation and standard browser zoom up to 200%",
+        "Voice-control software and switch devices on supported platforms",
+      ]},
+      { type: "p", text: "For the best experience, we recommend using the latest version of your browser and assistive technology." },
+
+      { type: "h2", text: "8. Changes to This Statement" },
+      { type: "p", text: "We may update this Accessibility Statement as we improve the platform. Changes will be posted on this page with an updated 'Last updated' date." },
     ],
   },
 
@@ -795,6 +861,71 @@ const es: LegalPagesCopy = {
         "Email: legal@portai-invest.com",
         "Sitio web: portai-invest.com",
       ]},
+    ],
+  },
+
+  accessibility: {
+    title: "Declaración de Accesibilidad",
+    pageTitleTag: "Declaración de Accesibilidad | PortAI",
+    lastUpdated: "22 de agosto de 2026",
+    nodes: [
+      { type: "h2", text: "1. Nuestro Compromiso" },
+      { type: "p", text: "PortAI está comprometido con hacer que su plataforma de inversión impulsada por IA sea accesible y utilizable para todos, incluidas las personas con discapacidad. Nuestro objetivo es cumplir o superar las Directrices de Accesibilidad para el Contenido Web (WCAG) 2.1 Nivel AA y seguir mejorando la accesibilidad de nuestro producto, contenido y servicios." },
+
+      { type: "h2", text: "2. Medidas de Accesibilidad" },
+      { type: "p", text: "Para garantizar una experiencia inclusiva, hemos implementado las siguientes medidas:" },
+      { type: "ul", items: [
+        "HTML semántico y puntos de referencia ARIA para ayudar a los usuarios de lectores de pantalla a navegar por las páginas",
+        "Navegación y controles interactivos accesibles por teclado en toda la plataforma",
+        "Etiquetas descriptivas en botones, enlaces y campos de formulario, incluidos los controles que solo muestran un icono",
+        "Contraste de color que cumple los umbrales WCAG AA para texto y elementos interactivos",
+        "Diseños responsivos que se adaptan al zoom, a la magnificación y a lectores de pantalla móviles",
+        "Indicadores de foco que hacen visible el elemento interactivo actual",
+        "Un enlace 'Saltar al contenido' para una navegación rápida por teclado más allá de los menús repetidos",
+        "Soporte para reducir el movimiento para usuarios que prefieren menos animación",
+      ]},
+
+      { type: "h2", text: "3. Funciones Accesibles" },
+      { type: "p", text: "Las áreas principales de la plataforma se han diseñado teniendo en cuenta la accesibilidad:" },
+      { type: "ul", items: [
+        "Todos los gráficos y visualizaciones de datos exponen sus valores subyacentes en texto y tablas cuando es posible",
+        "Los resultados del análisis de artículos están estructurados con encabezados y listas para facilitar el escaneado con lectores de pantalla",
+        "El menú de navegación, el diálogo de búsqueda y los ajustes son operables con teclado y tecnología de asistencia",
+        "Los errores de validación de formularios están asociados a sus campos y se anuncian claramente",
+        "Los flujos de autenticación, suscripción y facturación son compatibles con teclado y lectores de pantalla",
+      ]},
+
+      { type: "h2", text: "4. Limitaciones Conocidas" },
+      { type: "p", text: "Algunos contenidos de terceros y widgets integrados pueden no cumplir plenamente con WCAG 2.1 Nivel AA. Ejemplos:" },
+      { type: "ul", items: [
+        "Widgets de gráficos y datos de mercado de terceros que gestionan su propio renderizado y foco",
+        "Contenido de artículos de noticias externas cargado mediante enlaces o previsualizaciones, sobre el que no tenemos control",
+        "Vídeos incrustados o contenido de redes sociales si se añaden a nuestras páginas de marketing en el futuro",
+      ]},
+      { type: "p", text: "Cuando detectamos problemas de accesibilidad en componentes de terceros, los reportamos al proveedor y proporcionamos alternativas cuando es viable." },
+
+      { type: "h2", text: "5. Comentarios y Asistencia" },
+      { type: "p", text: "Agradecemos sus comentarios sobre accesibilidad. Si encuentra barreras, necesita información en un formato diferente o tiene sugerencias de mejora, contacte con nosotros:" },
+      { type: "ul", items: [
+        "Email: accessibility@portai-invest.com",
+        "Sitio web: portai-invest.com",
+      ]},
+      { type: "p", text: "Nuestro objetivo es responder a las consultas de accesibilidad en un plazo de **5 días hábiles** y resolver los problemas verificables de manera oportuna." },
+
+      { type: "h2", text: "6. Evaluación y Pruebas" },
+      { type: "p", text: "La accesibilidad se evalúa mediante una combinación de pruebas automatizadas, navegación manual por teclado y verificaciones con lectores de pantalla. Revisamos las actualizaciones importantes y las nuevas funciones en cuanto a accesibilidad antes de su lanzamiento y resolvemos los problemas a medida que se reportan." },
+
+      { type: "h2", text: "7. Herramientas de Terceros y Tecnología de Asistencia" },
+      { type: "p", text: "PortAI está diseñado para funcionar con navegadores modernos y tecnologías de asistencia, incluyendo:" },
+      { type: "ul", items: [
+        "Lectores de pantalla como NVDA, JAWS, VoiceOver y TalkBack",
+        "Navegación solo con teclado y zoom estándar del navegador hasta el 200%",
+        "Software de control por voz y dispositivos conmutadores en plataformas compatibles",
+      ]},
+      { type: "p", text: "Para la mejor experiencia, recomendamos usar la última versión de su navegador y tecnología de asistencia." },
+
+      { type: "h2", text: "8. Cambios en Esta Declaración" },
+      { type: "p", text: "Podemos actualizar esta Declaración de Accesibilidad a medida que mejoramos la plataforma. Los cambios se publicarán en esta página con una fecha de 'Última actualización' actualizada." },
     ],
   },
 

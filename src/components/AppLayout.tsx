@@ -31,6 +31,7 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
               <Link to="/terms-of-service" className="text-[11px] text-muted-foreground hover:text-foreground transition-colors">{t("terms")}</Link>
               <Link to="/data-compliance" className="text-[11px] text-muted-foreground hover:text-foreground transition-colors">{t("compliance")}</Link>
               <Link to="/ip-policy" className="text-[11px] text-muted-foreground hover:text-foreground transition-colors">{t("ipPolicy")}</Link>
+              <Link to="/accessibility" className="text-[11px] text-muted-foreground hover:text-foreground transition-colors">{t("accessibility")}</Link>
             </div>
           </div>
         </footer>

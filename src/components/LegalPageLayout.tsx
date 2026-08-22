@@ -39,6 +39,7 @@ export const LegalPageLayout = ({ title, lastUpdated, children }: LegalPageLayou
             <Link to="/terms-of-service" className="text-xs text-muted-foreground hover:text-foreground transition-colors">{t("termsOfService")}</Link>
             <Link to="/data-compliance" className="text-xs text-muted-foreground hover:text-foreground transition-colors">{t("dataCompliance")}</Link>
             <Link to="/ip-policy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">{t("ipPolicy")}</Link>
+            <Link to="/accessibility" className="text-xs text-muted-foreground hover:text-foreground transition-colors">{t("accessibility")}</Link>
           </div>
         </div>
       </footer>
