@@ -25,6 +25,7 @@ const staticEntries: Entry[] = [
   { path: "/terms-of-service", changefreq: "yearly", priority: "0.3" },
   { path: "/data-compliance", changefreq: "yearly", priority: "0.3" },
   { path: "/ip-policy", changefreq: "yearly", priority: "0.3" },
+  { path: "/accessibility", changefreq: "yearly", priority: "0.3" },
   { path: "/settings", changefreq: "monthly", priority: "0.3" },
   { path: "/billing-consents", changefreq: "yearly", priority: "0.3" },
   { path: "/upgrade-success", changefreq: "yearly", priority: "0.2" },

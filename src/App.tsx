@@ -66,6 +66,7 @@ const UpgradeSuccess = lazyWithRetry(() => import("./pages/UpgradeSuccess"));
 const BillingConsents = lazyWithRetry(() => import("./pages/BillingConsents"));
 const DataCompliance = lazyWithRetry(() => import("./pages/DataCompliance"));
 const IPPolicy = lazyWithRetry(() => import("./pages/IPPolicy"));
+const AccessibilityStatement = lazyWithRetry(() => import("./pages/AccessibilityStatement"));
 const AdminPage = lazyWithRetry(() => import("./pages/Admin"));
 const SeekingAlphaVsMotleyFool = lazyWithRetry(() => import("./pages/SeekingAlphaVsMotleyFool"));
 const BestStockAdvisorServices = lazyWithRetry(() => import("./pages/BestStockAdvisorServices"));
@@ -212,6 +213,7 @@ const App = () => (
               <Route path="/terms-of-service" element={<TermsOfService />} />
               <Route path="/data-compliance" element={<DataCompliance />} />
               <Route path="/ip-policy" element={<IPPolicy />} />
+              <Route path="/accessibility" element={<AccessibilityStatement />} />
               <Route path="/unsubscribe" element={<Unsubscribe />} />
               <Route path="/compare/seeking-alpha-vs-motley-fool" element={<SeekingAlphaVsMotleyFool />} />
               <Route path="/compare/best-stock-advisor-services" element={<BestStockAdvisorServices />} />
