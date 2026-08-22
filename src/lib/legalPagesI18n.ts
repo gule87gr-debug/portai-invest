@@ -29,6 +29,7 @@ export type LegalPagesCopy = {
   privacy: LegalPageCopy;
   dataCompliance: LegalPageCopy;
   ipPolicy: LegalPageCopy;
+  accessibility: LegalPageCopy;
   // ToS shell (sections 1–8, 10–15). Section 9 stays in legalI18n.ts.
   tosIntro: LegalNode[];
   tosTail: LegalNode[];
