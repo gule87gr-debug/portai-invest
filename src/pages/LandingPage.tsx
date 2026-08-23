@@ -780,8 +780,25 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
                           "@type": "Answer",
                           "text": "No. PortAI is an analytical and informational tool. We do not provide personalized financial advice. Always consult a qualified financial professional before making investment decisions."
                         }
+                      },
+                      {
+                        "@type": "Question",
+                        "name": "How does portfolio and watchlist tracking work?",
+                        "acceptedAnswer": {
+                          "@type": "Answer",
+                          "text": "Build unlimited multi-asset watchlists across stocks, ETFs and crypto. PortAI streams live quotes, interactive candlestick charts with volume, timeframe performance and price alerts, and links every position to the latest news scored for bias and trust."
+                        }
+                      },
+                      {
+                        "@type": "Question",
+                        "name": "How is my data secured?",
+                        "acceptedAnswer": {
+                          "@type": "Answer",
+                          "text": "All traffic is encrypted over TLS and data is stored on GDPR-compliant EU infrastructure with row-level security. PortAI never connects to your brokerage, never sells your data, and payments are handled entirely by Stripe. You can export or delete your account data at any time."
+                        }
                       }
                     ]
+
                   }
                 ]
               })
