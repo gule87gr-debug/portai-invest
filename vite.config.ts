@@ -30,13 +30,20 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 900,
     rollupOptions: {
       output: {
-        manualChunks: {
-          react: ["react", "react-dom", "react-router-dom"],
-          charts: ["recharts"],
-          markdown: ["react-markdown"],
+        manualChunks(id: string) {
+          if (id.includes("src/lib/stockDatabase")) return "stock-database";
+          if (id.includes("node_modules/recharts") || id.includes("node_modules/d3-")) return "charts";
+          if (id.includes("node_modules/react-markdown") || id.includes("node_modules/micromark") || id.includes("node_modules/mdast")) return "markdown";
+          if (
+            id.includes("node_modules/react-dom") ||
+            id.includes("node_modules/react-router") ||
+            id.includes("node_modules/react/")
+          )
+            return "react";
         },
       },
     },
+
   },
   esbuild: {
     // Strip debug logging from production builds; keep warnings/errors.
