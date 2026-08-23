@@ -847,6 +847,8 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
                 <li><a href="/terms-of-service" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footL2")}</a></li>
                 <li><a href="/data-compliance" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footL3")}</a></li>
                 <li><a href="/ip-policy" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footL4")}</a></li>
+                <li><a href="/accessibility" className="text-xs text-muted-foreground hover:text-primary transition-colors">Accessibility</a></li>
+
               </ul>
             </div>
           </nav>
