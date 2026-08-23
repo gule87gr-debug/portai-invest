@@ -145,26 +145,43 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
       </nav>
 
       {/* Hero — editorial, single voice */}
-      <header className="px-4 sm:px-6 pt-20 sm:pt-28 pb-16 max-w-4xl mx-auto">
-        <div className="flex items-center justify-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-8">
+      <header className="px-4 sm:px-6 pt-8 sm:pt-12 pb-12 max-w-4xl mx-auto">
+        <div className="flex items-center justify-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-5">
           <span className="h-px w-8 bg-border" />
-          <ShieldCheck className="h-3.5 w-3.5 text-foreground/70" />
+          <ShieldCheck className="h-3.5 w-3.5 text-foreground/70" aria-hidden="true" />
           <span>The Bloomberg Terminal for retail investors</span>
           <span className="h-px w-8 bg-border" />
         </div>
 
         <h1
-          className="editorial-heading text-center text-foreground text-[2.75rem] sm:text-6xl lg:text-[5rem]"
-          style={{ lineHeight: "1.04" }}
+          className="editorial-heading text-center text-foreground text-[2.25rem] sm:text-5xl lg:text-[4.25rem]"
+          style={{ lineHeight: "1.05" }}
         >
           Never trade on manipulated headlines again.
         </h1>
 
         <p className="sr-only">{lt("heroSrDesc")}</p>
 
-        <p className="mt-8 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto text-center leading-relaxed">
+        <p className="mt-5 text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto text-center leading-relaxed">
           Institutional-grade bias detection, trust scores and real-time tracking for 7,000+ stocks, ETFs and crypto — without the €20,000 terminal.
         </p>
+
+        {/* Primary CTA — above the fold on load */}
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button
+            onClick={onGetStarted}
+            className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg bg-primary px-7 py-3.5 text-sm font-bold text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97]"
+          >
+            {t("heroCreate")} <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </button>
+          <button
+            onClick={onLogIn ?? onGetStarted}
+            className="inline-flex w-full sm:w-auto items-center justify-center rounded-lg border border-border bg-card px-7 py-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent"
+          >
+            {t("logIn")}
+          </button>
+        </div>
+
 
         {/* Analyzer input */}
         <div id="hero-analyzer" className="mt-10 max-w-3xl scroll-mt-24">
