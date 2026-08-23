@@ -4,7 +4,6 @@ import { resolve } from "path";
 import { assetDatabase } from "../src/lib/stockDatabase/index";
 
 const BASE_URL = "https://portai-invest.com";
-const today = new Date().toISOString().slice(0, 10);
 
 interface Entry {
   path: string;
@@ -17,19 +16,18 @@ const staticEntries: Entry[] = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
   { path: "/pricing", changefreq: "monthly", priority: "0.8" },
   { path: "/dashboard", changefreq: "weekly", priority: "0.7" },
+  { path: "/news", changefreq: "daily", priority: "0.7" },
   { path: "/watchlists", changefreq: "weekly", priority: "0.7" },
   { path: "/chat", changefreq: "weekly", priority: "0.6" },
-  { path: "/forum", changefreq: "daily", priority: "0.6" },
   { path: "/quiz", changefreq: "monthly", priority: "0.5" },
+  { path: "/compare/seeking-alpha-vs-motley-fool", changefreq: "monthly", priority: "0.6" },
+  { path: "/compare/best-stock-advisor-services", changefreq: "monthly", priority: "0.6" },
+  { path: "/blog/how-to-detect-pump-and-dump-schemes", changefreq: "monthly", priority: "0.6" },
   { path: "/privacy-policy", changefreq: "yearly", priority: "0.3" },
   { path: "/terms-of-service", changefreq: "yearly", priority: "0.3" },
   { path: "/data-compliance", changefreq: "yearly", priority: "0.3" },
   { path: "/ip-policy", changefreq: "yearly", priority: "0.3" },
   { path: "/accessibility", changefreq: "yearly", priority: "0.3" },
-  { path: "/settings", changefreq: "monthly", priority: "0.3" },
-  { path: "/billing-consents", changefreq: "yearly", priority: "0.3" },
-  { path: "/upgrade-success", changefreq: "yearly", priority: "0.2" },
-  { path: "/unsubscribe", changefreq: "yearly", priority: "0.2" },
 ];
 
 const stockEntries: Entry[] = assetDatabase.map((a) => ({
@@ -38,10 +36,10 @@ const stockEntries: Entry[] = assetDatabase.map((a) => ({
   priority: "0.5",
 }));
 
-const entries: Entry[] = [...staticEntries, ...stockEntries].map((e) => ({
-  lastmod: today,
-  ...e,
-}));
+// No <lastmod>: the project has no authoritative per-page change timestamp,
+// and a build-time date is not a real signal.
+const entries: Entry[] = [...staticEntries, ...stockEntries];
+
 
 function generate(entries: Entry[]) {
   const urls = entries.map((e) =>
