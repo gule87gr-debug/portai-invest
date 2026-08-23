@@ -678,7 +678,29 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
                 {lt("faq4A")}
               </AccordionContent>
             </AccordionItem>
+            <AccordionItem value="q5" className="border-border">
+              <AccordionTrigger className="text-left text-sm sm:text-base font-semibold text-foreground hover:no-underline">
+                <span className="flex items-center gap-2"><HelpCircle className="h-4 w-4 text-primary shrink-0" aria-hidden="true" /> How does portfolio and watchlist tracking work?</span>
+              </AccordionTrigger>
+              <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                Build unlimited multi-asset watchlists across stocks, ETFs and crypto. PortAI streams live
+                quotes, interactive candlestick charts with volume, timeframe performance and price alerts,
+                and links every position to the latest news scored for bias and trust.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="q6" className="border-border">
+              <AccordionTrigger className="text-left text-sm sm:text-base font-semibold text-foreground hover:no-underline">
+                <span className="flex items-center gap-2"><Lock className="h-4 w-4 text-primary shrink-0" aria-hidden="true" /> How is my data secured?</span>
+              </AccordionTrigger>
+              <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                All traffic is encrypted over TLS and your data is stored on GDPR-compliant EU infrastructure
+                with row-level security, so only your account can read your watchlists and alerts. We never
+                connect to your brokerage, never sell your data, and payments are handled entirely by Stripe —
+                PortAI never sees your card details. You can export or delete your account data at any time.
+              </AccordionContent>
+            </AccordionItem>
           </Accordion>
+
 
           {/* JSON-LD: SoftwareApplication + FAQPage */}
           <script
