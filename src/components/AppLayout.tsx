@@ -5,6 +5,8 @@ import { TrialEndingBanner } from "./TrialEndingBanner";
 import { TrialEndedModal } from "./TrialEndedModal";
 import { FirstVisitPaywall } from "./FirstVisitPaywall";
 import { TickerSearch } from "./TickerSearch";
+import { FloatingSentryChat } from "./FloatingSentryChat";
+
 
 export const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const { t } = useLanguage();
