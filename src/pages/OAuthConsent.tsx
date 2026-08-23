@@ -5,6 +5,7 @@ import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SEO } from "@/components/SEO";
 
 // Minimal typed wrapper for the beta supabase.auth.oauth namespace.
 type OAuthDetails = {
@@ -220,5 +221,6 @@ export default function OAuthConsent() {
         )}
       </div>
     </main>
+    </>
   );
 }
