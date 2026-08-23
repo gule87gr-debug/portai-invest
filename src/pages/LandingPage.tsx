@@ -865,14 +865,25 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
         </div>
       </footer>
 
-      {/* Mobile sticky analyzer anchor */}
-      <a
-        href="#hero-analyzer"
-        className="sm:hidden fixed bottom-4 right-4 z-40 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-xs font-bold text-primary-foreground shadow-2xl shadow-primary/40 btn-glow active:scale-95"
-        aria-label="Jump to bias analyzer"
-      >
-        <Search className="h-4 w-4" /> Analyze
-      </a>
+      {/* Mobile sticky CTA bar */}
+      <div className="sm:hidden fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur-md px-3 py-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))]">
+        <div className="flex items-center gap-2">
+          <a
+            href="#hero-analyzer"
+            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-border bg-card px-3 py-3 text-xs font-semibold text-foreground active:scale-[0.97]"
+            aria-label="Jump to the news bias analyzer"
+          >
+            <Search className="h-4 w-4" aria-hidden="true" /> Analyze
+          </a>
+          <button
+            onClick={onGetStarted}
+            className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground btn-glow active:scale-[0.97]"
+          >
+            {t("heroCreate")} <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+
     </div>
     </TooltipProvider>
   );
