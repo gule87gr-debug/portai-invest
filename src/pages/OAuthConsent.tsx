@@ -5,6 +5,7 @@ import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SEO } from "@/components/SEO";
 
 // Minimal typed wrapper for the beta supabase.auth.oauth namespace.
 type OAuthDetails = {
@@ -112,15 +113,23 @@ export default function OAuthConsent() {
   }
 
   return (
+    <>
+    <SEO
+      title="Authorize App Access — PortAI"
+      description="Approve or deny an application requesting access to your PortAI account."
+      path="/.lovable/oauth/consent"
+      noindex
+    />
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10 text-foreground">
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-lg">
         <div className="mb-6 flex items-center gap-3">
-          <img src="/logo.png" alt="PortAI" className="h-10 w-10 rounded-lg" />
+          <img src="/logo.png" alt="PortAI logo" className="h-10 w-10 rounded-lg" />
           <div>
             <h1 className="text-xl font-bold">Connect to PortAI</h1>
             <p className="text-xs text-muted-foreground">Authorize an app to act as you</p>
           </div>
         </div>
+
 
         {error && (
           <div className="mb-4 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
@@ -212,5 +221,6 @@ export default function OAuthConsent() {
         )}
       </div>
     </main>
+    </>
   );
 }

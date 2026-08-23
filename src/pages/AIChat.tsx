@@ -84,9 +84,9 @@ async function streamChat({ messages, mode, onDelta, onDone, onError }: {
 const MarkdownContent = ({ content }: { content: string }) => (
   <ReactMarkdown
     components={{
-      h1: ({ children }) => <h1 className="text-lg font-bold mb-2 mt-3">{children}</h1>,
-      h2: ({ children }) => <h2 className="text-base font-bold mb-1.5 mt-2.5">{children}</h2>,
-      h3: ({ children }) => <h3 className="text-sm font-bold mb-1 mt-2">{children}</h3>,
+      h1: ({ children }) => <h2 className="text-lg font-bold mb-2 mt-3">{children}</h2>,
+      h2: ({ children }) => <h3 className="text-base font-bold mb-1.5 mt-2.5">{children}</h3>,
+      h3: ({ children }) => <h4 className="text-sm font-bold mb-1 mt-2">{children}</h4>,
       p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
       ul: ({ children }) => <ul className="mb-2 ml-4 list-disc space-y-0.5">{children}</ul>,
       ol: ({ children }) => <ol className="mb-2 ml-4 list-decimal space-y-0.5">{children}</ol>,
