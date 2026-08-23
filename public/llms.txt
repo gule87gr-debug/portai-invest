@@ -1,22 +1,29 @@
 # PortAI
 
-> AI financial news bias checker and professional portfolio tracker for retail investors. Real-time tracking of stocks, ETFs and crypto, paired with AI sentiment and bias detection across major financial outlets.
+> AI financial news bias checker and professional portfolio tracker for retail investors. Real-time tracking of 7,000+ stocks, ETFs and crypto, paired with AI bias detection, misinformation checks and trust scoring across major financial outlets.
 
-PortAI helps retail investors cut through biased financial reporting. The platform combines a multi-asset watchlist (stocks, ETFs, crypto) with AI-powered fact-checking, trust scoring of news sources, and a live S&P 500 heatmap. Pro tier unlocks deeper bias reports and AI market analysis.
+PortAI helps retail investors cut through biased financial reporting. The platform combines multi-asset watchlists (stocks, ETFs, crypto) with candlestick charts, price alerts, AI-powered fact-checking, trust scoring of news sources and a live market heatmap. "Sentry" is PortAI's in-app AI analyst. Plus and Pro tiers unlock deeper bias reports and higher AI usage limits.
+
+PortAI is an informational and analytical tool. It does not provide personalized financial advice.
 
 ## Pages
 
-- [Home](/): Product overview, features, pricing snapshot, FAQ.
-- [Pricing](/pricing): Free, Plus and Pro plan details.
-- [Privacy Policy](/privacy-policy): How we collect and process user data.
-- [Terms of Service](/terms-of-service): Terms governing use of the platform.
-- [Data & Compliance](/data-compliance): GDPR, data retention and compliance details.
-- [IP Policy](/ip-policy): Intellectual property and content usage policy.
+- [Home](https://portai-invest.com/): Product overview, live analyzer demo, pricing, FAQ.
+- [Pricing](https://portai-invest.com/pricing): Free, Plus (€8.99/mo) and Pro (€15.99/mo) plan details.
+- [Market news](https://portai-invest.com/news): Financial news feed with per-source trust scores.
+- [Seeking Alpha vs Motley Fool](https://portai-invest.com/compare/seeking-alpha-vs-motley-fool): Bias and conflict-of-interest comparison.
+- [Best stock advisor services](https://portai-invest.com/compare/best-stock-advisor-services): Evaluation of major advisory subscriptions.
+- [How to detect pump-and-dump schemes](https://portai-invest.com/blog/how-to-detect-pump-and-dump-schemes): Red flags and a verification checklist.
+- [Privacy Policy](https://portai-invest.com/privacy-policy): How we collect and process user data.
+- [Terms of Service](https://portai-invest.com/terms-of-service): Terms governing use of the platform.
+- [Data & Compliance](https://portai-invest.com/data-compliance): GDPR, data retention and security practices.
+- [IP Policy](https://portai-invest.com/ip-policy): Intellectual property and content usage policy.
+- [Accessibility Statement](https://portai-invest.com/accessibility): WCAG 2.1 AA commitment and feedback channel.
 
 ## Optional
 
-- [Dashboard](/dashboard): Authenticated portfolio dashboard (login required).
-- [AI Chat](/chat): Pro AI fact-checking assistant (login required).
-- [Watchlists](/watchlists): User watchlist management (login required).
-- [Forum](/forum): Community discussion (login required).
-- [Quiz](/quiz): Investor profile quiz (login required).
+- [Dashboard](https://portai-invest.com/dashboard): Article bias analysis and market intelligence (login required).
+- [Sentry AI chat](https://portai-invest.com/chat): AI analyst and fact-checking assistant (login required).
+- [Watchlists](https://portai-invest.com/watchlists): Multi-asset watchlist management (login required).
+- [Price alerts](https://portai-invest.com/alerts): Price alert management (login required).
+- [Investor quiz](https://portai-invest.com/quiz): Portfolio profile quiz (login required).
