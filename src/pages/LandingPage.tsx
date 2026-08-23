@@ -145,29 +145,46 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
       </nav>
 
       {/* Hero — editorial, single voice */}
-      <header className="px-4 sm:px-6 pt-20 sm:pt-28 pb-16 max-w-4xl mx-auto">
-        <div className="flex items-center justify-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-8">
+      <header className="px-4 sm:px-6 pt-8 sm:pt-12 pb-12 max-w-4xl mx-auto">
+        <div className="flex items-center justify-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-5">
           <span className="h-px w-8 bg-border" />
-          <ShieldCheck className="h-3.5 w-3.5 text-foreground/70" />
+          <ShieldCheck className="h-3.5 w-3.5 text-foreground/70" aria-hidden="true" />
           <span>The Bloomberg Terminal for retail investors</span>
           <span className="h-px w-8 bg-border" />
         </div>
 
         <h1
-          className="editorial-heading text-center text-foreground text-[2.75rem] sm:text-6xl lg:text-[5rem]"
-          style={{ lineHeight: "1.04" }}
+          className="editorial-heading text-center text-foreground text-[2.25rem] sm:text-5xl lg:text-[4.25rem]"
+          style={{ lineHeight: "1.05" }}
         >
           Never trade on manipulated headlines again.
         </h1>
 
         <p className="sr-only">{lt("heroSrDesc")}</p>
 
-        <p className="mt-8 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto text-center leading-relaxed">
+        <p className="mt-5 text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto text-center leading-relaxed">
           Institutional-grade bias detection, trust scores and real-time tracking for 7,000+ stocks, ETFs and crypto — without the €20,000 terminal.
         </p>
 
+        {/* Primary CTA — above the fold on load */}
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button
+            onClick={onGetStarted}
+            className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg bg-primary px-7 py-3.5 text-sm font-bold text-primary-foreground transition-all duration-200 hover:bg-primary/90 btn-glow active:scale-[0.97]"
+          >
+            {t("heroCreate")} <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </button>
+          <button
+            onClick={onLogIn ?? onGetStarted}
+            className="inline-flex w-full sm:w-auto items-center justify-center rounded-lg border border-border bg-card px-7 py-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-accent"
+          >
+            {t("logIn")}
+          </button>
+        </div>
+
+
         {/* Analyzer input */}
-        <div id="hero-analyzer" className="mt-10 max-w-3xl scroll-mt-24">
+        <div id="hero-analyzer" className="mt-6 max-w-3xl scroll-mt-24">
           <div className="focus-spring flex flex-col sm:flex-row items-stretch gap-2 rounded-xl border border-border bg-card p-2">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -661,7 +678,29 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
                 {lt("faq4A")}
               </AccordionContent>
             </AccordionItem>
+            <AccordionItem value="q5" className="border-border">
+              <AccordionTrigger className="text-left text-sm sm:text-base font-semibold text-foreground hover:no-underline">
+                <span className="flex items-center gap-2"><HelpCircle className="h-4 w-4 text-primary shrink-0" aria-hidden="true" /> How does portfolio and watchlist tracking work?</span>
+              </AccordionTrigger>
+              <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                Build unlimited multi-asset watchlists across stocks, ETFs and crypto. PortAI streams live
+                quotes, interactive candlestick charts with volume, timeframe performance and price alerts,
+                and links every position to the latest news scored for bias and trust.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="q6" className="border-border">
+              <AccordionTrigger className="text-left text-sm sm:text-base font-semibold text-foreground hover:no-underline">
+                <span className="flex items-center gap-2"><Lock className="h-4 w-4 text-primary shrink-0" aria-hidden="true" /> How is my data secured?</span>
+              </AccordionTrigger>
+              <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                All traffic is encrypted over TLS and your data is stored on GDPR-compliant EU infrastructure
+                with row-level security, so only your account can read your watchlists and alerts. We never
+                connect to your brokerage, never sell your data, and payments are handled entirely by Stripe —
+                PortAI never sees your card details. You can export or delete your account data at any time.
+              </AccordionContent>
+            </AccordionItem>
           </Accordion>
+
 
           {/* JSON-LD: SoftwareApplication + FAQPage */}
           <script
@@ -741,8 +780,25 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
                           "@type": "Answer",
                           "text": "No. PortAI is an analytical and informational tool. We do not provide personalized financial advice. Always consult a qualified financial professional before making investment decisions."
                         }
+                      },
+                      {
+                        "@type": "Question",
+                        "name": "How does portfolio and watchlist tracking work?",
+                        "acceptedAnswer": {
+                          "@type": "Answer",
+                          "text": "Build unlimited multi-asset watchlists across stocks, ETFs and crypto. PortAI streams live quotes, interactive candlestick charts with volume, timeframe performance and price alerts, and links every position to the latest news scored for bias and trust."
+                        }
+                      },
+                      {
+                        "@type": "Question",
+                        "name": "How is my data secured?",
+                        "acceptedAnswer": {
+                          "@type": "Answer",
+                          "text": "All traffic is encrypted over TLS and data is stored on GDPR-compliant EU infrastructure with row-level security. PortAI never connects to your brokerage, never sells your data, and payments are handled entirely by Stripe. You can export or delete your account data at any time."
+                        }
                       }
                     ]
+
                   }
                 ]
               })
@@ -791,6 +847,8 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
                 <li><a href="/terms-of-service" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footL2")}</a></li>
                 <li><a href="/data-compliance" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footL3")}</a></li>
                 <li><a href="/ip-policy" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footL4")}</a></li>
+                <li><a href="/accessibility" className="text-xs text-muted-foreground hover:text-primary transition-colors">Accessibility</a></li>
+
               </ul>
             </div>
           </nav>
@@ -809,14 +867,25 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
         </div>
       </footer>
 
-      {/* Mobile sticky analyzer anchor */}
-      <a
-        href="#hero-analyzer"
-        className="sm:hidden fixed bottom-4 right-4 z-40 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-xs font-bold text-primary-foreground shadow-2xl shadow-primary/40 btn-glow active:scale-95"
-        aria-label="Jump to bias analyzer"
-      >
-        <Search className="h-4 w-4" /> Analyze
-      </a>
+      {/* Mobile sticky CTA bar */}
+      <div className="sm:hidden fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur-md px-3 py-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))]">
+        <div className="flex items-center gap-2">
+          <a
+            href="#hero-analyzer"
+            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-border bg-card px-3 py-3 text-xs font-semibold text-foreground active:scale-[0.97]"
+            aria-label="Jump to the news bias analyzer"
+          >
+            <Search className="h-4 w-4" aria-hidden="true" /> Analyze
+          </a>
+          <button
+            onClick={onGetStarted}
+            className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground btn-glow active:scale-[0.97]"
+          >
+            {t("heroCreate")} <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+
     </div>
     </TooltipProvider>
   );

@@ -5,6 +5,8 @@ import { TrialEndingBanner } from "./TrialEndingBanner";
 import { TrialEndedModal } from "./TrialEndedModal";
 import { FirstVisitPaywall } from "./FirstVisitPaywall";
 import { TickerSearch } from "./TickerSearch";
+import { FloatingSentryChat } from "./FloatingSentryChat";
+
 
 export const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const { t } = useLanguage();
@@ -21,6 +23,8 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
         </main>
         <FirstVisitPaywall />
         <TrialEndedModal />
+        <FloatingSentryChat />
+
         <footer className="border-t border-border px-4 py-4 mt-auto">
           <div className="mx-auto max-w-6xl flex flex-col items-center gap-2">
             <p className="text-[11px] text-muted-foreground text-center max-w-lg leading-relaxed">
