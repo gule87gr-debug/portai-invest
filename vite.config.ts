@@ -33,7 +33,7 @@ export default defineConfig(({ mode }) => ({
         manualChunks: {
           react: ["react", "react-dom", "react-router-dom"],
           charts: ["recharts"],
-          markdown: ["react-markdown", "remark-gfm"],
+          markdown: ["react-markdown"],
         },
       },
     },
