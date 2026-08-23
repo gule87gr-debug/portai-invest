@@ -184,7 +184,7 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
 
 
         {/* Analyzer input */}
-        <div id="hero-analyzer" className="mt-10 max-w-3xl scroll-mt-24">
+        <div id="hero-analyzer" className="mt-6 max-w-3xl scroll-mt-24">
           <div className="focus-spring flex flex-col sm:flex-row items-stretch gap-2 rounded-xl border border-border bg-card p-2">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
