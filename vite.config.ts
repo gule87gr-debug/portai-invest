@@ -23,4 +23,24 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    // Never ship source maps to production — they expose original sources.
+    sourcemap: false,
+    target: "es2020",
+    chunkSizeWarningLimit: 900,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ["react", "react-dom", "react-router-dom"],
+          charts: ["recharts"],
+          markdown: ["react-markdown", "remark-gfm"],
+        },
+      },
+    },
+  },
+  esbuild: {
+    // Strip debug logging from production builds; keep warnings/errors.
+    pure: mode === "production" ? ["console.log", "console.debug"] : [],
+  },
 }));
+
