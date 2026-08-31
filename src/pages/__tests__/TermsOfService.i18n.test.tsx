@@ -86,7 +86,8 @@ describe("TermsOfService — localized §9 copy", () => {
     expect(fallback.tos.sectionTitle).toBe(en.tos.sectionTitle);
 
     renderTos("fr");
-    expect(screen.getByText(en.tos.sectionTitle)).toBeInTheDocument();
+    // Non-English translations load lazily, so wait for the localized render.
+    expect(await screen.findByText(en.tos.sectionTitle)).toBeInTheDocument();
     expect(screen.getByText(en.tos.withdrawalStrong)).toBeInTheDocument();
   });
 });
