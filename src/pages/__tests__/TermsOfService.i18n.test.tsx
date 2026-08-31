@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import { LanguageProvider, useLanguage, type Language } from "@/contexts/LanguageContext";
 import { useEffect } from "react";
 import TermsOfService from "@/pages/TermsOfService";
@@ -24,12 +25,14 @@ const LanguageSwitcher = ({ to }: { to: Language }) => {
 
 const renderTos = (initial: Language) =>
   render(
-    <MemoryRouter>
+    <HelmetProvider>
+      <MemoryRouter>
       <LanguageProvider initialLanguage={initial}>
         <LanguageSwitcher to={initial} />
         <TermsOfService />
       </LanguageProvider>
-    </MemoryRouter>
+      </MemoryRouter>
+    </HelmetProvider>
   );
 
 describe("TermsOfService — localized §9 copy", () => {

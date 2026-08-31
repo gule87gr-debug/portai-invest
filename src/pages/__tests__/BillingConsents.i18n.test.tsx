@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import { LanguageProvider, type Language } from "@/contexts/LanguageContext";
 import { getLegalCopy } from "@/lib/legalI18n";
 
@@ -44,11 +45,13 @@ import BillingConsents from "@/pages/BillingConsents";
 
 const renderPage = (lang: Language) =>
   render(
-    <MemoryRouter>
+    <HelmetProvider>
+      <MemoryRouter>
       <LanguageProvider initialLanguage={lang}>
         <BillingConsents />
       </LanguageProvider>
-    </MemoryRouter>
+      </MemoryRouter>
+    </HelmetProvider>
   );
 
 describe("BillingConsents — localized legal copy", () => {
