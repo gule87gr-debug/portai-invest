@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { ExternalLink, Loader2, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import { assetDatabase } from "@/lib/stockDatabase";
+import { getAsset } from "@/lib/stockDatabase";
 
 interface NewsItem {
   title: string;
@@ -39,7 +39,7 @@ export const StockNews = ({ ticker, height = 400 }: { ticker: string; height?: n
     }
     setLoading(true);
     try {
-      const entry = assetDatabase.find((a) => a.ticker.toUpperCase() === ticker.toUpperCase());
+      const entry = getAsset(ticker);
       const name = entry?.name || "";
       const cleanTicker = ticker.replace(/[^A-Za-z0-9.\-]/g, "");
       const search = name ? `"${name.replace(/[^\p{L}\p{N}\s&.\-]/gu, "")}" OR "${cleanTicker} stock"` : `"${cleanTicker} stock"`;

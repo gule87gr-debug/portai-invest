@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getStockDescription, stockDescriptions } from "@/lib/stockDescriptions";
-import { assetDatabase } from "@/lib/stockDatabase";
+import { getAsset } from "@/lib/stockDatabase";
 
 const LS_PREFIX = "asset-desc:v1:";
 

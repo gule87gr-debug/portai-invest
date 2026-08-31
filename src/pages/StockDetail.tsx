@@ -10,7 +10,7 @@ import { PriceAlertDialog } from "@/components/PriceAlertDialog";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAssetDescription } from "@/hooks/useAssetDescription";
 import { getTradingViewSymbol } from "@/lib/tradingViewSymbol";
-import { assetDatabase } from "@/lib/stockDatabase";
+import { getAsset } from "@/lib/stockDatabase";
 import { useQuotes } from "@/hooks/useQuotes";
 import { ArrowLeft, Building2, Newspaper, BarChart3, TrendingUp, TrendingDown, Minus, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ const StockDetail = () => {
   const symbol = ticker?.toUpperCase() || "SPY";
   usePageTitle(`${symbol} Stock Detail | PortAI`);
   const info = useAssetDescription(symbol);
-  const assetEntry = assetDatabase.find((a) => a.ticker.toUpperCase() === symbol);
+  const assetEntry = getAsset(symbol);
   const tvSymbol = getTradingViewSymbol(symbol, assetEntry?.type);
 
   const tickerList = useMemo(() => [symbol], [symbol]);
