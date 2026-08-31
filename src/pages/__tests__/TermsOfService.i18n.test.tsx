@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import { LanguageProvider, useLanguage, type Language } from "@/contexts/LanguageContext";
 import { useEffect } from "react";
 import TermsOfService from "@/pages/TermsOfService";
@@ -24,12 +25,14 @@ const LanguageSwitcher = ({ to }: { to: Language }) => {
 
 const renderTos = (initial: Language) =>
   render(
-    <MemoryRouter>
+    <HelmetProvider>
+      <MemoryRouter>
       <LanguageProvider initialLanguage={initial}>
         <LanguageSwitcher to={initial} />
         <TermsOfService />
       </LanguageProvider>
-    </MemoryRouter>
+      </MemoryRouter>
+    </HelmetProvider>
   );
 
 describe("TermsOfService — localized §9 copy", () => {
@@ -57,11 +60,12 @@ describe("TermsOfService — localized §9 copy", () => {
     expect(screen.queryByText(es.tos.withdrawalStrong)).not.toBeInTheDocument();
   });
 
-  it("renders the Spanish §9 strings when language=es", () => {
+  it("renders the Spanish §9 strings when language=es", async () => {
     const es = getLegalCopy("es");
     renderTos("es");
 
-    expect(screen.getByText(es.tos.sectionTitle)).toBeInTheDocument();
+    // Non-English translations load lazily, so wait for the localized render.
+    expect(await screen.findByText(es.tos.sectionTitle)).toBeInTheDocument();
     expect(screen.getByText(es.tos.withdrawalStrong)).toBeInTheDocument();
     expect(screen.getByText(es.tos.subscriptionBullets[0])).toBeInTheDocument();
     expect(
@@ -74,7 +78,7 @@ describe("TermsOfService — localized §9 copy", () => {
     expect(screen.queryByText(en.tos.withdrawalStrong)).not.toBeInTheDocument();
   });
 
-  it("falls back to English §9 strings for unreviewed locales (e.g. fr)", () => {
+  it("falls back to English §9 strings for unreviewed locales (e.g. fr)", async () => {
     // Per legalI18n.ts: only en + es are reviewed. Anything else must use en
     // so the legal meaning is never lost in an unreviewed translation.
     const en = getLegalCopy("en");
@@ -82,7 +86,8 @@ describe("TermsOfService — localized §9 copy", () => {
     expect(fallback.tos.sectionTitle).toBe(en.tos.sectionTitle);
 
     renderTos("fr");
-    expect(screen.getByText(en.tos.sectionTitle)).toBeInTheDocument();
+    // Non-English translations load lazily, so wait for the localized render.
+    expect(await screen.findByText(en.tos.sectionTitle)).toBeInTheDocument();
     expect(screen.getByText(en.tos.withdrawalStrong)).toBeInTheDocument();
   });
 });
