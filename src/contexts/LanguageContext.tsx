@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, Suspense, ReactNode } from "react";
 import en from "./translations/en";
 
 export type Language = "en" | "es" | "fr" | "pt" | "de" | "it";
@@ -79,7 +79,7 @@ const LANG_STORAGE_KEY = "portai.language";
 const isValidLanguage = (v: unknown): v is Language =>
   typeof v === "string" && ["en", "es", "fr", "pt", "de", "it"].includes(v);
 
-export const LanguageProvider = ({ children, initialLanguage = "en" }: { children: ReactNode; initialLanguage?: Language }) => {
+const LanguageProviderInner = ({ children, initialLanguage = "en" }: { children: ReactNode; initialLanguage?: Language }) => {
   const [language, setLanguageState] = useState<Language>(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem(LANG_STORAGE_KEY);
@@ -138,6 +138,16 @@ export const LanguageProvider = ({ children, initialLanguage = "en" }: { childre
     </LanguageContext.Provider>
   );
 };
+
+/**
+ * Suspense boundary so a code-split locale can load without an untranslated
+ * flash. English (the default) resolves synchronously and never suspends.
+ */
+export const LanguageProvider = ({ children, initialLanguage = "en" }: { children: ReactNode; initialLanguage?: Language }) => (
+  <Suspense fallback={null}>
+    <LanguageProviderInner initialLanguage={initialLanguage}>{children}</LanguageProviderInner>
+  </Suspense>
+);
 
 export const useLanguage = () => {
   const ctx = useContext(LanguageContext);
