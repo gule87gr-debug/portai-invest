@@ -9,7 +9,6 @@ import { NotificationProvider } from "@/contexts/NotificationContext";
 import { OnboardingTutorial } from "@/components/OnboardingTutorial";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import LandingPage from "./pages/LandingPage";
 import { CookieConsent } from "./components/CookieConsent";
 import { RouteSkeleton } from "./components/RouteSkeleton";
 import { OfflineIndicator } from "./components/OfflineIndicator";
@@ -46,6 +45,9 @@ function lazyWithRetry<T extends { default: React.ComponentType<any> }>(
 }
 
 // Lazy-load every authenticated/secondary route to keep the initial bundle small
+// Landing page is only rendered for signed-out visitors, and the session
+// lookup it waits on is async anyway, so loading it in parallel costs nothing.
+const LandingPage = lazyWithRetry(() => import("./pages/LandingPage"));
 const Dashboard = lazyWithRetry(() => import("./pages/Dashboard"));
 const NewsPage = lazyWithRetry(() => import("./pages/NewsPage"));
 const AIChat = lazyWithRetry(() => import("./pages/AIChat"));
@@ -175,7 +177,9 @@ const AppRoutes = () => {
             <AuthPage onAuth={() => {}} initialMode={authMode} />
           </Suspense>
         ) : (
-          <LandingPage onGetStarted={handleGetStarted} onLogIn={handleLogIn} />
+          <Suspense fallback={<RouteSkeleton />}>
+            <LandingPage onGetStarted={handleGetStarted} onLogIn={handleLogIn} />
+          </Suspense>
         )}
       </LanguageProvider>
     );

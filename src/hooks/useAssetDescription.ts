@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getStockDescription, stockDescriptions } from "@/lib/stockDescriptions";
-import { assetDatabase } from "@/lib/stockDatabase";
+import { getAsset } from "@/lib/stockDatabase";
 
 const LS_PREFIX = "asset-desc:v1:";
 
@@ -27,7 +27,7 @@ export function useAssetDescription(ticker: string) {
       }
     } catch { /* ignore */ }
 
-    const entry = assetDatabase.find((a) => a.ticker.toUpperCase() === upper);
+    const entry = getAsset(upper);
     if (!entry) return;
 
     let cancelled = false;

@@ -7,7 +7,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
-import { searchAssets, AssetEntry, assetDatabase, AssetRegion, REGION_LABELS, REGION_FLAGS, REGION_LABEL_KEYS } from "@/lib/stockDatabase";
+import { searchAssets, AssetEntry, getAsset, AssetRegion, REGION_LABELS, REGION_FLAGS, REGION_LABEL_KEYS } from "@/lib/stockDatabase";
 import { getTradingViewSymbol } from "@/lib/tradingViewSymbol";
 import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
 import { generateSparklineData } from "@/components/Sparkline";
@@ -46,7 +46,7 @@ const Watchlists = () => {
   const activeTypes = useMemo(() => {
     const map: Record<string, string> = {};
     active?.stocks?.forEach((s) => {
-      const entry = assetDatabase.find((a) => a.ticker === s.ticker);
+      const entry = getAsset(s.ticker);
       if (entry) map[s.ticker.toUpperCase()] = entry.type;
     });
     return map;
