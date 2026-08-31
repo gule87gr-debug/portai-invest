@@ -67,7 +67,7 @@ export const stockDescriptions: Record<string, { name: string; sector: string; d
   DOGEUSD: { name: "Dogecoin", sector: "Crypto", description: "Dogecoin started as a joke cryptocurrency in 2013 but has grown into one of the largest by market cap. It uses a proof-of-work consensus mechanism and has an unlimited supply, making it inflationary by design." },
 };
 
-import { assetDatabase, getAssetRegion } from "./stockDatabase";
+import { getAsset, getAssetRegion } from "./stockDatabase";
 
 const REGION_NAMES: Record<string, string> = {
   us: "the United States",
@@ -103,7 +103,7 @@ export function getStockDescription(ticker: string) {
   const curated = stockDescriptions[upper];
   if (curated) return curated;
 
-  const entry = assetDatabase.find((a) => a.ticker.toUpperCase() === upper);
+  const entry = getAsset(upper);
   if (entry) {
     return {
       name: entry.name,

@@ -27,7 +27,7 @@ export function useAssetDescription(ticker: string) {
       }
     } catch { /* ignore */ }
 
-    const entry = assetDatabase.find((a) => a.ticker.toUpperCase() === upper);
+    const entry = getAsset(upper);
     if (!entry) return;
 
     let cancelled = false;
