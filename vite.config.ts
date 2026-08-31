@@ -34,12 +34,9 @@ export default defineConfig(({ mode }) => ({
           if (id.includes("src/lib/stockDatabase")) return "stock-database";
           if (id.includes("node_modules/recharts") || id.includes("node_modules/d3-")) return "charts";
           if (id.includes("node_modules/react-markdown") || id.includes("node_modules/micromark") || id.includes("node_modules/mdast")) return "markdown";
-          if (
-            id.includes("node_modules/react-dom") ||
-            id.includes("node_modules/react-router") ||
-            id.includes("node_modules/react/")
-          )
-            return "react";
+          // NOTE: do not split React/react-router into their own chunk — it
+          // creates a circular chunk initialization ("Cannot access 'S' before
+          // initialization") that leaves the published site blank.
         },
       },
     },
