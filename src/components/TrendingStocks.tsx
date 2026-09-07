@@ -3,6 +3,8 @@ import { TrendingUp, Flame } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
+import { TrendingTilesSkeleton } from "@/components/Skeletons";
+import { EmptyState } from "@/components/EmptyState";
 
 type TrendingStock = {
   ticker: string;
@@ -73,15 +75,7 @@ export const TrendingStocks = () => {
           <Flame className="h-5 w-5 text-warning" />
           <h2 className="text-lg font-semibold">{t("trendingOnPortai")}</h2>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="rounded-lg border border-border bg-accent/20 p-3 animate-pulse">
-              <div className="h-4 w-16 bg-muted rounded mb-2" />
-              <div className="h-3 w-24 bg-muted rounded mb-2" />
-              <div className="h-5 w-20 bg-muted rounded" />
-            </div>
-          ))}
-        </div>
+        <TrendingTilesSkeleton />
       </div>
     );
   }
@@ -93,9 +87,12 @@ export const TrendingStocks = () => {
           <Flame className="h-5 w-5 text-warning" />
           <h2 className="text-lg font-semibold">{t("trendingOnPortai")}</h2>
         </div>
-        <p className="text-sm text-muted-foreground">
-          No trending stocks yet this week. Add stocks to your watchlists to see what's popular!
-        </p>
+        <EmptyState
+          compact
+          icon={Flame}
+          title="No trending stocks yet"
+          description="Add stocks to your watchlists and the most tracked ones will show up here."
+        />
       </div>
     );
   }

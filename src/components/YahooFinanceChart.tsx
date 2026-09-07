@@ -4,6 +4,7 @@ import {
   AreaChart, Area, LineChart, Line, XAxis, YAxis, Tooltip, Legend,
   ResponsiveContainer, ReferenceLine, ComposedChart, Bar, CartesianGrid,
 } from "recharts";
+import { ChartSkeleton } from "@/components/Skeletons";
 import { Loader2, AlertTriangle, Plus, X, Search, Lock, GitCompareArrows, LineChart as LineIcon, CandlestickChart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { searchAssets, type AssetEntry } from "@/lib/stockDatabase";
@@ -538,8 +539,8 @@ export const YahooFinanceChart = ({ ticker, type, height = 360, onStatsChange }:
       {/* Chart */}
       <div className="relative w-full" style={{ height }}>
         {loading && (
-          <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin" />
+          <div className="absolute inset-0">
+            <ChartSkeleton height={typeof height === "number" ? height : 300} />
           </div>
         )}
         {error && !loading && (

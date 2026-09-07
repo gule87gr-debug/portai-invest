@@ -3,6 +3,9 @@ import { ExternalLink, Loader2, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { getAsset } from "@/lib/stockDatabase";
+import { NewsListSkeleton } from "@/components/Skeletons";
+import { EmptyState } from "@/components/EmptyState";
+import { Newspaper } from "lucide-react";
 
 interface NewsItem {
   title: string;
@@ -91,17 +94,21 @@ export const StockNews = ({ ticker, height = 400 }: { ticker: string; height?: n
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center text-muted-foreground" style={{ height }}>
-        <Loader2 className="h-5 w-5 animate-spin mr-2" />
-        <span className="text-sm">Loading news...</span>
+      <div style={{ minHeight: height }}>
+        <NewsListSkeleton />
       </div>
     );
   }
 
   if (!news.length) {
     return (
-      <div className="flex items-center justify-center text-muted-foreground text-sm" style={{ height }}>
-        No news found for {ticker}
+      <div className="flex items-center justify-center" style={{ minHeight: height }}>
+        <EmptyState
+          compact
+          icon={Newspaper}
+          title={`No recent news for ${ticker}`}
+          description="We'll show headlines here as soon as this asset is covered again."
+        />
       </div>
     );
   }
