@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Newspaper, ExternalLink, RefreshCw, Search, SlidersHorizontal, X, Check, Shield } from "lucide-react";
+import { Newspaper, ExternalLink, RefreshCw, Search, SlidersHorizontal, X, Check, Shield, WifiOff } from "lucide-react";
+import { NewsCardsSkeleton } from "@/components/Skeletons";
+import { EmptyState } from "@/components/EmptyState";
+
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
