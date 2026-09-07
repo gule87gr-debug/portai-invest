@@ -23,8 +23,6 @@ interface Props {
   activeTypes: Record<string, string>;
 }
 
-const LONG_PRESS_MS = 280;
-
 export const DraggableStockList = ({
   stocks, onReorder, onRemove, onOpen, quotes, quotesLoading, activeTypes,
 }: Props) => {
@@ -198,6 +196,11 @@ export const DraggableStockList = ({
                     onPointerUp={(e) => { e.stopPropagation(); onPointerUpHandle(); }}
                     onPointerCancel={(e) => { e.stopPropagation(); onPointerCancelHandle(); }}
                     onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => {
+                      if (e.key === "ArrowUp" && idx > 0) { e.preventDefault(); e.stopPropagation(); onReorder(idx, idx - 1); }
+                      if (e.key === "ArrowDown" && idx < stocks.length - 1) { e.preventDefault(); e.stopPropagation(); onReorder(idx, idx + 1); }
+                    }}
+                    title="Drag to reorder (or use arrow keys)"
                     className={cn(
                       "flex h-9 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors",
                       "hover:bg-accent hover:text-foreground active:bg-accent",
