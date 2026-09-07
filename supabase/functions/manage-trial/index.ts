@@ -47,7 +47,10 @@ serve(async (req) => {
     }
 
     if (action === "activate") {
-      if (existing?.trial_used) return json({ error: "Trial already used" }, 409);
+      // Not an error condition for the client: the trial simply isn't available
+      // anymore. Return 200 so the UI can just refresh its state.
+      if (existing?.trial_used) return json({ ok: false, alreadyUsed: true, trialUsed: true }, 200);
+
 
       const start = new Date();
       const end = new Date(start.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
