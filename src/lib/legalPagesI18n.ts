@@ -54,12 +54,12 @@ const en: LegalPagesCopy = {
       { type: "h3", text: "2.1 Personal Information" },
       { type: "p", text: "When you register for an account, we may collect:" },
       { type: "ul", items: [
-        "Name and display name",
         "Email address",
-        "Profile picture (if uploaded)",
         "Language preference",
         "Authentication credentials (passwords are hashed and never stored in plain text)",
+        "Account activity dates (account creation date and last sign-in date)",
       ]},
+      { type: "p", text: "We no longer use usernames, display names or profile pictures: your account is identified solely by your email address. Our authorised administrators can view a list of registered accounts limited to email address, account creation date and last sign-in date, for the sole purposes of security monitoring, fraud prevention, subscription support and statutory record-keeping (legitimate interest under Article 6(1)(f) GDPR). Administrators cannot see your password, payment card details or private content." },
       { type: "h3", text: "2.2 Usage Data" },
       { type: "p", text: "We automatically collect certain information when you access the platform:" },
       { type: "ul", items: [
@@ -572,12 +572,12 @@ const es: LegalPagesCopy = {
       { type: "h3", text: "2.1 Información Personal" },
       { type: "p", text: "Cuando te registras para crear una cuenta, podemos recopilar:" },
       { type: "ul", items: [
-        "Nombre y nombre para mostrar",
         "Dirección de correo electrónico",
-        "Foto de perfil (si la subes)",
         "Preferencia de idioma",
         "Credenciales de autenticación (las contraseñas se almacenan cifradas y nunca en texto plano)",
+        "Fechas de actividad de la cuenta (fecha de creación y fecha del último inicio de sesión)",
       ]},
+      { type: "p", text: "Ya no utilizamos nombres de usuario, nombres para mostrar ni fotos de perfil: tu cuenta se identifica únicamente mediante tu correo electrónico. Nuestros administradores autorizados pueden consultar un listado de cuentas registradas limitado al correo electrónico, la fecha de creación de la cuenta y la fecha del último inicio de sesión, con la única finalidad de seguridad, prevención del fraude, soporte de suscripciones y conservación de registros legalmente exigidos (interés legítimo, art. 6.1.f RGPD). Los administradores no pueden ver tu contraseña, los datos de tu tarjeta ni tu contenido privado." },
       { type: "h3", text: "2.2 Datos de Uso" },
       { type: "p", text: "Recopilamos automáticamente cierta información cuando accedes a la plataforma:" },
       { type: "ul", items: [

@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 
 type AdminRow = { id: string; email: string; note: string; created_at: string };
 type AuditRow = { id: string; email: string; function_name: string; user_id: string | null; created_at: string };
-type UserRow = { id: string; email: string | null; username: string | null; created_at: string; last_sign_in_at: string | null; email_confirmed_at: string | null; provider: string | null };
+type UserRow = { id: string; email: string | null; created_at: string; last_sign_in_at: string | null };
 
 const AdminPage = () => {
   const { isAdmin, loading: adminLoading } = useIsAdmin();
@@ -253,12 +253,12 @@ const AdminPage = () => {
             <DialogContent className="max-w-3xl">
               <DialogHeader>
                 <DialogTitle>Registered users{usersLoaded ? ` (${users.length})` : ""}</DialogTitle>
-                <DialogDescription>All accounts that have signed up.</DialogDescription>
+                <DialogDescription>Email, sign-up date and last connection only.</DialogDescription>
               </DialogHeader>
               <div className="flex items-center justify-between gap-2 mb-2">
                 <input
                   type="search"
-                  placeholder="Search email or username…"
+                  placeholder="Search email…"
                   value={userSearch}
                   onChange={(e) => setUserSearch(e.target.value)}
                   className="w-full sm:w-64 rounded-md border border-border bg-background px-3 py-1.5 text-xs"
@@ -276,37 +276,22 @@ const AdminPage = () => {
                   <table className="w-full text-sm">
                     <thead className="text-xs text-muted-foreground border-b border-border sticky top-0 bg-card">
                       <tr>
-                        <th className="text-left py-2 px-2">Username</th>
                         <th className="text-left py-2 px-2">Email</th>
-                        <th className="text-left py-2 px-2">Provider</th>
-                        <th className="text-left py-2 px-2">Joined</th>
-                        <th className="text-left py-2 px-2">Last sign-in</th>
-                        <th className="text-left py-2 px-2">Verified</th>
+                        <th className="text-left py-2 px-2">Created</th>
+                        <th className="text-left py-2 px-2">Last connection</th>
                       </tr>
                     </thead>
                     <tbody>
                       {users
                         .filter((u) => {
                           if (!userSearch) return true;
-                          const q = userSearch.toLowerCase();
-                          return (u.email ?? "").toLowerCase().includes(q) || (u.username ?? "").toLowerCase().includes(q);
+                          return (u.email ?? "").toLowerCase().includes(userSearch.toLowerCase());
                         })
                         .map((u) => (
                           <tr key={u.id} className="border-b border-border/40">
-                            <td className="py-1.5 px-2 font-medium truncate max-w-[180px]">
-                              {u.username ?? <span className="text-muted-foreground italic">—</span>}
-                            </td>
-                            <td className="py-1.5 px-2 text-muted-foreground truncate max-w-[240px]">{u.email ?? "—"}</td>
-                            <td className="py-1.5 px-2 text-muted-foreground">{u.provider ?? "email"}</td>
+                            <td className="py-1.5 px-2 font-medium truncate max-w-[280px]">{u.email ?? "—"}</td>
                             <td className="py-1.5 px-2 text-muted-foreground">{new Date(u.created_at).toLocaleDateString()}</td>
-                            <td className="py-1.5 px-2 text-muted-foreground">{u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleDateString() : "—"}</td>
-                            <td className="py-1.5 px-2">
-                              {u.email_confirmed_at ? (
-                                <CheckCircle2 className="h-3.5 w-3.5 text-success" />
-                              ) : (
-                                <span className="text-[10px] uppercase text-muted-foreground">Pending</span>
-                              )}
-                            </td>
+                            <td className="py-1.5 px-2 text-muted-foreground">{u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleString() : "—"}</td>
                           </tr>
                         ))}
                     </tbody>

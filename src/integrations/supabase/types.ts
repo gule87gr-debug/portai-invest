@@ -583,7 +583,6 @@ export type Database = {
           tutorial_completed: boolean
           updated_at: string
           user_id: string
-          username: string | null
         }
         Insert: {
           anonymous_mode?: boolean
@@ -600,7 +599,6 @@ export type Database = {
           tutorial_completed?: boolean
           updated_at?: string
           user_id: string
-          username?: string | null
         }
         Update: {
           anonymous_mode?: boolean
@@ -617,7 +615,6 @@ export type Database = {
           tutorial_completed?: boolean
           updated_at?: string
           user_id?: string
-          username?: string | null
         }
         Relationships: []
       }
@@ -688,10 +685,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      check_username_available: {
-        Args: { desired_username: string }
-        Returns: boolean
-      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
