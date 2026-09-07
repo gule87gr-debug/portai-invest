@@ -1,5 +1,26 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { enqueueAction, isNetworkError, registerOfflineHandler } from "@/lib/offlineQueue";
+
+// Replay handlers for actions taken while offline.
+registerOfflineHandler("watchlist.delete", async ({ id }: { id: string }) => {
+  const { error } = await supabase.from("watchlists").delete().eq("id", id);
+  if (error) throw error;
+});
+registerOfflineHandler("watchlist.rename", async ({ id, name }: { id: string; name: string }) => {
+  const { error } = await supabase.from("watchlists").update({ name } as any).eq("id", id);
+  if (error) throw error;
+});
+registerOfflineHandler("watchlist.addStock", async (row: any) => {
+  const { error } = await supabase.from("watchlist_stocks").insert(row as any);
+  if (error) throw error;
+});
+registerOfflineHandler("watchlist.removeStock", async ({ listId, ticker }: { listId: string; ticker: string }) => {
+  const { error } = await supabase.from("watchlist_stocks").delete().eq("watchlist_id", listId).eq("ticker", ticker);
+  if (error) throw error;
+});
+
 
 export type Stock = { ticker: string; sector: string; name: string; signal: string; createdAt?: string };
 export type WatchlistData = { id: string; name: string; stocks: Stock[]; desc: string };
