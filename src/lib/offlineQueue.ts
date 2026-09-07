@@ -49,7 +49,9 @@ export const queuedActionCount = () => read().length;
 
 export const onQueueChange = (cb: (count: number) => void) => {
   listeners.add(cb);
-  return () => listeners.delete(cb);
+  return () => {
+    listeners.delete(cb);
+  };
 };
 
 export const enqueueAction = (type: string, payload: unknown) => {
