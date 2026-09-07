@@ -3,9 +3,13 @@ import { HelmetProvider } from "react-helmet-async";
 import App from "./App.tsx";
 import "./index.css";
 import { bootReducedMotion } from "./hooks/use-reduced-motion";
+import { initOfflineQueue } from "./lib/offlineQueue";
 
 // Apply persisted reduced-motion preference before first paint.
 bootReducedMotion();
+
+// Replay any actions queued while the user was offline.
+initOfflineQueue();
 
 // Clear stale-chunk reload guard once the app boots successfully.
 if (typeof window !== "undefined") {
