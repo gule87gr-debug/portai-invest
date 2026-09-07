@@ -97,39 +97,13 @@ serve(async (req) => {
         all.push(...batch);
         if (batch.length < perPage) break;
       }
-      // Fetch display names from user_settings to map user_id -> display_name
-      const ids = all.map((u: any) => u.id);
-      const nameMap = new Map<string, string>();
-      if (ids.length) {
-        // Chunk to avoid overly long IN lists
-        const CHUNK = 500;
-        for (let i = 0; i < ids.length; i += CHUNK) {
-          const slice = ids.slice(i, i + CHUNK);
-          const { data: settings } = await supabaseAdmin
-            .from("user_settings")
-            .select("user_id, display_name")
-            .in("user_id", slice);
-          (settings ?? []).forEach((s: any) => {
-            if (s?.user_id && s?.display_name) nameMap.set(s.user_id, s.display_name);
-          });
-        }
-      }
-      const users = all.map((u: any) => {
-        const meta = u.user_metadata ?? {};
-        const metaName =
-          meta.display_name || meta.full_name || meta.name || meta.user_name || meta.preferred_username || null;
-        const emailLocal = typeof u.email === "string" && u.email.includes("@") ? u.email.split("@")[0] : null;
-        const username = nameMap.get(u.id) ?? metaName ?? emailLocal ?? null;
-        return {
-          id: u.id,
-          email: u.email,
-          username,
-          created_at: u.created_at,
-          last_sign_in_at: u.last_sign_in_at,
-          email_confirmed_at: u.email_confirmed_at,
-          provider: u.app_metadata?.provider ?? null,
-        };
-      });
+      // Data minimisation: only email, creation date and last sign-in are exposed to admins.
+      const users = all.map((u: any) => ({
+        id: u.id,
+        email: u.email,
+        created_at: u.created_at,
+        last_sign_in_at: u.last_sign_in_at,
+      }));
       return json({ users, total: users.length });
 
     }
