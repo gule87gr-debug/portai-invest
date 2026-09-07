@@ -36,9 +36,6 @@ const SettingsPage = () => {
   const [userEmail, setUserEmail] = useState("");
   const { isDark, toggle: toggleTheme } = useTheme();
 
-  const [nameStatus, setNameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
-  const [savedName, setSavedName] = useState<string>("");
-  const [editingName, setEditingName] = useState<string>("");
   const [cancelLoading, setCancelLoading] = useState(false);
   const [reactivateLoading, setReactivateLoading] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -96,27 +93,6 @@ const SettingsPage = () => {
     });
   }, []);
 
-  useEffect(() => {
-    if (profile.name) {
-      setSavedName(profile.name);
-      setEditingName(profile.name);
-    }
-  }, [profile.name]);
-
-  const checkNameAvailable = useCallback(async (name: string) => {
-    const trimmed = name.trim();
-    if (!trimmed || trimmed.length < 2) { setNameStatus("idle"); return; }
-    if (trimmed.toLowerCase() === savedName.trim().toLowerCase()) { setNameStatus("idle"); return; }
-    setNameStatus("checking");
-    const { data, error } = await supabase.rpc("check_username_available", { desired_username: trimmed });
-    if (error) { setNameStatus("idle"); return; }
-    setNameStatus(data ? "available" : "taken");
-  }, [savedName]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => checkNameAvailable(editingName), 400);
-    return () => clearTimeout(timer);
-  }, [editingName, checkNameAvailable]);
 
   useEffect(() => {
     const syncLang = async () => {
