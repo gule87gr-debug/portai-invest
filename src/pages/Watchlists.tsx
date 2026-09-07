@@ -17,6 +17,8 @@ import { Plus, Trash2, Search, X, ChevronDown, Eye, Filter, GripVertical, Pencil
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { DraggableStockList } from "@/components/DraggableStockList";
+import { WatchlistRowsSkeleton } from "@/components/Skeletons";
+import { EmptyState } from "@/components/EmptyState";
 
 const FREE_MAX_WATCHLISTS = 1;
 const FREE_MAX_STOCKS = 5;
@@ -130,10 +132,8 @@ const Watchlists = () => {
               <div key={i} className="h-20 rounded-xl border border-border bg-card animate-pulse" />
             ))}
           </div>
-          <div className="flex-1 rounded-xl border border-border bg-card p-6 space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-48 rounded-xl border border-border animate-pulse bg-muted/30" />
-            ))}
+          <div className="flex-1 rounded-xl border border-border bg-card p-6">
+            <WatchlistRowsSkeleton rows={5} />
           </div>
         </div>
       </AppLayout>
@@ -353,9 +353,13 @@ const Watchlists = () => {
             </div>
 
             {active.stocks.length === 0 && (
-              <div className="py-10 text-center">
-                <p className="text-muted-foreground text-sm">{t("noStocksYet")}</p>
-              </div>
+              <EmptyState
+                icon={Search}
+                title={t("noStocksYet")}
+                description="Add stocks, ETFs or crypto to this watchlist to see live prices and charts."
+                actionLabel={t("addStock")}
+                onAction={handleAddStockClick}
+              />
             )}
 
             <DraggableStockList

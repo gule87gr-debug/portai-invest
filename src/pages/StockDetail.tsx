@@ -15,6 +15,7 @@ import { useQuotes } from "@/hooks/useQuotes";
 import { ArrowLeft, Building2, Newspaper, BarChart3, TrendingUp, TrendingDown, Minus, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useMemo, useState, useCallback } from "react";
+import { Shimmer } from "@/components/Skeletons";
 
 const StockDetail = () => {
   const { ticker } = useParams<{ ticker: string }>();
@@ -119,7 +120,7 @@ const StockDetail = () => {
           {/* Yahoo Finance price block */}
           <div className="flex items-end gap-4">
             {loading ? (
-              <div className="h-10 w-32 animate-pulse rounded-md bg-muted" />
+              <Shimmer className="h-10 w-32" />
             ) : quote ? (
               <>
                 <span className="text-4xl font-bold tnum font-mono spring-in inline-block">
@@ -179,9 +180,9 @@ const StockDetail = () => {
             </div>
             {info.loading && !info.isCurated ? (
               <div className="space-y-2">
-                <div className="h-3 w-full animate-pulse rounded bg-muted" />
-                <div className="h-3 w-11/12 animate-pulse rounded bg-muted" />
-                <div className="h-3 w-9/12 animate-pulse rounded bg-muted" />
+                <Shimmer className="h-3 w-full" />
+                <Shimmer className="h-3 w-11/12" />
+                <Shimmer className="h-3 w-9/12" />
               </div>
             ) : (
               <p className="text-sm leading-relaxed text-muted-foreground">{info.description}</p>
