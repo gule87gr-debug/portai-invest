@@ -150,7 +150,7 @@ const AIChat = () => {
   const { isPro, isPlus, isPaid, hasUnlimitedChat } = useSubscription();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState("");
-  const welcomeShown = messages.length === 0;
+  const welcomeShown = messages.length === 0 && !historyLoading;
   const suggestions = [t("suggestETF"), t("suggestDiversify"), t("suggestPE"), t("suggestDCA")];
 
   // Free-tier limits
