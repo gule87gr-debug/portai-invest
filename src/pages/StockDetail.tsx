@@ -13,6 +13,7 @@ import { getTradingViewSymbol } from "@/lib/tradingViewSymbol";
 import { getAsset } from "@/lib/stockDatabase";
 import { useQuotes } from "@/hooks/useQuotes";
 import { ArrowLeft, Building2, Newspaper, BarChart3, TrendingUp, TrendingDown, Minus, Bell } from "lucide-react";
+import { AddToWatchlistButton } from "@/components/AddToWatchlistButton";
 import { Button } from "@/components/ui/button";
 import { useMemo, useState, useCallback } from "react";
 import { Shimmer } from "@/components/Skeletons";
@@ -93,6 +94,8 @@ const StockDetail = () => {
           <Link to="/watchlists" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-4 w-4" /> {t("backToWatchlists")}
           </Link>
+          <div className="flex items-center gap-2">
+          <AddToWatchlistButton ticker={symbol} name={info.name} sector={info.sector} />
           <PriceAlertDialog
             ticker={symbol}
             assetName={info.name}
@@ -104,6 +107,7 @@ const StockDetail = () => {
               </Button>
             }
           />
+          </div>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
