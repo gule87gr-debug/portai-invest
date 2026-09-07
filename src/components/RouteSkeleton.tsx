@@ -155,6 +155,20 @@ const StockSkeleton = () => (
 );
 
 
+const NewsSkeleton = () => (
+  <Shell>
+    <div className="flex items-center justify-between">
+      <Skeleton className="h-9 w-56" />
+      <Skeleton className="h-10 w-10 rounded-lg" />
+    </div>
+    <div className="columns-1 gap-4 md:columns-2 xl:columns-3">
+      {Array.from({ length: 9 }).map((_, i) => (
+        <Skeleton key={i} className="mb-4 h-32 w-full break-inside-avoid rounded-xl" />
+      ))}
+    </div>
+  </Shell>
+);
+
 const FormSkeleton = () => (
   <Shell>
     <Skeleton className="h-8 w-56" />
@@ -197,6 +211,8 @@ export const RouteSkeleton = () => {
   if (pathname.startsWith("/forum")) return <ListSkeleton />;
   if (pathname.startsWith("/watchlists")) return <ListSkeleton />;
   if (pathname.startsWith("/stock/")) return <StockSkeleton />;
+  if (pathname.startsWith("/news")) return <NewsSkeleton />;
+  if (pathname.startsWith("/alerts")) return <ListSkeleton />;
   if (pathname.startsWith("/settings")) return <FormSkeleton />;
   if (pathname.startsWith("/pricing")) return <PlainSkeleton />;
   if (
