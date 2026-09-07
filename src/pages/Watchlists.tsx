@@ -1,24 +1,25 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
-import { useApp, Stock } from "@/contexts/AppContext";
+import { useApp } from "@/contexts/AppContext";
 import { SEO } from "@/components/SEO";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
-import { searchAssets, AssetEntry, getAsset, AssetRegion, REGION_LABELS, REGION_FLAGS, REGION_LABEL_KEYS } from "@/lib/stockDatabase";
+import { getAsset } from "@/lib/stockDatabase";
 import { getTradingViewSymbol } from "@/lib/tradingViewSymbol";
 import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
 import { generateSparklineData } from "@/components/Sparkline";
 import { DailySparkline } from "@/components/DailySparkline";
 import { useQuotes } from "@/hooks/useQuotes";
-import { Plus, Trash2, Search, X, ChevronDown, Eye, Filter, GripVertical, Pencil, Check } from "lucide-react";
+import { Plus, Trash2, Search, X, ChevronDown, Eye, GripVertical, Pencil, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { DraggableStockList } from "@/components/DraggableStockList";
 import { WatchlistRowsSkeleton } from "@/components/Skeletons";
 import { EmptyState } from "@/components/EmptyState";
+import { TickerSearch } from "@/components/TickerSearch";
 
 const FREE_MAX_WATCHLISTS = 1;
 const FREE_MAX_STOCKS = 5;
@@ -32,11 +33,7 @@ const Watchlists = () => {
   const [showNewList, setShowNewList] = useState(false);
   const [newListName, setNewListName] = useState("");
   const [showAddStock, setShowAddStock] = useState(false);
-  const [stockSearch, setStockSearch] = useState("");
-  const [assetFilter, setAssetFilter] = useState<"all" | "stock" | "etf" | "crypto" | "index">("all");
-  const [regionFilter, setRegionFilter] = useState<AssetRegion>("all");
   const [showListPicker, setShowListPicker] = useState(false);
-  const [showRegionPicker, setShowRegionPicker] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeMsg, setUpgradeMsg] = useState("");
   const [renamingId, setRenamingId] = useState<string | null>(null);
@@ -54,9 +51,6 @@ const Watchlists = () => {
     return map;
   }, [active]);
   const { quotes, loading: quotesLoading } = useQuotes(activeTickers, activeTypes);
-  const searchResults = searchAssets(stockSearch, regionFilter).filter(
-    (a) => assetFilter === "all" || a.type === assetFilter
-  );
 
   const canCreateWatchlist = hasUnlimitedWatchlists || watchlists.length < FREE_MAX_WATCHLISTS;
   const canAddStock = hasUnlimitedWatchlists || (active?.stocks.length ?? 0) < FREE_MAX_STOCKS;
@@ -89,18 +83,6 @@ const Watchlists = () => {
   const commitRename = async () => {
     if (renamingId && renameValue.trim()) await renameWatchlist(renamingId, renameValue);
     setRenamingId(null); setRenameValue("");
-  };
-
-  const handleAddStock = (asset: AssetEntry) => {
-    if (!active) return;
-    if (!canAddStock) {
-      setUpgradeMsg("Free users can add up to 5 stocks per watchlist. Upgrade to Pro for unlimited stocks.");
-      setShowUpgrade(true);
-      return;
-    }
-    const stock: Stock = { ticker: asset.ticker, name: asset.name, sector: asset.sector, signal: "neutral" };
-    addStockToWatchlist(active.id, stock);
-    setStockSearch(""); setShowAddStock(false);
   };
 
   const createModal = showNewList && (
@@ -176,88 +158,9 @@ const Watchlists = () => {
       {createModal}
       <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} description={upgradeMsg} />
 
-      {showAddStock && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in p-4">
-          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-bold">{t("addStock")}</h2>
-              <button onClick={() => { setShowAddStock(false); setStockSearch(""); setAssetFilter("all"); setRegionFilter("all"); setShowRegionPicker(false); }} aria-label="Close add stock dialog" className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
-            </div>
-            {!hasUnlimitedWatchlists && (
-              <p className="text-xs text-muted-foreground mb-2">{active?.stocks.length ?? 0}/{FREE_MAX_STOCKS} stocks used</p>
-            )}
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {(["all", "stock", "etf", "index", "crypto"] as const).map((f) => (
-                <button
-                  key={f}
-                  onClick={() => setAssetFilter(f)}
-                  className={cn(
-                    "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors border",
-                    assetFilter === f
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-accent/30 text-muted-foreground border-border hover:bg-accent/60"
-                  )}
-                >
-                  {f === "all" ? t("filterAllAssets") : f === "stock" ? t("filterStocks") : f === "etf" ? t("filterETFs") : f === "index" ? t("filterIndexFunds") : t("filterCrypto")}
-                </button>
-              ))}
-            </div>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="relative">
-                <button
-                  onClick={() => setShowRegionPicker(!showRegionPicker)}
-                  className={cn(
-                    "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors border",
-                    regionFilter !== "all"
-                      ? "bg-chart-4 text-white border-chart-4"
-                      : "bg-accent/30 text-muted-foreground border-border hover:bg-accent/60"
-                  )}
-                >
-                  <Filter className="h-3 w-3" />
-                  {`${REGION_FLAGS[regionFilter]} ${t(REGION_LABEL_KEYS[regionFilter])}`.trim()}
-                  <ChevronDown className={cn("h-3 w-3 transition-transform", showRegionPicker && "rotate-180")} />
-                </button>
-                {showRegionPicker && (
-                  <div className="absolute top-full left-0 mt-1 z-10 w-48 rounded-xl border border-border bg-card shadow-xl animate-fade-in py-1">
-                    {(Object.keys(REGION_LABELS) as AssetRegion[]).map((key) => (
-                      <button
-                        key={key}
-                        onClick={() => { setRegionFilter(key); setShowRegionPicker(false); }}
-                        className={cn(
-                          "w-full text-left px-3 py-2 text-xs font-medium transition-colors hover:bg-accent/50",
-                          regionFilter === key && "text-primary bg-primary/10"
-                        )}
-                      >
-                        {`${REGION_FLAGS[key]} ${t(REGION_LABEL_KEYS[key])}`.trim()}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input value={stockSearch} onChange={(e) => setStockSearch(e.target.value)} placeholder={t("searchStocksEtfs")} autoFocus className="h-10 w-full rounded-lg border border-border bg-accent/30 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
-            </div>
-            <div className="mt-3 max-h-60 overflow-y-auto scrollbar-thin space-y-1">
-              {stockSearch.trim() === "" && <p className="py-4 text-center text-xs text-muted-foreground">{t("startTypingSearch")}</p>}
-              {searchResults.map((a) => {
-                const alreadyAdded = active?.stocks.some((s) => s.ticker === a.ticker);
-                return (
-                  <button key={a.ticker} onClick={() => !alreadyAdded && handleAddStock(a)} disabled={alreadyAdded} className={cn("w-full flex items-center justify-between rounded-lg px-3 py-2.5 text-left transition-colors", alreadyAdded ? "opacity-40" : "hover:bg-accent/50")}>
-                    <div>
-                      <span className="text-sm font-semibold">{a.ticker}</span>
-                      <span className="ml-2 text-xs text-muted-foreground">{a.name}</span>
-                    </div>
-                    <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-medium", a.type === "crypto" ? "bg-chart-3/20 text-chart-3" : a.type === "etf" ? "bg-primary/20 text-primary" : a.type === "index" ? "bg-chart-4/20 text-chart-4" : "bg-muted text-muted-foreground")}>{a.type === "index" ? "INDEX" : a.type.toUpperCase()}</span>
-                  </button>
-                );
-              })}
-              {stockSearch.trim() && searchResults.length === 0 && <p className="py-4 text-center text-xs text-muted-foreground">{t("noResults")}</p>}
-            </div>
-          </div>
-        </div>
-      )}
+      <TickerSearch hideTrigger open={showAddStock} onOpenChange={setShowAddStock} />
+
+      <TickerSearch className="mb-5 sm:max-w-md" />
 
       <div className="mb-4 flex items-start justify-between">
         <div>

@@ -35,9 +35,23 @@ const TYPE_LABEL: Record<string, string> = {
   index: "Index",
 };
 
-export const TickerSearch = ({ className }: { className?: string }) => {
+interface TickerSearchProps {
+  className?: string;
+  /** Hide the inline trigger button (use with controlled `open`). */
+  hideTrigger?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export const TickerSearch = ({ className, hideTrigger, open: openProp, onOpenChange }: TickerSearchProps) => {
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
+  const [openState, setOpenState] = useState(false);
+  const open = openProp ?? openState;
+  const setOpen = (v: boolean | ((p: boolean) => boolean)) => {
+    const next = typeof v === "function" ? v(open) : v;
+    if (openProp === undefined) setOpenState(next);
+    onOpenChange?.(next);
+  };
   const [query, setQuery] = useState("");
   const [ready, setReady] = useState(() => searchModule !== null);
 
@@ -74,6 +88,7 @@ export const TickerSearch = ({ className }: { className?: string }) => {
 
   return (
     <>
+      {!hideTrigger && (
       <button
         type="button"
         onClick={() => setOpen(true)}
@@ -91,6 +106,7 @@ export const TickerSearch = ({ className }: { className?: string }) => {
           ⌘K
         </kbd>
       </button>
+      )}
 
       <CommandDialog open={open} onOpenChange={setOpen} shouldFilter={false}>
         <CommandInput
