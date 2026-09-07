@@ -367,27 +367,23 @@ export const StockNewsFeed = () => {
       <div className="rounded-2xl border border-border overflow-hidden">
         <div className="h-[500px] overflow-y-auto scrollbar-thin relative p-4">
           {loading ? (
-            <div className="masonry columns-1 md:columns-2 xl:columns-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="rounded-xl border border-border bg-card/50 p-3 space-y-2">
-                  <div className="h-4 w-full rounded bg-muted animate-pulse" />
-                  <div className="h-4 w-3/4 rounded bg-muted animate-pulse" />
-                  <div className="flex gap-2">
-                    <div className="h-4 w-16 rounded bg-muted animate-pulse" />
-                    <div className="h-4 w-10 rounded bg-muted animate-pulse" />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <NewsCardsSkeleton count={6} />
           ) : error ? (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              <span className="text-sm">{error}</span>
-            </div>
+            <EmptyState
+              icon={WifiOff}
+              title="Couldn't load the news feed"
+              description={error}
+              actionLabel="Try again"
+              onAction={() => fetchNews(selectedCategories, selectedRegions, searchQuery)}
+            />
           ) : sortedNews.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              <span className="text-sm">{t("noNewsFound")}</span>
-            </div>
+            <EmptyState
+              icon={Newspaper}
+              title={t("noNewsFound")}
+              description="Try clearing a filter or searching for a different topic."
+            />
           ) : (
+
             <div className="masonry columns-1 md:columns-2 xl:columns-3">
               {sortedNews.map((item, i) => {
                 const sourceInitial = item.source?.[0]?.toUpperCase() || "N";
