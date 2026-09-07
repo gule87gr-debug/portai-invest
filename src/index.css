@@ -20,7 +20,7 @@
     --secondary-foreground: 0 0% 75%;
 
     --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 64%;
+    --muted-foreground: 0 0% 72%;
 
     --accent: 0 0% 18%;
     --accent-foreground: 0 0% 98%;
@@ -88,7 +88,7 @@
     --secondary-foreground: 0 0% 35%;
 
     --muted: 0 0% 93%;
-    --muted-foreground: 0 0% 38%;
+    --muted-foreground: 0 0% 46%;
 
     --accent: 0 0% 91%;
     --accent-foreground: 0 0% 8%;
@@ -152,6 +152,13 @@
     font-family: var(--font-body);
     overflow-x: hidden;
     max-width: 100vw;
+    font-size: 16px;
+  }
+
+  /* Slightly larger, higher-contrast small text for readability */
+  .text-sm, small {
+    font-size: 0.9375rem;
+    line-height: 1.55;
   }
 
   h1, h2, h3, h4, h5, h6 {
