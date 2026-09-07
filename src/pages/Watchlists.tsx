@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
-import { useApp, Stock } from "@/contexts/AppContext";
+import { useApp } from "@/contexts/AppContext";
 import { SEO } from "@/components/SEO";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -13,7 +13,7 @@ import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
 import { generateSparklineData } from "@/components/Sparkline";
 import { DailySparkline } from "@/components/DailySparkline";
 import { useQuotes } from "@/hooks/useQuotes";
-import { Plus, Trash2, Search, X, ChevronDown, Eye, Filter, GripVertical, Pencil, Check } from "lucide-react";
+import { Plus, Trash2, Search, X, ChevronDown, Eye, GripVertical, Pencil, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { DraggableStockList } from "@/components/DraggableStockList";
