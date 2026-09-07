@@ -26,17 +26,42 @@ const Shell = ({ children }: { children: React.ReactNode }) => (
 
 const DashboardSkeleton = () => (
   <Shell>
-    <Skeleton className="h-8 w-64" />
-    <Skeleton className="h-5 w-96" />
-    <Skeleton className="h-32 w-full rounded-xl" />
-    <div className="grid gap-4 md:grid-cols-3">
-      {Array.from({ length: 3 }).map((_, i) => (
-        <Skeleton key={i} className="h-40 w-full rounded-xl" />
-      ))}
+    {/* Page heading */}
+    <div className="space-y-3">
+      <Skeleton className="h-10 w-72" />
+      <Skeleton className="h-5 w-96 max-w-full" />
     </div>
-    <Skeleton className="h-64 w-full rounded-xl" />
+    {/* Link analyser card */}
+    <div className="space-y-5 rounded-2xl border border-border/40 p-6 sm:p-10">
+      <Skeleton className="h-6 w-44" />
+      <Skeleton className="h-4 w-2/3 max-w-md" />
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <Skeleton className="h-14 flex-1 rounded-2xl" />
+        <Skeleton className="h-14 w-full rounded-2xl sm:w-36" />
+      </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} className="h-24 w-full rounded-lg" />
+        ))}
+      </div>
+    </div>
+    {/* Trending tiles */}
+    <div className="space-y-4 rounded-xl border border-border/40 p-4">
+      <Skeleton className="h-5 w-48" />
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-24 w-full rounded-lg" />
+        ))}
+      </div>
+    </div>
+    {/* Heatmap */}
+    <div className="space-y-4 rounded-2xl border border-border/40 p-6 sm:p-8">
+      <Skeleton className="h-6 w-40" />
+      <Skeleton className="h-[420px] w-full rounded-xl" />
+    </div>
   </Shell>
 );
+
 
 const ChatSkeleton = () => (
   <Shell>
