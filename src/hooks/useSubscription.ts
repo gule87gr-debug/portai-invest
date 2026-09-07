@@ -291,9 +291,14 @@ export const useSubscription = (): SubscriptionState => {
       headers: { Authorization: `Bearer ${session.access_token}` },
     });
     if (error) return { ok: false, error: error.message };
+    if ((data as any)?.alreadyUsed) {
+      await refreshStore();
+      return { ok: false, error: "You've already used your free trial." };
+    }
     if ((data as any)?.error) return { ok: false, error: (data as any).error };
     await refreshStore();
     return { ok: true };
+
   }, []);
 
   const markProTourCompleted = useCallback(async () => {
