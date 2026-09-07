@@ -111,3 +111,54 @@ export const AnalysisSkeleton = () => (
     <Shimmer className="h-3 w-3/4" />
   </Card>
 );
+
+/** Price chart placeholder — axis ticks plus a soft plot area. */
+export const ChartSkeleton = ({ height = 300 }: { height?: number }) => (
+  <div className="w-full space-y-3" style={{ height }} aria-busy="true" aria-live="polite">
+    <Shimmer className="h-[calc(100%-2rem)] w-full rounded-xl" />
+    <div className="flex justify-between">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <Shimmer key={i} className="h-2.5 w-10" />
+      ))}
+    </div>
+  </div>
+);
+
+/** Trending stocks tiles on the dashboard. */
+export const TrendingTilesSkeleton = ({ count = 4 }: { count?: number }) => (
+  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-busy="true" aria-live="polite">
+    {Array.from({ length: count }).map((_, i) => (
+      <Card key={i} className="space-y-2 bg-accent/20">
+        <div className="flex items-center justify-between">
+          <Shimmer className="h-3.5 w-14" />
+          <Shimmer className="h-3 w-6" />
+        </div>
+        <Shimmer className="h-2.5 w-20" />
+        <Shimmer className="h-4 w-16" />
+      </Card>
+    ))}
+  </div>
+);
+
+/** Compact news list (stock detail sidebar). */
+export const NewsListSkeleton = ({ rows = 5 }: { rows?: number }) => (
+  <div className="divide-y divide-border" aria-busy="true" aria-live="polite">
+    {Array.from({ length: rows }).map((_, i) => (
+      <div key={i} className="space-y-2 py-3">
+        <Shimmer className="h-3.5 w-full" />
+        <Shimmer className="h-3.5 w-3/4" />
+        <div className="flex gap-2 pt-0.5">
+          <Shimmer className="h-3.5 w-16" />
+          <Shimmer className="h-3.5 w-10" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+/** Embedded third-party widget (TradingView) placeholder. */
+export const WidgetSkeleton = ({ height = 400 }: { height?: number }) => (
+  <div className="w-full" style={{ height }} aria-busy="true" aria-live="polite">
+    <Shimmer className="h-full w-full rounded-xl" />
+  </div>
+);

@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { WidgetSkeleton } from "@/components/Skeletons";
 
 interface TradingViewChartProps {
   symbol: string;
@@ -55,9 +56,11 @@ export const TradingViewChart = ({ symbol, height = 500 }: TradingViewChartProps
 
 export const TradingViewTechnicalAnalysis = ({ symbol }: { symbol: string }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
+    setReady(false);
     containerRef.current.innerHTML = "";
 
     const script = document.createElement("script");
@@ -86,12 +89,27 @@ export const TradingViewTechnicalAnalysis = ({ symbol }: { symbol: string }) => 
     wrapper.appendChild(script);
     containerRef.current.appendChild(wrapper);
 
+    const observer = new MutationObserver(() => {
+      if (containerRef.current?.querySelector("iframe")) setReady(true);
+    });
+    observer.observe(containerRef.current, { childList: true, subtree: true });
+
     return () => {
+      observer.disconnect();
       if (containerRef.current) containerRef.current.innerHTML = "";
     };
   }, [symbol]);
 
-  return <div ref={containerRef} className="rounded-xl overflow-hidden" style={{ minHeight: 450 }} />;
+  return (
+    <div className="relative rounded-xl overflow-hidden" style={{ minHeight: 450 }}>
+      {!ready && (
+        <div className="absolute inset-0">
+          <WidgetSkeleton height={450} />
+        </div>
+      )}
+      <div ref={containerRef} className={ready ? "opacity-100 transition-opacity" : "opacity-0"} style={{ minHeight: 450 }} />
+    </div>
+  );
 };
 
 export const TradingViewMiniChart = ({ symbol, width = 350 }: { symbol: string; width?: number | string }) => {
@@ -218,9 +236,11 @@ export const TradingViewHeatmap = ({
   dataSource = "SPX500",
 }: { height?: number; dataSource?: string }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
+    setReady(false);
     containerRef.current.innerHTML = "";
 
     const script = document.createElement("script");
@@ -257,9 +277,26 @@ export const TradingViewHeatmap = ({
     wrapper.appendChild(script);
     containerRef.current.appendChild(wrapper);
 
-    return () => { if (containerRef.current) containerRef.current.innerHTML = ""; };
+    const observer = new MutationObserver(() => {
+      if (containerRef.current?.querySelector("iframe")) setReady(true);
+    });
+    observer.observe(containerRef.current, { childList: true, subtree: true });
+
+    return () => {
+      observer.disconnect();
+      if (containerRef.current) containerRef.current.innerHTML = "";
+    };
   }, [height, dataSource]);
 
-  return <div ref={containerRef} style={{ height: `${height}px` }} className="rounded-xl overflow-hidden" />;
+  return (
+    <div className="relative rounded-xl overflow-hidden" style={{ height: `${height}px` }}>
+      {!ready && (
+        <div className="absolute inset-0">
+          <WidgetSkeleton height={height} />
+        </div>
+      )}
+      <div ref={containerRef} style={{ height: `${height}px` }} className={ready ? "opacity-100 transition-opacity" : "opacity-0"} />
+    </div>
+  );
 };
 

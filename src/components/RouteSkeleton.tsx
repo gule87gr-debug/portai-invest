@@ -26,17 +26,42 @@ const Shell = ({ children }: { children: React.ReactNode }) => (
 
 const DashboardSkeleton = () => (
   <Shell>
-    <Skeleton className="h-8 w-64" />
-    <Skeleton className="h-5 w-96" />
-    <Skeleton className="h-32 w-full rounded-xl" />
-    <div className="grid gap-4 md:grid-cols-3">
-      {Array.from({ length: 3 }).map((_, i) => (
-        <Skeleton key={i} className="h-40 w-full rounded-xl" />
-      ))}
+    {/* Page heading */}
+    <div className="space-y-3">
+      <Skeleton className="h-10 w-72" />
+      <Skeleton className="h-5 w-96 max-w-full" />
     </div>
-    <Skeleton className="h-64 w-full rounded-xl" />
+    {/* Link analyser card */}
+    <div className="space-y-5 rounded-2xl border border-border/40 p-6 sm:p-10">
+      <Skeleton className="h-6 w-44" />
+      <Skeleton className="h-4 w-2/3 max-w-md" />
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <Skeleton className="h-14 flex-1 rounded-2xl" />
+        <Skeleton className="h-14 w-full rounded-2xl sm:w-36" />
+      </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} className="h-24 w-full rounded-lg" />
+        ))}
+      </div>
+    </div>
+    {/* Trending tiles */}
+    <div className="space-y-4 rounded-xl border border-border/40 p-4">
+      <Skeleton className="h-5 w-48" />
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-24 w-full rounded-lg" />
+        ))}
+      </div>
+    </div>
+    {/* Heatmap */}
+    <div className="space-y-4 rounded-2xl border border-border/40 p-6 sm:p-8">
+      <Skeleton className="h-6 w-40" />
+      <Skeleton className="h-[420px] w-full rounded-xl" />
+    </div>
   </Shell>
 );
+
 
 const ChatSkeleton = () => (
   <Shell>
@@ -71,17 +96,75 @@ const ListSkeleton = () => (
 
 const StockSkeleton = () => (
   <Shell>
-    <div className="flex items-center gap-4">
-      <Skeleton className="h-14 w-14 rounded-full" />
+    {/* Back link + alert button */}
+    <div className="flex items-center justify-between">
+      <Skeleton className="h-4 w-40" />
+      <Skeleton className="h-8 w-32 rounded-md" />
+    </div>
+    {/* Title + price block */}
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="space-y-2">
-        <Skeleton className="h-7 w-48" />
-        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-11 w-80 max-w-full" />
+        <Skeleton className="h-4 w-44" />
+      </div>
+      <div className="flex items-end gap-4">
+        <Skeleton className="h-10 w-36" />
+        <Skeleton className="h-10 w-44 rounded-lg" />
       </div>
     </div>
-    <Skeleton className="h-80 w-full rounded-xl" />
-    <div className="grid gap-4 md:grid-cols-2">
-      <Skeleton className="h-48 w-full rounded-xl" />
-      <Skeleton className="h-48 w-full rounded-xl" />
+    {/* OHLC row */}
+    <div className="flex flex-wrap gap-x-6 gap-y-2">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Skeleton key={i} className="h-4 w-28" />
+      ))}
+    </div>
+    {/* Chart card */}
+    <div className="space-y-4 rounded-2xl border border-border/40 p-6 sm:p-8">
+      <div className="flex flex-wrap gap-2">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <Skeleton key={i} className="h-8 w-12 rounded-md" />
+        ))}
+      </div>
+      <Skeleton className="h-[340px] w-full rounded-xl" />
+    </div>
+    {/* Technicals + about/news columns */}
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="space-y-4 rounded-2xl border border-border/40 p-6 sm:p-8">
+        <Skeleton className="h-5 w-44" />
+        <Skeleton className="h-[420px] w-full rounded-xl" />
+      </div>
+      <div className="space-y-6">
+        <div className="space-y-3 rounded-2xl border border-border/40 p-6 sm:p-8">
+          <Skeleton className="h-5 w-28" />
+          <Skeleton className="h-3 w-full" />
+          <Skeleton className="h-3 w-11/12" />
+          <Skeleton className="h-3 w-9/12" />
+        </div>
+        <div className="space-y-3 rounded-2xl border border-border/40 p-6 sm:p-8">
+          <Skeleton className="h-5 w-36" />
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="space-y-2 py-1">
+              <Skeleton className="h-3.5 w-full" />
+              <Skeleton className="h-3 w-1/3" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </Shell>
+);
+
+
+const NewsSkeleton = () => (
+  <Shell>
+    <div className="flex items-center justify-between">
+      <Skeleton className="h-9 w-56" />
+      <Skeleton className="h-10 w-10 rounded-lg" />
+    </div>
+    <div className="columns-1 gap-4 md:columns-2 xl:columns-3">
+      {Array.from({ length: 9 }).map((_, i) => (
+        <Skeleton key={i} className="mb-4 h-32 w-full break-inside-avoid rounded-xl" />
+      ))}
     </div>
   </Shell>
 );
@@ -128,6 +211,8 @@ export const RouteSkeleton = () => {
   if (pathname.startsWith("/forum")) return <ListSkeleton />;
   if (pathname.startsWith("/watchlists")) return <ListSkeleton />;
   if (pathname.startsWith("/stock/")) return <StockSkeleton />;
+  if (pathname.startsWith("/news")) return <NewsSkeleton />;
+  if (pathname.startsWith("/alerts")) return <ListSkeleton />;
   if (pathname.startsWith("/settings")) return <FormSkeleton />;
   if (pathname.startsWith("/pricing")) return <PlainSkeleton />;
   if (
