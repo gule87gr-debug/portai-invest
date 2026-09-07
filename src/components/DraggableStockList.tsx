@@ -23,8 +23,6 @@ interface Props {
   activeTypes: Record<string, string>;
 }
 
-const LONG_PRESS_MS = 280;
-
 export const DraggableStockList = ({
   stocks, onReorder, onRemove, onOpen, quotes, quotesLoading, activeTypes,
 }: Props) => {
@@ -75,6 +73,7 @@ export const DraggableStockList = ({
     if (e.button !== undefined && e.button !== 0) return;
     const el = itemRefs.current[idx];
     if (!el) return;
+    e.preventDefault();
     const rect = el.getBoundingClientRect();
     // Include the 12px space-y gap so the slot height matches visual stride
     itemHeightRef.current = rect.height + 12;
@@ -82,14 +81,14 @@ export const DraggableStockList = ({
     fromIdxRef.current = idx;
     pointerIdRef.current = e.pointerId;
     try { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); } catch { /* noop */ }
-    longPressTimer.current = window.setTimeout(() => {
-      setDragIdx(idx);
-      setOverIdx(idx);
-      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-        try { (navigator as any).vibrate(12); } catch { /* noop */ }
-      }
-    }, LONG_PRESS_MS);
+    // Start dragging immediately — no long press required
+    setDragIdx(idx);
+    setOverIdx(idx);
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      try { (navigator as any).vibrate(8); } catch { /* noop */ }
+    }
   };
+
 
   const onPointerMoveHandle = (e: React.PointerEvent) => {
     if (longPressTimer.current && Math.abs(e.clientY - startYRef.current) > 8) {
@@ -197,6 +196,11 @@ export const DraggableStockList = ({
                     onPointerUp={(e) => { e.stopPropagation(); onPointerUpHandle(); }}
                     onPointerCancel={(e) => { e.stopPropagation(); onPointerCancelHandle(); }}
                     onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => {
+                      if (e.key === "ArrowUp" && idx > 0) { e.preventDefault(); e.stopPropagation(); onReorder(idx, idx - 1); }
+                      if (e.key === "ArrowDown" && idx < stocks.length - 1) { e.preventDefault(); e.stopPropagation(); onReorder(idx, idx + 1); }
+                    }}
+                    title="Drag to reorder (or use arrow keys)"
                     className={cn(
                       "flex h-9 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors",
                       "hover:bg-accent hover:text-foreground active:bg-accent",
