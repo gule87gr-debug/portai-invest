@@ -75,6 +75,7 @@ export const DraggableStockList = ({
     if (e.button !== undefined && e.button !== 0) return;
     const el = itemRefs.current[idx];
     if (!el) return;
+    e.preventDefault();
     const rect = el.getBoundingClientRect();
     // Include the 12px space-y gap so the slot height matches visual stride
     itemHeightRef.current = rect.height + 12;
@@ -82,14 +83,14 @@ export const DraggableStockList = ({
     fromIdxRef.current = idx;
     pointerIdRef.current = e.pointerId;
     try { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId); } catch { /* noop */ }
-    longPressTimer.current = window.setTimeout(() => {
-      setDragIdx(idx);
-      setOverIdx(idx);
-      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-        try { (navigator as any).vibrate(12); } catch { /* noop */ }
-      }
-    }, LONG_PRESS_MS);
+    // Start dragging immediately — no long press required
+    setDragIdx(idx);
+    setOverIdx(idx);
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      try { (navigator as any).vibrate(8); } catch { /* noop */ }
+    }
   };
+
 
   const onPointerMoveHandle = (e: React.PointerEvent) => {
     if (longPressTimer.current && Math.abs(e.clientY - startYRef.current) > 8) {
