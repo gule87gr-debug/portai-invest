@@ -4,6 +4,7 @@ import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SEO } from "@/components/SEO";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { ChatBubbleSkeleton } from "@/components/Skeletons";
 import sentryLogo from "@/assets/sentry-logo.png.asset.json";
 import { Send, Plus, Trash2, MessageCircle, Image, X, Crown, Zap, Brain, Lightbulb, Gauge, ChevronDown, Bot } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -102,6 +103,26 @@ const MarkdownContent = ({ content }: { content: string }) => (
   </ReactMarkdown>
 );
 
+const SESSIONS_CACHE_KEY = "portai-chat-sessions-cache";
+const MSG_CACHE_PREFIX = "portai-chat-msgs-";
+
+const readCache = <T,>(key: string, fallback: T): T => {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const writeCache = (key: string, value: unknown) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* ignore quota errors */
+  }
+};
+
 const FREE_MSG_LIMIT = 10;
 const FREE_MSG_WINDOW_HOURS = 24;
 const FREE_IMG_LIMIT = 3;
@@ -113,7 +134,8 @@ const AIChat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [sessions, setSessions] = useState<ChatSession[]>(() => readCache<ChatSession[]>(SESSIONS_CACHE_KEY, []));
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [showSessions, setShowSessions] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -128,7 +150,7 @@ const AIChat = () => {
   const { isPro, isPlus, isPaid, hasUnlimitedChat } = useSubscription();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState("");
-  const welcomeShown = messages.length === 0;
+  const welcomeShown = messages.length === 0 && !historyLoading;
   const suggestions = [t("suggestETF"), t("suggestDiversify"), t("suggestPE"), t("suggestDCA")];
 
   // Free-tier limits
@@ -164,20 +186,32 @@ const AIChat = () => {
 
   const loadSessions = async () => {
     const { data } = await supabase.from("chat_sessions").select("id, title, created_at").order("updated_at", { ascending: false });
-    if (data) setSessions(data);
+    if (data) {
+      setSessions(data);
+      writeCache(SESSIONS_CACHE_KEY, data);
+    }
   };
 
   const loadSession = async (sessionId: string) => {
     setActiveSessionId(sessionId);
-    const { data } = await supabase.from("chat_messages").select("role, content").eq("session_id", sessionId).order("created_at", { ascending: true });
-    if (data) setMessages(data as Message[]);
+    // Paint the cached transcript instantly, then refresh from the server.
+    const cached = readCache<Message[]>(`${MSG_CACHE_PREFIX}${sessionId}`, []);
+    if (cached.length) setMessages(cached);
+    else setHistoryLoading(true);
     setShowSessions(false);
+    const { data } = await supabase.from("chat_messages").select("role, content").eq("session_id", sessionId).order("created_at", { ascending: true });
+    if (data) {
+      setMessages(data as Message[]);
+      writeCache(`${MSG_CACHE_PREFIX}${sessionId}`, data);
+    }
+    setHistoryLoading(false);
   };
 
   const saveMessages = async (sessionId: string, msgs: Message[]) => {
     const lastTwo = msgs.slice(-2);
     const inserts = lastTwo.map((m) => ({ session_id: sessionId, role: m.role, content: m.content }));
     await supabase.from("chat_messages").insert(inserts);
+    writeCache(`${MSG_CACHE_PREFIX}${sessionId}`, msgs);
     await supabase.from("chat_sessions").update({ updated_at: new Date().toISOString() }).eq("id", sessionId);
   };
 
@@ -193,6 +227,7 @@ const AIChat = () => {
 
   const deleteSession = async (sessionId: string) => {
     await supabase.from("chat_sessions").delete().eq("id", sessionId);
+    try { localStorage.removeItem(`${MSG_CACHE_PREFIX}${sessionId}`); } catch { /* ignore */ }
     if (activeSessionId === sessionId) { setActiveSessionId(null); setMessages([]); }
     loadSessions();
   };
@@ -362,6 +397,13 @@ const AIChat = () => {
                 ))}
               </div>
             </>
+          )}
+
+          {historyLoading && messages.length === 0 && (
+            <div className="flex gap-3">
+              <img src={sentryLogo.url} alt="Sentry" className="h-8 w-8 shrink-0 rounded-full object-cover" />
+              <ChatBubbleSkeleton />
+            </div>
           )}
 
           {messages.map((m, i) => (
