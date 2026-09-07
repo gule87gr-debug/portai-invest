@@ -8,6 +8,9 @@ import { Bell, BellRing, TrendingUp, TrendingDown, Trash2, CheckCircle2, Loader2
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { EmptyState } from "@/components/EmptyState";
+import { WatchlistRowsSkeleton } from "@/components/Skeletons";
+import { enqueueAction, isNetworkError, registerOfflineHandler } from "@/lib/offlineQueue";
 
 type Alert = {
   id: string;
@@ -21,14 +24,32 @@ type Alert = {
   created_at: string;
 };
 
+const CACHE_KEY = "portai-alerts-cache";
+
+const readCache = (): Alert[] | null => {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    return raw ? (JSON.parse(raw) as Alert[]) : null;
+  } catch { return null; }
+};
+const writeCache = (rows: Alert[]) => {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify(rows)); } catch { /* ignore */ }
+};
+
+registerOfflineHandler("alert.delete", async ({ id }: { id: string }) => {
+  const { error } = await supabase.from("price_alerts").delete().eq("id", id);
+  if (error) throw error;
+});
+
 const fmtDate = (s: string | null) =>
   s ? new Date(s).toLocaleString(undefined, { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
 
 const AlertsPage = () => {
   usePageTitle("Alert History | PortAI");
   const navigate = useNavigate();
-  const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cached = readCache();
+  const [alerts, setAlerts] = useState<Alert[]>(cached ?? []);
+  const [loading, setLoading] = useState(!cached);
   const [tab, setTab] = useState<"active" | "history">("active");
   const [pushPerm, setPushPerm] = useState<NotificationPermission>(
     typeof Notification !== "undefined" ? Notification.permission : "denied"
@@ -45,7 +66,9 @@ const AlertsPage = () => {
         .eq("user_id", session.user.id)
         .order("created_at", { ascending: false });
       if (!cancelled) {
-        setAlerts((data as Alert[]) || []);
+        const rows = (data as Alert[]) || [];
+        setAlerts(rows);
+        writeCache(rows);
         setLoading(false);
       }
     })();
@@ -56,9 +79,28 @@ const AlertsPage = () => {
   const history = useMemo(() => alerts.filter((a) => a.triggered), [alerts]);
 
   const handleDelete = async (id: string) => {
-    await supabase.from("price_alerts").delete().eq("id", id);
-    setAlerts((p) => p.filter((a) => a.id !== id));
-    toast.success("Alert removed");
+    const snapshot = alerts;
+    setAlerts((p) => {
+      const next = p.filter((a) => a.id !== id);
+      writeCache(next);
+      return next;
+    });
+    try {
+      const { error } = await supabase.from("price_alerts").delete().eq("id", id);
+      if (error) throw error;
+      toast.success("Alert removed");
+    } catch (err) {
+      if (isNetworkError(err)) {
+        enqueueAction("alert.delete", { id });
+        toast("Removed offline — will sync when you're back online");
+        return;
+      }
+      setAlerts(snapshot);
+      writeCache(snapshot);
+      toast.error("Couldn't remove that alert", {
+        action: { label: "Retry", onClick: () => void handleDelete(id) },
+      });
+    }
   };
 
   const enablePush = async () => {
@@ -111,16 +153,19 @@ const AlertsPage = () => {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-16 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" />
-        </div>
+        <WatchlistRowsSkeleton rows={4} />
       ) : list.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-12 text-center">
-          <BellOff className="mx-auto h-10 w-10 text-muted-foreground/40 mb-3" />
-          <p className="text-sm text-muted-foreground">
-            {tab === "active" ? "No active alerts. Create one from any stock detail page." : "No alerts have triggered yet."}
-          </p>
-        </div>
+        <EmptyState
+          icon={BellOff}
+          title={tab === "active" ? "No active alerts" : "No alerts have triggered yet"}
+          description={
+            tab === "active"
+              ? "Open any stock page and set a target price to be notified when it's reached."
+              : "Once one of your price targets is hit, it will show up here."
+          }
+          actionLabel={tab === "active" ? "Browse watchlists" : undefined}
+          onAction={tab === "active" ? () => navigate("/watchlists") : undefined}
+        />
       ) : (
         <div className="rounded-xl border border-border bg-card overflow-hidden">
           {list.map((a, i) => {
@@ -160,7 +205,7 @@ const AlertsPage = () => {
                 </button>
                 <button
                   onClick={() => handleDelete(a.id)}
-                  className="text-muted-foreground hover:text-red-400 shrink-0"
+                  className="press-scale text-muted-foreground hover:text-red-400 shrink-0"
                   aria-label="Delete alert"
                 >
                   <Trash2 className="h-4 w-4" />

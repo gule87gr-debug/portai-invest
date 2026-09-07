@@ -1,5 +1,26 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { enqueueAction, isNetworkError, registerOfflineHandler } from "@/lib/offlineQueue";
+
+// Replay handlers for actions taken while offline.
+registerOfflineHandler("watchlist.delete", async ({ id }: { id: string }) => {
+  const { error } = await supabase.from("watchlists").delete().eq("id", id);
+  if (error) throw error;
+});
+registerOfflineHandler("watchlist.rename", async ({ id, name }: { id: string; name: string }) => {
+  const { error } = await supabase.from("watchlists").update({ name } as any).eq("id", id);
+  if (error) throw error;
+});
+registerOfflineHandler("watchlist.addStock", async (row: any) => {
+  const { error } = await supabase.from("watchlist_stocks").insert(row as any);
+  if (error) throw error;
+});
+registerOfflineHandler("watchlist.removeStock", async ({ listId, ticker }: { listId: string; ticker: string }) => {
+  const { error } = await supabase.from("watchlist_stocks").delete().eq("watchlist_id", listId).eq("ticker", ticker);
+  if (error) throw error;
+});
+
 
 export type Stock = { ticker: string; sector: string; name: string; signal: string; createdAt?: string };
 export type WatchlistData = { id: string; name: string; stocks: Stock[]; desc: string };
@@ -195,35 +216,105 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const deleteWatchlist = async (id: string) => {
-    await supabase.from("watchlists").delete().eq("id", id);
+    const snapshot = watchlists;
+    // Optimistic: drop it immediately, restore if the write fails.
     setWatchlists((prev) => prev.filter((w) => w.id !== id));
+    try {
+      const { error } = await supabase.from("watchlists").delete().eq("id", id);
+      if (error) throw error;
+    } catch (err) {
+      if (isNetworkError(err)) {
+        enqueueAction("watchlist.delete", { id });
+        toast("Saved offline — will sync when you're back online");
+        return;
+      }
+      setWatchlists(snapshot);
+      toast.error("Couldn't delete that watchlist", {
+        action: { label: "Retry", onClick: () => void deleteWatchlist(id) },
+      });
+    }
   };
 
   const renameWatchlist = async (id: string, name: string) => {
     const trimmed = name.trim();
     if (!trimmed) return;
+    const previous = watchlists.find((w) => w.id === id)?.name;
     setWatchlists((prev) => prev.map((w) => (w.id === id ? { ...w, name: trimmed } : w)));
-    await supabase.from("watchlists").update({ name: trimmed } as any).eq("id", id);
+    try {
+      const { error } = await supabase.from("watchlists").update({ name: trimmed } as any).eq("id", id);
+      if (error) throw error;
+    } catch (err) {
+      if (isNetworkError(err)) {
+        enqueueAction("watchlist.rename", { id, name: trimmed });
+        toast("Saved offline — will sync when you're back online");
+        return;
+      }
+      if (previous) setWatchlists((prev) => prev.map((w) => (w.id === id ? { ...w, name: previous } : w)));
+      toast.error("Couldn't rename that watchlist", {
+        action: { label: "Retry", onClick: () => void renameWatchlist(id, trimmed) },
+      });
+    }
   };
 
   const addStockToWatchlist = async (listId: string, stock: Stock) => {
     const list = watchlists.find((w) => w.id === listId);
     if (!list || list.stocks.find((s) => s.ticker === stock.ticker)) return;
-    const { data: inserted } = await supabase.from("watchlist_stocks").insert({
+    // Optimistic: show the row instantly.
+    const optimistic = { ...stock, createdAt: new Date().toISOString() };
+    setWatchlists((prev) => prev.map((w) => w.id === listId ? { ...w, stocks: [optimistic, ...w.stocks] } : w));
+    const row = {
       watchlist_id: listId,
       ticker: stock.ticker,
       name: stock.name,
       sector: stock.sector,
       signal: stock.signal,
-    } as any).select("created_at").single();
-    const newStock = { ...stock, createdAt: (inserted as any)?.created_at ?? new Date().toISOString() };
-    setWatchlists((prev) => prev.map((w) => w.id === listId ? { ...w, stocks: [newStock, ...w.stocks] } : w));
+    };
+    try {
+      const { data: inserted, error } = await supabase
+        .from("watchlist_stocks").insert(row as any).select("created_at").single();
+      if (error) throw error;
+      const createdAt = (inserted as any)?.created_at;
+      if (createdAt) {
+        setWatchlists((prev) => prev.map((w) => w.id === listId
+          ? { ...w, stocks: w.stocks.map((s) => s.ticker === stock.ticker ? { ...s, createdAt } : s) }
+          : w));
+      }
+    } catch (err) {
+      if (isNetworkError(err)) {
+        enqueueAction("watchlist.addStock", row);
+        toast("Saved offline — will sync when you're back online");
+        return;
+      }
+      setWatchlists((prev) => prev.map((w) => w.id === listId
+        ? { ...w, stocks: w.stocks.filter((s) => s.ticker !== stock.ticker) }
+        : w));
+      toast.error(`Couldn't add ${stock.ticker}`, {
+        action: { label: "Retry", onClick: () => void addStockToWatchlist(listId, stock) },
+      });
+    }
   };
 
   const removeStockFromWatchlist = async (listId: string, ticker: string) => {
-    await supabase.from("watchlist_stocks").delete().eq("watchlist_id", listId).eq("ticker", ticker);
+    const removed = watchlists.find((w) => w.id === listId)?.stocks.find((s) => s.ticker === ticker);
     setWatchlists((prev) => prev.map((w) => w.id === listId ? { ...w, stocks: w.stocks.filter((s) => s.ticker !== ticker) } : w));
+    try {
+      const { error } = await supabase.from("watchlist_stocks").delete().eq("watchlist_id", listId).eq("ticker", ticker);
+      if (error) throw error;
+    } catch (err) {
+      if (isNetworkError(err)) {
+        enqueueAction("watchlist.removeStock", { listId, ticker });
+        toast("Saved offline — will sync when you're back online");
+        return;
+      }
+      if (removed) {
+        setWatchlists((prev) => prev.map((w) => w.id === listId ? { ...w, stocks: [removed, ...w.stocks] } : w));
+      }
+      toast.error(`Couldn't remove ${ticker}`, {
+        action: { label: "Retry", onClick: () => void removeStockFromWatchlist(listId, ticker) },
+      });
+    }
   };
+
 
   const moveStock = async (listId: string, ticker: string, direction: "up" | "down") => {
     const list = watchlists.find((w) => w.id === listId);
