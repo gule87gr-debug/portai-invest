@@ -18,7 +18,8 @@ const LANGUAGE_NAMES: Record<string, string> = {
   en: "English", es: "Spanish", fr: "French", pt: "Portuguese", de: "German", it: "Italian",
 };
 
-const FREE_DAILY_ANALYSES = 1;
+// Daily article-analysis quota per tier (Pro is unlimited).
+const DAILY_ANALYSIS_LIMITS: Record<"free" | "plus", number> = { free: 3, plus: 10 };
 
 // Must stay in sync with src/lib/trustScore.ts so the news-feed badge
 // and the article analyzer always return the same score for a known source.
