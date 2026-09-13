@@ -1025,7 +1025,7 @@ ${crossSourceBlock}`,
       analysis.proDeepDive = null;
     }
 
-    return new Response(JSON.stringify({ success: true, analysis }), {
+    return new Response(JSON.stringify({ success: true, analysis, tier }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
