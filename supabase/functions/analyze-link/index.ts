@@ -669,13 +669,14 @@ serve(async (req) => {
         cached.hiddenAngle = null;
         cached.proDeepDive = null;
       }
-      return new Response(JSON.stringify({ success: true, analysis: cached, cached: true }), {
+      return new Response(JSON.stringify({ success: true, analysis: cached, cached: true, tier }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Enforce daily analysis limit for free users
+    // Enforce the daily analysis quota (Pro is unlimited)
     if (!isPro) {
+      const limit = DAILY_ANALYSIS_LIMITS[tier as "free" | "plus"] ?? DAILY_ANALYSIS_LIMITS.free;
       const today = new Date().toISOString().split("T")[0];
       const { count } = await supabaseAdmin
         .from("analysis_usage")
@@ -683,12 +684,15 @@ serve(async (req) => {
         .eq("user_id", userId)
         .eq("used_date", today);
 
-      if ((count ?? 0) >= FREE_DAILY_ANALYSES) {
-        return new Response(JSON.stringify({ error: "Daily analysis limit reached. Upgrade to Pro for unlimited analyses." }), {
+      if ((count ?? 0) >= limit) {
+        return new Response(JSON.stringify({
+          error: `Daily analysis limit reached (${limit}/day on ${tier === "plus" ? "Plus" : "Free"}). Upgrade to Pro for unlimited analyses.`,
+        }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
     }
+
 
     // ---- Article body fallback (many publishers 403 direct bot fetches) ----
     let articleBody = ((pre as { bodyText?: string }).bodyText || "").trim();
