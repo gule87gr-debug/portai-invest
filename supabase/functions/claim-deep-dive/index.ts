@@ -19,7 +19,7 @@ const json = (body: unknown, status = 200) =>
   });
 
 async function cacheKeyFor(url: string, language: string): Promise<string> {
-  const data = new TextEncoder().encode(`${url}::${language}`);
+  const data = new TextEncoder().encode(`v2::${url}::${language}`);
   const digest = await crypto.subtle.digest("SHA-256", data);
   return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
