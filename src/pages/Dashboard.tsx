@@ -138,6 +138,7 @@ const Dashboard = () => {
       : `https://${url.trim().replace(/^\/+/, "")}`;
     setIsAnalyzing(true);
     setResult(null);
+    setClaimedDeepDive(null);
     setError("");
     setLimitReached(false);
     try {
@@ -166,6 +167,7 @@ const Dashboard = () => {
       }
       if (data?.analysis) {
         setResult(data.analysis);
+        setAnalyzedUrl(normalizedUrl);
         await trackAnalysis();
         await refresh();
         // Now that a credit was actually used, reveal the remaining counter
@@ -180,7 +182,7 @@ const Dashboard = () => {
 
   const trustColor = (score: number) => score >= 7 ? "text-gain" : score >= 5 ? "text-warning" : "text-loss";
   const trustBorder = (score: number) => score >= 7 ? "border-gain/40" : score >= 5 ? "border-warning/40" : "border-loss/40";
-  const remaining = Math.max(0, FREE_DAILY_ANALYSES - dailyAnalysesUsed);
+  const remaining = dailyAnalysisLimit === null ? null : Math.max(0, dailyAnalysisLimit - dailyAnalysesUsed);
 
 
   return (
