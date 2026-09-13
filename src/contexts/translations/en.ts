@@ -135,7 +135,7 @@ const en: Record<string, string> = {
     // Dashboard extras
     unlimited: "Unlimited", analysesRemainingToday: "analyses remaining today", noAnalysesRemainingToday: "No analyses remaining today",
     welcomePro: "Welcome to Pro! 🎉 All features are now unlocked.",
-    analysisLimitTitle: "Analysis Limit Reached", analysisLimitDesc: "You've used all your free analyses today. Upgrade to Pro for unlimited analyses.",
+    analysisLimitTitle: "Analysis Limit Reached", analysisLimitDesc: "You've used today's article analyses. Free includes 3 per day, Plus 10 per day with 3 Pro deep dives, and Pro is unlimited.",
     freeAnalysisUsedSingle: "You've used your free analysis for today.", freeAnalysesUsedMulti: "You've used all your free analyses for today.",
     quotaResets: "Your quota resets at midnight, or upgrade to Pro for unlimited analyses.",
     analysesUsedToday: "You've used all {limit} of today's article analyses.",
@@ -182,7 +182,7 @@ const en: Record<string, string> = {
     plusFeatAlerts: "Custom price alerts",
     proSubtitle: "Everything in Plus, and more",
     proFeatEverything: "Everything in Plus",
-    proFeatAnalyses: "Unlimited article & link analyses",
+    proFeatAnalyses: "Unlimited article analyses + unlimited Pro deep dives",
     proFeatFactCheck: "AI Fact Check on market claims",
     proFeatInstitutional: "Deep-Dive institutional analysis",
     proFeatRealtime: "Real-time bias alerts for your portfolio",
