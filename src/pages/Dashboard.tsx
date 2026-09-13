@@ -46,12 +46,11 @@ type AnalysisResult = {
   };
 };
 
-const FREE_DAILY_ANALYSES = 1;
-
 const Dashboard = () => {
   usePageTitle("Market Intelligence | PortAI");
   const { t } = useLanguage();
   const [url, setUrl] = useState("");
+  const [analyzedUrl, setAnalyzedUrl] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState("");
@@ -60,8 +59,46 @@ const Dashboard = () => {
   // was actually accepted (so a "not an article" reply never makes the badge tick down)
   const [showRemaining, setShowRemaining] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
-  const { isPro, dailyAnalysesUsed, canAnalyze, refresh } = useSubscription();
+  const { isPro, isPlus, dailyAnalysesUsed, dailyAnalysisLimit, canAnalyze, refresh } = useSubscription();
   const [searchParams] = useSearchParams();
+
+  // Plus tier: 3 claimable Pro-level deep dives per day
+  const [deepDiveUsed, setDeepDiveUsed] = useState(0);
+  const [claimedDeepDive, setClaimedDeepDive] = useState<AnalysisResult["proDeepDive"] | null>(null);
+  const [claiming, setClaiming] = useState(false);
+
+  useEffect(() => {
+    if (!isPlus) return;
+    let cancelled = false;
+    supabase.functions
+      .invoke("claim-deep-dive", { body: { action: "status" } })
+      .then(({ data }) => {
+        if (!cancelled && typeof data?.used === "number") setDeepDiveUsed(data.used);
+      })
+      .catch(() => { /* ignore */ });
+    return () => { cancelled = true; };
+  }, [isPlus]);
+
+  const claimDeepDive = async () => {
+    if (!analyzedUrl) return;
+    setClaiming(true);
+    try {
+      const { data, error: fnErr } = await supabase.functions.invoke("claim-deep-dive", {
+        body: {
+          action: "claim",
+          url: analyzedUrl,
+          language: (typeof window !== "undefined" ? localStorage.getItem("portai.language") : null) || "en",
+        },
+      });
+      if (fnErr || data?.error) throw new Error(data?.error || fnErr?.message || "Could not unlock the deep dive");
+      setClaimedDeepDive(data.deepDive);
+      if (typeof data.used === "number") setDeepDiveUsed(data.used);
+    } catch (e: any) {
+      toast.error(e.message || "Could not unlock the deep dive");
+    } finally {
+      setClaiming(false);
+    }
+  };
 
   useEffect(() => {
     if (searchParams.get("upgrade") === "success") {
