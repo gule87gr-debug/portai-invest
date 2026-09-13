@@ -412,7 +412,7 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
                 was: "€24.99",
                 badge: lt("off36"),
                 highlight: true,
-                features: [lt("pro1"), lt("pro2"), lt("pro3"), lt("pro5")],
+                features: [lt("pro1"), lt("pro2"), lt("pro3")],
                 cta: lt("goPro"),
               },
             ].map((tier) => (
@@ -456,24 +456,6 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
                       <span>{f}</span>
                     </li>
                   ))}
-                  {tier.highlight && (
-                    <li className="flex gap-2.5 items-start">
-                      <CheckCircle2 className="h-4 w-4 text-foreground/70 mt-0.5 shrink-0" />
-                      <span className="inline-flex items-center gap-1">
-                        {lt("pro4Label")}
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button type="button" aria-label={lt("pro4AriaLabel")} className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors">
-                              <Info className="h-3.5 w-3.5" />
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
-                            {lt("pro4Tooltip")}
-                          </TooltipContent>
-                        </Tooltip>
-                      </span>
-                    </li>
-                  )}
                 </ul>
 
                 <button
