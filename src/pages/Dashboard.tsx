@@ -425,34 +425,57 @@ const Dashboard = () => {
               </details>
             )}
 
-            {/* Pro deep dive */}
-            {isPro ? (
-              result.proDeepDive && (
-                <details className="mt-2 rounded-lg border border-primary/30 bg-primary/5 p-3">
-                  <summary className="cursor-pointer text-sm font-semibold uppercase tracking-wider text-primary">
-                    {t("proDeepDive")}
-                  </summary>
-                  <div className="mt-2 space-y-1.5">
-                    {[
-                      [t("stakeholderMotives"), result.proDeepDive.stakeholderMotives],
-                      [t("omittedDataPoints"), result.proDeepDive.omittedDataPoints],
-                      [t("sentimentDivergence"), result.proDeepDive.sentimentDivergence],
-                    ].filter(([, v]) => !!v).map(([label, body]) => (
-                      <p key={label as string} className="text-sm leading-relaxed text-muted-foreground">
-                        <span className="font-semibold text-foreground">{label}: </span>{body}
-                      </p>
-                    ))}
-                  </div>
-                </details>
-              )
-            ) : (
-              <button
-                onClick={() => setShowUpgrade(true)}
-                className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10 transition-colors"
-              >
-                <Lock className="h-3.5 w-3.5" /> {t("unlockDeepDive")}
-              </button>
-            )}
+            {/* Pro-level deep dive: unlimited on Pro, 3/day claimable on Plus */}
+            {(() => {
+              const deepDive = isPro ? result.proDeepDive : claimedDeepDive;
+              if (deepDive) {
+                return (
+                  <details className="mt-2 rounded-lg border border-primary/30 bg-primary/5 p-3" open={!isPro}>
+                    <summary className="cursor-pointer text-sm font-semibold uppercase tracking-wider text-primary">
+                      {t("proDeepDive")}
+                    </summary>
+                    <div className="mt-2 space-y-1.5">
+                      {[
+                        [t("stakeholderMotives"), deepDive.stakeholderMotives],
+                        [t("omittedDataPoints"), deepDive.omittedDataPoints],
+                        [t("sentimentDivergence"), deepDive.sentimentDivergence],
+                      ].filter(([, v]) => !!v).map(([label, body]) => (
+                        <p key={label as string} className="text-sm leading-relaxed text-muted-foreground">
+                          <span className="font-semibold text-foreground">{label}: </span>{body}
+                        </p>
+                      ))}
+                    </div>
+                  </details>
+                );
+              }
+              if (isPro) return null;
+
+              if (isPlus) {
+                const left = Math.max(0, PLUS_DAILY_DEEP_DIVES - deepDiveUsed);
+                return (
+                  <button
+                    onClick={left > 0 ? claimDeepDive : () => setShowUpgrade(true)}
+                    disabled={claiming}
+                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10 transition-colors disabled:opacity-60"
+                  >
+                    {claiming ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : left > 0 ? <Sparkles className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                    {left > 0 ? t("claimDeepDive") : t("deepDivesUsedUp")}
+                    <span className="font-mono text-xs opacity-80">
+                      {deepDiveUsed}/{PLUS_DAILY_DEEP_DIVES}
+                    </span>
+                  </button>
+                );
+              }
+
+              return (
+                <button
+                  onClick={() => setShowUpgrade(true)}
+                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10 transition-colors"
+                >
+                  <Lock className="h-3.5 w-3.5" /> {t("unlockDeepDive")}
+                </button>
+              );
+            })()}
           </div>
         )}
 
