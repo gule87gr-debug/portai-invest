@@ -243,7 +243,7 @@ const Dashboard = () => {
             <div className="flex items-start gap-2">
               <Lock className="h-4 w-4 text-primary mt-0.5 shrink-0" />
               <p className="text-sm text-foreground">
-                {FREE_DAILY_ANALYSES === 1 ? t("freeAnalysisUsedSingle") : t("freeAnalysesUsedMulti")}{" "}
+                {t("analysesUsedToday").replace("{limit}", String(dailyAnalysisLimit ?? 3))}{" "}
                 {t("quotaResets")}
               </p>
             </div>
@@ -254,6 +254,14 @@ const Dashboard = () => {
               <Crown className="h-3.5 w-3.5" /> {t("upgradeToPro")}
             </button>
           </div>
+        )}
+
+        {showRemaining && !limitReached && remaining !== null && (
+          <p className="mt-3 text-sm text-muted-foreground">
+            {t("analysesRemaining")
+              .replace("{remaining}", String(remaining))
+              .replace("{limit}", String(dailyAnalysisLimit ?? 3))}
+          </p>
         )}
 
         {error && !limitReached && <p className="mt-3 text-sm text-loss">{error}</p>}
