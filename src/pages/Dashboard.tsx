@@ -7,9 +7,9 @@ import { TradingViewHeatmap } from "@/components/TradingViewWidgets";
 
 import { TrendingStocks } from "@/components/TrendingStocks";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useSubscription, trackAnalysis } from "@/hooks/useSubscription";
+import { useSubscription, trackAnalysis, PLUS_DAILY_DEEP_DIVES } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
-import { Link as LinkIcon, Search, Globe, ShieldCheck, FileText, AlertCircle, Loader2, Crown, Lock, X } from "lucide-react";
+import { Link as LinkIcon, Search, Globe, ShieldCheck, FileText, AlertCircle, Loader2, Crown, Lock, X, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -46,12 +46,11 @@ type AnalysisResult = {
   };
 };
 
-const FREE_DAILY_ANALYSES = 1;
-
 const Dashboard = () => {
   usePageTitle("Market Intelligence | PortAI");
   const { t } = useLanguage();
   const [url, setUrl] = useState("");
+  const [analyzedUrl, setAnalyzedUrl] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState("");
@@ -60,8 +59,46 @@ const Dashboard = () => {
   // was actually accepted (so a "not an article" reply never makes the badge tick down)
   const [showRemaining, setShowRemaining] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
-  const { isPro, dailyAnalysesUsed, canAnalyze, refresh } = useSubscription();
+  const { isPro, isPlus, dailyAnalysesUsed, dailyAnalysisLimit, canAnalyze, refresh } = useSubscription();
   const [searchParams] = useSearchParams();
+
+  // Plus tier: 3 claimable Pro-level deep dives per day
+  const [deepDiveUsed, setDeepDiveUsed] = useState(0);
+  const [claimedDeepDive, setClaimedDeepDive] = useState<AnalysisResult["proDeepDive"] | null>(null);
+  const [claiming, setClaiming] = useState(false);
+
+  useEffect(() => {
+    if (!isPlus) return;
+    let cancelled = false;
+    supabase.functions
+      .invoke("claim-deep-dive", { body: { action: "status" } })
+      .then(({ data }) => {
+        if (!cancelled && typeof data?.used === "number") setDeepDiveUsed(data.used);
+      })
+      .catch(() => { /* ignore */ });
+    return () => { cancelled = true; };
+  }, [isPlus]);
+
+  const claimDeepDive = async () => {
+    if (!analyzedUrl) return;
+    setClaiming(true);
+    try {
+      const { data, error: fnErr } = await supabase.functions.invoke("claim-deep-dive", {
+        body: {
+          action: "claim",
+          url: analyzedUrl,
+          language: (typeof window !== "undefined" ? localStorage.getItem("portai.language") : null) || "en",
+        },
+      });
+      if (fnErr || data?.error) throw new Error(data?.error || fnErr?.message || "Could not unlock the deep dive");
+      setClaimedDeepDive(data.deepDive);
+      if (typeof data.used === "number") setDeepDiveUsed(data.used);
+    } catch (e: any) {
+      toast.error(e.message || "Could not unlock the deep dive");
+    } finally {
+      setClaiming(false);
+    }
+  };
 
   useEffect(() => {
     if (searchParams.get("upgrade") === "success") {
@@ -101,6 +138,7 @@ const Dashboard = () => {
       : `https://${url.trim().replace(/^\/+/, "")}`;
     setIsAnalyzing(true);
     setResult(null);
+    setClaimedDeepDive(null);
     setError("");
     setLimitReached(false);
     try {
@@ -129,6 +167,7 @@ const Dashboard = () => {
       }
       if (data?.analysis) {
         setResult(data.analysis);
+        setAnalyzedUrl(normalizedUrl);
         await trackAnalysis();
         await refresh();
         // Now that a credit was actually used, reveal the remaining counter
@@ -143,7 +182,7 @@ const Dashboard = () => {
 
   const trustColor = (score: number) => score >= 7 ? "text-gain" : score >= 5 ? "text-warning" : "text-loss";
   const trustBorder = (score: number) => score >= 7 ? "border-gain/40" : score >= 5 ? "border-warning/40" : "border-loss/40";
-  const remaining = Math.max(0, FREE_DAILY_ANALYSES - dailyAnalysesUsed);
+  const remaining = dailyAnalysisLimit === null ? null : Math.max(0, dailyAnalysisLimit - dailyAnalysesUsed);
 
 
   return (
@@ -204,7 +243,7 @@ const Dashboard = () => {
             <div className="flex items-start gap-2">
               <Lock className="h-4 w-4 text-primary mt-0.5 shrink-0" />
               <p className="text-sm text-foreground">
-                {FREE_DAILY_ANALYSES === 1 ? t("freeAnalysisUsedSingle") : t("freeAnalysesUsedMulti")}{" "}
+                {t("analysesUsedToday").replace("{limit}", String(dailyAnalysisLimit ?? 3))}{" "}
                 {t("quotaResets")}
               </p>
             </div>
@@ -215,6 +254,14 @@ const Dashboard = () => {
               <Crown className="h-3.5 w-3.5" /> {t("upgradeToPro")}
             </button>
           </div>
+        )}
+
+        {showRemaining && !limitReached && remaining !== null && (
+          <p className="mt-3 text-sm text-muted-foreground">
+            {t("analysesRemaining")
+              .replace("{remaining}", String(remaining))
+              .replace("{limit}", String(dailyAnalysisLimit ?? 3))}
+          </p>
         )}
 
         {error && !limitReached && <p className="mt-3 text-sm text-loss">{error}</p>}
@@ -378,34 +425,57 @@ const Dashboard = () => {
               </details>
             )}
 
-            {/* Pro deep dive */}
-            {isPro ? (
-              result.proDeepDive && (
-                <details className="mt-2 rounded-lg border border-primary/30 bg-primary/5 p-3">
-                  <summary className="cursor-pointer text-sm font-semibold uppercase tracking-wider text-primary">
-                    {t("proDeepDive")}
-                  </summary>
-                  <div className="mt-2 space-y-1.5">
-                    {[
-                      [t("stakeholderMotives"), result.proDeepDive.stakeholderMotives],
-                      [t("omittedDataPoints"), result.proDeepDive.omittedDataPoints],
-                      [t("sentimentDivergence"), result.proDeepDive.sentimentDivergence],
-                    ].filter(([, v]) => !!v).map(([label, body]) => (
-                      <p key={label as string} className="text-sm leading-relaxed text-muted-foreground">
-                        <span className="font-semibold text-foreground">{label}: </span>{body}
-                      </p>
-                    ))}
-                  </div>
-                </details>
-              )
-            ) : (
-              <button
-                onClick={() => setShowUpgrade(true)}
-                className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10 transition-colors"
-              >
-                <Lock className="h-3.5 w-3.5" /> {t("unlockDeepDive")}
-              </button>
-            )}
+            {/* Pro-level deep dive: unlimited on Pro, 3/day claimable on Plus */}
+            {(() => {
+              const deepDive = isPro ? result.proDeepDive : claimedDeepDive;
+              if (deepDive) {
+                return (
+                  <details className="mt-2 rounded-lg border border-primary/30 bg-primary/5 p-3" open={!isPro}>
+                    <summary className="cursor-pointer text-sm font-semibold uppercase tracking-wider text-primary">
+                      {t("proDeepDive")}
+                    </summary>
+                    <div className="mt-2 space-y-1.5">
+                      {[
+                        [t("stakeholderMotives"), deepDive.stakeholderMotives],
+                        [t("omittedDataPoints"), deepDive.omittedDataPoints],
+                        [t("sentimentDivergence"), deepDive.sentimentDivergence],
+                      ].filter(([, v]) => !!v).map(([label, body]) => (
+                        <p key={label as string} className="text-sm leading-relaxed text-muted-foreground">
+                          <span className="font-semibold text-foreground">{label}: </span>{body}
+                        </p>
+                      ))}
+                    </div>
+                  </details>
+                );
+              }
+              if (isPro) return null;
+
+              if (isPlus) {
+                const left = Math.max(0, PLUS_DAILY_DEEP_DIVES - deepDiveUsed);
+                return (
+                  <button
+                    onClick={left > 0 ? claimDeepDive : () => setShowUpgrade(true)}
+                    disabled={claiming}
+                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10 transition-colors disabled:opacity-60"
+                  >
+                    {claiming ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : left > 0 ? <Sparkles className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                    {left > 0 ? t("claimDeepDive") : t("deepDivesUsedUp")}
+                    <span className="font-mono text-xs opacity-80">
+                      {deepDiveUsed}/{PLUS_DAILY_DEEP_DIVES}
+                    </span>
+                  </button>
+                );
+              }
+
+              return (
+                <button
+                  onClick={() => setShowUpgrade(true)}
+                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10 transition-colors"
+                >
+                  <Lock className="h-3.5 w-3.5" /> {t("unlockDeepDive")}
+                </button>
+              );
+            })()}
           </div>
         )}
 

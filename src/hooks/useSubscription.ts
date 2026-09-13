@@ -24,6 +24,8 @@ type SubscriptionState = {
   scheduledStart: string | null;
   scheduledChangesCount: number;
   dailyAnalysesUsed: number;
+  /** Daily analysis allowance for the current tier; null = unlimited (Pro). */
+  dailyAnalysisLimit: number | null;
   canAnalyze: boolean;
   // Trial fields
   trialActive: boolean;
@@ -37,7 +39,10 @@ type SubscriptionState = {
   refresh: () => Promise<void>;
 };
 
-const FREE_DAILY_ANALYSES = 1;
+/** Daily article-analysis quota per tier (Pro is unlimited). */
+export const DAILY_ANALYSIS_LIMITS = { free: 3, plus: 10 } as const;
+/** Pro-level deep dives included per day on Plus (Pro is unlimited). */
+export const PLUS_DAILY_DEEP_DIVES = 3;
 
 /* ------------------------------------------------------------------ *
  * Module-level store: one network round-trip shared by every consumer *
@@ -339,7 +344,9 @@ export const useSubscription = (): SubscriptionState => {
     scheduledStart: s.scheduledStart,
     scheduledChangesCount: s.scheduledChangesCount,
     dailyAnalysesUsed: s.dailyAnalysesUsed,
-    canAnalyze: isPro || s.dailyAnalysesUsed < FREE_DAILY_ANALYSES,
+    dailyAnalysisLimit: isPro ? null : isPlus ? DAILY_ANALYSIS_LIMITS.plus : DAILY_ANALYSIS_LIMITS.free,
+    canAnalyze:
+      isPro || s.dailyAnalysesUsed < (isPlus ? DAILY_ANALYSIS_LIMITS.plus : DAILY_ANALYSIS_LIMITS.free),
     trialActive: s.trialActive,
     trialUsed: s.trialUsed,
     trialEndsAt: s.trialEndsAt,

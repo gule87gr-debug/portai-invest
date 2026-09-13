@@ -3,6 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { checkRateLimit, getClientIP, rateLimitResponse } from "../_shared/rate-limiter.ts";
 import { validateInput, validationErrorResponse, type SchemaDefinition } from "../_shared/input-validator.ts";
 import { isAdminEmail, logAdminBypass } from "../_shared/admin-bypass.ts";
+import { resolveTier, type Tier } from "../_shared/tier.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -18,7 +19,8 @@ const LANGUAGE_NAMES: Record<string, string> = {
   en: "English", es: "Spanish", fr: "French", pt: "Portuguese", de: "German", it: "Italian",
 };
 
-const FREE_DAILY_ANALYSES = 1;
+// Daily article-analysis quota per tier (Pro is unlimited).
+const DAILY_ANALYSIS_LIMITS: Record<"free" | "plus", number> = { free: 3, plus: 10 };
 
 // Must stay in sync with src/lib/trustScore.ts so the news-feed badge
 // and the article analyzer always return the same score for a known source.
@@ -629,45 +631,18 @@ serve(async (req) => {
     }
 
     const userId = userData.user.id;
-    let isPro = false;
+    let tier: Tier = "free";
 
     // Admin bypass via DB lookup
     const isAdmin = await isAdminEmail(supabaseAdmin, userData.user.email ?? null);
     if (isAdmin) {
-      isPro = true;
+      tier = "pro";
       await logAdminBypass(supabaseAdmin, userData.user.email!, "analyze-link", userId);
     } else {
-      const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-      if (stripeKey && userData.user.email) {
-        try {
-          // Only the Pro tier grants unlimited article analyses.
-          // Plus ("price_1TPM56PJefLcxc6CzfD5CUaS" / "prod_UO8LzRA6kfvdwm")
-          // remains on the free daily quota for this feature.
-          const PRO_PRICE_IDS = new Set([
-            "price_1TFyVKPJefLcxc6Cn1iwdSTk",
-            "price_1TPM5RPJefLcxc6Cap03GhJm",
-          ]);
-          const PRO_PRODUCT_ID = "prod_UEROAe01UbaEpK";
-          const Stripe = (await import("https://esm.sh/stripe@18.5.0")).default;
-          const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-          const customers = await stripe.customers.list({ email: userData.user.email, limit: 1 });
-          if (customers.data.length > 0) {
-            const subs = await stripe.subscriptions.list({ customer: customers.data[0].id, status: "active", limit: 5 });
-            for (const sub of subs.data) {
-              const item = sub.items.data[0];
-              const priceId = item?.price?.id ?? "";
-              const productId = typeof item?.price?.product === "string" ? item.price.product : "";
-              if (PRO_PRICE_IDS.has(priceId) || productId === PRO_PRODUCT_ID) {
-                isPro = true;
-                break;
-              }
-            }
-          }
-        } catch {
-          // Default to free tier
-        }
-      }
+      tier = await resolveTier(supabaseAdmin, userId, userData.user.email ?? null);
     }
+    const isPro = tier === "pro";
+
 
     // ---- Pre-flight URL/metadata validation (does NOT count against quota) ----
     const pre = await preCheckArticle(url);
@@ -695,13 +670,14 @@ serve(async (req) => {
         cached.hiddenAngle = null;
         cached.proDeepDive = null;
       }
-      return new Response(JSON.stringify({ success: true, analysis: cached, cached: true }), {
+      return new Response(JSON.stringify({ success: true, analysis: cached, cached: true, tier }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Enforce daily analysis limit for free users
+    // Enforce the daily analysis quota (Pro is unlimited)
     if (!isPro) {
+      const limit = DAILY_ANALYSIS_LIMITS[tier as "free" | "plus"] ?? DAILY_ANALYSIS_LIMITS.free;
       const today = new Date().toISOString().split("T")[0];
       const { count } = await supabaseAdmin
         .from("analysis_usage")
@@ -709,12 +685,15 @@ serve(async (req) => {
         .eq("user_id", userId)
         .eq("used_date", today);
 
-      if ((count ?? 0) >= FREE_DAILY_ANALYSES) {
-        return new Response(JSON.stringify({ error: "Daily analysis limit reached. Upgrade to Pro for unlimited analyses." }), {
+      if ((count ?? 0) >= limit) {
+        return new Response(JSON.stringify({
+          error: `Daily analysis limit reached (${limit}/day on ${tier === "plus" ? "Plus" : "Free"}). Upgrade to Pro for unlimited analyses.`,
+        }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
     }
+
 
     // ---- Article body fallback (many publishers 403 direct bot fetches) ----
     let articleBody = ((pre as { bodyText?: string }).bodyText || "").trim();
@@ -1046,7 +1025,7 @@ ${crossSourceBlock}`,
       analysis.proDeepDive = null;
     }
 
-    return new Response(JSON.stringify({ success: true, analysis }), {
+    return new Response(JSON.stringify({ success: true, analysis, tier }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

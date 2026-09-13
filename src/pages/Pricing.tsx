@@ -28,7 +28,7 @@ const Pricing = () => {
 
   const freeTierFeatures = [
     t("featFreeAnalyses"), t("featFreeChat"), t("featFreeImg"),
-    t("featFreeWatch"), t("featFreeQuiz"),
+    t("featFreeWatch"), t("featFreeQuiz"), t("featFreeFactCheck"),
   ];
   const plusTierFeatures = [
     t("featPlusWatch"), t("featPlusQuiz"), t("featPlusChat"), t("featPlusImg"),
