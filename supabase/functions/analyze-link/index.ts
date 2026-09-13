@@ -3,6 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { checkRateLimit, getClientIP, rateLimitResponse } from "../_shared/rate-limiter.ts";
 import { validateInput, validationErrorResponse, type SchemaDefinition } from "../_shared/input-validator.ts";
 import { isAdminEmail, logAdminBypass } from "../_shared/admin-bypass.ts";
+import { resolveTier, type Tier } from "../_shared/tier.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
