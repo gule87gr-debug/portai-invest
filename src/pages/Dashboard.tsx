@@ -7,9 +7,9 @@ import { TradingViewHeatmap } from "@/components/TradingViewWidgets";
 
 import { TrendingStocks } from "@/components/TrendingStocks";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useSubscription, trackAnalysis } from "@/hooks/useSubscription";
+import { useSubscription, trackAnalysis, PLUS_DAILY_DEEP_DIVES } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
-import { Link as LinkIcon, Search, Globe, ShieldCheck, FileText, AlertCircle, Loader2, Crown, Lock, X } from "lucide-react";
+import { Link as LinkIcon, Search, Globe, ShieldCheck, FileText, AlertCircle, Loader2, Crown, Lock, X, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
