@@ -24,6 +24,8 @@ type SubscriptionState = {
   scheduledStart: string | null;
   scheduledChangesCount: number;
   dailyAnalysesUsed: number;
+  /** Daily analysis allowance for the current tier; null = unlimited (Pro). */
+  dailyAnalysisLimit: number | null;
   canAnalyze: boolean;
   // Trial fields
   trialActive: boolean;
@@ -342,7 +344,9 @@ export const useSubscription = (): SubscriptionState => {
     scheduledStart: s.scheduledStart,
     scheduledChangesCount: s.scheduledChangesCount,
     dailyAnalysesUsed: s.dailyAnalysesUsed,
-    canAnalyze: isPro || s.dailyAnalysesUsed < FREE_DAILY_ANALYSES,
+    dailyAnalysisLimit: isPro ? null : isPlus ? DAILY_ANALYSIS_LIMITS.plus : DAILY_ANALYSIS_LIMITS.free,
+    canAnalyze:
+      isPro || s.dailyAnalysesUsed < (isPlus ? DAILY_ANALYSIS_LIMITS.plus : DAILY_ANALYSIS_LIMITS.free),
     trialActive: s.trialActive,
     trialUsed: s.trialUsed,
     trialEndsAt: s.trialEndsAt,
