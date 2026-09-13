@@ -37,7 +37,10 @@ type SubscriptionState = {
   refresh: () => Promise<void>;
 };
 
-const FREE_DAILY_ANALYSES = 1;
+/** Daily article-analysis quota per tier (Pro is unlimited). */
+export const DAILY_ANALYSIS_LIMITS = { free: 3, plus: 10 } as const;
+/** Pro-level deep dives included per day on Plus (Pro is unlimited). */
+export const PLUS_DAILY_DEEP_DIVES = 3;
 
 /* ------------------------------------------------------------------ *
  * Module-level store: one network round-trip shared by every consumer *
