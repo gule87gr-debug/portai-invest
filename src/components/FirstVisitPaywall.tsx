@@ -67,7 +67,7 @@ export const FirstVisitPaywall = () => {
 
   const freePerks = [
     tr("welcomeFreePerk1", "1 watchlist with up to 5 assets"),
-    tr("welcomeFreePerk2", "1 article bias analysis per day"),
+    tr("welcomeFreePerk2", "3 article bias analyses per day"),
     tr("welcomeFreePerk3", "10 AI chat messages + 3 image analyses per day"),
   ];
   const freeLimits = [
@@ -77,7 +77,7 @@ export const FirstVisitPaywall = () => {
   ];
   const plusPerks = [
     tr("welcomePlusPerk1", "Unlimited watchlists & assets"),
-    tr("welcomePlusPerk2", "Full quiz results & recommendations"),
+    tr("welcomePlusPerk2", "10 article analyses per day + 3 Pro deep dives"),
     tr("welcomePlusPerk3", "Unlimited fast AI chat & image analyses"),
     tr("welcomePlusPerk4", "Advanced AI models (5 msgs/day each)"),
   ];
