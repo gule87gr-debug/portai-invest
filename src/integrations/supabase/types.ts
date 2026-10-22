@@ -685,6 +685,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_price_alert_checked: {
+        Args: {
+          _asset_name: string
+          _asset_type: string
+          _direction: string
+          _target_price: number
+          _ticker: string
+          _tier: string
+          _user_id: string
+        }
+        Returns: {
+          asset_name: string
+          asset_type: string
+          created_at: string
+          direction: string
+          id: string
+          target_price: number
+          ticker: string
+          triggered: boolean
+          triggered_at: string | null
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "price_alerts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean

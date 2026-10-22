@@ -10,7 +10,7 @@ import createPriceAlert from "./tools/create-price-alert";
 const projectRef = import.meta.env.VITE_SUPABASE_PROJECT_ID ?? "project-ref-unset";
 
 export default defineMcp({
-  name: "portai-mcp",
+  name: "portai",
   title: "PortAI",
   version: "0.1.0",
   instructions:

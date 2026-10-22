@@ -31,6 +31,7 @@ export const UpgradeModal = ({
     t("plusFeatCompare"),
     t("plusFeatHeatmaps"),
     t("plusFeatDeepDive"),
+    t("plusFeatAlerts"),
     "Advanced AI models (5 messages/day each)",
   ];
 

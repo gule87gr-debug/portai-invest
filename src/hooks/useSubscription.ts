@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useSyncExternalStore, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { ACTIVE_ALERT_LIMITS } from "@/lib/priceAlertLimits";
 
 export type SubscriptionTier = "free" | "plus" | "pro";
 
@@ -15,6 +16,8 @@ type SubscriptionState = {
   hasUnlimitedChat: boolean;
   hasUnlimitedWatchlists: boolean;
   hasFullQuiz: boolean;
+  hasPriceAlerts: boolean;
+  activeAlertLimit: number | null;
   loading: boolean;
   subscriptionEnd: string | null;
   cancelAtPeriodEnd: boolean;
@@ -335,6 +338,8 @@ export const useSubscription = (): SubscriptionState => {
     hasUnlimitedChat: isPaid,
     hasUnlimitedWatchlists: isPaid,
     hasFullQuiz: isPaid,
+    hasPriceAlerts: isPaid,
+    activeAlertLimit: ACTIVE_ALERT_LIMITS[effectiveTier],
     loading: s.loading,
     subscriptionEnd: s.subscriptionEnd,
     cancelAtPeriodEnd: s.cancelAtPeriodEnd,

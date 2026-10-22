@@ -33,10 +33,12 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [activeCount, setActiveCount] = useState(0);
   const [price, setPrice] = useState("");
   const [direction, setDirection] = useState<"above" | "below">("above");
   const [userId, setUserId] = useState<string | null>(null);
-  const { isPro, loading: subLoading } = useSubscription();
+  const { hasPriceAlerts, isPlus, activeAlertLimit, loading: subLoading } = useSubscription();
+  const atCap = isPlus && activeAlertLimit !== null && activeCount >= activeAlertLimit;
   const navigate = useNavigate();
   let t: (k: string) => string;
   try { t = useLanguage().t; } catch { t = (k) => k; }
@@ -50,13 +52,17 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
   const loadAlerts = async () => {
     if (!userId) return;
     setLoading(true);
-    const { data } = await supabase
+    const [rows, total] = await Promise.all([supabase
       .from("price_alerts")
-      .select("*")
+      .select("id,ticker,target_price,direction,triggered,created_at")
       .eq("ticker", ticker.toUpperCase())
       .eq("user_id", userId)
-      .order("created_at", { ascending: false });
-    setAlerts((data as Alert[]) || []);
+      .order("created_at", { ascending: false }),
+      supabase.from("price_alerts").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("triggered", false),
+    ]);
+    if (rows.error || total.error) { toast.error(t("alertLoadFailed")); setLoading(false); return; }
+    setAlerts((rows.data as Alert[]) || []);
+    setActiveCount(total.count ?? 0);
     setLoading(false);
   };
 
@@ -78,26 +84,28 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
       toast.error(t("signInForAlertsToast"));
       return;
     }
-    if (!isPro) {
+    if (!hasPriceAlerts) {
       toast.error(t("alertsProToast"));
       return;
     }
+    if (atCap) { toast.error(t("plusAlertCapReached")); return; }
     if (isNaN(target) || target <= 0) {
       toast.error(t("enterValidPrice"));
       return;
     }
     setSaving(true);
-    const { error } = await supabase.from("price_alerts").insert({
-      user_id: userId,
+    const { error } = await supabase.functions.invoke("create-price-alert", { body: {
       ticker: ticker.toUpperCase(),
       asset_name: assetName,
       asset_type: assetType,
       target_price: target,
       direction,
-    });
+    } });
     setSaving(false);
     if (error) {
-      toast.error(t("alertCreateFailed"));
+      const response = "context" in error && error.context instanceof Response ? await error.context.json().catch(() => null) : null;
+      toast.error(response?.code === "PRICE_ALERT_LIMIT_REACHED" ? t("plusAlertCapReached") : response?.code === "PRICE_ALERTS_PAID_REQUIRED" ? t("alertsProToast") : t("alertCreateFailed"));
+      void loadAlerts();
       return;
     }
     toast.success(`${ticker} ${direction === "above" ? t("risesAbove") : t("fallsBelow")} $${target}`);
@@ -110,8 +118,9 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
   };
 
   const handleDelete = async (id: string) => {
-    await supabase.from("price_alerts").delete().eq("id", id);
-    setAlerts((prev) => prev.filter((a) => a.id !== id));
+    const { error } = await supabase.from("price_alerts").delete().eq("id", id);
+    if (error) { toast.error(t("alertDeleteFailed")); return; }
+    void loadAlerts();
     toast.success(t("alertRemovedToast"));
   };
 
@@ -136,13 +145,13 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
           <div className="py-6 text-center text-sm text-muted-foreground">
             {t("signInForAlertsBody")}
           </div>
-        ) : !subLoading && !isPro ? (
+        ) : !subLoading && !hasPriceAlerts ? (
           <div className="py-6 px-2 text-center space-y-4">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/15">
               <Lock className="h-6 w-6 text-primary" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-base font-semibold text-foreground">{t("proFeatureTitle")}</h3>
+              <h3 className="text-base font-semibold text-foreground">{t("priceAlert")}</h3>
               <p className="text-sm text-muted-foreground">
                 {t("proFeatureBody")}
               </p>
@@ -151,11 +160,15 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
               onClick={() => { setOpen(false); navigate("/pricing"); }}
               className="w-full gap-2"
             >
-              <Sparkles className="h-4 w-4" /> {t("upgradeToPro")}
+              <Sparkles className="h-4 w-4" /> {t("upgradeToPlus")}
             </Button>
           </div>
         ) : (
           <>
+            {isPlus && <div className="space-y-2">
+              <p className="text-sm font-mono" aria-live="polite">{t("plusActiveAlertCount").replace("{count}", String(activeCount))}</p>
+              {atCap && <><p className="text-sm text-muted-foreground">{t("plusAlertCapReached")}</p><Button variant="outline" onClick={() => { setOpen(false); navigate("/pricing"); }}>{t("upgradeToPro")}</Button></>}
+            </div>}
             <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
               {currentPrice !== undefined && (
                 <p className="text-xs text-muted-foreground">
@@ -196,7 +209,7 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
                   <TrendingDown className="h-3.5 w-3.5" /> {t("fallsBelow")}
                 </button>
               </div>
-              <Button onClick={handleCreate} disabled={saving} className="w-full" size="sm">
+              <Button onClick={handleCreate} disabled={saving || loading || subLoading || atCap} className="w-full" size="sm">
                 {saving ? t("settingDots") : t("setAlert")}
               </Button>
             </div>
@@ -241,14 +254,14 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
 
         <DialogFooter className="flex items-center justify-between text-[10px] text-muted-foreground sm:justify-between">
           <span>{t("alertsCheckNote")}</span>
-          {userId && isPro && (
-            <button
+          {userId && hasPriceAlerts && (
+            <Button variant="link" size="sm"
               type="button"
               onClick={() => { setOpen(false); navigate("/alerts"); }}
               className="text-primary hover:underline font-medium whitespace-nowrap"
             >
-              View all alerts →
-            </button>
+              {t("viewAllAlerts")} →
+            </Button>
           )}
         </DialogFooter>
       </DialogContent>

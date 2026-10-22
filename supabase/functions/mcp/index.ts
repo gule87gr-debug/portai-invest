@@ -131,43 +131,59 @@ var list_price_alerts_default = defineTool4({
 });
 
 // src/lib/mcp/tools/create-price-alert.ts
-import { createClient as createClient5 } from "npm:@supabase/supabase-js@^2.99.1";
 import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.24.0";
 import { z as z3 } from "npm:zod@^4.4.3";
-function client5(ctx) {
-  return createClient5(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
-    global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
-    auth: { persistSession: false, autoRefreshToken: false }
-  });
+
+// src/lib/mcp/supabase.ts
+import { createClient as createClient5 } from "npm:@supabase/supabase-js@^2.99.1";
+function env(name) {
+  const runtime = globalThis;
+  return runtime.Deno?.env?.get?.(name) ?? runtime.process?.env?.[name];
 }
+function supabaseForUser(ctx) {
+  const token = ctx.getToken();
+  if (!token) throw new Error("Authentication required");
+  const url = env("SUPABASE_URL") ?? env("VITE_SUPABASE_URL");
+  let key = env("SUPABASE_PUBLISHABLE_KEY") ?? env("VITE_SUPABASE_PUBLISHABLE_KEY");
+  if (!key) {
+    try {
+      const keys = JSON.parse(env("SUPABASE_PUBLISHABLE_KEYS") ?? "{}");
+      if (keys && typeof keys === "object") key = Object.values(keys).find((value) => typeof value === "string" && value.startsWith("sb_publishable_"));
+    } catch {
+    }
+  }
+  key ??= env("SUPABASE_ANON_KEY") ?? env("VITE_SUPABASE_ANON_KEY");
+  if (!url || !key) throw new Error("Backend configuration unavailable");
+  return createClient5(url, key, { global: { headers: { Authorization: `Bearer ${token}` } }, auth: { persistSession: false, autoRefreshToken: false } });
+}
+
+// src/lib/mcp/tools/create-price-alert.ts
 var create_price_alert_default = defineTool5({
   name: "create_price_alert",
   title: "Create price alert",
-  description: "Create a new PortAI price alert for the signed-in user.",
+  description: "Create a price alert: Plus allows 5 active alerts, Pro unlimited, Free none. Triggered alerts do not count.",
   inputSchema: {
     ticker: z3.string().trim().min(1).max(20),
     asset_name: z3.string().trim().min(1).max(120),
     asset_type: z3.enum(["stock", "crypto", "etf", "index"]).describe("Asset category."),
     direction: z3.enum(["above", "below"]).describe("Trigger when price crosses above or below the target."),
-    target_price: z3.number().positive()
+    target_price: z3.number().finite().positive()
   },
   annotations: { readOnlyHint: false, destructiveHint: false },
   handler: async (input, ctx) => {
     if (!ctx.isAuthenticated()) {
       return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     }
-    const { data, error } = await client5(ctx).from("price_alerts").insert({
-      user_id: ctx.getUserId(),
-      ticker: input.ticker.toUpperCase(),
-      asset_name: input.asset_name,
-      asset_type: input.asset_type,
-      direction: input.direction,
-      target_price: input.target_price
-    }).select("id, ticker, direction, target_price").single();
-    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    const { data, error } = await supabaseForUser(ctx).functions.invoke("create-price-alert", { body: input });
+    if (error) {
+      const response = "context" in error && error.context instanceof Response ? await error.context.json().catch(() => null) : null;
+      return { content: [{ type: "text", text: response?.error ?? error.message }], isError: true };
+    }
+    const alert = data?.alert;
+    if (!alert) return { content: [{ type: "text", text: "Could not create alert" }], isError: true };
     return {
-      content: [{ type: "text", text: `Alert set: ${data.ticker} ${data.direction} ${data.target_price}` }],
-      structuredContent: { alert: data }
+      content: [{ type: "text", text: `Alert set: ${alert.ticker} ${alert.direction} ${alert.target_price}` }],
+      structuredContent: { alert: { id: alert.id, ticker: alert.ticker, direction: alert.direction, target_price: alert.target_price } }
     };
   }
 });
@@ -175,7 +191,7 @@ var create_price_alert_default = defineTool5({
 // src/lib/mcp/index.ts
 var projectRef = "vejlgkyydezrnqrzwodp";
 var mcp_default = defineMcp({
-  name: "portai-mcp",
+  name: "portai",
   title: "PortAI",
   version: "0.1.0",
   instructions: "Tools for PortAI, an AI investing assistant. Manage the signed-in user's watchlists and price alerts. All actions act as the connected PortAI user and respect their tier and RLS.",

@@ -29,11 +29,13 @@ const Pricing = () => {
   const freeTierFeatures = [
     t("featFreeAnalyses"), t("featFreeChat"), t("featFreeImg"),
     t("featFreeWatch"), t("featFreeQuiz"), t("featFreeFactCheck"),
+    t("featFreeAlerts"),
   ];
   const plusTierFeatures = [
     t("featPlusWatch"), t("featPlusQuiz"), t("featPlusChat"), t("featPlusImg"),
     "Advanced AI models (Balanced, Reasoning, Creative) — 5 messages/day each",
     t("featPlusDeepDive"),
+    t("plusFeatAlerts"),
   ];
   const proTierFeatures = [
     t("featProEverything"),
@@ -291,6 +293,17 @@ const Pricing = () => {
             )}
           </div>
         </div>
+
+        <section className="mt-10" aria-labelledby="alert-comparison-title">
+          <h2 id="alert-comparison-title" className="text-xl font-semibold mb-4">{t("priceAlertComparison")}</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead><tr className="border-b border-border"><th scope="col" className="p-3">{t("activeAlerts")}</th><th scope="col" className="p-3">Free</th><th scope="col" className="p-3">Plus</th><th scope="col" className="p-3">Pro</th></tr></thead>
+              <tbody><tr className="border-b border-border"><th scope="row" className="p-3 font-normal">{t("activeAlerts")}</th><td className="p-3">{t("featFreeAlerts")}</td><td className="p-3">{t("plusFeatAlerts")}</td><td className="p-3">{t("featProAlerts")}</td></tr></tbody>
+            </table>
+          </div>
+          <p className="mt-3 text-sm text-muted-foreground">{t("triggeredAlertsExcluded")}</p>
+        </section>
 
         <div className="mt-10 grid sm:grid-cols-3 gap-4 text-xs text-muted-foreground">
           <div className="rounded-lg border border-border bg-card/50 p-3 flex items-start gap-2">
