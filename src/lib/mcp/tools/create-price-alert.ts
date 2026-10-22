@@ -1,46 +1,33 @@
-import { createClient } from "@supabase/supabase-js";
-import { defineTool, type ToolContext } from "@lovable.dev/mcp-js";
+import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
-
-function client(ctx: ToolContext) {
-  return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
-    global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-}
+import { supabaseForUser } from "../supabase";
 
 export default defineTool({
   name: "create_price_alert",
   title: "Create price alert",
-  description: "Create a new PortAI price alert for the signed-in user.",
+  description: "Create a price alert: Plus allows 5 active alerts, Pro unlimited, Free none. Triggered alerts do not count.",
   inputSchema: {
     ticker: z.string().trim().min(1).max(20),
     asset_name: z.string().trim().min(1).max(120),
     asset_type: z.enum(["stock", "crypto", "etf", "index"]).describe("Asset category."),
     direction: z.enum(["above", "below"]).describe("Trigger when price crosses above or below the target."),
-    target_price: z.number().positive(),
+    target_price: z.number().finite().positive(),
   },
   annotations: { readOnlyHint: false, destructiveHint: false },
   handler: async (input, ctx) => {
     if (!ctx.isAuthenticated()) {
       return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     }
-    const { data, error } = await client(ctx)
-      .from("price_alerts")
-      .insert({
-        user_id: ctx.getUserId()!,
-        ticker: input.ticker.toUpperCase(),
-        asset_name: input.asset_name,
-        asset_type: input.asset_type,
-        direction: input.direction,
-        target_price: input.target_price,
-      })
-      .select("id, ticker, direction, target_price")
-      .single();
-    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    const { data, error } = await supabaseForUser(ctx).functions.invoke("create-price-alert", { body: input });
+    if (error) {
+      const response = "context" in error && error.context instanceof Response ? await error.context.json().catch(() => null) : null;
+      return { content: [{ type: "text", text: response?.error ?? error.message }], isError: true };
+    }
+    const alert = data?.alert;
+    if (!alert) return { content: [{ type: "text", text: "Could not create alert" }], isError: true };
     return {
-      content: [{ type: "text", text: `Alert set: ${data.ticker} ${data.direction} ${data.target_price}` }],
-      structuredContent: { alert: data },
+      content: [{ type: "text", text: `Alert set: ${alert.ticker} ${alert.direction} ${alert.target_price}` }],
+      structuredContent: { alert: { id: alert.id, ticker: alert.ticker, direction: alert.direction, target_price: alert.target_price } },
     };
   },
 });
