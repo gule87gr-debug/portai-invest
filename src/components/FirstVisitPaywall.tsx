@@ -80,12 +80,13 @@ export const FirstVisitPaywall = () => {
     tr("welcomePlusPerk2", "10 article analyses per day + 3 Pro deep dives"),
     tr("welcomePlusPerk3", "Unlimited fast AI chat & image analyses"),
     tr("welcomePlusPerk4", "Advanced AI models (5 msgs/day each)"),
+    t("plusFeatAlerts"),
   ];
   const proPerks = [
     tr("welcomeProPerk1", "Everything in Plus"),
     tr("welcomeProPerk2", "Unlimited article analyses + Pro Deep Dive"),
     tr("welcomeProPerk3", "Unlimited messages on all AI models"),
-    tr("welcomeProPerk4", "Price alerts & AI fact check"),
+    t("featProAlerts"),
   ];
 
   return (

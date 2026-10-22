@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { EmptyState } from "@/components/EmptyState";
 import { WatchlistRowsSkeleton } from "@/components/Skeletons";
 import { enqueueAction, isNetworkError, registerOfflineHandler } from "@/lib/offlineQueue";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type Alert = {
   id: string;
@@ -47,6 +49,8 @@ const fmtDate = (s: string | null) =>
 const AlertsPage = () => {
   usePageTitle("Alert History | PortAI");
   const navigate = useNavigate();
+  const { isPlus, hasPriceAlerts, activeAlertLimit, loading: subLoading } = useSubscription();
+  const { t } = useLanguage();
   const cached = readCache();
   const [alerts, setAlerts] = useState<Alert[]>(cached ?? []);
   const [loading, setLoading] = useState(!cached);
@@ -136,6 +140,18 @@ const AlertsPage = () => {
           </span>
         )}
       </div>
+
+      {isPlus && !loading && <div className="mb-5 space-y-2">
+        <p className="text-sm font-mono" aria-live="polite">{t("plusActiveAlertCount").replace("{count}", String(active.length))}</p>
+        {activeAlertLimit !== null && active.length >= activeAlertLimit && <div className="flex flex-wrap items-center gap-3">
+          <p className="text-sm text-muted-foreground">{t("plusAlertCapReached")}</p>
+          <Button variant="outline" onClick={() => navigate("/pricing")}>{t("upgradeToPro")}</Button>
+        </div>}
+      </div>}
+      {!subLoading && !hasPriceAlerts && <div className="mb-5 flex flex-wrap items-center gap-3">
+        <p className="text-sm text-muted-foreground">{t("proFeatureBody")}</p>
+        <Button variant="outline" onClick={() => navigate("/pricing")}>{t("upgradeToPlus")}</Button>
+      </div>}
 
       <div className="mb-4 inline-flex rounded-lg border border-border bg-muted/40 p-0.5">
         {(["active", "history"] as const).map((k) => (
