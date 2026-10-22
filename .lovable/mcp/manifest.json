@@ -11,7 +11,7 @@
   },
   "mcp": {
     "server": {
-      "name": "portai-mcp",
+      "name": "portai",
       "version": "0.1.0",
       "title": "PortAI"
     },
@@ -124,7 +124,7 @@
       {
         "name": "create_price_alert",
         "title": "Create price alert",
-        "description": "Create a new PortAI price alert for the signed-in user.",
+        "description": "Create a price alert: Plus allows 5 active alerts, Pro unlimited, Free none. Triggered alerts do not count.",
         "annotations": {
           "readOnlyHint": false,
           "destructiveHint": false
