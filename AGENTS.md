@@ -1,4 +1,5 @@
 # Project architecture
+- Request throttling uses the service-only atomic fixed-window database RPC; callers await it and fail open on errors to preserve availability.
 - Price alert creation must use the authenticated create-price-alert edge function and its service-only atomic database RPC; this prevents direct-client and concurrent MCP quota bypasses.
 - Use the shared active-alert allowance module for frontend gates and policy tests; server tier resolution never trusts cached client subscription state.
 - MCP tool database/function clients use a lazy caller-token factory with runtime key fallbacks; this preserves RLS and import-safe manifest extraction.

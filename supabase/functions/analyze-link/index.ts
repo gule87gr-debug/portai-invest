@@ -594,11 +594,6 @@ async function fetchCrossSources(query: string, excludeHost: string): Promise<Cr
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  // Rate limit: 10 requests per minute per IP
-  const ip = getClientIP(req);
-  const rl = checkRateLimit(`analyze:${ip}`, { maxRequests: 10, windowMs: 60_000 });
-  if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs, corsHeaders);
-
   try {
     const rawBody = await req.json();
 
@@ -631,6 +626,8 @@ serve(async (req) => {
     }
 
     const userId = userData.user.id;
+    const rl = await checkRateLimit(`user:${userId}:analyze-link`, { maxRequests: 10, windowMs: 60_000 });
+    if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs, corsHeaders);
     let tier: Tier = "free";
 
     // Admin bypass via DB lookup

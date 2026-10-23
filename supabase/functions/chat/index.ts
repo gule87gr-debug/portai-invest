@@ -34,10 +34,6 @@ const PRODUCT_TO_TIER: Record<string, "plus" | "pro"> = {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const ip = getClientIP(req);
-  const rl = checkRateLimit(`chat:${ip}`, { maxRequests: 15, windowMs: 60_000 });
-  if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs, corsHeaders);
-
   try {
     const rawBody = await req.json();
     if (!rawBody || typeof rawBody !== "object") {
@@ -121,6 +117,8 @@ serve(async (req) => {
     }
 
     const userId = userData.user.id;
+    const rl = await checkRateLimit(`user:${userId}:chat`, { maxRequests: 15, windowMs: 60_000 });
+    if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs, corsHeaders);
     let tier: "free" | "plus" | "pro" = "free";
 
     // Admin bypass = Pro

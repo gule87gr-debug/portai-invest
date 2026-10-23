@@ -1,19 +1,7 @@
-/**
- * In-memory rate limiter for edge functions.
- * Tracks requests per IP with a sliding window.
- * Note: Each edge function instance has its own memory, so this is per-instance.
- * For production-grade limiting, use Redis or a database-backed solution.
- */
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
-const store = new Map<string, { count: number; resetAt: number }>();
-
-// Clean up expired entries periodically
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, value] of store) {
-    if (now > value.resetAt) store.delete(key);
-  }
-}, 60_000);
+// Lazy service-only client: importing this module does not read runtime secrets.
+let client: ReturnType<typeof createClient> | undefined;
 
 export interface RateLimitConfig {
   maxRequests: number;   // Max requests per window
@@ -25,25 +13,34 @@ const DEFAULT_CONFIG: RateLimitConfig = {
   windowMs: 60_000, // 1 minute
 };
 
-export function checkRateLimit(
+export async function checkRateLimit(
   identifier: string,
   config: RateLimitConfig = DEFAULT_CONFIG
-): { allowed: boolean; remaining: number; retryAfterMs: number } {
-  const now = Date.now();
-  const entry = store.get(identifier);
-
-  if (!entry || now > entry.resetAt) {
-    store.set(identifier, { count: 1, resetAt: now + config.windowMs });
-    return { allowed: true, remaining: config.maxRequests - 1, retryAfterMs: 0 };
+): Promise<{ allowed: boolean; remaining: number; retryAfterMs: number }> {
+  try {
+    client ??= createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false, autoRefreshToken: false } },
+    );
+    const seconds = Math.max(1, Math.ceil(config.windowMs / 1000));
+    const { data, error } = await client.rpc("check_rate_limit", {
+      p_key: identifier,
+      p_limit: config.maxRequests,
+      p_window_seconds: seconds,
+    });
+    if (error || typeof data !== "boolean") throw error ?? new Error("Invalid limiter response");
+    const windowMs = seconds * 1000;
+    return {
+      allowed: data,
+      // The boolean RPC intentionally does not expose the exact remaining count.
+      remaining: 0,
+      retryAfterMs: data ? 0 : windowMs - (Date.now() % windowMs),
+    };
+  } catch (error) {
+    console.error("[rate-limiter] check failed; allowing request:", error instanceof Error ? error.message : "RPC error");
+    return { allowed: true, remaining: config.maxRequests, retryAfterMs: 0 };
   }
-
-  if (entry.count >= config.maxRequests) {
-    const retryAfterMs = entry.resetAt - now;
-    return { allowed: false, remaining: 0, retryAfterMs };
-  }
-
-  entry.count++;
-  return { allowed: true, remaining: config.maxRequests - entry.count, retryAfterMs: 0 };
 }
 
 export function getClientIP(req: Request): string {
