@@ -27,10 +27,6 @@ async function cacheKeyFor(url: string, language: string): Promise<string> {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const ip = getClientIP(req);
-  const rl = checkRateLimit(`deepdive:${ip}`, { maxRequests: 20, windowMs: 60_000 });
-  if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs, corsHeaders);
-
   try {
     const body = await req.json().catch(() => ({}));
     const action = body?.action === "claim" ? "claim" : "status";
@@ -49,6 +45,8 @@ serve(async (req) => {
     if (!userData?.user) return json({ error: "Invalid or expired token" }, 401);
 
     const userId = userData.user.id;
+    const rl = await checkRateLimit(`user:${userId}:claim-deep-dive`, { maxRequests: 20, windowMs: 60_000 });
+    if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs, corsHeaders);
     const email = userData.user.email ?? null;
 
     let tier: Tier = "free";

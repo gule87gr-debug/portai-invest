@@ -37,7 +37,7 @@ serve(async (req) => {
   }
 
   // Rate limit: 30 requests per minute per user
-  const rl = checkRateLimit(`moderate:${userData.user.id}`, { maxRequests: 30, windowMs: 60_000 });
+  const rl = await checkRateLimit(`user:${userData.user.id}:moderate-post`, { maxRequests: 30, windowMs: 60_000 });
   if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs, corsHeaders);
 
   try {

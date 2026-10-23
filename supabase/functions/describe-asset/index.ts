@@ -53,7 +53,7 @@ serve(async (req) => {
     });
   }
 
-  const rl = checkRateLimit(`describe-asset:${userData.user.id}`, { maxRequests: 30, windowMs: 60_000 });
+  const rl = await checkRateLimit(`user:${userData.user.id}:describe-asset`, { maxRequests: 30, windowMs: 60_000 });
   if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs, corsHeaders);
 
   try {

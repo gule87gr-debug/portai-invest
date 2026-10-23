@@ -59,7 +59,7 @@ serve(async (req) => {
   }
 
   // Per-user rate limit (defence-in-depth)
-  const rl = checkRateLimit(`fetch-history:${userData.user.id}`, { maxRequests: 60, windowMs: 60_000 });
+  const rl = await checkRateLimit(`user:${userData.user.id}:fetch-history`, { maxRequests: 60, windowMs: 60_000 });
   if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs, corsHeaders);
 
   try {
