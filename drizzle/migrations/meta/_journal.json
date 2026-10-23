@@ -8,6 +8,13 @@
       "when": 1792654700198,
       "tag": "0000_enforce_active_price_alert_limits",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792759825242,
+      "tag": "0001_database_backed_rate_limits",
+      "breakpoints": true
     }
   ]
 }
