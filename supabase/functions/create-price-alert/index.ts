@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "npm:zod@4";
-import { isAdminEmail } from "../_shared/admin-bypass.ts";
+import { isAdminUser } from "../_shared/admin-bypass.ts";
 import { resolveTier } from "../_shared/tier.ts";
 import { ACTIVE_ALERT_LIMITS } from "../_shared/price-alert-limits.ts";
 
@@ -28,7 +28,7 @@ serve(async (req) => {
     if (authError || !user) return json({ error: "Authentication required" }, 401);
     const parsed = schema.safeParse(await req.json().catch(() => null));
     if (!parsed.success) return json({ error: "Invalid alert", details: parsed.error.flatten().fieldErrors }, 400);
-    const tier = await isAdminEmail(admin, user.email) ? "pro" : await resolveTier(admin, user.id, user.email ?? null);
+    const tier = await isAdminUser(admin, user.id) ? "pro" : await resolveTier(admin, user.id, user.email ?? null);
     if (tier === "free") return json({ error: "Price alerts require Plus or Pro", code: "PRICE_ALERTS_PAID_REQUIRED", limit: ACTIVE_ALERT_LIMITS.free }, 403);
     const input = parsed.data;
     // Only a server-resolved tier is passed to this service-only RPC. The database

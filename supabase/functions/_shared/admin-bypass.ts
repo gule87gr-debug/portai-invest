@@ -3,20 +3,22 @@
 
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2.57.2";
 
-export async function isAdminEmail(
+export async function isAdminUser(
   supabaseAdmin: SupabaseClient,
-  email: string | null | undefined,
+  userId: string | null | undefined,
 ): Promise<boolean> {
-  if (!email) return false;
+  if (!userId) return false;
   try {
-    const { data, error } = await supabaseAdmin.rpc("is_admin_email", { _email: email });
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.getUserById(userId);
+    if (authError || !authData.user?.email_confirmed_at) return false;
+    const { data, error } = await supabaseAdmin.rpc("has_role", { _user_id: userId, _role: "admin" });
     if (error) {
-      console.warn("[admin-bypass] is_admin_email RPC error:", error.message);
+      console.warn("[admin-bypass] role RPC error:", error.message);
       return false;
     }
     return !!data;
   } catch (e) {
-    console.warn("[admin-bypass] is_admin_email threw:", (e as Error).message);
+    console.warn("[admin-bypass] role check failed:", (e as Error).message);
     return false;
   }
 }

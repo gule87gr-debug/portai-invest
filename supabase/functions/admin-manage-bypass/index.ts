@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
-import { isAdminEmail } from "../_shared/admin-bypass.ts";
+import { isAdminUser } from "../_shared/admin-bypass.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -32,7 +32,7 @@ serve(async (req) => {
     const caller = userData?.user;
     if (!caller?.email) return json({ error: "Invalid token" }, 401);
 
-    const callerIsAdmin = await isAdminEmail(supabaseAdmin, caller.email);
+    const callerIsAdmin = await isAdminUser(supabaseAdmin, caller.id);
     if (!callerIsAdmin) return json({ error: "Forbidden" }, 403);
 
     const body = await req.json().catch(() => ({}));
@@ -40,20 +40,31 @@ serve(async (req) => {
 
     if (action === "list") {
       const { data, error } = await supabaseAdmin
-        .from("admin_emails")
-        .select("id, email, note, created_at, created_by")
+        .from("user_roles")
+        .select("id, user_id, role, created_at")
+        .eq("role", "admin")
         .order("created_at", { ascending: false });
       if (error) { console.error("admin-manage-bypass db error:", error); return json({ error: "Internal server error" }, 500); }
-      return json({ admins: data ?? [] });
+      const admins = await Promise.all((data ?? []).map(async (row) => {
+        const { data: auth } = await supabaseAdmin.auth.admin.getUserById(row.user_id);
+        return { id: row.id, email: auth.user?.email ?? "", note: "", created_at: row.created_at };
+      }));
+      return json({ admins });
     }
 
     if (action === "add") {
       const email = String(body?.email ?? "").trim().toLowerCase();
       const note = String(body?.note ?? "").slice(0, 200);
       if (!EMAIL_RE.test(email)) return json({ error: "Invalid email" }, 400);
-      const { error } = await supabaseAdmin
-        .from("admin_emails")
-        .insert({ email, note, created_by: caller.id });
+      let target: { id: string; email_confirmed_at?: string } | undefined;
+      for (let page = 1; page <= 50; page++) {
+        const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 1000 });
+        if (error) return json({ error: "Could not find account" }, 500);
+        target = data.users.find((u) => u.email?.toLowerCase() === email);
+        if (target || data.users.length < 1000) break;
+      }
+      if (!target?.email_confirmed_at) return json({ error: "A registered account with a confirmed email is required" }, 400);
+      const { error } = await supabaseAdmin.from("user_roles").upsert({ user_id: target.id, role: "admin" }, { onConflict: "user_id,role" });
       if (error) { console.error("admin-manage-bypass db error:", error); return json({ error: "Internal server error" }, 500); }
       return json({ ok: true });
     }
@@ -63,14 +74,14 @@ serve(async (req) => {
       if (!id) return json({ error: "Missing id" }, 400);
       // Prevent admin from removing their own access (avoid lockout).
       const { data: row } = await supabaseAdmin
-        .from("admin_emails")
-        .select("email")
+        .from("user_roles")
+        .select("user_id")
         .eq("id", id)
         .maybeSingle();
-      if (row && (row as any).email?.toLowerCase() === caller.email.toLowerCase()) {
+      if (row?.user_id === caller.id) {
         return json({ error: "You cannot remove your own admin access" }, 400);
       }
-      const { error } = await supabaseAdmin.from("admin_emails").delete().eq("id", id);
+      const { error } = await supabaseAdmin.from("user_roles").delete().eq("id", id).eq("role", "admin");
       if (error) { console.error("admin-manage-bypass db error:", error); return json({ error: "Internal server error" }, 500); }
       return json({ ok: true });
     }

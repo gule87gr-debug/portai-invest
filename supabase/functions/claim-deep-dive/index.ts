@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { checkRateLimit, getClientIP, rateLimitResponse } from "../_shared/rate-limiter.ts";
-import { isAdminEmail } from "../_shared/admin-bypass.ts";
+import { isAdminUser } from "../_shared/admin-bypass.ts";
 import { resolveTier, startOfUtcDay, type Tier } from "../_shared/tier.ts";
 
 const corsHeaders = {
@@ -50,7 +50,7 @@ serve(async (req) => {
     const email = userData.user.email ?? null;
 
     let tier: Tier = "free";
-    if (await isAdminEmail(supabaseAdmin, email)) tier = "pro";
+    if (await isAdminUser(supabaseAdmin, userId)) tier = "pro";
     else tier = await resolveTier(supabaseAdmin, userId, email);
 
     const limit = tier === "pro" ? null : PLUS_DAILY_DEEP_DIVES;

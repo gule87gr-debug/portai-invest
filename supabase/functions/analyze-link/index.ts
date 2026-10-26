@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { checkRateLimit, getClientIP, rateLimitResponse } from "../_shared/rate-limiter.ts";
 import { validateInput, validationErrorResponse, type SchemaDefinition } from "../_shared/input-validator.ts";
-import { isAdminEmail, logAdminBypass } from "../_shared/admin-bypass.ts";
+import { isAdminUser, logAdminBypass } from "../_shared/admin-bypass.ts";
 import { resolveTier, type Tier } from "../_shared/tier.ts";
 
 const corsHeaders = {
@@ -631,7 +631,7 @@ serve(async (req) => {
     let tier: Tier = "free";
 
     // Admin bypass via DB lookup
-    const isAdmin = await isAdminEmail(supabaseAdmin, userData.user.email ?? null);
+    const isAdmin = await isAdminUser(supabaseAdmin, userId);
     if (isAdmin) {
       tier = "pro";
       await logAdminBypass(supabaseAdmin, userData.user.email!, "analyze-link", userId);

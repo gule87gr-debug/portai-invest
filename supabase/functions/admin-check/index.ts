@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
-import { isAdminEmail } from "../_shared/admin-bypass.ts";
+import { isAdminUser } from "../_shared/admin-bypass.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,7 +24,7 @@ serve(async (req) => {
     const token = authHeader.replace("Bearer ", "");
     const { data: userData } = await supabaseAdmin.auth.getUser(token);
     const email = userData?.user?.email ?? null;
-    const isAdmin = await isAdminEmail(supabaseAdmin, email);
+    const isAdmin = await isAdminUser(supabaseAdmin, userData?.user?.id);
     return new Response(JSON.stringify({ isAdmin, email }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
