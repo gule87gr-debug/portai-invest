@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
-import { isAdminEmail } from "../_shared/admin-bypass.ts";
+import { isAdminUser } from "../_shared/admin-bypass.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -41,7 +41,7 @@ serve(async (req) => {
     const { data: userData } = await supabaseAdmin.auth.getUser(token);
     const caller = userData?.user;
     if (!caller?.email) return json({ error: "Invalid token" }, 401);
-    if (!(await isAdminEmail(supabaseAdmin, caller.email))) {
+    if (!(await isAdminUser(supabaseAdmin, caller.id))) {
       return json({ error: "Forbidden" }, 403);
     }
 

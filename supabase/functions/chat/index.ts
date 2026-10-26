@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { checkRateLimit, getClientIP, rateLimitResponse } from "../_shared/rate-limiter.ts";
-import { isAdminEmail, logAdminBypass } from "../_shared/admin-bypass.ts";
+import { isAdminUser, logAdminBypass } from "../_shared/admin-bypass.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -122,7 +122,7 @@ serve(async (req) => {
     let tier: "free" | "plus" | "pro" = "free";
 
     // Admin bypass = Pro
-    const isAdmin = await isAdminEmail(supabaseAdmin, userData.user.email ?? null);
+    const isAdmin = await isAdminUser(supabaseAdmin, userId);
     if (isAdmin) {
       tier = "pro";
       await logAdminBypass(supabaseAdmin, userData.user.email!, "chat", userId);

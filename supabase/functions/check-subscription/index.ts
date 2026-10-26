@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "npm:stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
-import { isAdminEmail, logAdminBypass } from "../_shared/admin-bypass.ts";
+import { isAdminUser, logAdminBypass } from "../_shared/admin-bypass.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -72,7 +72,7 @@ serve(async (req) => {
     const user = userData.user;
 
     // Admin bypass: looked up via DB so it's configurable in the admin panel.
-    const isAdminCaller = await isAdminEmail(supabaseClient, user.email);
+    const isAdminCaller = await isAdminUser(supabaseClient, user.id);
 
     const debugMode = debugRequested && (isAdminCaller || hasValidDebugSecret);
     if (debugRequested && !debugMode) {
