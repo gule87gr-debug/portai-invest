@@ -29,7 +29,7 @@ serve(async (req) => {
     const parsed = schema.safeParse(await req.json().catch(() => null));
     if (!parsed.success) return json({ error: "Invalid alert", details: parsed.error.flatten().fieldErrors }, 400);
     const tier = await isAdminUser(admin, user.id) ? "pro" : await resolveTier(admin, user.id, user.email ?? null);
-    if (tier === "free") return json({ error: "Price alerts require Plus or Pro", code: "PRICE_ALERTS_PAID_REQUIRED", limit: ACTIVE_ALERT_LIMITS.free }, 403);
+    if (tier === "free") return json({ error: "Price alerts require Pro", code: "PRICE_ALERTS_PAID_REQUIRED", limit: ACTIVE_ALERT_LIMITS.free }, 403);
     const input = parsed.data;
     // Only a server-resolved tier is passed to this service-only RPC. The database
     // serializes same-user creations, so simultaneous UI/MCP requests cannot race.
@@ -38,7 +38,6 @@ serve(async (req) => {
       _asset_name: input.asset_name, _asset_type: input.asset_type,
       _target_price: input.target_price, _direction: input.direction,
     });
-    if (error?.message.includes("PRICE_ALERT_LIMIT_REACHED")) return json({ error: "Plus includes up to 5 active price alerts. Upgrade to Pro for unlimited alerts.", code: "PRICE_ALERT_LIMIT_REACHED", limit: ACTIVE_ALERT_LIMITS.plus }, 409);
     if (error) { console.error("create-price-alert RPC failed", error.code); return json({ error: "Could not create alert" }, 500); }
     const alert = Array.isArray(data) ? data[0] : data;
     return json({ alert, tier });

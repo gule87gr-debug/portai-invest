@@ -809,6 +809,10 @@ export type Database = {
           read_ct: number
         }[]
       }
+      reserve_daily_usage: {
+        Args: { p_requirements: Json; p_user_id: string }
+        Returns: boolean
+      }
       send_notification: {
         Args: {
           _from_user: string

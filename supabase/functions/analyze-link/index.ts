@@ -20,7 +20,7 @@ const LANGUAGE_NAMES: Record<string, string> = {
 };
 
 // Daily article-analysis quota per tier (Pro is unlimited).
-const DAILY_ANALYSIS_LIMITS: Record<"free" | "plus", number> = { free: 3, plus: 10 };
+import { reserveDailyUsage, dailyLimitResponse } from "../_shared/daily-usage.ts";
 
 // Must stay in sync with src/lib/trustScore.ts so the news-feed badge
 // and the article analyzer always return the same score for a known source.
@@ -634,7 +634,7 @@ serve(async (req) => {
     const isAdmin = await isAdminUser(supabaseAdmin, userId);
     if (isAdmin) {
       tier = "pro";
-      await logAdminBypass(supabaseAdmin, userData.user.email!, "analyze-link", userId);
+      await logAdminBypass(supabaseAdmin, userData.user.email ?? "", "analyze-link", userId);
     } else {
       tier = await resolveTier(supabaseAdmin, userId, userData.user.email ?? null);
     }
@@ -653,6 +653,9 @@ serve(async (req) => {
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+    if (!await reserveDailyUsage(supabaseAdmin, userId, tier, isAdmin, "analysis")) return dailyLimitResponse(tier, langCode || "en", corsHeaders);
+    if (!isPro) await supabaseAdmin.from("analysis_usage").insert({ user_id: userId });
+
     // ---- Deterministic cache: the same URL always returns the same analysis ----
     const cacheKey = await analysisCacheKey(url, langCode || "en");
     const { data: cachedRow } = await supabaseAdmin
@@ -671,26 +674,6 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    // Enforce the daily analysis quota (Pro is unlimited)
-    if (!isPro) {
-      const limit = DAILY_ANALYSIS_LIMITS[tier as "free" | "plus"] ?? DAILY_ANALYSIS_LIMITS.free;
-      const today = new Date().toISOString().split("T")[0];
-      const { count } = await supabaseAdmin
-        .from("analysis_usage")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", userId)
-        .eq("used_date", today);
-
-      if ((count ?? 0) >= limit) {
-        return new Response(JSON.stringify({
-          error: `Daily analysis limit reached (${limit}/day on ${tier === "plus" ? "Plus" : "Free"}). Upgrade to Pro for unlimited analyses.`,
-        }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-    }
-
 
     // ---- Article body fallback (many publishers 403 direct bot fetches) ----
     let articleBody = ((pre as { bodyText?: string }).bodyText || "").trim();

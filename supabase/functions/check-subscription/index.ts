@@ -8,20 +8,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Map of Stripe price IDs to subscription tiers
-const PRICE_TO_TIER: Record<string, "plus" | "pro"> = {
-  // Plus
-  "price_1TPM56PJefLcxc6CzfD5CUaS": "plus",
-  // Pro (legacy USD + previous EUR + current EUR price)
-  "price_1TFyVKPJefLcxc6Cn1iwdSTk": "pro",
-  "price_1TPM5RPJefLcxc6Cap03GhJm": "pro",
-  "price_1TPQ1oPJefLcxc6CTI4Hf42E": "pro",
-};
-
-const PRODUCT_TO_TIER: Record<string, "plus" | "pro"> = {
-  "prod_UO8LzRA6kfvdwm": "plus",
-  "prod_UEROAe01UbaEpK": "pro",
-};
+import { PRICE_TO_TIER, PRODUCT_TO_TIER } from "../_shared/subscription-policy.ts";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -116,17 +103,17 @@ serve(async (req) => {
     const liveSubs = subscriptions.data.filter((s) => liveStatuses.has(s.status));
 
     const hasActiveSub = liveSubs.length > 0;
-    let tier: "free" | "plus" | "pro" = "free";
+    let tier: "free" | "pro" = "free";
     let subscriptionEnd: string | null = null;
     let cancelAtPeriodEnd = false;
     let subscriptionId: string | null = null;
     let subscriptionStatus: string | null = null;
 
     if (hasActiveSub) {
-      // Pick the highest tier among active subscriptions (pro > plus)
-      const rank = { free: 0, plus: 1, pro: 2 } as const;
+      // Pick the highest tier among active subscriptions (paid access first)
+      const rank = { free: 0, pro: 1 } as const;
       let best = liveSubs[0];
-      let bestTier: "free" | "plus" | "pro" = "free";
+      let bestTier: "free" | "pro" = "free";
       for (const sub of liveSubs) {
         const item = sub.items.data[0];
         const priceId = item?.price?.id ?? "";
@@ -184,7 +171,7 @@ serve(async (req) => {
     // A customer may have multiple subscription schedules and each may have multiple
     // future phases (e.g. upgrade now + downgrade later). We pick the soonest future
     // phase whose price maps to a known tier AND differs from the current tier.
-    let scheduledTier: "free" | "plus" | "pro" | null = null;
+    let scheduledTier: "free" | "pro" | null = null;
     let scheduledStart: string | null = null;
     let scheduledChangesCount = 0;
 
@@ -225,7 +212,7 @@ serve(async (req) => {
         // Explicitly exclude: "completed", "canceled", "released" (and any unknown future state).
         const PENDING_SCHEDULE_STATUSES = new Set(["active", "not_started"]);
 
-        type Candidate = { startSec: number; tier: "free" | "plus" | "pro"; scheduleId: string };
+        type Candidate = { startSec: number; tier: "free" | "pro"; scheduleId: string };
         const candidates: Candidate[] = [];
 
         for (const sch of schedules.data) {
@@ -271,14 +258,14 @@ serve(async (req) => {
           }
 
           // Track previous candidate-eligible tier within this schedule for distinct transitions.
-          let prevTierForThisSchedule: "free" | "plus" | "pro" = tier;
+          let prevTierForThisSchedule: "free" | "pro" = tier;
 
           for (const phase of phases) {
             const startSec = typeof phase.start_date === "number" ? phase.start_date : null;
             const endSec = typeof phase.end_date === "number" ? phase.end_date : null;
 
             // Resolve phase tier + first known priceId for debug visibility
-            let phaseTier: "free" | "plus" | "pro" | null = null;
+            let phaseTier: "free" | "pro" | null = null;
             let firstKnownPriceId: string | null = null;
             for (const item of phase.items ?? []) {
               const priceRef = (item as any).price;
@@ -311,8 +298,9 @@ serve(async (req) => {
             }
 
             // Accepted candidate
-            candidates.push({ startSec: startSec!, tier: phaseTier!, scheduleId: sch.id });
-            prevTierForThisSchedule = phaseTier!;
+            if (startSec === null || phaseTier === null) continue;
+            candidates.push({ startSec, tier: phaseTier, scheduleId: sch.id });
+            prevTierForThisSchedule = phaseTier;
             dbgSchedule.phases.push(dbgPhase);
           }
 
@@ -354,6 +342,9 @@ serve(async (req) => {
       cancel_at_period_end: cancelAtPeriodEnd,
       subscription_id: subscriptionId,
       subscription_status: subscriptionStatus,
+      price_amount: liveSubs[0]?.items.data[0]?.price.unit_amount ?? null,
+      price_currency: liveSubs[0]?.items.data[0]?.price.currency ?? null,
+      billing_interval: liveSubs[0]?.items.data[0]?.price.recurring?.interval ?? null,
       scheduled_tier: scheduledTier,
       scheduled_start: scheduledStart,
       scheduled_changes_count: scheduledChangesCount,
