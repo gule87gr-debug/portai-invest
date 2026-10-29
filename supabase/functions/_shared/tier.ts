@@ -1,20 +1,9 @@
 // Shared subscription-tier resolution for edge functions.
 // Order of precedence: admin bypass > active Pro trial > Stripe subscription.
 
-export type Tier = "free" | "plus" | "pro";
-
-const PRICE_TO_TIER: Record<string, "plus" | "pro"> = {
-  "price_1TPM56PJefLcxc6CzfD5CUaS": "plus",
-  "price_1TFyVKPJefLcxc6Cn1iwdSTk": "pro",
-  "price_1TPM5RPJefLcxc6Cap03GhJm": "pro",
-  "price_1TPQ1oPJefLcxc6CTI4Hf42E": "pro",
-};
-const PRODUCT_TO_TIER: Record<string, "plus" | "pro"> = {
-  "prod_UO8LzRA6kfvdwm": "plus",
-  "prod_UEROAe01UbaEpK": "pro",
-};
-
-const RANK = { free: 0, plus: 1, pro: 2 } as const;
+import { isAdminUser } from "./admin-bypass.ts";
+import { PRICE_TO_TIER, PRODUCT_TO_TIER, type Tier } from "./subscription-policy.ts";
+export type { Tier } from "./subscription-policy.ts";
 
 /** Resolve the effective tier for a user (trial counts as Pro). */
 export async function resolveTier(
@@ -23,6 +12,7 @@ export async function resolveTier(
   email: string | null,
 ): Promise<Tier> {
   let tier: Tier = "free";
+  if (await isAdminUser(supabaseAdmin, userId)) return "pro";
 
   try {
     const { data: settings } = await supabaseAdmin
@@ -55,8 +45,8 @@ export async function resolveTier(
           for (const item of sub.items.data) {
             const priceId = item.price?.id ?? "";
             const productId = typeof item.price?.product === "string" ? item.price.product : "";
-            const t = PRICE_TO_TIER[priceId] ?? PRODUCT_TO_TIER[productId] ?? "pro";
-            if (RANK[t] > RANK[tier]) tier = t;
+             const t = PRICE_TO_TIER[priceId] ?? PRODUCT_TO_TIER[productId];
+             if (t) tier = t;
           }
         }
       }
