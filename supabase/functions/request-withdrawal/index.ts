@@ -51,7 +51,7 @@ serve(async (req) => {
     }
     const reason =
       typeof body?.reason === "string" ? body.reason.slice(0, 2000) : "";
-    const tier = body?.tier === "plus" || body?.tier === "pro" ? body.tier : null;
+    const tier = body?.tier === "pro" ? body.tier : null;
     const priceId = typeof body?.price_id === "string" ? body.price_id.slice(0, 100) : null;
     const subscriptionId =
       typeof body?.subscription_id === "string" ? body.subscription_id.slice(0, 100) : null;

@@ -16,20 +16,8 @@ const FREE_MSG_LIMIT = 10;
 const FREE_IMG_LIMIT = 3;
 const WINDOW_HOURS = 24;
 
-// Plus-tier per-mode daily limit for non-fast modes
-const PLUS_MODE_DAILY_LIMIT = 5;
-
-// Price → tier (mirrors check-subscription)
-const PRICE_TO_TIER: Record<string, "plus" | "pro"> = {
-  "price_1TPM56PJefLcxc6CzfD5CUaS": "plus",
-  "price_1TFyVKPJefLcxc6Cn1iwdSTk": "pro",
-  "price_1TPM5RPJefLcxc6Cap03GhJm": "pro",
-  "price_1TPQ1oPJefLcxc6CTI4Hf42E": "pro",
-};
-const PRODUCT_TO_TIER: Record<string, "plus" | "pro"> = {
-  "prod_UO8LzRA6kfvdwm": "plus",
-  "prod_UEROAe01UbaEpK": "pro",
-};
+import { resolveTier } from "../_shared/tier.ts";
+import { reserveDailyUsage, dailyLimitResponse } from "../_shared/daily-usage.ts";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -119,97 +107,12 @@ serve(async (req) => {
     const userId = userData.user.id;
     const rl = await checkRateLimit(`user:${userId}:chat`, { maxRequests: 15, windowMs: 60_000 });
     if (!rl.allowed) return rateLimitResponse(rl.retryAfterMs, corsHeaders);
-    let tier: "free" | "plus" | "pro" = "free";
-
-    // Admin bypass = Pro
     const isAdmin = await isAdminUser(supabaseAdmin, userId);
-    if (isAdmin) {
-      tier = "pro";
-      await logAdminBypass(supabaseAdmin, userData.user.email!, "chat", userId);
-    } else {
-      // Trial-active users = Pro
-      try {
-        const { data: settings } = await supabaseAdmin
-          .from("user_settings")
-          .select("pro_trial_active, trial_end_date")
-          .eq("user_id", userId)
-          .maybeSingle();
-        if (
-          settings?.pro_trial_active &&
-          settings?.trial_end_date &&
-          new Date(settings.trial_end_date).getTime() > Date.now()
-        ) {
-          tier = "pro";
-        }
-      } catch { /* ignore */ }
-
-      if (tier === "free") {
-        const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-        if (stripeKey && userData.user.email) {
-          try {
-            const Stripe = (await import("https://esm.sh/stripe@18.5.0")).default;
-            const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-            const customers = await stripe.customers.list({ email: userData.user.email, limit: 1 });
-            if (customers.data.length > 0) {
-              const subs = await stripe.subscriptions.list({ customer: customers.data[0].id, status: "active", limit: 5 });
-              const rank = { free: 0, plus: 1, pro: 2 } as const;
-              for (const sub of subs.data) {
-                for (const item of sub.items.data) {
-                  const priceId = item.price?.id ?? "";
-                  const productId = typeof item.price?.product === "string" ? item.price.product : "";
-                  const t = PRICE_TO_TIER[priceId] ?? PRODUCT_TO_TIER[productId] ?? "pro";
-                  if (rank[t] > rank[tier]) tier = t;
-                }
-              }
-            }
-          } catch { /* default to free */ }
-        }
-      }
-    }
-
+    const tier = await resolveTier(supabaseAdmin, userId, userData.user.email ?? null);
     const cfg = MODE_CONFIG[selectedMode];
-    const cutoff = new Date(Date.now() - WINDOW_HOURS * 3600000).toISOString();
-
-    // Mode access gating
-    if (cfg.nonFree && tier === "free") {
-      return new Response(JSON.stringify({
-        error: `${selectedMode} mode is available on Plus and Pro. Upgrade to access advanced AI models.`,
-      }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
-
-    // Per-tier usage enforcement
-    if (tier === "free") {
-      const { count: msgCount } = await supabaseAdmin
-        .from("chat_usage").select("*", { count: "exact", head: true })
-        .eq("user_id", userId).eq("usage_type", "message").gte("created_at", cutoff);
-      if ((msgCount ?? 0) >= FREE_MSG_LIMIT) {
-        return new Response(JSON.stringify({ error: `Daily message limit reached (${FREE_MSG_LIMIT}/day). Upgrade to Plus or Pro for more messages.` }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (hasImages) {
-        const { count: imgCount } = await supabaseAdmin
-          .from("chat_usage").select("*", { count: "exact", head: true })
-          .eq("user_id", userId).eq("usage_type", "image_analysis").gte("created_at", cutoff);
-        if ((imgCount ?? 0) >= FREE_IMG_LIMIT) {
-          return new Response(JSON.stringify({ error: `Daily image analysis limit reached (${FREE_IMG_LIMIT}/day). Upgrade to Plus or Pro for unlimited image analysis.` }), {
-            status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-      }
-    } else if (tier === "plus" && cfg.nonFree) {
-      // Plus: advanced modes capped at 5/day each
-      const modeUsageKey = `mode:${selectedMode}`;
-      const { count: modeCount } = await supabaseAdmin
-        .from("chat_usage").select("*", { count: "exact", head: true })
-        .eq("user_id", userId).eq("usage_type", modeUsageKey).gte("created_at", cutoff);
-      if ((modeCount ?? 0) >= PLUS_MODE_DAILY_LIMIT) {
-        return new Response(JSON.stringify({ error: `Daily limit reached for ${selectedMode} mode (${PLUS_MODE_DAILY_LIMIT}/day on Plus). Upgrade to Pro for unlimited messages on all models.` }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-    }
-    // Pro: no limits
+    if (cfg.nonFree && tier === "free") return new Response(JSON.stringify({ error: "This mode requires Pro" }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const language = typeof rawBody.language === "string" ? rawBody.language : "en";
+    if (!await reserveDailyUsage(supabaseAdmin, userId, tier, isAdmin, "chat", hasImages)) return dailyLimitResponse(tier, language, corsHeaders);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -289,18 +192,6 @@ Always end with: "⚠️ Just my take — not financial advice. Do your own rese
       return new Response(JSON.stringify({ error: "AI service error" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-    }
-
-    // Record usage (always: message + image, plus per-mode for Plus on advanced modes)
-    if (userId && tier !== "pro") {
-      if (tier === "free") {
-        await supabaseAdmin.from("chat_usage").insert({ user_id: userId, usage_type: "message" });
-        if (hasImages) {
-          await supabaseAdmin.from("chat_usage").insert({ user_id: userId, usage_type: "image_analysis" });
-        }
-      } else if (tier === "plus" && cfg.nonFree) {
-        await supabaseAdmin.from("chat_usage").insert({ user_id: userId, usage_type: `mode:${selectedMode}` });
-      }
     }
 
     return new Response(response.body, {
