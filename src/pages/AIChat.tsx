@@ -26,7 +26,7 @@ const MODES: { id: ChatMode; label: string; desc: string; icon: typeof Zap; adva
   { id: "creative",  label: "Creative",  desc: "Nuanced takes (GPT-5)",                   icon: Lightbulb, advanced: true  },
 ];
 
-const PLUS_MODE_DAILY_LIMIT = 5;
+
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 
@@ -45,8 +45,8 @@ function buildMessages(msgs: Message[]): Array<{ role: string; content: MessageC
   });
 }
 
-async function streamChat({ messages, mode, onDelta, onDone, onError }: {
-  messages: Array<{ role: string; content: MessageContent }>; mode: ChatMode; onDelta: (text: string) => void; onDone: () => void; onError: (msg: string) => void;
+async function streamChat({ messages, mode, language, onDelta, onDone, onError }: {
+  messages: Array<{ role: string; content: MessageContent }>; mode: ChatMode; language: string; onDelta: (text: string) => void; onDone: () => void; onError: (msg: string) => void;
 }) {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session?.access_token) { onError("Please sign in to use the AI chat."); return; }
@@ -54,7 +54,7 @@ async function streamChat({ messages, mode, onDelta, onDone, onError }: {
   const resp = await fetch(CHAT_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
-    body: JSON.stringify({ messages, mode }),
+    body: JSON.stringify({ messages, mode, language }),
   });
   if (!resp.ok) { const err = await resp.json().catch(() => ({ error: "Request failed" })); onError(err.error || `Error ${resp.status}`); return; }
   if (!resp.body) { onError("No response body"); return; }
@@ -129,7 +129,7 @@ const FREE_IMG_LIMIT = 3;
 const FREE_IMG_WINDOW_HOURS = 24;
 
 const AIChat = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   usePageTitle("Sentry — AI Market Analyst | PortAI");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -147,7 +147,7 @@ const AIChat = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { isPro, isPlus, isPaid, hasUnlimitedChat } = useSubscription();
+  const { isPro, isPaid, hasUnlimitedChat } = useSubscription();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState("");
   const welcomeShown = messages.length === 0 && !historyLoading;
@@ -156,14 +156,10 @@ const AIChat = () => {
   // Free-tier limits
   const msgLimitReached = !isPaid && msgUsage >= FREE_MSG_LIMIT;
   const imgLimitReached = !isPaid && imgUsage >= FREE_IMG_LIMIT;
-  // Plus advanced-mode limit
-  const currentModeAdvanced = MODES.find((m) => m.id === mode)?.advanced ?? false;
-  const plusModeReached = isPlus && currentModeAdvanced && (modeUsage[mode] ?? 0) >= PLUS_MODE_DAILY_LIMIT;
-
   const loadUsage = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    const cutoff = new Date(Date.now() - 24 * 3600000).toISOString();
+    const cutoff = new Date(new Date().toISOString().split("T")[0] + "T00:00:00.000Z").toISOString();
     const [{ count: mc }, { count: ic }, { data: modeRows }] = await Promise.all([
       supabase.from("chat_usage").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("usage_type", "message").gte("created_at", cutoff),
       supabase.from("chat_usage").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("usage_type", "image_analysis").gte("created_at", cutoff),
@@ -251,24 +247,16 @@ const AIChat = () => {
     // Free-tier daily caps
     if (!isPaid) {
       if (msgLimitReached) {
-        setUpgradeReason(`You've used all ${FREE_MSG_LIMIT} free messages today. Upgrade to Plus or Pro for more.`);
+        setUpgradeReason(`You've used all ${FREE_MSG_LIMIT} free messages today. Upgrade to Pro for more.`);
         setShowUpgrade(true);
         return;
       }
       if (hasImage && imgLimitReached) {
-        setUpgradeReason(`You've used all ${FREE_IMG_LIMIT} free image analyses today. Upgrade to Plus or Pro for unlimited.`);
+        setUpgradeReason(`You've used all ${FREE_IMG_LIMIT} free image analyses today. Upgrade to Pro for unlimited.`);
         setShowUpgrade(true);
         return;
       }
     }
-    // Plus advanced-mode daily cap
-    if (plusModeReached) {
-      setUpgradeReason(`You've used all ${PLUS_MODE_DAILY_LIMIT} daily messages for ${mode} mode on Plus. Upgrade to Pro for unlimited messages on all models.`);
-      setShowUpgrade(true);
-      return;
-    }
-
-
     const userMsg: Message = { role: "user", content: text || "Analyze this image", imageUrl: imagePreview || undefined };
     const allMessages = [...messages, userMsg];
     setMessages(allMessages);
@@ -299,6 +287,7 @@ const AIChat = () => {
     await streamChat({
       messages: apiMessages,
       mode,
+      language,
       onDelta: upsert,
       onDone: () => {
         setIsTyping(false);
@@ -331,7 +320,7 @@ const AIChat = () => {
         <div className="flex items-center gap-2">
           {isPro && (
             <span className="flex items-center gap-1 rounded-full bg-primary/20 px-2.5 py-1 text-xs font-semibold text-primary">
-              <Crown className="h-3 w-3" /> Priority
+              <Crown className="h-3 w-3" /> Pro
             </span>
           )}
           <button onClick={() => setShowSessions(!showSessions)} aria-label={t("history")} className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs sm:text-sm font-medium transition-colors hover:bg-accent">
@@ -368,14 +357,14 @@ const AIChat = () => {
       {msgLimitReached && (
         <div className="mt-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3 flex items-center gap-2 text-sm">
           <Crown className="h-4 w-4 text-primary shrink-0" />
-          <span>{t("freeMsgLimitReached")} ({FREE_MSG_LIMIT} / {FREE_MSG_WINDOW_HOURS}h). <a href="/pricing" className="text-primary font-semibold hover:underline">{t("upgradeToPlusOrPro")}</a> {t("forUnlimitedMsgs")}</span>
+          <span>{t("freeMsgLimitReached")} ({FREE_MSG_LIMIT} / {FREE_MSG_WINDOW_HOURS}h). <a href="/pricing" className="text-primary font-semibold hover:underline">{t("upgradeToPro")}</a> {t("forUnlimitedMsgs")}</span>
         </div>
       )}
 
       {imgLimitReached && !msgLimitReached && (
         <div className="mt-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3 flex items-center gap-2 text-sm">
           <Crown className="h-4 w-4 text-primary shrink-0" />
-          <span>{t("freeImgLimitReached")} {FREE_IMG_LIMIT} {t("freeImgAnalysesToday")}. <a href="/pricing" className="text-primary font-semibold hover:underline">{t("upgradeToPlusOrPro")}</a> {t("forUnlimitedAnalyses")}</span>
+          <span>{t("freeImgLimitReached")} {FREE_IMG_LIMIT} {t("freeImgAnalysesToday")}. <a href="/pricing" className="text-primary font-semibold hover:underline">{t("upgradeToPro")}</a> {t("forUnlimitedAnalyses")}</span>
         </div>
       )}
 
@@ -448,7 +437,8 @@ const AIChat = () => {
 
         <div className="relative mt-4">
           {(() => {
-            const current = MODES.find((m) => m.id === mode)!;
+            const current = MODES.find((m) => m.id === mode) ?? MODES[0];
+            if (!current) return null;
             const CurIcon = current.icon;
             return (
               <button
@@ -479,7 +469,8 @@ const AIChat = () => {
             <Image className="h-5 w-5" />
           </button>
           {(() => {
-            const current = MODES.find((m) => m.id === mode)!;
+            const current = MODES.find((m) => m.id === mode) ?? MODES[0];
+            if (!current) return null;
             const CurIcon = current.icon;
             return (
               <button
@@ -518,19 +509,13 @@ const AIChat = () => {
                     const Icon = m.icon;
                     const lockedForFree = m.advanced && !isPaid;
                     const usedForMode = modeUsage[m.id] ?? 0;
-                    const plusCapReached = m.advanced && isPlus && usedForMode >= PLUS_MODE_DAILY_LIMIT;
                     const active = mode === m.id;
                     return (
                       <button
                         key={m.id}
                         onClick={() => {
                           if (lockedForFree) {
-                            setUpgradeReason(`${m.label} mode is available on Plus and Pro. Upgrade to access advanced AI models.`);
-                            setShowUpgrade(true);
-                            return;
-                          }
-                          if (plusCapReached) {
-                            setUpgradeReason(`You've used all ${PLUS_MODE_DAILY_LIMIT} daily ${m.label} messages on Plus. Upgrade to Pro for unlimited.`);
+                            setUpgradeReason(`${m.label} mode is available on Pro. Upgrade to access advanced AI models.`);
                             setShowUpgrade(true);
                             return;
                           }
@@ -540,7 +525,7 @@ const AIChat = () => {
                         className={cn(
                           "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors",
                           active ? "bg-primary/15" : "hover:bg-accent",
-                          (lockedForFree || plusCapReached) && "opacity-70"
+                          lockedForFree && "opacity-70"
                         )}
                       >
                         <Icon className={cn("h-4 w-4 shrink-0", active ? "text-primary" : "text-muted-foreground")} />
@@ -549,16 +534,11 @@ const AIChat = () => {
                             <span className={cn("text-sm font-semibold", active ? "text-primary" : "text-foreground")}>{m.label}</span>
                             {m.advanced ? (
                               <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
-                                <Crown className="h-2.5 w-2.5" /> Plus / Pro
+                                <Crown className="h-2.5 w-2.5" /> Pro
                               </span>
                             ) : (
                               <span className="inline-flex items-center rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
                                 Free
-                              </span>
-                            )}
-                            {m.advanced && isPlus && !isPro && (
-                              <span className="ml-auto text-[10px] font-semibold text-muted-foreground tnum">
-                                {usedForMode}/{PLUS_MODE_DAILY_LIMIT}
                               </span>
                             )}
                             {m.advanced && isPro && (

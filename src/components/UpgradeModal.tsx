@@ -24,24 +24,7 @@ export const UpgradeModal = ({
 
   if (!open) return null;
 
-  const plusFeatures = [
-    t("plusFeatPlan"),
-    t("plusFeatChat"),
-    t("plusFeatWatch"),
-    t("plusFeatCompare"),
-    t("plusFeatHeatmaps"),
-    t("plusFeatDeepDive"),
-    t("plusFeatAlerts"),
-    "Advanced AI models (5 messages/day each)",
-  ];
-
-  const proFeatures = [
-    "Everything in Plus, plus:",
-    "Unlimited messages on all AI models",
-    t("proFeatAnalyses"),
-    t("proFeatInstitutional"),
-    t("featProAlerts"),
-  ];
+  const proFeatures = [t("proBiasUnlimited"), t("proDivesUnlimited"), t("proChatUnlimited"), t("proAlertsUnlimited"), t("proQuizFull")];
 
   const goToPricing = () => {
     onClose();
@@ -74,39 +57,6 @@ export const UpgradeModal = ({
 
 
         <div className="space-y-4">
-          {/* Plus card */}
-          <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 space-y-3">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <Crown className="h-4 w-4 text-primary" />
-                  <h3 className="text-base font-semibold">Plus</h3>
-                </div>
-                <p className="text-xs text-muted-foreground mt-0.5">{t("plusEssentials")}</p>
-              </div>
-              <div className="text-right">
-                <div className="mb-0.5"><span className="inline-block rounded-full bg-green-500/20 px-1.5 py-0.5 text-[9px] font-bold text-green-500">40% {t("off")}</span></div>
-                <div className="text-base font-bold text-foreground">
-                  €8.99<span className="text-xs font-normal text-muted-foreground line-through ml-1">€14.99</span><span className="text-xs font-normal text-muted-foreground">/mo</span>
-                </div>
-              </div>
-            </div>
-            <ul className="space-y-1.5 text-sm">
-              {plusFeatures.map((f) => (
-                <li key={f} className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-primary shrink-0" />
-                  <span>{f}</span>
-                </li>
-              ))}
-            </ul>
-            <button
-              onClick={goToPricing}
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary/20"
-            >
-              {t("upgradeToPlus")}
-            </button>
-          </div>
-
           {/* Pro card */}
           <div className="relative rounded-xl border border-primary bg-primary/10 p-4 space-y-3">
             <span className="absolute -top-2 right-4 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary-foreground">
@@ -127,9 +77,9 @@ export const UpgradeModal = ({
                 <p className="text-xs text-muted-foreground mt-0.5">{t("proSubtitle")}</p>
               </div>
               <div className="text-right">
-                <div className="mb-0.5"><span className="inline-block rounded-full bg-green-500/20 px-1.5 py-0.5 text-[9px] font-bold text-green-500">36% {t("off")}</span></div>
+                <p className="text-xs text-muted-foreground">{t("save26")}</p>
                 <div className="text-base font-bold text-foreground">
-                  €15.99<span className="text-xs font-normal text-muted-foreground line-through ml-1">€24.99</span><span className="text-xs font-normal text-muted-foreground">/mo</span>
+                  €89<span className="text-xs font-normal text-muted-foreground">{t("perYear")}</span>
                 </div>
               </div>
             </div>

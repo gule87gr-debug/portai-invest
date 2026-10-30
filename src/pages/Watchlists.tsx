@@ -57,7 +57,7 @@ const Watchlists = () => {
 
   const handleNewListClick = () => {
     if (!canCreateWatchlist) {
-      setUpgradeMsg("Free users can create 1 watchlist. Upgrade to Plus or Pro for unlimited watchlists.");
+      setUpgradeMsg("Free users can create 1 watchlist. Upgrade to Pro for unlimited watchlists.");
       setShowUpgrade(true);
       return;
     }
@@ -66,7 +66,7 @@ const Watchlists = () => {
 
   const handleAddStockClick = () => {
     if (!canAddStock) {
-      setUpgradeMsg("Free users can add up to 5 stocks per watchlist. Upgrade to Plus or Pro for unlimited stocks.");
+      setUpgradeMsg("Free users can add up to 5 stocks per watchlist. Upgrade to Pro for unlimited stocks.");
       setShowUpgrade(true);
       return;
     }

@@ -67,27 +67,15 @@ export const FirstVisitPaywall = () => {
 
   const freePerks = [
     tr("welcomeFreePerk1", "1 watchlist with up to 5 assets"),
-    tr("welcomeFreePerk2", "3 article bias analyses per day"),
-    tr("welcomeFreePerk3", "10 AI chat messages + 3 image analyses per day"),
+    t("featFreeAnalyses"),
+    `${t("featFreeChat")} · ${t("featFreeImg")}`,
   ];
   const freeLimits = [
     tr("welcomeFreeLimit1", "No Pro Deep Dive on articles"),
-    tr("welcomeFreeLimit2", "Quiz results locked"),
+    t("featFreeQuiz"),
     tr("welcomeFreeLimit3", "No price alerts"),
   ];
-  const plusPerks = [
-    tr("welcomePlusPerk1", "Unlimited watchlists & assets"),
-    tr("welcomePlusPerk2", "10 article analyses per day + 3 Pro deep dives"),
-    tr("welcomePlusPerk3", "Unlimited fast AI chat & image analyses"),
-    tr("welcomePlusPerk4", "Advanced AI models (5 msgs/day each)"),
-    t("plusFeatAlerts"),
-  ];
-  const proPerks = [
-    tr("welcomeProPerk1", "Everything in Plus"),
-    tr("welcomeProPerk2", "Unlimited article analyses + Pro Deep Dive"),
-    tr("welcomeProPerk3", "Unlimited messages on all AI models"),
-    t("featProAlerts"),
-  ];
+  const proPerks = [t("proBiasUnlimited"), t("proDivesUnlimited"), t("proChatUnlimited"), t("proAlertsUnlimited"), t("proQuizFull")];
 
   return (
     <div
@@ -119,7 +107,7 @@ export const FirstVisitPaywall = () => {
             {tr("welcomePaywallSub", "Start free, upgrade anytime. You can also change plans later from Settings.")}
           </p>
 
-          <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+          <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
             {/* Free tier */}
             <div className="rounded-xl border border-border bg-accent/20 p-4 sm:p-5 flex flex-col">
               <div className="flex items-baseline justify-between mb-2">
@@ -160,40 +148,6 @@ export const FirstVisitPaywall = () => {
               </button>
             </div>
 
-            {/* Plus tier */}
-            <div className="rounded-xl border border-primary/40 bg-gradient-to-br from-primary/[0.06] to-transparent p-4 sm:p-5 flex flex-col">
-              <div className="flex items-baseline justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  <h3 className="text-base font-bold">Plus</h3>
-                </div>
-                <div className="text-right">
-                  <span className="text-sm font-bold text-foreground">€8.99</span>
-                  <span className="text-[11px] text-muted-foreground">/mo</span>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground mb-3">{tr("welcomePlusSubtitle", "More room to research")}</p>
-
-              <p className="text-[11px] font-bold uppercase tracking-wider text-primary mb-1.5">
-                {tr("everythingYouGet", "Everything you get")}
-              </p>
-              <ul className="space-y-1.5 mb-4">
-                {plusPerks.map((p) => (
-                  <li key={p} className="flex items-start gap-2 text-xs">
-                    <Check className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
-                    <span className="text-foreground/90">{p}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <button
-                onClick={() => { dismiss(true); navigate("/pricing"); }}
-                className="mt-auto w-full rounded-lg border border-primary bg-primary/10 px-4 py-2.5 text-sm font-bold text-primary hover:bg-primary/15 transition-colors active:scale-[0.98]"
-              >
-                {tr("upgradeToPlus", "Upgrade to Plus")}
-              </button>
-            </div>
-
             {/* Pro tier */}
             <div className="relative rounded-xl border-2 border-primary bg-gradient-to-br from-primary/15 via-primary/5 to-transparent p-4 sm:p-5 flex flex-col">
               <span className="absolute -top-2 right-4 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary-foreground shadow-md">
@@ -205,8 +159,8 @@ export const FirstVisitPaywall = () => {
                   <h3 className="text-base font-bold">Pro</h3>
                 </div>
                 <div className="text-right">
-                  <span className="text-sm font-bold text-foreground">€15.99</span>
-                  <span className="text-[11px] text-muted-foreground">/mo</span>
+                  <span className="text-sm font-bold text-foreground">€89</span>
+                  <span className="text-[11px] text-muted-foreground">{t("perYear")}</span>
                 </div>
               </div>
               <p className="text-xs text-muted-foreground mb-3">{tr("proSubtitle", "Institutional-grade tools")}</p>
@@ -232,7 +186,7 @@ export const FirstVisitPaywall = () => {
                   {tr("upgradeToPro", "Upgrade to Pro")}
                 </button>
                 <p className="text-center text-[10px] text-muted-foreground">
-                  {tr("welcomeProFootnote", "Cancel anytime. 14-day free trial also available.")}
+                  {tr("welcomeProFootnote", "Cancel anytime. 7-day free trial also available.")}
                 </p>
               </div>
             </div>

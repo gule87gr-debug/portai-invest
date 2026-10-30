@@ -138,7 +138,7 @@ const AdminPage = () => {
             <div>
               <h2 className="text-base font-semibold">Stripe pricing audit</h2>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Verifies only €8.99 Plus and €15.99 Pro are active; everything else inactive.
+                Verifies Pro monthly €9.99 and yearly €89 prices. Existing subscriptions keep their prices.
               </p>
             </div>
             <button
@@ -170,9 +170,9 @@ const AdminPage = () => {
 
         {/* Admin bypass list */}
         <section className="rounded-lg border border-border bg-card p-5">
-          <h2 className="text-base font-semibold mb-1">Admin bypass emails</h2>
+          <h2 className="text-base font-semibold mb-1">Administrator roles</h2>
           <p className="text-xs text-muted-foreground mb-4">
-            Users with these emails get permanent Pro access. Every use is logged below.
+            Confirmed accounts with an administrator role get permanent Pro access.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-2 mb-5">
@@ -203,7 +203,7 @@ const AdminPage = () => {
           {loading ? (
             <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
           ) : admins.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-6">No admin emails configured.</p>
+            <p className="text-sm text-muted-foreground text-center py-6">No administrator roles configured.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">

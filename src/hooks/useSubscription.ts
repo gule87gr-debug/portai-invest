@@ -2,12 +2,11 @@ import { useCallback, useEffect, useSyncExternalStore, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ACTIVE_ALERT_LIMITS } from "@/lib/priceAlertLimits";
 
-export type SubscriptionTier = "free" | "plus" | "pro";
+export type SubscriptionTier = "free" | "pro";
 
 type SubscriptionState = {
   tier: SubscriptionTier;
   isPro: boolean;
-  isPlus: boolean;
   isPaid: boolean;
   /** True only when the user is actually paying (Stripe-backed sub), not via trial. */
   isPaying: boolean;
@@ -23,6 +22,7 @@ type SubscriptionState = {
   cancelAtPeriodEnd: boolean;
   subscriptionId: string | null;
   subscriptionStatus: string | null;
+  billingPrice: string | null;
   scheduledTier: SubscriptionTier | null;
   scheduledStart: string | null;
   scheduledChangesCount: number;
@@ -43,9 +43,7 @@ type SubscriptionState = {
 };
 
 /** Daily article-analysis quota per tier (Pro is unlimited). */
-export const DAILY_ANALYSIS_LIMITS = { free: 3, plus: 10 } as const;
-/** Pro-level deep dives included per day on Plus (Pro is unlimited). */
-export const PLUS_DAILY_DEEP_DIVES = 3;
+export const DAILY_ANALYSIS_LIMITS = { free: 3 } as const;
 
 /* ------------------------------------------------------------------ *
  * Module-level store: one network round-trip shared by every consumer *
@@ -58,6 +56,7 @@ type Snapshot = {
   cancelAtPeriodEnd: boolean;
   subscriptionId: string | null;
   subscriptionStatus: string | null;
+  billingPrice: string | null;
   scheduledTier: SubscriptionTier | null;
   scheduledStart: string | null;
   scheduledChangesCount: number;
@@ -75,6 +74,7 @@ const emptySnapshot: Snapshot = {
   cancelAtPeriodEnd: false,
   subscriptionId: null,
   subscriptionStatus: null,
+  billingPrice: null,
   scheduledTier: null,
   scheduledStart: null,
   scheduledChangesCount: 0,
@@ -87,7 +87,7 @@ const emptySnapshot: Snapshot = {
 
 let snapshot: Snapshot = emptySnapshot;
 const listeners = new Set<() => void>();
-const CACHE_PREFIX = "portai-sub-cache";
+const CACHE_PREFIX = "portai-sub-v2-cache";
 
 const emit = () => listeners.forEach((l) => l());
 
@@ -176,6 +176,7 @@ const loadAll = async (): Promise<void> => {
     patch.cancelAtPeriodEnd = data?.cancel_at_period_end ?? false;
     patch.subscriptionId = data?.subscription_id ?? null;
     patch.subscriptionStatus = data?.subscription_status ?? null;
+    patch.billingPrice = typeof data?.price_amount === "number" && data?.price_currency ? `${new Intl.NumberFormat(undefined, { style: "currency", currency: data.price_currency }).format(data.price_amount / 100)}/${data.billing_interval ?? "month"}` : null;
     patch.scheduledTier = (data?.scheduled_tier as SubscriptionTier | null) ?? null;
     patch.scheduledStart = data?.scheduled_start ?? null;
     patch.scheduledChangesCount = data?.scheduled_changes_count ?? 0;
@@ -325,15 +326,13 @@ export const useSubscription = (): SubscriptionState => {
     : null;
 
   const isPro = effectiveTier === "pro";
-  const isPlus = effectiveTier === "plus";
-  const isPaid = isPro || isPlus;
+  const isPaid = isPro;
 
   return {
     tier: effectiveTier,
     isPro,
-    isPlus,
     isPaid,
-    isPaying: s.paidTier !== "free",
+    isPaying: s.paidTier !== "free" && s.subscriptionId !== "admin_override",
     isTrialPro: s.trialActive && s.paidTier === "free",
     hasUnlimitedChat: isPaid,
     hasUnlimitedWatchlists: isPaid,
@@ -345,13 +344,14 @@ export const useSubscription = (): SubscriptionState => {
     cancelAtPeriodEnd: s.cancelAtPeriodEnd,
     subscriptionId: s.subscriptionId,
     subscriptionStatus: s.subscriptionStatus,
+    billingPrice: s.billingPrice,
     scheduledTier: s.scheduledTier,
     scheduledStart: s.scheduledStart,
     scheduledChangesCount: s.scheduledChangesCount,
     dailyAnalysesUsed: s.dailyAnalysesUsed,
-    dailyAnalysisLimit: isPro ? null : isPlus ? DAILY_ANALYSIS_LIMITS.plus : DAILY_ANALYSIS_LIMITS.free,
+    dailyAnalysisLimit: isPro ? null : DAILY_ANALYSIS_LIMITS.free,
     canAnalyze:
-      isPro || s.dailyAnalysesUsed < (isPlus ? DAILY_ANALYSIS_LIMITS.plus : DAILY_ANALYSIS_LIMITS.free),
+      isPro || s.dailyAnalysesUsed < DAILY_ANALYSIS_LIMITS.free,
     trialActive: s.trialActive,
     trialUsed: s.trialUsed,
     trialEndsAt: s.trialEndsAt,

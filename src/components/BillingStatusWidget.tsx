@@ -6,18 +6,17 @@ import { toast } from "sonner";
 
 const TIER_META: Record<string, { label: string; price: string; tone: string }> = {
   free: { label: "Free", price: "€0/mo", tone: "bg-muted text-muted-foreground" },
-  plus: { label: "Plus", price: "€8.99/mo", tone: "bg-primary/15 text-primary" },
-  pro:  { label: "Pro",  price: "€15.99/mo", tone: "bg-primary text-primary-foreground" },
+  pro:  { label: "Pro",  price: "", tone: "bg-primary text-primary-foreground" },
 };
 
 export const BillingStatusWidget = () => {
-  const { tier, isPaid, isPaying, isTrialPro, trialDaysLeft, trialEndsAt, subscriptionEnd, subscriptionStatus, cancelAtPeriodEnd, loading } = useSubscription();
+  const { tier, isPaid, isPaying, isTrialPro, trialDaysLeft, trialEndsAt, subscriptionEnd, subscriptionStatus, billingPrice, cancelAtPeriodEnd, loading } = useSubscription();
   const [portalLoading, setPortalLoading] = useState(false);
   const baseMeta = TIER_META[tier] ?? TIER_META.free;
   // Distinguish trial-Pro from paid Pro so the label and price never lie.
   const meta = isTrialPro
     ? { label: "Pro Trial", price: "Free trial", tone: "bg-amber-500/15 text-amber-500" }
-    : baseMeta;
+    : { ...baseMeta, price: billingPrice ?? baseMeta.price };
 
   const trialEndDate = trialEndsAt
     ? new Date(trialEndsAt).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })
