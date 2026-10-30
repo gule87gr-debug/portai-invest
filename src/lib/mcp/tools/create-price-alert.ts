@@ -5,7 +5,7 @@ import { supabaseForUser } from "../supabase";
 export default defineTool({
   name: "create_price_alert",
   title: "Create price alert",
-  description: "Create a price alert: Plus allows 5 active alerts, Pro unlimited, Free none. Triggered alerts do not count.",
+  description: "Create a price alert: Pro unlimited, Free none. Server-side access checks apply.",
   inputSchema: {
     ticker: z.string().trim().min(1).max(20),
     asset_name: z.string().trim().min(1).max(120),

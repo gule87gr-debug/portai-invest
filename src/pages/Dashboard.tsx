@@ -7,7 +7,7 @@ import { TradingViewHeatmap } from "@/components/TradingViewWidgets";
 
 import { TrendingStocks } from "@/components/TrendingStocks";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useSubscription, trackAnalysis, PLUS_DAILY_DEEP_DIVES } from "@/hooks/useSubscription";
+import { useSubscription, trackAnalysis } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { Link as LinkIcon, Search, Globe, ShieldCheck, FileText, AlertCircle, Loader2, Crown, Lock, X, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -59,46 +59,8 @@ const Dashboard = () => {
   // was actually accepted (so a "not an article" reply never makes the badge tick down)
   const [showRemaining, setShowRemaining] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
-  const { isPro, isPlus, dailyAnalysesUsed, dailyAnalysisLimit, canAnalyze, refresh } = useSubscription();
+  const { isPro, dailyAnalysesUsed, dailyAnalysisLimit, canAnalyze, refresh } = useSubscription();
   const [searchParams] = useSearchParams();
-
-  // Plus tier: 3 claimable Pro-level deep dives per day
-  const [deepDiveUsed, setDeepDiveUsed] = useState(0);
-  const [claimedDeepDive, setClaimedDeepDive] = useState<AnalysisResult["proDeepDive"] | null>(null);
-  const [claiming, setClaiming] = useState(false);
-
-  useEffect(() => {
-    if (!isPlus) return;
-    let cancelled = false;
-    supabase.functions
-      .invoke("claim-deep-dive", { body: { action: "status" } })
-      .then(({ data }) => {
-        if (!cancelled && typeof data?.used === "number") setDeepDiveUsed(data.used);
-      })
-      .catch(() => { /* ignore */ });
-    return () => { cancelled = true; };
-  }, [isPlus]);
-
-  const claimDeepDive = async () => {
-    if (!analyzedUrl) return;
-    setClaiming(true);
-    try {
-      const { data, error: fnErr } = await supabase.functions.invoke("claim-deep-dive", {
-        body: {
-          action: "claim",
-          url: analyzedUrl,
-          language: (typeof window !== "undefined" ? localStorage.getItem("portai.language") : null) || "en",
-        },
-      });
-      if (fnErr || data?.error) throw new Error(data?.error || fnErr?.message || "Could not unlock the deep dive");
-      setClaimedDeepDive(data.deepDive);
-      if (typeof data.used === "number") setDeepDiveUsed(data.used);
-    } catch (e: any) {
-      toast.error(e.message || "Could not unlock the deep dive");
-    } finally {
-      setClaiming(false);
-    }
-  };
 
   useEffect(() => {
     if (searchParams.get("upgrade") === "success") {
@@ -138,7 +100,6 @@ const Dashboard = () => {
       : `https://${url.trim().replace(/^\/+/, "")}`;
     setIsAnalyzing(true);
     setResult(null);
-    setClaimedDeepDive(null);
     setError("");
     setLimitReached(false);
     try {
@@ -404,7 +365,7 @@ const Dashboard = () => {
                     )}
                     {(result.crossCheck.sources?.length ?? 0) > 0 && (
                       <ul className="mt-2 space-y-1">
-                        {result.crossCheck.sources!.slice(0, 4).map((s, i) => (
+                        {result.crossCheck.sources?.slice(0, 4).map((s, i) => (
                           <li key={i} className="text-sm leading-relaxed text-muted-foreground">
                             <span className="font-semibold text-foreground">{s.source}</span>
                             {s.agreement && (
@@ -425,9 +386,9 @@ const Dashboard = () => {
               </details>
             )}
 
-            {/* Pro-level deep dive: unlimited on Pro, 3/day claimable on Plus */}
+            {/* Pro deep dive is automatically included */}
             {(() => {
-              const deepDive = isPro ? result.proDeepDive : claimedDeepDive;
+              const deepDive = isPro ? result.proDeepDive : null;
               if (deepDive) {
                 return (
                   <details className="mt-2 rounded-lg border border-primary/30 bg-primary/5 p-3" open={!isPro}>
@@ -449,23 +410,6 @@ const Dashboard = () => {
                 );
               }
               if (isPro) return null;
-
-              if (isPlus) {
-                const left = Math.max(0, PLUS_DAILY_DEEP_DIVES - deepDiveUsed);
-                return (
-                  <button
-                    onClick={left > 0 ? claimDeepDive : () => setShowUpgrade(true)}
-                    disabled={claiming}
-                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10 transition-colors disabled:opacity-60"
-                  >
-                    {claiming ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : left > 0 ? <Sparkles className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
-                    {left > 0 ? t("claimDeepDive") : t("deepDivesUsedUp")}
-                    <span className="font-mono text-xs opacity-80">
-                      {deepDiveUsed}/{PLUS_DAILY_DEEP_DIVES}
-                    </span>
-                  </button>
-                );
-              }
 
               return (
                 <button

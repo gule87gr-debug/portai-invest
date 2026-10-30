@@ -37,8 +37,7 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
   const [price, setPrice] = useState("");
   const [direction, setDirection] = useState<"above" | "below">("above");
   const [userId, setUserId] = useState<string | null>(null);
-  const { hasPriceAlerts, isPlus, activeAlertLimit, loading: subLoading } = useSubscription();
-  const atCap = isPlus && activeAlertLimit !== null && activeCount >= activeAlertLimit;
+  const { hasPriceAlerts, loading: subLoading } = useSubscription();
   const navigate = useNavigate();
   let t: (k: string) => string;
   try { t = useLanguage().t; } catch { t = (k) => k; }
@@ -88,7 +87,6 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
       toast.error(t("alertsProToast"));
       return;
     }
-    if (atCap) { toast.error(t("plusAlertCapReached")); return; }
     if (isNaN(target) || target <= 0) {
       toast.error(t("enterValidPrice"));
       return;
@@ -104,7 +102,7 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
     setSaving(false);
     if (error) {
       const response = "context" in error && error.context instanceof Response ? await error.context.json().catch(() => null) : null;
-      toast.error(response?.code === "PRICE_ALERT_LIMIT_REACHED" ? t("plusAlertCapReached") : response?.code === "PRICE_ALERTS_PAID_REQUIRED" ? t("alertsProToast") : t("alertCreateFailed"));
+      toast.error(response?.code === "PRICE_ALERTS_PAID_REQUIRED" ? t("alertsProToast") : t("alertCreateFailed"));
       void loadAlerts();
       return;
     }
@@ -160,15 +158,11 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
               onClick={() => { setOpen(false); navigate("/pricing"); }}
               className="w-full gap-2"
             >
-              <Sparkles className="h-4 w-4" /> {t("upgradeToPlus")}
+              <Sparkles className="h-4 w-4" /> {t("upgradeToPro")}
             </Button>
           </div>
         ) : (
           <>
-            {isPlus && <div className="space-y-2">
-              <p className="text-sm font-mono" aria-live="polite">{t("plusActiveAlertCount").replace("{count}", String(activeCount))}</p>
-              {atCap && <><p className="text-sm text-muted-foreground">{t("plusAlertCapReached")}</p><Button variant="outline" onClick={() => { setOpen(false); navigate("/pricing"); }}>{t("upgradeToPro")}</Button></>}
-            </div>}
             <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
               {currentPrice !== undefined && (
                 <p className="text-xs text-muted-foreground">
@@ -209,7 +203,7 @@ export const PriceAlertDialog = ({ ticker, assetName = "", assetType = "stock", 
                   <TrendingDown className="h-3.5 w-3.5" /> {t("fallsBelow")}
                 </button>
               </div>
-              <Button onClick={handleCreate} disabled={saving || loading || subLoading || atCap} className="w-full" size="sm">
+              <Button onClick={handleCreate} disabled={saving || loading || subLoading} className="w-full" size="sm">
                 {saving ? t("settingDots") : t("setAlert")}
               </Button>
             </div>
