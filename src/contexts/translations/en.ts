@@ -620,6 +620,27 @@ const en: Record<string, string> = {
     assetDesc_SMH: "Top semiconductor holdings for AI and chip cycle exposure.",
     assetDesc_IWM: "Small-cap US stocks for higher growth potential.",
     rationaleTpl: "A {risk}, {profit} portfolio designed for a {time} horizon. Tailored for {exp} investors. This allocation balances risk and reward to target {ret} annual returns.",
+    // Price alerts & yearly billing
+    alertLoadFailed: "Couldn't load your alerts. Please try again.",
+    alertDeleteFailed: "Couldn't remove that alert. Please try again.",
+    viewAllAlerts: "View all alerts",
+    billingInterval: "Billing interval",
+    monthly: "Monthly",
+    yearly: "Yearly",
+    perYear: "/yr",
+    save26: "Save 26% with yearly billing",
+    renewsYearly: "Automatically each year",
+    redirectStripeYearly: "to complete payment. Your subscription renews automatically each year at",
+    termsAcceptYearly: "today and every year until I cancel. I have read and accept the",
+    featFreeAlerts: "No price alerts (Pro feature)",
+    priceAlertComparison: "Price alerts by plan",
+    triggeredAlertsExcluded: "Only active alerts count. Alerts that have already triggered don't count.",
+    proBiasUnlimited: "Unlimited article bias analyses",
+    proDivesUnlimited: "Unlimited Pro deep dives",
+    proChatUnlimited: "Unlimited AI chat messages",
+    proAlertsUnlimited: "Unlimited active price alerts",
+    proQuizFull: "Full portfolio quiz results",
+    today: "Today",
 };
 
 export default en;

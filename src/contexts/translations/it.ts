@@ -570,6 +570,27 @@ const it: Record<string, string> = {
     assetDesc_SMH: "Principali titoli dei semiconduttori per esposizione a IA e ciclo dei chip.",
     assetDesc_IWM: "Azioni small-cap USA con maggior potenziale di crescita.",
     rationaleTpl: "Un portafoglio {risk}, {profit} per un orizzonte {time}. Studiato per investitori {exp}. Questa allocazione bilancia rischio e rendimento puntando a rendimenti annui di {ret}.",
+    // Price alerts & yearly billing
+    alertLoadFailed: "Impossibile caricare i tuoi avvisi. Riprova.",
+    alertDeleteFailed: "Impossibile rimuovere l'avviso. Riprova.",
+    viewAllAlerts: "Vedi tutti gli avvisi",
+    billingInterval: "Periodo di fatturazione",
+    monthly: "Mensile",
+    yearly: "Annuale",
+    perYear: "/anno",
+    save26: "Risparmia il 26% con la fatturazione annuale",
+    renewsYearly: "Automaticamente ogni anno",
+    redirectStripeYearly: "per completare il pagamento. Il tuo abbonamento si rinnova automaticamente ogni anno a",
+    termsAcceptYearly: "oggi e ogni anno fino alla disdetta. Ho letto e accetto i",
+    featFreeAlerts: "Nessun avviso di prezzo (funzione Pro)",
+    priceAlertComparison: "Avvisi di prezzo per piano",
+    triggeredAlertsExcluded: "Contano solo gli avvisi attivi. Gli avvisi già scattati non contano.",
+    proBiasUnlimited: "Analisi del bias degli articoli illimitate",
+    proDivesUnlimited: "Analisi approfondite Pro illimitate",
+    proChatUnlimited: "Messaggi di chat IA illimitati",
+    proAlertsUnlimited: "Avvisi di prezzo attivi illimitati",
+    proQuizFull: "Risultati completi del quiz sul portafoglio",
+    today: "Oggi",
 };
 
 export default it;

@@ -570,6 +570,27 @@ const de: Record<string, string> = {
     assetDesc_SMH: "Top-Halbleiterwerte für Engagement in KI und Chipzyklus.",
     assetDesc_IWM: "US-Small-Cap-Aktien mit höherem Wachstumspotenzial.",
     rationaleTpl: "Ein {risk}, {profit} Portfolio für einen {time} Horizont. Zugeschnitten auf {exp} Anleger. Diese Allokation balanciert Risiko und Rendite mit Zielrenditen von {ret} pro Jahr.",
+    // Price alerts & yearly billing
+    alertLoadFailed: "Ihre Alarme konnten nicht geladen werden. Bitte versuchen Sie es erneut.",
+    alertDeleteFailed: "Der Alarm konnte nicht entfernt werden. Bitte versuchen Sie es erneut.",
+    viewAllAlerts: "Alle Alarme anzeigen",
+    billingInterval: "Abrechnungszeitraum",
+    monthly: "Monatlich",
+    yearly: "Jährlich",
+    perYear: "/Jahr",
+    save26: "Sparen Sie 26 % mit jährlicher Abrechnung",
+    renewsYearly: "Automatisch jedes Jahr",
+    redirectStripeYearly: "um die Zahlung abzuschließen. Ihr Abonnement verlängert sich automatisch jedes Jahr zu",
+    termsAcceptYearly: "heute und jedes Jahr bis zur Kündigung berechnet. Ich habe die",
+    featFreeAlerts: "Keine Preisalarme (Pro-Funktion)",
+    priceAlertComparison: "Preisalarme nach Tarif",
+    triggeredAlertsExcluded: "Nur aktive Alarme zählen. Bereits ausgelöste Alarme zählen nicht.",
+    proBiasUnlimited: "Unbegrenzte Bias-Analysen von Artikeln",
+    proDivesUnlimited: "Unbegrenzte Pro-Tiefenanalysen",
+    proChatUnlimited: "Unbegrenzte KI-Chat-Nachrichten",
+    proAlertsUnlimited: "Unbegrenzte aktive Preisalarme",
+    proQuizFull: "Vollständige Portfolio-Quiz-Ergebnisse",
+    today: "Heute",
 };
 
 export default de;
