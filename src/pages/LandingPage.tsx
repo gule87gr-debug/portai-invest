@@ -380,7 +380,7 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
           <p className="text-center text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-10">
             {lt("pricingDesc")}
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-3xl mx-auto">
             {[
               {
                 icon: Eye,
@@ -394,25 +394,14 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
                 cta: lt("startFree"),
               },
               {
-                icon: Sparkles,
-                kicker: lt("shield"),
-                name: lt("plusName"),
-                price: "€8.99",
-                was: "€14.99",
-                badge: lt("off40"),
-                highlight: false,
-                features: [lt("plus1"), lt("plus2"), lt("plus3"), lt("plus4"), lt("plus5"), t("plusFeatAlerts")],
-                cta: lt("upgradePlus"),
-              },
-              {
                 icon: Crown,
                 kicker: lt("alphaSuite"),
                 name: lt("proName"),
-                price: "€15.99",
-                was: "€24.99",
-                badge: lt("off36"),
+                price: "€9.99",
+                was: null,
+                badge: null,
                 highlight: true,
-                features: [lt("pro1"), lt("pro2"), t("featProAlerts")],
+                features: [t("proBiasUnlimited"), t("proDivesUnlimited"), t("proChatUnlimited"), t("proAlertsUnlimited"), t("proQuizFull"), `€89${t("perYear")} · ${t("save26")}`],
                 cta: lt("goPro"),
               },
             ].map((tier) => (
@@ -717,8 +706,8 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
                     "description": "AI Financial News Bias Checker and Professional Portfolio Tracker for retail investors. Detect market manipulation with AI-powered sentiment analysis.",
                     "offers": [
                       { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "EUR" },
-                      { "@type": "Offer", "name": "Plus", "price": "8.99", "priceCurrency": "EUR" },
-                      { "@type": "Offer", "name": "Pro", "price": "15.99", "priceCurrency": "EUR" }
+                      { "@type": "Offer", "name": "Pro (monthly)", "price": "9.99", "priceCurrency": "EUR" },
+                      { "@type": "Offer", "name": "Pro (yearly)", "price": "89", "priceCurrency": "EUR" }
                     ],
                     "aggregateRating": {
                       "@type": "AggregateRating",
