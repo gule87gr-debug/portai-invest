@@ -1,7 +1,7 @@
 const it: Record<string, string> = {
     home: "Home", dashboard: "Dashboard", aiChat: "Sentry", quiz: "Quiz", forum: "Polso Media", watchlists: "Liste", settings: "Impostazioni", news: "Notizie", articleAnalyzer: "Analizza", new: "NUOVO",
     // Landing
-    landingBanner: "Tempo limitato: Plus 40% OFF (€8,99) · Pro 36% OFF (€15,99)",
+    landingBanner: "Pro: €9.99/mo or €89/yr · Save 26% yearly",
     heroBadge: "Scudo IA anti-bias",
     heroTitleA: "Smetti di operare su", heroTitleB: "notizie distorte.",
     heroSubtitle: "Il primo scudo IA per gli investitori al dettaglio. Ottieni Trust Score, rilevamento dei bias e insight nascosti su qualsiasi articolo finanziario.",

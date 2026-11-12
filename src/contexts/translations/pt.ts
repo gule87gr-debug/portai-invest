@@ -1,7 +1,7 @@
 const pt: Record<string, string> = {
     home: "Início", dashboard: "Painel", aiChat: "Sentry", quiz: "Quiz", forum: "Pulso Media", watchlists: "Listas", settings: "Configurações", news: "Notícias", articleAnalyzer: "Analisar", new: "NOVO",
     // Landing
-    landingBanner: "Por tempo limitado: Plus 40% OFF (€8,99) · Pro 36% OFF (€15,99)",
+    landingBanner: "Pro: €9.99/mo or €89/yr · Save 26% yearly",
     heroBadge: "Escudo IA contra o viés",
     heroTitleA: "Pare de negociar com", heroTitleB: "notícias enviesadas.",
     heroSubtitle: "O primeiro escudo com IA para investidores de varejo. Obtenha Pontuações de Confiança, detecção de viés e insights ocultos de qualquer artigo financeiro.",

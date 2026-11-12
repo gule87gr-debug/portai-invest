@@ -2,7 +2,7 @@ const en: Record<string, string> = {
     // Nav
     home: "Home", dashboard: "Dashboard", aiChat: "Sentry", quiz: "Quiz", forum: "Media Pulse", watchlists: "Watchlists", settings: "Settings", news: "News", articleAnalyzer: "Analyze", new: "NEW",
     // Landing
-    landingBanner: "Limited time: Plus 40% OFF (€8.99) · Pro 36% OFF (€15.99)",
+    landingBanner: "Pro: €9.99/mo or €89/yr · Save 26% yearly",
     heroBadge: "AI-Powered Bias Shield",
     heroTitleA: "Stop Trading on", heroTitleB: "Biased News.",
     heroSubtitle: "The first AI-powered shield for retail investors. Get instant Trust Scores, Bias Detection, and hidden insights on any financial article.",
