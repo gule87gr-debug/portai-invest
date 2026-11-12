@@ -1,7 +1,7 @@
 const fr: Record<string, string> = {
     home: "Accueil", dashboard: "Tableau de bord", aiChat: "Sentry", quiz: "Quiz", forum: "Pulse Média", watchlists: "Listes", settings: "Paramètres", news: "Actualités", articleAnalyzer: "Analyser", new: "NOUVEAU",
     // Landing
-    landingBanner: "Durée limitée : Plus -40% (8,99 €) · Pro -36% (15,99 €)",
+    landingBanner: "Pro: €9.99/mo or €89/yr · Save 26% yearly",
     heroBadge: "Bouclier IA contre les biais",
     heroTitleA: "Arrêtez de trader sur", heroTitleB: "des infos biaisées.",
     heroSubtitle: "Le premier bouclier IA pour les investisseurs particuliers. Obtenez des Scores de Confiance, une détection des biais et des insights cachés sur tout article financier.",

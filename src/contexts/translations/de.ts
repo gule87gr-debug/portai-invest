@@ -1,7 +1,7 @@
 const de: Record<string, string> = {
     home: "Startseite", dashboard: "Dashboard", aiChat: "Sentry", quiz: "Quiz", forum: "Medien-Puls", watchlists: "Beobachtungslisten", settings: "Einstellungen", news: "News", articleAnalyzer: "Analysieren", new: "NEU",
     // Landing
-    landingBanner: "Nur kurze Zeit: Plus 40% RABATT (8,99 €) · Pro 36% RABATT (15,99 €)",
+    landingBanner: "Pro: €9.99/mo or €89/yr · Save 26% yearly",
     heroBadge: "KI-Schild gegen Voreingenommenheit",
     heroTitleA: "Schluss mit Trades auf", heroTitleB: "voreingenommenen News.",
     heroSubtitle: "Der erste KI-Schild für Privatanleger. Erhalten Sie sofortige Trust-Scores, Bias-Erkennung und versteckte Erkenntnisse zu jedem Finanzartikel.",

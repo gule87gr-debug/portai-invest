@@ -1,7 +1,7 @@
 const es: Record<string, string> = {
     home: "Inicio", dashboard: "Panel", aiChat: "Sentry", quiz: "Cuestionario", forum: "Pulso Media", watchlists: "Listas", settings: "Ajustes", news: "Noticias", articleAnalyzer: "Analizar", new: "NUEVO",
     // Landing
-    landingBanner: "Tiempo limitado: Plus 40% OFF (€8,99) · Pro 36% OFF (€15,99)",
+    landingBanner: "Pro: €9.99/mo or €89/yr · Save 26% yearly",
     heroBadge: "Escudo IA contra el sesgo",
     heroTitleA: "Deja de operar con", heroTitleB: "noticias sesgadas.",
     heroSubtitle: "El primer escudo con IA para inversores minoristas. Obtén Puntuaciones de Confianza, detección de sesgo e información oculta de cualquier artículo financiero.",
