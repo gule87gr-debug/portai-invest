@@ -570,6 +570,27 @@ const es: Record<string, string> = {
     assetDesc_SMH: "Principales holdings de semiconductores para exposición a IA y al ciclo de chips.",
     assetDesc_IWM: "Acciones small-cap de EE. UU. para mayor potencial de crecimiento.",
     rationaleTpl: "Una cartera {risk} y {profit} diseñada para un horizonte {time}. Pensada para inversores {exp}. Esta asignación equilibra riesgo y recompensa con un objetivo de {ret} de retornos anuales.",
+    // Price alerts & yearly billing
+    alertLoadFailed: "No se pudieron cargar tus alertas. Inténtalo de nuevo.",
+    alertDeleteFailed: "No se pudo eliminar la alerta. Inténtalo de nuevo.",
+    viewAllAlerts: "Ver todas las alertas",
+    billingInterval: "Periodo de facturación",
+    monthly: "Mensual",
+    yearly: "Anual",
+    perYear: "/año",
+    save26: "Ahorra un 26% con la facturación anual",
+    renewsYearly: "Automáticamente cada año",
+    redirectStripeYearly: "para completar el pago. Tu suscripción se renueva automáticamente cada año a",
+    termsAcceptYearly: "hoy y cada año hasta que cancele. He leído y acepto los",
+    featFreeAlerts: "Sin alertas de precio (función Pro)",
+    priceAlertComparison: "Alertas de precio por plan",
+    triggeredAlertsExcluded: "Solo cuentan las alertas activas. Las alertas ya activadas no cuentan.",
+    proBiasUnlimited: "Análisis de sesgo de artículos ilimitados",
+    proDivesUnlimited: "Análisis profundos Pro ilimitados",
+    proChatUnlimited: "Mensajes de chat IA ilimitados",
+    proAlertsUnlimited: "Alertas de precio activas ilimitadas",
+    proQuizFull: "Resultados completos del quiz de cartera",
+    today: "Hoy",
 };
 
 export default es;

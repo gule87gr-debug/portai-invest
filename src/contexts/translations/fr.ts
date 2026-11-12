@@ -570,6 +570,27 @@ const fr: Record<string, string> = {
     assetDesc_SMH: "Principaux titres de semi-conducteurs pour l'exposition IA et au cycle des puces.",
     assetDesc_IWM: "Actions US small-cap pour un potentiel de croissance accru.",
     rationaleTpl: "Un portefeuille {risk}, {profit} conçu pour un horizon {time}. Adapté aux investisseurs {exp}. Cette allocation équilibre risque et rendement pour cibler {ret} de rendements annuels.",
+    // Price alerts & yearly billing
+    alertLoadFailed: "Impossible de charger vos alertes. Veuillez réessayer.",
+    alertDeleteFailed: "Impossible de supprimer cette alerte. Veuillez réessayer.",
+    viewAllAlerts: "Voir toutes les alertes",
+    billingInterval: "Période de facturation",
+    monthly: "Mensuel",
+    yearly: "Annuel",
+    perYear: "/an",
+    save26: "Économisez 26 % avec la facturation annuelle",
+    renewsYearly: "Automatiquement chaque année",
+    redirectStripeYearly: "pour finaliser le paiement. Votre abonnement est renouvelé automatiquement chaque année à",
+    termsAcceptYearly: "aujourd'hui et chaque année jusqu'à ce que j'annule. J'ai lu et j'accepte les",
+    featFreeAlerts: "Pas d'alertes de prix (fonction Pro)",
+    priceAlertComparison: "Alertes de prix par offre",
+    triggeredAlertsExcluded: "Seules les alertes actives comptent. Les alertes déjà déclenchées ne comptent pas.",
+    proBiasUnlimited: "Analyses de biais d'articles illimitées",
+    proDivesUnlimited: "Analyses approfondies Pro illimitées",
+    proChatUnlimited: "Messages de chat IA illimités",
+    proAlertsUnlimited: "Alertes de prix actives illimitées",
+    proQuizFull: "Résultats complets du quiz de portefeuille",
+    today: "Aujourd'hui",
 };
 
 export default fr;
