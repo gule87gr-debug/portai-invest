@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { SEO } from "@/components/SEO";
 import { Helmet } from "react-helmet-async";
 import { AppLayout } from "@/components/AppLayout";
@@ -11,17 +12,15 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { TrialActivation } from "@/components/TrialActivation";
 
-const TIER_PRICE: Record<"plus" | "pro", string> = {
-  plus: "€8.99",
-  pro: "€15.99",
-};
-
 const Pricing = () => {
   const { tier, loading, cancelAtPeriodEnd, refresh } = useSubscription();
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [checkoutLoading, setCheckoutLoading] = useState<SubscriptionTier | null>(null);
-  const [pendingTarget, setPendingTarget] = useState<"plus" | "pro" | null>(null);
+  const [pendingTarget, setPendingTarget] = useState<"pro" | null>(null);
+  const [interval, setInterval] = useState<"month" | "year">("year");
+  const price = interval === "year" ? "€89" : "€9.99";
+  const period = interval === "year" ? t("perYear") : t("perMonth");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [euWaiver, setEuWaiver] = useState(false);
   const [reactivating, setReactivating] = useState(false);
@@ -31,22 +30,9 @@ const Pricing = () => {
     t("featFreeWatch"), t("featFreeQuiz"), t("featFreeFactCheck"),
     t("featFreeAlerts"),
   ];
-  const plusTierFeatures = [
-    t("featPlusWatch"), t("featPlusQuiz"), t("featPlusChat"), t("featPlusImg"),
-    "Advanced AI models (Balanced, Reasoning, Creative) — 5 messages/day each",
-    t("featPlusDeepDive"),
-    t("plusFeatAlerts"),
-  ];
-  const proTierFeatures = [
-    t("featProEverything"),
-    t("featProAnalyses"),
-    "Unlimited messages on all AI models (Balanced, Reasoning, Creative)",
-    t("featProPriority"),
-    t("featProAlerts"),
-    "AI fact check on market claims",
-  ];
+  const proTierFeatures = [t("proBiasUnlimited"), t("proDivesUnlimited"), t("proChatUnlimited"), t("proAlertsUnlimited"), t("proQuizFull")];
 
-  const beginUpgradeFlow = (target: "plus" | "pro") => {
+  const beginUpgradeFlow = (target: "pro") => {
     setAcceptedTerms(false);
     setEuWaiver(false);
     setPendingTarget(target);
@@ -59,10 +45,9 @@ const Pricing = () => {
       return;
     }
     const target = pendingTarget;
-    const targetLabel = target === "pro" ? "Pro" : "Plus";
-    const price = TIER_PRICE[target];
+    const targetLabel = "Pro";
     const consentText = [
-      `I subscribe to PortAI ${targetLabel} at ${price}/month, billed monthly via Stripe.`,
+      `I subscribe to PortAI ${targetLabel} at ${price}/${interval}, billed ${interval === "year" ? "yearly" : "monthly"} via Stripe.`,
       `I have read and accept the Terms of Service and Privacy Policy.`,
       euWaiver
         ? `I expressly request that performance of the digital service begins immediately and acknowledge that, by doing so, I lose my 14-day right of withdrawal once performance has fully begun (Directive 2011/83/EU, Art. 16(m)).`
@@ -71,7 +56,7 @@ const Pricing = () => {
     setCheckoutLoading(target);
     try {
       const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { tier: target, accepted_terms: acceptedTerms, eu_withdrawal_waiver: euWaiver, consent_text: consentText },
+        body: { interval, accepted_terms: acceptedTerms, eu_withdrawal_waiver: euWaiver, consent_text: consentText },
       });
       if (error) throw error;
 
@@ -127,14 +112,13 @@ const Pricing = () => {
   };
 
   const isFree = tier === "free";
-  const isPlus = tier === "plus";
   const isPro = tier === "pro";
 
   return (
     <AppLayout>
       <SEO
-        title="Pricing — PortAI Plus & Pro Plans"
-        description="Compare PortAI Free, Plus and Pro plans. Unlock AI bias detection, fact-checking, deeper market analysis and unlimited watchlists."
+        title="Pricing — PortAI Free & Pro Plans"
+        description="Compare PortAI Free and Pro plans. Unlock AI bias detection, fact-checking, deeper market analysis and unlimited watchlists."
         path="/pricing"
       />
       <Helmet>
@@ -146,20 +130,19 @@ const Pricing = () => {
           brand: { "@type": "Brand", name: "PortAI" },
           offers: [
             { "@type": "Offer", name: "Free", price: "0", priceCurrency: "EUR", url: "https://portai-invest.com/pricing", availability: "https://schema.org/InStock" },
-            { "@type": "Offer", name: "Plus", price: "8.99", priceCurrency: "EUR", url: "https://portai-invest.com/pricing", availability: "https://schema.org/InStock" },
-            { "@type": "Offer", name: "Pro", price: "15.99", priceCurrency: "EUR", url: "https://portai-invest.com/pricing", availability: "https://schema.org/InStock" },
+            { "@type": "Offer", name: "Pro", price: "9.99", priceCurrency: "EUR", url: "https://portai-invest.com/pricing", availability: "https://schema.org/InStock" },
           ],
         })}</script>
       </Helmet>
       <div className="mx-auto max-w-6xl py-8 relative">
-        <button
+        <Button
           onClick={() => navigate(-1)}
           className="absolute top-8 right-0 rounded-full p-2 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
           title={t("cancelBtn")}
           aria-label={t("closeAria")}
         >
           <X className="h-5 w-5" />
-        </button>
+        </Button>
         <div className="text-center mb-10">
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">{t("choosePlan")}</h1>
           <p className="text-muted-foreground max-w-lg mx-auto">{t("pricingSubtitle")}</p>
@@ -169,7 +152,7 @@ const Pricing = () => {
           <TrialActivation />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Free */}
           <div className={cn("rounded-2xl border p-6 sm:p-8", isFree ? "border-primary bg-primary/5" : "border-border bg-card")}>
             {isFree && <span className="inline-block rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary mb-4">{t("currentPlan")}</span>}
@@ -185,61 +168,9 @@ const Pricing = () => {
               ))}
             </ul>
             {isFree && (
-              <button disabled className="w-full rounded-xl border border-border py-3 text-sm font-medium text-muted-foreground">
+              <Button disabled className="w-full rounded-xl border border-border py-3 text-sm font-medium text-muted-foreground">
                 {t("yourCurrentPlan")}
-              </button>
-            )}
-          </div>
-
-          {/* Plus */}
-          <div className={cn("rounded-2xl border p-6 sm:p-8 relative", isPlus ? "border-primary bg-primary/5" : "border-border bg-card")}>
-            {isPlus && !cancelAtPeriodEnd && <span className="inline-block rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary mb-4">{t("currentPlan")}</span>}
-            {isPlus && cancelAtPeriodEnd && <span className="inline-block rounded-full bg-warning/20 px-3 py-1 text-xs font-semibold text-warning mb-4">{t("cancellingBadge")}</span>}
-            <div className="flex items-center gap-2 mb-1">
-              <Sparkles className="h-5 w-5 text-primary" />
-              <h2 className="text-2xl font-bold">{t("tierPlus")}</h2>
-            </div>
-            <p className="text-muted-foreground text-sm mb-6">{t("tierPlusDesc")}</p>
-            <div className="mb-1"><span className="inline-block rounded-full bg-green-500/20 px-2.5 py-0.5 text-xs font-semibold text-green-500">40% OFF</span></div>
-            <div className="text-4xl font-bold font-mono mb-6">€8.99<span className="text-lg text-muted-foreground font-normal line-through ml-2">€14.99</span><span className="text-lg text-muted-foreground font-normal">/mo</span></div>
-            <ul className="space-y-3 mb-8">
-              {plusTierFeatures.map((f, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm">
-                  <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                  <span>{f}</span>
-                </li>
-              ))}
-            </ul>
-            {!isPlus && !isPro && (
-              <>
-                <button
-                  onClick={() => beginUpgradeFlow("plus")}
-                  disabled={checkoutLoading !== null || loading}
-                  className="w-full rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {checkoutLoading === "plus" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                  {checkoutLoading === "plus" ? t("redirecting") : t("upgradeToPlusBtn")}
-                </button>
-                <p className="mt-2 text-center text-[11px] text-muted-foreground flex items-center justify-center gap-1">
-                  <Check className="h-3 w-3 text-primary" /> {t("cancelAnytimeShort")}
-                </p>
-              </>
-            )}
-            {isPlus && !cancelAtPeriodEnd && (
-              <button disabled className="w-full rounded-xl border border-primary py-3 text-sm font-medium text-primary">
-                {t("yourCurrentPlan")}
-              </button>
-            )}
-            {isPlus && cancelAtPeriodEnd && (
-              <button onClick={handleReactivate} disabled={reactivating} className="w-full rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2">
-                {reactivating ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                {t("reactivateNoCharge")}
-              </button>
-            )}
-            {isPro && (
-              <button disabled className="w-full rounded-xl border border-border py-3 text-sm font-medium text-muted-foreground">
-                {t("includedInPro")}
-              </button>
+              </Button>
             )}
           </div>
 
@@ -255,8 +186,12 @@ const Pricing = () => {
               <h2 className="text-2xl font-bold">{t("tierPro")}</h2>
             </div>
             <p className="text-muted-foreground text-sm mb-6">{t("tierProDesc")}</p>
-            <div className="mb-1"><span className="inline-block rounded-full bg-green-500/20 px-2.5 py-0.5 text-xs font-semibold text-green-500">36% OFF</span></div>
-            <div className="text-4xl font-bold font-mono mb-6">€15.99<span className="text-lg text-muted-foreground font-normal line-through ml-2">€24.99</span><span className="text-lg text-muted-foreground font-normal">/mo</span></div>
+            <div className="mb-4 inline-flex gap-1 rounded-lg border border-border p-1" aria-label={t("billingInterval")}>
+              <Button variant={interval === "month" ? "default" : "ghost"} size="sm" onClick={() => setInterval("month")} aria-pressed={interval === "month"}>{t("monthly")}</Button>
+              <Button variant={interval === "year" ? "default" : "ghost"} size="sm" onClick={() => setInterval("year")} aria-pressed={interval === "year"}>{t("yearly")}</Button>
+            </div>
+            <div className="text-4xl font-bold font-mono mb-2">{price}<span className="text-lg text-muted-foreground font-normal">{period}</span></div>
+            <p className="mb-6 text-sm text-muted-foreground">{interval === "year" ? t("save26") : t("billedMonthly")}</p>
             <ul className="space-y-3 mb-8">
               {proTierFeatures.map((f, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm">
@@ -267,29 +202,29 @@ const Pricing = () => {
             </ul>
             {!isPro && (
               <>
-                <button
+                <Button
                   onClick={() => beginUpgradeFlow("pro")}
                   disabled={checkoutLoading !== null || loading}
                   className="w-full rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {checkoutLoading === "pro" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
                   {checkoutLoading === "pro" ? t("redirecting") : t("upgradeToProBtn")}
-                </button>
+                </Button>
                 <p className="mt-2 text-center text-[11px] text-muted-foreground flex items-center justify-center gap-1">
                   <Check className="h-3 w-3 text-primary" /> {t("cancelAnytimeNQA")}
                 </p>
               </>
             )}
             {isPro && !cancelAtPeriodEnd && (
-              <button disabled className="w-full rounded-xl border border-primary py-3 text-sm font-medium text-primary">
+              <Button disabled className="w-full rounded-xl border border-primary py-3 text-sm font-medium text-primary">
                 {t("yourCurrentPlan")}
-              </button>
+              </Button>
             )}
             {isPro && cancelAtPeriodEnd && (
-              <button onClick={handleReactivate} disabled={reactivating} className="w-full rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2">
+              <Button onClick={handleReactivate} disabled={reactivating} className="w-full rounded-xl bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2">
                 {reactivating ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 {t("reactivateNoCharge")}
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -298,8 +233,8 @@ const Pricing = () => {
           <h2 id="alert-comparison-title" className="text-xl font-semibold mb-4">{t("priceAlertComparison")}</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
-              <thead><tr className="border-b border-border"><th scope="col" className="p-3">{t("activeAlerts")}</th><th scope="col" className="p-3">Free</th><th scope="col" className="p-3">Plus</th><th scope="col" className="p-3">Pro</th></tr></thead>
-              <tbody><tr className="border-b border-border"><th scope="row" className="p-3 font-normal">{t("activeAlerts")}</th><td className="p-3">{t("featFreeAlerts")}</td><td className="p-3">{t("plusFeatAlerts")}</td><td className="p-3">{t("featProAlerts")}</td></tr></tbody>
+              <thead><tr className="border-b border-border"><th scope="col" className="p-3">{t("activeAlerts")}</th><th scope="col" className="p-3">Free</th><th scope="col" className="p-3">Pro</th></tr></thead>
+              <tbody><tr className="border-b border-border"><th scope="row" className="p-3 font-normal">{t("activeAlerts")}</th><td className="p-3">{t("featFreeAlerts")}</td><td className="p-3">{t("featProAlerts")}</td></tr></tbody>
             </table>
           </div>
           <p className="mt-3 text-sm text-muted-foreground">{t("triggeredAlertsExcluded")}</p>
@@ -323,9 +258,8 @@ const Pricing = () => {
 
       {pendingTarget && (() => {
         const target = pendingTarget;
-        const targetLabel = target === "pro" ? "Pro" : "Plus";
-        const price = TIER_PRICE[target];
-        const inFlight = checkoutLoading === target;
+        const targetLabel = "Pro";
+            const inFlight = checkoutLoading === target;
         return (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in p-4" role="dialog" aria-modal="true">
             <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
@@ -343,7 +277,7 @@ const Pricing = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t("priceLabel")}</span>
-                  <span className="font-semibold text-foreground">{price}/month, {t("billedMonthly")}</span>
+                  <span className="font-semibold text-foreground">{price}{period}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t("firstCharge")}</span>
@@ -351,13 +285,13 @@ const Pricing = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t("renewsLabel")}</span>
-                  <span className="text-foreground">{t("renewsAuto")}</span>
+                  <span className="text-foreground">{interval === "year" ? t("renewsYearly") : t("renewsAuto")}</span>
                 </div>
               </div>
 
               <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-xs text-muted-foreground mb-4 space-y-2">
                 <p>
-                  {t("redirectStripeNotice1")} <span className="font-medium text-foreground">Stripe</span> {t("redirectStripeNotice2")} {price} {t("untilYouCancel")}
+                  {t("redirectStripeNotice1")} <span className="font-medium text-foreground">Stripe</span> {interval === "year" ? t("redirectStripeYearly") : t("redirectStripeNotice2")} {price} {t("untilYouCancel")}
                 </p>
                 <p>
                   {t("cancelAnytimeInfo")} <span className="font-medium text-foreground">{t("notLabel")}</span> {t("refundCurrentPeriod")}
@@ -367,7 +301,7 @@ const Pricing = () => {
               <label className="flex items-start gap-2 text-xs text-muted-foreground mb-3 cursor-pointer">
                 <input type="checkbox" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} className="mt-0.5 h-4 w-4 accent-primary" aria-required="true" />
                 <span>
-                  <span className="font-medium text-foreground">{t("requiredLabel")}</span> {t("termsAcceptText1")} {price} {t("termsAcceptText2")}{" "}
+                  <span className="font-medium text-foreground">{t("requiredLabel")}</span> {t("termsAcceptText1")} {price} {interval === "year" ? t("termsAcceptYearly") : t("termsAcceptText2")}{" "}
                   <Link to="/terms-of-service" target="_blank" className="underline">{t("termsOfService")}</Link> {t("andLabel")}{" "}
                   <Link to="/privacy-policy" target="_blank" className="underline">{t("privacyPolicy")}</Link>.
                 </span>
@@ -397,13 +331,13 @@ const Pricing = () => {
               </div>
 
               <div className="flex gap-3">
-                <button onClick={() => setPendingTarget(null)} disabled={inFlight} className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium hover:bg-accent disabled:opacity-50">
+                <Button onClick={() => setPendingTarget(null)} disabled={inFlight} className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium hover:bg-accent disabled:opacity-50">
                   {t("cancelBtn")}
-                </button>
-                <button onClick={confirmUpgrade} disabled={inFlight || !acceptedTerms} className="flex-1 rounded-xl bg-primary py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2">
+                </Button>
+                <Button onClick={confirmUpgrade} disabled={inFlight || !acceptedTerms} className="flex-1 rounded-xl bg-primary py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2">
                   {inFlight && <Loader2 className="h-4 w-4 animate-spin" />}
                   {t("continueToCheckout")}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
