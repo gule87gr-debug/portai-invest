@@ -580,7 +580,7 @@ const de: Record<string, string> = {
     perYear: "/Jahr",
     save26: "Sparen Sie 26 % mit jährlicher Abrechnung",
     renewsYearly: "Automatisch jedes Jahr",
-    redirectStripeYearly: ", um die Zahlung abzuschließen. Ihr Abonnement verlängert sich automatisch jedes Jahr zu",
+    redirectStripeYearly: "um die Zahlung abzuschließen. Ihr Abonnement verlängert sich automatisch jedes Jahr zu",
     termsAcceptYearly: "heute und jedes Jahr bis zur Kündigung berechnet. Ich habe die",
     featFreeAlerts: "Keine Preisalarme (Pro-Funktion)",
     priceAlertComparison: "Preisalarme nach Tarif",
