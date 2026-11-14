@@ -80,3 +80,4 @@ export function searchAssets(query: string, region?: AssetRegion) {
     .slice(0, 12);
 }
 
+export { toTradingViewSymbol } from "./tradingView";

@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { TradingViewHeatmap } from "@/components/TradingViewWidgets";
+import { TVStockHeatmap, TradingViewAttribution } from "@/components/tradingview";
 
 import { TrendingStocks } from "@/components/TrendingStocks";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -448,7 +448,8 @@ const Dashboard = () => {
         <div className="mb-4 flex items-center justify-between gap-3">
           <h2 className="editorial-h2 text-xl font-semibold">🇺🇸 S&P 500</h2>
         </div>
-        <TradingViewHeatmap height={550} dataSource="SPX500" />
+        <TVStockHeatmap height={550} dataSource="SPX500" />
+        <TradingViewAttribution className="mt-2" />
       </div>
     </AppLayout>
   );

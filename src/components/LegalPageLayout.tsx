@@ -1,6 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { TradingViewAttribution } from "@/components/tradingview/TradingViewAttribution";
 
 interface LegalPageLayoutProps {
   title: string;
@@ -33,7 +34,10 @@ export const LegalPageLayout = ({ title, lastUpdated, children }: LegalPageLayou
 
       <footer className="border-t border-border px-6 py-6">
         <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-muted-foreground">{t("footerLegalCopy")}</p>
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground">{t("footerLegalCopy")}</p>
+            <TradingViewAttribution />
+          </div>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link to="/privacy-policy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">{t("privacyPolicy")}</Link>
             <Link to="/terms-of-service" className="text-xs text-muted-foreground hover:text-foreground transition-colors">{t("termsOfService")}</Link>

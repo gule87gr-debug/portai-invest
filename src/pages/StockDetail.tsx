@@ -2,20 +2,14 @@ import { useParams, Link } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { SEO } from "@/components/SEO";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { TradingViewTechnicalAnalysis } from "@/components/TradingViewWidgets";
-import { YahooFinanceChart, type RangeStats } from "@/components/YahooFinanceChart";
+import { TVAdvancedChart, TVSymbolInfo, TVTechnicalAnalysis, TradingViewAttribution } from "@/components/tradingview";
 import { StockNews } from "@/components/StockNews";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
-import { PriceAlertDialog } from "@/components/PriceAlertDialog";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAssetDescription } from "@/hooks/useAssetDescription";
-import { getTradingViewSymbol } from "@/lib/tradingViewSymbol";
-import { getAsset } from "@/lib/stockDatabase";
-import { useQuotes } from "@/hooks/useQuotes";
-import { ArrowLeft, Building2, Newspaper, BarChart3, TrendingUp, TrendingDown, Minus, Bell } from "lucide-react";
+import { getAsset, toTradingViewSymbol } from "@/lib/stockDatabase";
+import { ArrowLeft, Building2, Newspaper, BarChart3, LineChart } from "lucide-react";
 import { AddToWatchlistButton } from "@/components/AddToWatchlistButton";
-import { Button } from "@/components/ui/button";
-import { useMemo, useState, useCallback } from "react";
 import { Shimmer } from "@/components/Skeletons";
 
 const StockDetail = () => {
@@ -24,15 +18,7 @@ const StockDetail = () => {
   usePageTitle(`${symbol} Stock Detail | PortAI`);
   const info = useAssetDescription(symbol);
   const assetEntry = getAsset(symbol);
-  const tvSymbol = getTradingViewSymbol(symbol, assetEntry?.type);
-
-  const tickerList = useMemo(() => [symbol], [symbol]);
-  const typeMap = useMemo(() => assetEntry ? { [symbol]: assetEntry.type } : {}, [symbol, assetEntry]);
-  const { quotes, loading } = useQuotes(tickerList, typeMap);
-  const quote = quotes[symbol];
-
-  const [rangeStats, setRangeStats] = useState<RangeStats | null>(null);
-  const handleStats = useCallback((s: RangeStats | null) => setRangeStats(s), []);
+  const tvSymbol = toTradingViewSymbol(symbol);
 
   let t: (key: string) => string;
   try {
@@ -42,18 +28,11 @@ const StockDetail = () => {
     t = (key: string) => key;
   }
 
-  const rangeLabelMap: Record<string, string> = { "1D": "1D", "5D": "5D", "1M": "1M", "6M": "6M", "YTD": "YTD", "1Y": "1Y", "5Y": "5Y", "ALL": "All" };
-  const displayChange = rangeStats ? rangeStats.diff : quote?.change ?? 0;
-  const displayPct = rangeStats ? rangeStats.pct : quote?.changePercent ?? 0;
-  const displayLabel = rangeStats ? rangeLabelMap[rangeStats.range] ?? rangeStats.range : t("today");
-  const isPositive = displayChange > 0;
-  const isNegative = displayChange < 0;
-
   return (
     <AppLayout>
       <SEO
         title={`${symbol}${info.name ? ` — ${info.name}` : ""} | PortAI`}
-        description={`Live ${symbol} price, AI-powered news bias analysis, technicals and chart. Set price alerts and track ${info.name || symbol} on PortAI.`}
+        description={`${symbol} chart, AI-powered news bias analysis and technicals. Track ${info.name || symbol} on PortAI.`}
         path={`/stock/${symbol}`}
       />
       <script
@@ -66,7 +45,7 @@ const StockDetail = () => {
                 "@type": "WebPage",
                 name: `${symbol}${info.name ? ` — ${info.name}` : ""}`,
                 url: `https://portai-invest.com/stock/${symbol}`,
-                description: `Live ${symbol} price, AI-powered news bias analysis, technicals and chart for ${info.name || symbol}.`,
+                description: `${symbol} chart, AI-powered news bias analysis and technicals for ${info.name || symbol}.`,
               },
               {
                 "@type": "FinancialProduct",
@@ -75,8 +54,8 @@ const StockDetail = () => {
                 tickerSymbol: symbol,
                 category: assetEntry?.type === "crypto" ? "Cryptocurrency" : assetEntry?.type === "etf" ? "ETF" : "Stock",
                 description: info.sector
-                  ? `${info.name || symbol} (${symbol}) — ${info.sector} sector asset tracked on PortAI with live price, AI bias analysis and technicals.`
-                  : `${symbol} asset tracked on PortAI with live price, AI bias analysis and technicals.`,
+                  ? `${info.name || symbol} (${symbol}) — ${info.sector} sector asset tracked on PortAI with charts, AI bias analysis and technicals.`
+                  : `${symbol} asset tracked on PortAI with charts, AI bias analysis and technicals.`,
                 url: `https://portai-invest.com/stock/${symbol}`,
                 provider: {
                   "@type": "Organization",
@@ -96,17 +75,6 @@ const StockDetail = () => {
           </Link>
           <div className="flex items-center gap-2">
           <AddToWatchlistButton ticker={symbol} name={info.name} sector={info.sector} />
-          <PriceAlertDialog
-            ticker={symbol}
-            assetName={info.name}
-            assetType={assetEntry?.type || "stock"}
-            currentPrice={quote?.price}
-            trigger={
-              <Button variant="outline" size="sm" className="gap-2">
-                <Bell className="h-4 w-4" /> {t("setPriceAlert")}
-              </Button>
-            }
-          />
           </div>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -121,49 +89,25 @@ const StockDetail = () => {
             <p className="mt-1 text-muted-foreground">{info.name}</p>
           </div>
 
-          {/* Yahoo Finance price block */}
-          <div className="flex items-end gap-4">
-            {loading ? (
-              <Shimmer className="h-10 w-32" />
-            ) : quote ? (
-              <>
-                <span className="text-4xl font-bold tnum font-mono spring-in inline-block">
-                  ${quote.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </span>
-                <div className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-base font-bold border ${
-                  isPositive ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40" :
-                  isNegative ? "bg-red-500/20 text-red-300 border-red-500/40" :
-                  "bg-muted text-muted-foreground border-border"
-                }`}>
-                  {isPositive ? <TrendingUp className="h-4 w-4" /> :
-                   isNegative ? <TrendingDown className="h-4 w-4" /> :
-                   <Minus className="h-4 w-4" />}
-                  <span className="tnum font-mono">
-                    {displayChange >= 0 ? "+" : ""}{displayChange.toFixed(2)} ({displayPct >= 0 ? "+" : ""}{displayPct.toFixed(2)}%)
-                  </span>
-                  <span className="ml-1 text-xs font-semibold opacity-90">{displayLabel}</span>
-                </div>
-              </>
-            ) : (
-              <span className="text-sm text-muted-foreground">{t("priceUnavailable")}</span>
-            )}
-          </div>
         </div>
+      </div>
 
-        {/* OHLC bar */}
-        {quote && (
-          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 font-mono tnum">
-            <span className="metric-label">Open <strong className="text-foreground font-mono normal-case tracking-normal ml-1">${quote.open.toFixed(2)}</strong></span>
-            <span className="metric-label">High <strong className="text-foreground font-mono normal-case tracking-normal ml-1">${quote.high.toFixed(2)}</strong></span>
-            <span className="metric-label">Low <strong className="text-foreground font-mono normal-case tracking-normal ml-1">${quote.low.toFixed(2)}</strong></span>
-            <span className="metric-label">Prev Close <strong className="text-foreground font-mono normal-case tracking-normal ml-1">${quote.prevClose.toFixed(2)}</strong></span>
+      {tvSymbol ? (
+        <div className="mb-6 space-y-4">
+          <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
+            <TVSymbolInfo symbol={tvSymbol} />
           </div>
-        )}
-      </div>
-
-      <div className="mb-6 rounded-2xl border border-border bg-card p-6 sm:p-8">
-        <YahooFinanceChart ticker={symbol} type={assetEntry?.type} height={380} onStatsChange={handleStats} />
-      </div>
+          <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
+            <TVAdvancedChart symbol={tvSymbol} height={520} />
+          </div>
+          <TradingViewAttribution />
+        </div>
+      ) : (
+        <div className="mb-6 flex items-start gap-3 rounded-2xl border border-border bg-card p-6">
+          <LineChart className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">{t("chartUnavailable")}</p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {tvSymbol && (
@@ -172,7 +116,7 @@ const StockDetail = () => {
               <BarChart3 className="h-4 w-4 text-primary" />
               <h2 className="editorial-h2 text-lg font-semibold">{t("technicalAnalysis")}</h2>
             </div>
-            <TradingViewTechnicalAnalysis symbol={tvSymbol} />
+            <TVTechnicalAnalysis symbol={tvSymbol} />
           </div>
         )}
 
