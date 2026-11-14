@@ -2,29 +2,16 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Trash2, GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Stock } from "@/contexts/AppContext";
-import { DailySparkline } from "@/components/DailySparkline";
-import { generateSparklineData } from "@/components/Sparkline";
-
-type Quote = {
-  price: number;
-  changePercent: number;
-  live?: boolean;
-  high?: number;
-  open?: number;
-};
 
 interface Props {
   stocks: Stock[];
   onReorder: (from: number, to: number) => void;
   onRemove: (ticker: string) => void;
   onOpen: (ticker: string) => void;
-  quotes: Record<string, Quote>;
-  quotesLoading: boolean;
-  activeTypes: Record<string, string>;
 }
 
 export const DraggableStockList = ({
-  stocks, onReorder, onRemove, onOpen, quotes, quotesLoading, activeTypes,
+  stocks, onReorder, onRemove, onOpen,
 }: Props) => {
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [overIdx, setOverIdx] = useState<number | null>(null);
@@ -135,29 +122,6 @@ export const DraggableStockList = ({
   return (
     <div ref={containerRef} className="space-y-3 select-none">
       {stocks.map((s, idx) => {
-        const quote = quotes[s.ticker.toUpperCase()];
-        const hasQuote = !!quote;
-        let price: number | null = null;
-        let dailyPct: string;
-        let isUp: boolean;
-        let label: string;
-
-        if (hasQuote) {
-          price = quote.price;
-          dailyPct = quote.changePercent.toFixed(2);
-          isUp = quote.changePercent >= 0;
-          label = quote.live ? "Live" : "Last close";
-        } else if (quotesLoading) {
-          dailyPct = "—";
-          isUp = true;
-          label = "Loading…";
-        } else {
-          const { pctChange, isUp: simUp } = generateSparklineData(`${s.ticker}-${new Date().toISOString().split("T")[0]}`);
-          dailyPct = pctChange.toFixed(2);
-          isUp = simUp;
-          label = "Estimated";
-        }
-
         const isDragging = dragIdx === idx;
         const transform = rowTransform(idx);
 
@@ -216,19 +180,6 @@ export const DraggableStockList = ({
                   </div>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-                  <div className="flex flex-col items-end gap-0.5">
-                    {price !== null ? (
-                      <span className="text-sm font-semibold tnum text-foreground">${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                    ) : quotesLoading ? (
-                      <span className="text-sm text-muted-foreground animate-pulse">···</span>
-                    ) : null}
-                    {dailyPct !== "—" && (
-                      <span className={cn("text-xs font-semibold tnum", isUp ? "text-gain" : "text-loss")}>
-                        {isUp ? "+" : ""}{dailyPct}%
-                      </span>
-                    )}
-                    <span className="metric-label text-[9px]">{label}</span>
-                  </div>
                   <button
                     onClick={(e) => { e.stopPropagation(); onRemove(s.ticker); }}
                     aria-label={`Remove ${s.ticker} from watchlist`}
@@ -238,29 +189,6 @@ export const DraggableStockList = ({
                   </button>
                 </div>
               </div>
-              {!isDragging && (
-                <div className="reveal-grid px-3 sm:px-5">
-                  <div>
-                    <div className="flex items-center justify-between gap-4 border-t border-border/60 py-3">
-                      <DailySparkline ticker={s.ticker} type={activeTypes[s.ticker.toUpperCase()]} width={160} height={32} colorIsUp={isUp} />
-                      <div className="flex items-center gap-5 text-right">
-                        <div>
-                          <p className="metric-label">High</p>
-                          <p className="text-xs font-mono tnum text-foreground">
-                            {quote?.high ? `$${quote.high.toFixed(2)}` : "—"}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="metric-label">Open</p>
-                          <p className="text-xs font-mono tnum text-foreground">
-                            {quote?.open ? `$${quote.open.toFixed(2)}` : "—"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         );

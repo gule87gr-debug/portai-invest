@@ -7,12 +7,8 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradeModal } from "@/components/UpgradeModal";
-import { getAsset } from "@/lib/stockDatabase";
-import { getTradingViewSymbol } from "@/lib/tradingViewSymbol";
-import { TradingViewMiniChart } from "@/components/TradingViewWidgets";
-import { generateSparklineData } from "@/components/Sparkline";
-import { DailySparkline } from "@/components/DailySparkline";
-import { useQuotes } from "@/hooks/useQuotes";
+import { toTradingViewSymbol } from "@/lib/stockDatabase";
+import { TVMarketOverview, TradingViewAttribution } from "@/components/tradingview";
 import { Plus, Trash2, Search, X, ChevronDown, Eye, GripVertical, Pencil, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -41,16 +37,15 @@ const Watchlists = () => {
   const navigate = useNavigate();
 
   const active = watchlists[activeIdx] || watchlists[0];
-  const activeTickers = useMemo(() => active?.stocks?.map((s) => s.ticker) || [], [active]);
-  const activeTypes = useMemo(() => {
-    const map: Record<string, string> = {};
-    active?.stocks?.forEach((s) => {
-      const entry = getAsset(s.ticker);
-      if (entry) map[s.ticker.toUpperCase()] = entry.type;
-    });
-    return map;
-  }, [active]);
-  const { quotes, loading: quotesLoading } = useQuotes(activeTickers, activeTypes);
+  // One TradingView market-overview widget per watchlist (lighter than a mini chart per row).
+  const tvSymbols = useMemo(
+    () => (active?.stocks ?? []).flatMap((st) => {
+      const s = toTradingViewSymbol(st.ticker);
+      return s ? [{ s, d: st.name || st.ticker }] : [];
+    }),
+    [active],
+  );
+  const unmappedCount = (active?.stocks.length ?? 0) - tvSymbols.length;
 
   const canCreateWatchlist = hasUnlimitedWatchlists || watchlists.length < FREE_MAX_WATCHLISTS;
   const canAddStock = hasUnlimitedWatchlists || (active?.stocks.length ?? 0) < FREE_MAX_STOCKS;
@@ -138,7 +133,7 @@ const Watchlists = () => {
           </div>
           <h1 className="text-2xl font-bold mb-2">{t("noWatchlistsYet")}</h1>
           <p className="text-muted-foreground mb-6 text-center max-w-sm text-sm leading-relaxed">
-            Create your first watchlist to start tracking stocks, ETFs, and crypto with live charts and price data.
+            Create your first watchlist to start tracking stocks, ETFs, and crypto with TradingView charts.
           </p>
           <button onClick={handleNewListClick} className="flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
             <Plus className="h-4 w-4" /> {t("createWatchlist")}
@@ -152,7 +147,7 @@ const Watchlists = () => {
     <AppLayout>
       <SEO
         title="Stock Watchlists — PortAI"
-        description="Build multi-asset watchlists for stocks, ETFs and crypto. Live quotes, sparklines and price alerts from PortAI."
+        description="Build multi-asset watchlists for stocks, ETFs and crypto with TradingView charts on PortAI."
         path="/watchlists"
       />
       {createModal}
@@ -259,10 +254,18 @@ const Watchlists = () => {
               <EmptyState
                 icon={Search}
                 title={t("noStocksYet")}
-                description="Add stocks, ETFs or crypto to this watchlist to see live prices and charts."
+                description="Add stocks, ETFs or crypto to this watchlist to see their charts."
                 actionLabel={t("addStock")}
                 onAction={handleAddStockClick}
               />
+            )}
+
+            {tvSymbols.length > 0 && (
+              <div className="mb-5 space-y-2">
+                <TVMarketOverview key={active.id} title={active.name} symbols={tvSymbols} />
+                <TradingViewAttribution />
+                {unmappedCount > 0 && <p className="text-xs text-muted-foreground">{t("chartUnavailableSome").replace("{count}", String(unmappedCount))}</p>}
+              </div>
             )}
 
             <DraggableStockList
@@ -270,9 +273,6 @@ const Watchlists = () => {
               onReorder={(from, to) => reorderStocks(active.id, from, to)}
               onRemove={(ticker) => removeStockFromWatchlist(active.id, ticker)}
               onOpen={(ticker) => navigate(`/stock/${ticker}`)}
-              quotes={quotes}
-              quotesLoading={quotesLoading}
-              activeTypes={activeTypes}
             />
           </div>
         )}
