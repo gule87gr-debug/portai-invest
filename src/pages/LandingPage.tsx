@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import LiveAnalysisDemo from "@/components/landing/LiveAnalysisDemo";
 import ExtensionShowcase from "@/components/landing/ExtensionShowcase";
 import TransparencyTrust from "@/components/landing/TransparencyTrust";
+import { TradingViewAttribution } from "@/components/tradingview/TradingViewAttribution";
 
 const supportingFeatures = [
   { icon: LayoutDashboard, key: "marketIntelligence", descKey: "supF1Desc" as const },
@@ -807,7 +808,6 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
               <ul className="space-y-1.5">
                 <li><a href="/watchlists" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footTr1")}</a></li>
                 <li><a href="/dashboard#heatmap" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footTr2")}</a></li>
-                <li><a href="/watchlists#alerts" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footTr3")}</a></li>
                 <li><a href="/watchlists?asset=crypto" className="text-xs text-muted-foreground hover:text-primary transition-colors">{lt("footTr4")}</a></li>
               </ul>
             </div>
@@ -825,6 +825,7 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
           </nav>
 
           <div className="border-t border-border pt-6 flex flex-col items-center gap-3">
+            <TradingViewAttribution className="text-[11px] text-center" />
             <p className="inline-flex items-center gap-2 text-[11px] font-semibold text-foreground/80 text-center">
               <Globe className="h-3.5 w-3.5 text-primary" />
               {lt("footAvailable")}

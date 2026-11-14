@@ -5,6 +5,7 @@ import { TrialEndingBanner } from "./TrialEndingBanner";
 import { TrialEndedModal } from "./TrialEndedModal";
 import { FirstVisitPaywall } from "./FirstVisitPaywall";
 import { FloatingSentryChat } from "./FloatingSentryChat";
+import { TradingViewAttribution } from "./tradingview/TradingViewAttribution";
 
 
 export const AppLayout = ({ children }: { children: React.ReactNode }) => {
@@ -28,6 +29,7 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
             <p className="text-[11px] text-muted-foreground text-center max-w-lg leading-relaxed">
               {t("footerDisclaimer")}
             </p>
+            <TradingViewAttribution className="text-[11px] text-center" />
             <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
               <Link to="/privacy-policy" className="text-[11px] text-muted-foreground hover:text-foreground transition-colors">{t("privacy")}</Link>
               <Link to="/terms-of-service" className="text-[11px] text-muted-foreground hover:text-foreground transition-colors">{t("terms")}</Link>
