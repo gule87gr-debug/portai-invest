@@ -125,7 +125,6 @@ const de: Record<string, string> = {
     quotaResets: "Dein Kontingent wird um Mitternacht zurückgesetzt, oder upgrade auf Pro für unbegrenzte Analysen.",
     analysesUsedToday: "Du hast alle {limit} Artikelanalysen für heute verbraucht.",
     analysesRemaining: "Noch {remaining} von {limit} Artikelanalysen heute.",
-    claimDeepDive: "Pro-Tiefenanalyse einlösen",
     deepDivesUsedUp: "Tägliche Tiefenanalysen aufgebraucht — mit Pro unbegrenzt",
     featFreeFactCheck: "KI-Bias- und Faktencheck bei jeder Analyse",
     upgradeToPro: "Auf Pro upgraden", clearLink: "Link löschen", share: "Teilen", shareToX: "Auf X teilen",

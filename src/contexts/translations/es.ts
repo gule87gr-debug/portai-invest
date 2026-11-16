@@ -125,7 +125,6 @@ const es: Record<string, string> = {
     quotaResets: "Tu cuota se reinicia a medianoche, o actualiza a Pro para análisis ilimitados.",
     analysesUsedToday: "Has usado los {limit} análisis de artículos de hoy.",
     analysesRemaining: "Te quedan {remaining} de {limit} análisis de artículos hoy.",
-    claimDeepDive: "Reclamar análisis profundo Pro",
     deepDivesUsedUp: "Análisis profundos diarios agotados — pasa a Pro para ilimitados",
     featFreeFactCheck: "Sesgo y verificación con IA en cada análisis",
     upgradeToPro: "Actualizar a Pro", clearLink: "Borrar enlace", share: "Compartir", shareToX: "Compartir en X",

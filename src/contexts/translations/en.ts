@@ -140,7 +140,6 @@ const en: Record<string, string> = {
     quotaResets: "Your quota resets at midnight, or upgrade to Pro for unlimited analyses.",
     analysesUsedToday: "You've used all {limit} of today's article analyses.",
     analysesRemaining: "{remaining} of {limit} article analyses left today.",
-    claimDeepDive: "Claim Pro-level deep dive",
     deepDivesUsedUp: "Daily deep dives used — upgrade to Pro for unlimited",
     featFreeFactCheck: "AI bias & fact check on every analysis",
     upgradeToPro: "Upgrade to Pro", clearLink: "Clear link", share: "Share", shareToX: "Share to X",
