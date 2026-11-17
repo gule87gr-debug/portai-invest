@@ -12,12 +12,11 @@ interface NewsItem {
   link: string;
   source: string;
   pubDate: string;
+  snippet?: string;
 }
 
-const STOP_WORDS = new Set(["inc", "corp", "corporation", "company", "co", "ltd", "plc", "the", "group", "holdings", "sa", "nv", "ag", "etf", "fund", "trust", "index", "class"]);
-
 const NEWS_TTL_MS = 5 * 60 * 1000;
-const cacheKey = (t: string) => `portai-stock-news-${t.toUpperCase()}`;
+const cacheKey = (t: string) => `portai-stock-news-v2-${t.toUpperCase()}`;
 
 const readCached = (t: string): NewsItem[] | null => {
   try {
@@ -43,29 +42,12 @@ export const StockNews = ({ ticker, height = 400 }: { ticker: string; height?: n
     setLoading(true);
     try {
       const entry = getAsset(ticker);
-      const name = entry?.name || "";
       const cleanTicker = ticker.replace(/[^A-Za-z0-9.\-]/g, "");
-      const search = name ? `"${name.replace(/[^\p{L}\p{N}\s&.\-]/gu, "")}" OR "${cleanTicker} stock"` : `"${cleanTicker} stock"`;
-
+      // The server matches headlines/snippets against the ticker and company name.
       const { data } = await supabase.functions.invoke("fetch-news", {
-        body: { search, ticker: cleanTicker },
+        body: { ticker: cleanTicker, company: entry?.name || "" },
       });
-
-      const items: NewsItem[] = data?.items || [];
-      const nameWords = name
-        .toLowerCase()
-        .replace(/[^\p{L}\p{N}\s]/gu, " ")
-        .split(/\s+/)
-        .filter((w) => w.length > 2 && !STOP_WORDS.has(w));
-      const tickerRe = new RegExp(`\\b${cleanTicker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
-
-      const relevant = items.filter((item) => {
-        const title = item.title.toLowerCase();
-        if (tickerRe.test(item.title)) return true;
-        if (!nameWords.length) return false;
-        const hits = nameWords.filter((w) => title.includes(w)).length;
-        return hits >= Math.min(2, nameWords.length);
-      });
+      const relevant: NewsItem[] = data?.items || [];
 
       setNews(relevant);
       try {
@@ -127,8 +109,9 @@ export const StockNews = ({ ticker, height = 400 }: { ticker: string; height?: n
             <p className="text-sm font-medium leading-snug group-hover:text-primary transition-colors line-clamp-2">
               {item.title}
             </p>
+            {item.snippet ? <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{item.snippet}</p> : null}
             <div className="flex items-center gap-2 mt-1.5">
-              <span className="text-[11px] font-medium text-primary/80 bg-primary/10 px-1.5 py-0.5 rounded">
+              <span className="text-[11px] font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
                 {item.source}
               </span>
               <span className="text-[10px] text-muted-foreground">

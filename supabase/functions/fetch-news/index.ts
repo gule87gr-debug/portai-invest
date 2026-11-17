@@ -1,233 +1,240 @@
-import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.57.2";
+import { NEWS_FEEDS, NEWS_USER_AGENT, SNIPPET_MAX, type NewsFeed } from "../_shared/news-feeds.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const MAX_SEARCH_LEN = 200;
-const SAFE_QUERY_RE = /^[\p{L}\p{N}\s\-_.,&'"()|:]+$/u;
-
-interface NewsItem {
+interface StoredItem {
+  url: string;
   title: string;
-  link: string;
   source: string;
-  pubDate: string;
+  snippet: string;
+  published_at: string;
+  feed_key: string;
+  categories: string[];
+  regions: string[];
 }
 
-function decodeHtmlEntities(s: string): string {
+const REFRESH_MS = 10 * 60 * 1000;
+const RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
+const MAX_SEARCH_LEN = 200;
+
+const CATEGORY_RULES: Record<string, RegExp> = {
+  technology: /\b(tech|technology|AI|artificial intelligence|chips?|semiconductors?|software|cloud|Apple|Microsoft|Nvidia|Alphabet|Google|Meta|Amazon|OpenAI)\b/i,
+  finance: /\b(banks?|banking|lenders?|Fed|Federal Reserve|ECB|interest rates?|bonds?|yields?|JPMorgan|Goldman|insurers?|central bank)\b/i,
+  healthcare: /\b(pharma|pharmaceutical|biotech|drugs?|drugmakers?|health|healthcare|FDA|vaccines?|hospital)\b/i,
+  energy: /\b(oil|gas|energy|OPEC|crude|solar|renewables?|wind power|petroleum|LNG)\b/i,
+  consumer: /\b(retail|retailers?|consumers?|Tesla|Walmart|spending|shoppers|restaurants?|apparel)\b/i,
+  crypto: /\b(bitcoin|crypto|cryptocurrenc(y|ies)|ethereum|blockchain|stablecoins?|tokens?)\b/i,
+  etfs: /\b(ETFs?|index funds?|S&P 500|Nasdaq 100|index)\b/i,
+};
+const REGION_RULES: Record<string, RegExp> = {
+  us: /\b(Wall Street|U\.S\.|US|United States|Nasdaq|Dow|S&P|Fed|Treasury)\b/,
+  europe: /\b(Europe|European|EU|eurozone|ECB|UK|Britain|British|Germany|German|France|French|Spain|Spanish|Italy|FTSE|DAX|CAC|Ibex)\b/,
+  asia: /\b(Asia|Asian|China|Chinese|Japan|Japanese|India|Indian|Korea|Nikkei|Hang Seng|Hong Kong|Taiwan|Singapore)\b/,
+  americas: /\b(Canada|Canadian|Brazil|Mexico|Latin America|Argentina|Chile|Colombia|Peru|TSX|Bovespa)\b/,
+  africa: /\b(Africa|African|Nigeria|Kenya|Egypt|Johannesburg|South Africa)\b/,
+  middle_east: /\b(Middle East|Saudi|Gulf|UAE|Dubai|Abu Dhabi|Qatar|Israel|Iran|Tadawul)\b/,
+  oceania: /\b(Australia|Australian|New Zealand|ASX|NZX)\b/,
+};
+
+function decodeEntities(s: string): string {
   return s
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&apos;/g, "'")
-    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)));
+    .replace(/&nbsp;/g, " ")
+    .replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"').replace(/&#39;|&apos;|&#x27;/g, "'")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)))
+    .replace(/&amp;/g, "&");
 }
 
-function parseRSSItems(xml: string): NewsItem[] {
-  const items: NewsItem[] = [];
-  const itemRegex = /<item>([\s\S]*?)<\/item>/g;
-  let match;
+const cleanText = (raw: string | undefined) =>
+  decodeEntities(decodeEntities((raw ?? "").replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")).replace(/<[^>]*>/g, " "))
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
-  while ((match = itemRegex.exec(xml)) !== null) {
-    const itemXml = match[1];
+/** Feed description → at most SNIPPET_MAX characters, ending with "…" when cut. */
+export function toSnippet(description: string): string {
+  const text = cleanText(description);
+  if (text.length <= SNIPPET_MAX) return text;
+  return text.slice(0, SNIPPET_MAX - 1).replace(/\s+\S*$/, "").trimEnd() + "…";
+}
 
-    const title = decodeHtmlEntities(
-      itemXml.match(/<title>([\s\S]*?)<\/title>/)?.[1]?.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")?.trim() || ""
+const tag = (xml: string, name: string) => xml.match(new RegExp(`<${name}(?:\\s[^>]*)?>([\\s\\S]*?)</${name}>`, "i"))?.[1];
+
+function parseFeed(xml: string, feed: NewsFeed): StoredItem[] {
+  const out: StoredItem[] = [];
+  const cutoff = Date.now() - RETENTION_MS;
+  for (const m of xml.matchAll(/<item[\s>]([\s\S]*?)<\/item>/gi)) {
+    const body = m[1];
+    const title = cleanText(tag(body, "title")).slice(0, 300);
+    let url = cleanText(tag(body, "link"));
+    if (!/^https?:\/\//i.test(url)) {
+      const guid = cleanText(tag(body, "guid"));
+      url = /^https?:\/\//i.test(guid) ? guid : "";
+    }
+    if (!title || !url) continue;
+    const dateRaw = cleanText(tag(body, "pubDate") ?? tag(body, "dc:date") ?? tag(body, "published"));
+    const ts = Date.parse(dateRaw);
+    if (!Number.isFinite(ts)) continue; // no publish date → can't show one honestly
+    const published = Math.min(ts, Date.now());
+    if (published < cutoff) continue;
+    const snippet = toSnippet(tag(body, "description") ?? "");
+    const text = `${title} ${snippet}`;
+    const categories = new Set<string>(feed.categories);
+    for (const [k, re] of Object.entries(CATEGORY_RULES)) if (re.test(text)) categories.add(k);
+    const regions = new Set<string>(feed.regions);
+    for (const [k, re] of Object.entries(REGION_RULES)) if (re.test(text)) regions.add(k);
+    out.push({
+      url: url.slice(0, 1000),
+      title,
+      source: feed.publisher,
+      snippet,
+      published_at: new Date(published).toISOString(),
+      feed_key: feed.key,
+      categories: [...categories],
+      regions: [...regions],
+    });
+  }
+  return out.slice(0, 40);
+}
+
+async function fetchFeed(feed: NewsFeed): Promise<StoredItem[]> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 5000);
+  try {
+    const r = await fetch(feed.url, {
+      headers: { "User-Agent": NEWS_USER_AGENT, Accept: "application/rss+xml, application/xml;q=0.9, */*;q=0.5" },
+      redirect: "follow",
+      signal: ctrl.signal,
+    });
+    if (!r.ok) return [];
+    return parseFeed(await r.text(), feed);
+  } catch (e) {
+    console.warn("feed failed", feed.key, (e as Error).message);
+    return [];
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Warm-instance memory copy, used when the database is unavailable.
+let memoryItems: StoredItem[] = [];
+let lastRefresh = 0;
+let refreshing: Promise<void> | null = null;
+
+async function refresh(db: SupabaseClient | null) {
+  const results = await Promise.all(NEWS_FEEDS.map(fetchFeed));
+  const byUrl = new Map<string, StoredItem>();
+  for (const list of results) for (const it of list) if (!byUrl.has(it.url)) byUrl.set(it.url, it);
+  const fresh = [...byUrl.values()];
+  if (fresh.length) {
+    const merged = new Map(memoryItems.map((i) => [i.url, i]));
+    for (const it of fresh) merged.set(it.url, it);
+    const cutoff = Date.now() - RETENTION_MS;
+    memoryItems = [...merged.values()].filter((i) => Date.parse(i.published_at) >= cutoff)
+      .sort((a, b) => b.published_at.localeCompare(a.published_at)).slice(0, 1500);
+  }
+  if (db && fresh.length) {
+    const { error } = await db.from("news_items").upsert(
+      fresh.map((i) => ({ ...i, fetched_at: new Date().toISOString() })),
+      { onConflict: "url" },
     );
-    const link = itemXml.match(/<link>([\s\S]*?)<\/link>/)?.[1]?.trim() || "";
-    const pubDate = itemXml.match(/<pubDate>([\s\S]*?)<\/pubDate>/)?.[1]?.trim() || "";
-    const source = decodeHtmlEntities(
-      itemXml.match(/<source[^>]*>([\s\S]*?)<\/source>/)?.[1]?.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")?.trim() || "News"
-    );
+    if (error) console.warn("news_items upsert failed:", error.message);
+  }
+  lastRefresh = Date.now();
+}
 
-    if (title && !title.includes("View Full Coverage")) {
-      items.push({ title, link, source, pubDate });
+async function refreshIfStale(db: SupabaseClient | null) {
+  if (Date.now() - lastRefresh < REFRESH_MS) return;
+  if (db) {
+    const { data } = await db.from("news_items").select("fetched_at").order("fetched_at", { ascending: false }).limit(1).maybeSingle();
+    if (data?.fetched_at && Date.now() - Date.parse(data.fetched_at) < REFRESH_MS && memoryItems.length) {
+      lastRefresh = Date.parse(data.fetched_at);
+      return;
     }
   }
-
-  return items;
+  refreshing ??= refresh(db).finally(() => { refreshing = null; });
+  // Never stall a request for more than ~7s on slow publishers.
+  await Promise.race([refreshing, new Promise((r) => setTimeout(r, 7000))]);
 }
 
-const categoryQueries: Record<string, string> = {
-  all: "stock market OR finance OR investing",
-  technology: "technology stocks OR tech earnings OR AAPL OR MSFT OR NVDA",
-  finance: "banking stocks OR JPMorgan OR Goldman Sachs OR financial sector",
-  healthcare: "healthcare stocks OR pharma OR biotech OR Johnson Johnson",
-  energy: "energy stocks OR oil prices OR renewable energy stocks",
-  consumer: "consumer stocks OR Tesla OR retail stocks OR consumer spending",
-  crypto: "cryptocurrency OR bitcoin OR ethereum OR crypto market",
-  etfs: "ETF OR index fund OR S&P 500 OR market index",
-};
+const NAME_STOP = /\b(inc|corp|corporation|company|co|ltd|plc|the|group|holdings?|sa|nv|ag|se|etf|fund|trust|class [a-z]|limited|incorporated)\b\.?/gi;
+const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-const regionQueries: Record<string, string> = {
-  us: "US stocks OR Wall Street OR Nasdaq OR NYSE",
-  europe: "European stocks OR FTSE OR DAX OR CAC OR European markets",
-  asia: "Asian stocks OR Nikkei OR Hang Seng OR Shanghai OR Asian markets",
-  americas: "Canada stocks OR TSX OR Brazil stocks OR Bovespa OR Latin America",
-  africa: "African stocks OR Johannesburg OR Nigeria stocks OR African markets",
-  middle_east: "Middle East stocks OR Saudi stocks OR Tadawul OR Dubai stocks",
-  oceania: "Australia stocks OR ASX OR New Zealand stocks OR NZX",
-};
+function tickerMatcher(ticker: string, company: string) {
+  const base = ticker.toUpperCase().split(/[.\-]/)[0].replace(/USDT?$/, "");
+  const core = company.replace(NAME_STOP, " ").replace(/[^\p{L}\p{N}&' ]/gu, " ").replace(/\s+/g, " ").trim();
+  const tests: RegExp[] = [];
+  if (base.length >= 2) tests.push(new RegExp(`(^|[^A-Za-z0-9])\\$?${escapeRe(base)}([^A-Za-z0-9]|$)`)); // case-sensitive ticker
+  if (core.length >= 3) tests.push(new RegExp(`\\b${escapeRe(core)}\\b`, "i"));
+  return (it: StoredItem) => tests.some((re) => re.test(it.title) || re.test(it.snippet));
+}
 
-// Simple in-memory cache shared across warm invocations (5 min TTL)
-const CACHE_TTL_MS = 5 * 60 * 1000;
-const newsCache = new Map<string, { ts: number; items: NewsItem[] }>();
+function searchMatcher(search: string) {
+  const terms = search.split(/\s+OR\s+|\|/i)
+    .map((t) => t.replace(/["()]/g, "").trim().toLowerCase())
+    .filter((t) => t.length >= 2);
+  return (it: StoredItem) => {
+    const hay = `${it.title} ${it.snippet}`.toLowerCase();
+    return terms.some((t) => hay.includes(t));
+  };
+}
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
-
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
-    // Public endpoint - news is non-sensitive RSS data
     const body = await req.json().catch(() => ({}));
-    const {
-      category = "all",
-      categories: catList,
-      regions: regionList,
-      search,
-      ticker,
-    }: {
-      category?: string;
-      categories?: string[];
-      regions?: string[];
-      search?: string;
-      ticker?: string;
-    } = body;
+    const allowedCats = Object.keys(CATEGORY_RULES);
+    const allowedRegions = Object.keys(REGION_RULES);
+    const cats: string[] = Array.isArray(body.categories) ? body.categories.filter((c: unknown) => typeof c === "string" && allowedCats.includes(c)) : [];
+    if (!cats.length && typeof body.category === "string" && allowedCats.includes(body.category)) cats.push(body.category);
+    const regions: string[] = Array.isArray(body.regions) ? body.regions.filter((r: unknown) => typeof r === "string" && allowedRegions.includes(r)) : [];
+    const search = typeof body.search === "string" ? body.search.trim().slice(0, MAX_SEARCH_LEN) : "";
+    const ticker = typeof body.ticker === "string" ? body.ticker.replace(/[^A-Za-z0-9.\-]/g, "").slice(0, 15) : "";
+    const company = typeof body.company === "string" ? body.company.slice(0, 120) : "";
 
-    // Validate against allow-lists; ignore unknown keys
-    const allowedCategories = Object.keys(categoryQueries);
-    const allowedRegions = Object.keys(regionQueries);
-    const safeCats = Array.isArray(catList)
-      ? catList.filter((c) => typeof c === "string" && allowedCategories.includes(c))
-      : undefined;
-    const safeRegions = Array.isArray(regionList)
-      ? regionList.filter((r) => typeof r === "string" && allowedRegions.includes(r))
-      : undefined;
-    const safeCategory = allowedCategories.includes(category) ? category : "all";
+    const url = Deno.env.get("SUPABASE_URL");
+    const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const db = url && key ? createClient(url, key, { auth: { persistSession: false } }) : null;
 
-    let query: string;
-    let searchTrim = typeof search === "string" ? search.trim().slice(0, MAX_SEARCH_LEN) : "";
-    if (searchTrim && !SAFE_QUERY_RE.test(searchTrim)) {
-      searchTrim = "";
+    await refreshIfStale(db);
+
+    let pool: StoredItem[] = [];
+    if (db) {
+      let q = db.from("news_items")
+        .select("url,title,source,snippet,published_at,feed_key,categories,regions")
+        .gte("published_at", new Date(Date.now() - RETENTION_MS).toISOString())
+        .order("published_at", { ascending: false })
+        .limit(ticker || search ? 1500 : 300);
+      if (cats.length) q = q.overlaps("categories", cats);
+      if (regions.length) q = q.overlaps("regions", regions);
+      const { data, error } = await q;
+      if (error) console.warn("news_items read failed:", error.message);
+      else pool = data as StoredItem[];
+    }
+    if (!pool.length) {
+      pool = memoryItems.filter((i) =>
+        (!cats.length || i.categories.some((c) => cats.includes(c))) &&
+        (!regions.length || i.regions.some((r) => regions.includes(r))));
     }
 
-    if (searchTrim) {
-      query = searchTrim;
-    } else if (safeRegions && safeRegions.length > 0) {
-      query = safeRegions
-        .map((r) => `(${regionQueries[r]})`)
-        .join(" OR ");
-    } else if (safeCats && safeCats.length > 0 && !safeCats.includes("all")) {
-      query = safeCats
-        .map((c) => `(${categoryQueries[c]})`)
-        .join(" OR ");
-    } else {
-      query = categoryQueries[safeCategory] || categoryQueries.all;
-    }
+    if (ticker) pool = pool.filter(tickerMatcher(ticker, company));
+    else if (search) pool = pool.filter(searchMatcher(search));
 
-    const encodedQuery = encodeURIComponent(query);
-    const cacheKey = query;
-
-    // Primary source + generic fallbacks (used only when the primary fails).
-    const primaryUrls = [
-      `https://news.google.com/rss/search?q=${encodedQuery}+when:7d&hl=en-US&gl=US&ceid=US:en`,
-      `https://news.google.com/rss/search?q=${encodedQuery}&hl=en-US&gl=US&ceid=US:en`,
-    ];
-    const safeTicker = typeof ticker === "string" ? ticker.replace(/[^A-Za-z0-9.\-]/g, "").slice(0, 12) : "";
-    const fallbackUrls = safeTicker
-      ? [`https://feeds.finance.yahoo.com/rss/2.0/headline?s=${encodeURIComponent(safeTicker)}&region=US&lang=en-US`]
-      : searchTrim
-      ? []
-      : [
-          "https://feeds.content.dowjones.io/public/rss/mw_topstories",
-          "https://finance.yahoo.com/news/rssindex",
-          "https://www.cnbc.com/id/10000664/device/rss/rss.html",
-        ];
-
-    // Cache hit?
-    const cached = newsCache.get(cacheKey);
-    if (cached && Date.now() - cached.ts < CACHE_TTL_MS) {
-      return new Response(JSON.stringify({ success: true, items: cached.items, cached: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "public, max-age=300" },
-      });
-    }
-
-    console.log("Fetching news for:", query);
-
-    const fetchFeed = async (url: string, timeoutMs: number): Promise<NewsItem[]> => {
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), timeoutMs);
-      try {
-        const r = await fetch(url, {
-          headers: {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
-            "Accept": "application/rss+xml, application/xml;q=0.9, */*;q=0.8",
-          },
-          signal: ctrl.signal,
-        });
-        if (!r.ok) return [];
-        return parseRSSItems(await r.text());
-      } catch (e) {
-        console.warn("Feed failed:", url, (e as Error).message);
-        return [];
-      } finally {
-        clearTimeout(timer);
-      }
-    };
-
-    // Hit both Google variants in parallel with a tight timeout so a slow
-    // upstream can never stall the request beyond ~4s.
-    const primaryResults = await Promise.all(primaryUrls.map((u) => fetchFeed(u, 3000)));
-    let items = primaryResults.find((r) => r.length > 0) ?? [];
-
-    // Only pay for fallbacks when the primary produced nothing.
-    if (!items.length) {
-      const fallbackResults = await Promise.all(fallbackUrls.map((u) => fetchFeed(u, 3000)));
-      const merged: NewsItem[] = [];
-      const seen = new Set<string>();
-      for (const list of fallbackResults) {
-        for (const it of list) {
-          if (seen.has(it.title)) continue;
-          seen.add(it.title);
-          merged.push(it);
-        }
-      }
-      items = merged;
-    }
-
-    items = items.slice(0, 25);
-
-    if (!items.length) {
-      const stale = newsCache.get(cacheKey);
-      if (stale) {
-        return new Response(JSON.stringify({ success: true, items: stale.items, cached: true, stale: true }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      return new Response(
-        JSON.stringify({ success: false, error: "SERVICE_UNAVAILABLE", fallback: true, items: [] }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    console.log(`Found ${items.length} news items`);
-
-    newsCache.set(cacheKey, { ts: Date.now(), items });
-
+    const items = pool.slice(0, ticker ? 20 : 30).map((i) => ({
+      title: i.title, link: i.url, source: i.source, pubDate: i.published_at, snippet: i.snippet,
+    }));
     return new Response(JSON.stringify({ success: true, items }), {
       headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "public, max-age=300" },
     });
-
   } catch (error) {
-    console.error("Error fetching news:", error);
-    return new Response(
-      JSON.stringify({ success: false, error: "Unable to fetch news", fallback: true, items: [] }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    console.error("fetch-news error:", error);
+    return new Response(JSON.stringify({ success: false, error: "Unable to fetch news", fallback: true, items: [] }), {
+      status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });

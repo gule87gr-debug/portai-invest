@@ -103,65 +103,33 @@ var add_stock_to_watchlist_default = defineTool3({
 });
 
 // src/lib/mcp/tools/list-price-alerts.ts
-import { createClient as createClient4 } from "npm:@supabase/supabase-js@^2.99.1";
 import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@0.24.0";
-function client4(ctx) {
-  return createClient4(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
-    global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
-    auth: { persistSession: false, autoRefreshToken: false }
-  });
-}
+
+// src/lib/mcp/alertsPaused.ts
+var ALERTS_PAUSED_NOTICE = "Price alerts are temporarily unavailable while we move to a new data provider. Your existing alerts are saved.";
+
+// src/lib/mcp/tools/list-price-alerts.ts
 var list_price_alerts_default = defineTool4({
   name: "list_price_alerts",
   title: "List price alerts",
-  description: "List the signed-in user's active PortAI price alerts.",
+  description: "Price alerts are temporarily unavailable while PortAI moves to a new data provider.",
   inputSchema: {},
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async (_input, ctx) => {
     if (!ctx.isAuthenticated()) {
       return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     }
-    const { data, error } = await client4(ctx).from("price_alerts").select("id, ticker, asset_name, asset_type, direction, target_price, triggered, triggered_at, created_at").order("created_at", { ascending: false });
-    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
-    return {
-      content: [{ type: "text", text: JSON.stringify(data ?? [], null, 2) }],
-      structuredContent: { alerts: data ?? [] }
-    };
+    return { content: [{ type: "text", text: ALERTS_PAUSED_NOTICE }], structuredContent: { paused: true, notice: ALERTS_PAUSED_NOTICE } };
   }
 });
 
 // src/lib/mcp/tools/create-price-alert.ts
 import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.24.0";
 import { z as z3 } from "npm:zod@^4.4.3";
-
-// src/lib/mcp/supabase.ts
-import { createClient as createClient5 } from "npm:@supabase/supabase-js@^2.99.1";
-function env(name) {
-  const runtime = globalThis;
-  return runtime.Deno?.env?.get?.(name) ?? runtime.process?.env?.[name];
-}
-function supabaseForUser(ctx) {
-  const token = ctx.getToken();
-  if (!token) throw new Error("Authentication required");
-  const url = env("SUPABASE_URL") ?? env("VITE_SUPABASE_URL");
-  let key = env("SUPABASE_PUBLISHABLE_KEY") ?? env("VITE_SUPABASE_PUBLISHABLE_KEY");
-  if (!key) {
-    try {
-      const keys = JSON.parse(env("SUPABASE_PUBLISHABLE_KEYS") ?? "{}");
-      if (keys && typeof keys === "object") key = Object.values(keys).find((value) => typeof value === "string" && value.startsWith("sb_publishable_"));
-    } catch {
-    }
-  }
-  key ??= env("SUPABASE_ANON_KEY") ?? env("VITE_SUPABASE_ANON_KEY");
-  if (!url || !key) throw new Error("Backend configuration unavailable");
-  return createClient5(url, key, { global: { headers: { Authorization: `Bearer ${token}` } }, auth: { persistSession: false, autoRefreshToken: false } });
-}
-
-// src/lib/mcp/tools/create-price-alert.ts
 var create_price_alert_default = defineTool5({
   name: "create_price_alert",
   title: "Create price alert",
-  description: "Create a price alert: Pro unlimited, Free none. Server-side access checks apply.",
+  description: "Price alerts are temporarily unavailable while PortAI moves to a new data provider.",
   inputSchema: {
     ticker: z3.string().trim().min(1).max(20),
     asset_name: z3.string().trim().min(1).max(120),
@@ -169,22 +137,12 @@ var create_price_alert_default = defineTool5({
     direction: z3.enum(["above", "below"]).describe("Trigger when price crosses above or below the target."),
     target_price: z3.number().finite().positive()
   },
-  annotations: { readOnlyHint: false, destructiveHint: false },
-  handler: async (input, ctx) => {
+  annotations: { readOnlyHint: true, destructiveHint: false },
+  handler: async (_input, ctx) => {
     if (!ctx.isAuthenticated()) {
       return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     }
-    const { data, error } = await supabaseForUser(ctx).functions.invoke("create-price-alert", { body: input });
-    if (error) {
-      const response = "context" in error && error.context instanceof Response ? await error.context.json().catch(() => null) : null;
-      return { content: [{ type: "text", text: response?.error ?? error.message }], isError: true };
-    }
-    const alert = data?.alert;
-    if (!alert) return { content: [{ type: "text", text: "Could not create alert" }], isError: true };
-    return {
-      content: [{ type: "text", text: `Alert set: ${alert.ticker} ${alert.direction} ${alert.target_price}` }],
-      structuredContent: { alert: { id: alert.id, ticker: alert.ticker, direction: alert.direction, target_price: alert.target_price } }
-    };
+    return { content: [{ type: "text", text: ALERTS_PAUSED_NOTICE }], structuredContent: { paused: true, notice: ALERTS_PAUSED_NOTICE } };
   }
 });
 
