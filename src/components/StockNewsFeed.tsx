@@ -34,9 +34,10 @@ interface NewsItem {
   link: string;
   source: string;
   pubDate: string;
+  snippet?: string;
 }
 
-const NEWS_CACHE_KEY = "portai_news_cache_v1";
+const NEWS_CACHE_KEY = "portai_news_cache_v2";
 const NEWS_CACHE_TTL_MS = 5 * 60 * 1000;
 
 type NewsCacheEntry = { ts: number; items: NewsItem[] };
@@ -390,7 +391,6 @@ export const StockNewsFeed = () => {
             <div className="masonry columns-1 md:columns-2 xl:columns-3">
               {sortedNews.map((item, i) => {
                 const sourceInitial = item.source?.[0]?.toUpperCase() || "N";
-                const sourceColor = ["bg-primary/20 text-primary", "bg-chart-3/20 text-chart-3", "bg-warning/20 text-warning", "bg-gain/20 text-gain"][i % 4];
                 const trust = getArticleTrustScore(item.link, item.source);
                 const trustTone =
                   trust >= 7 ? "text-gain bg-gain/15 border-gain/40" :
@@ -405,15 +405,16 @@ export const StockNewsFeed = () => {
                     className="group block rounded-xl border border-border bg-card/60 p-4 hover:bg-accent/30 hover:border-primary/40 transition-all duration-200 hover:-translate-y-0.5"
                   >
                     <div className="flex items-start gap-3">
-                      <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-xs font-bold", sourceColor)}>
+                      <div aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-xs font-bold text-muted-foreground">
                         {sourceInitial}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium leading-snug group-hover:text-primary transition-colors">
                           {item.title}
                         </p>
+                        {item.snippet ? <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{item.snippet}</p> : null}
                         <div className="flex items-center gap-2 mt-2 flex-wrap">
-                          <span className="text-[11px] font-medium text-primary/80 bg-primary/10 px-1.5 py-0.5 rounded transition-transform duration-200 group-hover:scale-105">
+                          <span className="text-[11px] font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded transition-transform duration-200 group-hover:scale-105">
                             {item.source}
                           </span>
                           <span className={cn("inline-flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded border tnum transition-transform duration-200 group-hover:scale-110", trustTone)}>
