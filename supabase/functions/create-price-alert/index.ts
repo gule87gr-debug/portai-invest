@@ -13,6 +13,8 @@ const schema = z.object({
   target_price: z.number().finite().positive(),
   direction: z.enum(["above", "below"]),
 }).strict();
+const ALERTS_PAUSED = true;
+const ALERTS_PAUSED_NOTICE = "Price alerts are temporarily unavailable while we move to a new data provider. Your existing alerts are saved.";
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
   status, headers: { ...corsHeaders, "Content-Type": "application/json" },
 });
@@ -20,6 +22,8 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  // Price alerts are paused while PortAI moves to a new data provider. Saved alerts are kept.
+  if (ALERTS_PAUSED) return json({ error: ALERTS_PAUSED_NOTICE, code: "PRICE_ALERTS_PAUSED" }, 503);
   try {
     const header = req.headers.get("Authorization");
     if (!header?.startsWith("Bearer ")) return json({ error: "Authentication required" }, 401);
