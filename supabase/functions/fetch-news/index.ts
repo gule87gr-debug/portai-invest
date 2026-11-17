@@ -79,7 +79,8 @@ function parseFeed(xml: string, feed: NewsFeed): StoredItem[] {
     if (!title || !url) continue;
     const dateRaw = cleanText(tag(body, "pubDate") ?? tag(body, "dc:date") ?? tag(body, "published"));
     const ts = Date.parse(dateRaw);
-    const published = Number.isFinite(ts) ? Math.min(ts, Date.now()) : Date.now();
+    if (!Number.isFinite(ts)) continue; // no publish date → can't show one honestly
+    const published = Math.min(ts, Date.now());
     if (published < cutoff) continue;
     const snippet = toSnippet(tag(body, "description") ?? "");
     const text = `${title} ${snippet}`;
