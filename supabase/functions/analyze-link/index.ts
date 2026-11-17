@@ -4,6 +4,10 @@ import { checkRateLimit, getClientIP, rateLimitResponse } from "../_shared/rate-
 import { validateInput, validationErrorResponse, type SchemaDefinition } from "../_shared/input-validator.ts";
 import { isAdminUser, logAdminBypass } from "../_shared/admin-bypass.ts";
 import { resolveTier, type Tier } from "../_shared/tier.ts";
+import {
+  ANALYZER_USER_AGENT, checkPublisherPermissions, looksPaywalled, permissionMessage, tdmReservedByResponse,
+} from "../_shared/publisher-permissions.ts";
+import { NEWS_FEEDS } from "../_shared/news-feeds.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -238,7 +242,7 @@ function normalizeHost(host: string): string {
 
 type PreCheck =
   | { ok: true; metaTitle?: string; metaType?: string; metaDescription?: string; bodyText?: string }
-  | { ok: false; reason: string };
+  | { ok: false; reason: string; publisherBlocked?: boolean };
 
 /**
  * Strips scripts/styles/markup from raw HTML and returns the readable article
@@ -266,30 +270,6 @@ function extractArticleText(html: string): string {
     text = decodeEntities(body.replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
   }
   return text.slice(0, 14_000);
-}
-
-/**
- * Last-resort body retrieval for publishers that block direct bot fetches
- * (CNBC, WSJ, Bloomberg all 403 server-side requests). Uses a public
- * text-extraction proxy that renders the page and returns plain text, so the
- * model still analyses the real article instead of only the headline.
- */
-async function fetchArticleTextFallback(url: string): Promise<string> {
-  try {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 9000);
-    const res = await fetch(`https://r.jina.ai/${url}`, {
-      signal: ctrl.signal,
-      headers: { Accept: "text/plain", "X-Return-Format": "text" },
-    });
-    clearTimeout(timer);
-    if (!res.ok) return "";
-    const text = (await res.text()).replace(/\r/g, "").trim();
-    if (text.length < 400) return "";
-    return text.slice(0, 14_000);
-  } catch {
-    return "";
-  }
 }
 
 function decodeEntities(s: string): string {
@@ -338,7 +318,7 @@ function isPrivateOrLocalHost(hostname: string): boolean {
   return false;
 }
 
-async function preCheckArticle(urlStr: string): Promise<PreCheck> {
+async function preCheckArticle(urlStr: string, lang: string): Promise<PreCheck> {
 
   let parsed: URL;
   try {
@@ -394,12 +374,18 @@ async function preCheckArticle(urlStr: string): Promise<PreCheck> {
   const isKnownPublisher = isKnownPublisherHost(host);
   const hasPathHint = ARTICLE_PATH_HINTS.some((p) => p.test(path));
 
-  // Try to fetch metadata to confirm
+  // Respect publisher opt-outs BEFORE fetching the article: robots.txt and
+  // the TDM Reservation Protocol (tdmrep.json). Never work around them.
+  const blocked = (): PreCheck => ({ ok: false, publisherBlocked: true, reason: permissionMessage("blocked", lang) });
+  const permission = await checkPublisherPermissions(parsed);
+  if (!permission.allowed) return blocked();
+
+  // Fetch the article with an honest user agent.
   try {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 6000);
     const fetchHeaders = {
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+      "User-Agent": ANALYZER_USER_AGENT,
       Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
       "Accept-Language": "en-US,en;q=0.9",
     } as const;
@@ -424,6 +410,11 @@ async function preCheckArticle(urlStr: string): Promise<PreCheck> {
           clearTimeout(timer);
           return { ok: false, reason: "This URL is not allowed." };
         }
+        // A redirect to another site must pass that site's opt-out checks too.
+        if (next.origin !== new URL(current).origin) {
+          const hopPermission = await checkPublisherPermissions(next);
+          if (!hopPermission.allowed) { clearTimeout(timer); return blocked(); }
+        }
         current = next.toString();
         continue;
       }
@@ -433,15 +424,14 @@ async function preCheckArticle(urlStr: string): Promise<PreCheck> {
     if (!res) return { ok: false, reason: "We couldn't reach this page." };
 
 
-    // If the publisher blocks the bot (403/429/503), don't penalize the user —
-    // fall back to path heuristics.
+    // A publisher that refuses automated access (401/402/403/451) is respected:
+    // we never retry through proxies or readers. Other failures are "unreachable".
     if (!res.ok) {
-      if (hasPathHint || isKnownPublisher) return { ok: true };
-      return {
-        ok: false,
-        reason: "We couldn't reach this page to verify it's an article. Please paste a different link or try again later.",
-      };
+      await res.body?.cancel();
+      if ([401, 402, 403, 451].includes(res.status)) return blocked();
+      return { ok: false, publisherBlocked: true, reason: permissionMessage("unreachable", lang) };
     }
+    if (tdmReservedByResponse(res.headers, "")) { await res.body?.cancel(); return blocked(); }
 
     const ctype = res.headers.get("content-type") || "";
     if (!ctype.toLowerCase().includes("text/html")) {
@@ -468,6 +458,7 @@ async function preCheckArticle(urlStr: string): Promise<PreCheck> {
 
 
     const headHtml = html.split(/<\/head>/i)[0] || html;
+    if (tdmReservedByResponse(res.headers, headHtml)) return blocked();
 
     const metaType = (headHtml.match(/<meta[^>]+property=["']og:type["'][^>]+content=["']([^"']+)["']/i)?.[1] || "").toLowerCase();
     const metaTitle = headHtml.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i)?.[1]
@@ -523,23 +514,27 @@ async function preCheckArticle(urlStr: string): Promise<PreCheck> {
       };
     }
 
+    // Never bypass paywalls: paywalled or truncated pages are not analysed.
+    const bodyText = extractArticleText(html);
+    if (looksPaywalled(html, bodyText)) {
+      return { ok: false, publisherBlocked: true, reason: permissionMessage("paywall", lang) };
+    }
+
     return {
       ok: true,
       metaTitle: metaTitle?.slice(0, 300),
       metaType,
       metaDescription: metaDescription?.slice(0, 500),
-      bodyText: extractArticleText(html),
+      bodyText,
     };
   } catch (_e) {
-    // Network/timeout: don't hard-block — let the AI try, but flag as unknown
-    return { ok: true };
+    return { ok: false, publisherBlocked: true, reason: permissionMessage("unreachable", lang) };
   }
 }
 
 // ---------- Cross-source corroboration ----------
-// Derives a search query from the article's title (or URL slug) and pulls
-// independent coverage from Google News RSS so the model can compare claims
-// against what other outlets are reporting.
+// Compares the article's headline with headlines PortAI stored from publishers'
+// own RSS feeds in the last 72 hours (keyword + named-entity similarity).
 function deriveQuery(urlStr: string, metaTitle?: string): string {
   const t = (metaTitle || "").replace(/\s*[|\-–—]\s*[^|\-–—]{0,40}$/, "").trim();
   if (t.length >= 15) return t.slice(0, 160);
@@ -554,35 +549,74 @@ function deriveQuery(urlStr: string, metaTitle?: string): string {
 
 type CrossSource = { source: string; title: string; date?: string };
 
-async function fetchCrossSources(query: string, excludeHost: string): Promise<CrossSource[]> {
+const SIMILARITY_STOP_WORDS = new Set(
+  ("the a an and or of to in on for with at by from as is are was were be been it its this that these those after before over under " +
+   "into than more most new says said say will would could can may might up down out about amid why how what who when where not no " +
+   "de la el los las y en del con por para un una que se al le les des du et à au aux pour sur il der die das und mit von für ein eine " +
+   "o os as do da dos das em com uma il lo gli e di per su")
+    .split(" "),
+);
+
+function keywordTokens(text: string): Set<string> {
+  return new Set(
+    text.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
+      .split(/[^a-z0-9$%.]+/).map((w) => w.replace(/^\.+|\.+$/g, ""))
+      .filter((w) => w.length >= 3 && !SIMILARITY_STOP_WORDS.has(w)),
+  );
+}
+
+function entityTokens(text: string): Set<string> {
+  const out = new Set<string>();
+  for (const m of text.matchAll(/\b([A-Z][A-Za-z&.-]{1,}|[A-Z]{2,}|\d+(?:\.\d+)?%?)\b/g)) {
+    const w = m[1].toLowerCase();
+    if (!SIMILARITY_STOP_WORDS.has(w)) out.add(w);
+  }
+  return out;
+}
+
+export function headlineSimilarity(a: string, b: string): number {
+  const ta = keywordTokens(a), tb = keywordTokens(b);
+  if (!ta.size || !tb.size) return 0;
+  let shared = 0;
+  for (const w of ta) if (tb.has(w)) shared++;
+  if (shared < 2) return 0;
+  const jaccard = shared / (ta.size + tb.size - shared);
+  const ea = entityTokens(a), eb = entityTokens(b);
+  let sharedEntities = 0;
+  for (const w of ea) if (eb.has(w)) sharedEntities++;
+  return jaccard + Math.min(sharedEntities, 3) * 0.1;
+}
+
+const FEED_SITE = new Map(NEWS_FEEDS.map((f) => [f.key, f.site]));
+
+// deno-lint-ignore no-explicit-any
+async function fetchCrossSources(admin: any, query: string, excludeHost: string): Promise<CrossSource[]> {
   if (!query || query.length < 8) return [];
   try {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 6000);
-    const res = await fetch(
-      `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-US&gl=US&ceid=US:en`,
-      {
-        signal: ctrl.signal,
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
-          Accept: "application/rss+xml,application/xml;q=0.9,*/*;q=0.8",
-        },
-      },
-    );
-    clearTimeout(timer);
-    if (!res.ok) return [];
-    const xml = (await res.text()).slice(0, 200_000);
-    const items = xml.split(/<item>/i).slice(1, 15);
+    const since = new Date(Date.now() - 72 * 3600_000).toISOString();
+    const { data, error } = await admin
+      .from("news_items")
+      .select("title, source, snippet, published_at, feed_key")
+      .gte("published_at", since)
+      .order("published_at", { ascending: false })
+      .limit(3000);
+    if (error || !Array.isArray(data)) return [];
+    const scored: { item: CrossSource; score: number }[] = [];
+    const seenSources = new Set<string>();
+    for (const row of data as Array<{ title: string; source: string; snippet: string; published_at: string; feed_key: string }>) {
+      const site = FEED_SITE.get(row.feed_key) ?? "";
+      if (site && excludeHost && (excludeHost === site || excludeHost.endsWith(`.${site}`))) continue;
+      const score = headlineSimilarity(query, `${row.title} ${row.snippet ?? ""}`);
+      if (score < 0.25) continue;
+      scored.push({ item: { source: row.source.slice(0, 60), title: row.title.slice(0, 200), date: row.published_at }, score });
+    }
+    scored.sort((x, y) => y.score - x.score);
     const out: CrossSource[] = [];
-    for (const item of items) {
-      const title = (item.match(/<title>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/i)?.[1] || "")
-        .replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"').trim();
-      const source = (item.match(/<source[^>]*>([\s\S]*?)<\/source>/i)?.[1] || "").trim();
-      const date = (item.match(/<pubDate>([\s\S]*?)<\/pubDate>/i)?.[1] || "").trim();
-      if (!title) continue;
-      const src = source || (title.split(" - ").pop() || "").trim();
-      if (src && excludeHost && src.toLowerCase().replace(/\s+/g, "").includes(excludeHost.split(".")[0])) continue;
-      out.push({ source: src.slice(0, 60), title: title.replace(/\s+-\s+[^-]+$/, "").slice(0, 200), date: date.slice(0, 40) });
+    for (const { item } of scored) {
+      // One headline per outlet so "corroborated by X outlets" counts outlets, not items.
+      if (seenSources.has(item.source)) continue;
+      seenSources.add(item.source);
+      out.push(item);
       if (out.length >= 8) break;
     }
     return out;
@@ -642,12 +676,13 @@ serve(async (req) => {
 
 
     // ---- Pre-flight URL/metadata validation (does NOT count against quota) ----
-    const pre = await preCheckArticle(url);
+    const pre = await preCheckArticle(url, langCode || "en");
     if (!pre.ok) {
       return new Response(
         JSON.stringify({
           success: false,
           notArticle: true,
+          publisherBlocked: pre.publisherBlocked === true,
           reason: pre.reason,
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -675,20 +710,16 @@ serve(async (req) => {
       });
     }
 
-    // ---- Article body fallback (many publishers 403 direct bot fetches) ----
-    let articleBody = ((pre as { bodyText?: string }).bodyText || "").trim();
-    if (articleBody.length < 400) {
-      const fallback = await fetchArticleTextFallback(url);
-      if (fallback.length > articleBody.length) articleBody = fallback;
-    }
+    // Article text is used only in memory for this request; it is never stored or returned.
+    const articleBody = ((pre as { bodyText?: string }).bodyText || "").trim();
 
     // ---- Cross-source corroboration (independent coverage of the same story) ----
     let articleHost = "";
     try { articleHost = normalizeHost(new URL(url).hostname); } catch { /* noop */ }
-    const crossSources = await fetchCrossSources(deriveQuery(url, (pre as { metaTitle?: string }).metaTitle), articleHost);
+    const crossSources = await fetchCrossSources(supabaseAdmin, deriveQuery(url, (pre as { metaTitle?: string }).metaTitle), articleHost);
     const crossSourceBlock = crossSources.length
       ? crossSources.map((c, i) => `${i + 1}. [${c.source || "Unknown outlet"}] ${c.title}${c.date ? ` (${c.date})` : ""}`).join("\n")
-      : "No independent coverage of this story was found in the news index.";
+      : "None of the publisher RSS headlines stored in the last 72 hours matches this story.";
 
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -765,7 +796,7 @@ CRITICAL — misinformation requirement:
 You are not only a bias detector, you are a misinformation detector. Evaluate the FACTUAL accuracy of the article's central claims, not just its tone. Populate "factualIssues" with 2-4 of the article's most consequential checkable claims and judge each one. Flag fabricated statistics, misattributed quotes, stale data presented as current, causal claims unsupported by the cited data, and pump-and-dump or scam patterns. Set "misinformationRisk" accordingly: "high" when central claims are false or fabricated, "medium" when key claims are unsupported/misleading, "low" when claims are verifiable and consistent with the record.
 
 CRITICAL — cross-source verification requirement:
-Below you are given independent coverage of the same story from other outlets, retrieved from a live news index. You MUST use it. Compare the article's claims, numbers, and framing against that coverage and fill in "crossCheck". If several credible outlets report the same facts, say so and let it raise the trust score. If the numbers or conclusions diverge, or if NO other outlet is reporting this story at all, treat that as a serious credibility signal and lower the score. List up to 4 of the supplied outlets in "crossCheck.sources" with their agreement level — only use outlets from the supplied list, never invent sources or URLs.
+Below you are given independent coverage of the same story from other outlets, taken from headlines PortAI stored from publishers' own RSS feeds in the last 72 hours. You MUST use it. Compare the article's claims, numbers, and framing against that coverage and fill in "crossCheck". If several credible outlets report the same facts, say so and let it raise the trust score. If the numbers or conclusions diverge, or if NO other outlet is reporting this story at all, treat that as a serious credibility signal and lower the score. List up to 4 of the supplied outlets in "crossCheck.sources" with their agreement level — only use outlets from the supplied list, never invent sources or URLs.
 
 CRITICAL — "reasoning" requirement:
 The "reasoning" array MUST contain 4-6 entries that transparently explain "why we're saying this". Each entry must cite CONCRETE evidence — a specific phrase, adjective, source citation, statistic, headline pattern, structural choice, or a named outlet from the cross-source list. At least ONE entry MUST use category "Accuracy" (factual correctness of a claim) and at least ONE MUST use category "Cross-check" (what other outlets do or do not confirm, naming them). Cover a mix of the remaining categories so the user understands what triggered the trust score, the biases list, and the red flag. This section is what makes the analysis auditable.
@@ -788,6 +819,7 @@ Scoring guide:
 
 EVIDENCE RULES (non-negotiable):
 - The article's actual text is supplied below under "ARTICLE TEXT" whenever we could retrieve it. Base EVERY judgement — trust score, biases, red flag, factual issues, reasoning — on quotes and facts taken from that text plus the independent coverage list.
+- Never reproduce the article: every quote in "evidence" or "claim" must be at most 200 characters.
 - Every "evidence" field must quote a real phrase, number, or headline that appears in the supplied material. Never invent quotes, statistics, insiders, filings or outlets.
 - If no ARTICLE TEXT is supplied, say so explicitly in the summary, keep factualIssues limited to claims visible in the title/description, and do not fabricate article details.
 - Be reproducible: identical input must produce the identical score and the same reasoning.`,
@@ -801,9 +833,9 @@ ${(pre as { metaTitle?: string }).metaTitle ? `Page title: ${(pre as { metaTitle
 ${(pre as { metaDescription?: string }).metaDescription ? `Page description: ${(pre as { metaDescription?: string }).metaDescription}` : ""}
 
 ARTICLE TEXT (extracted from the page — this is the primary evidence):
-${articleBody || "[Could not retrieve the article body. Analyse only the title/description above and the independent coverage below, and state this limitation in the summary.]"}
+${articleBody || "[Article text unavailable. Analyse only the title/description above and the independent coverage below, and state this limitation in the summary.]"}
 
-INDEPENDENT COVERAGE OF THE SAME STORY (live news index, use this for cross-source verification):
+INDEPENDENT COVERAGE OF THE SAME STORY (publisher RSS headlines from the last 72 hours, use this for cross-source verification):
 ${crossSourceBlock}`,
           },
         ],
@@ -890,7 +922,7 @@ ${crossSourceBlock}`,
     }
     if (!Array.isArray(analysis.factualIssues)) analysis.factualIssues = [];
     analysis.factualIssues = analysis.factualIssues.slice(0, 5).map((f: Record<string, unknown>) => ({
-      claim: String(f?.claim ?? "").slice(0, 300),
+      claim: String(f?.claim ?? "").slice(0, 200),
       status: ["accurate", "unsupported", "misleading", "false"].includes(String(f?.status ?? "").toLowerCase())
         ? String(f.status).toLowerCase() : "unsupported",
       explanation: String(f?.explanation ?? "").slice(0, 500),
@@ -932,6 +964,16 @@ ${crossSourceBlock}`,
       });
     }
 
+    // Cap every quoted excerpt so cached analyses never hold article text.
+    analysis.reasoning = analysis.reasoning.slice(0, 8).map((r: Record<string, unknown>) => ({
+      category: String(r?.category ?? "").slice(0, 60),
+      evidence: String(r?.evidence ?? "").slice(0, 200),
+      explanation: String(r?.explanation ?? "").slice(0, 500),
+    }));
+    if (Array.isArray(analysis.biases)) analysis.biases = analysis.biases.slice(0, 8).map((b: unknown) => String(b).slice(0, 200));
+    if (Array.isArray(analysis.strengths)) analysis.strengths = analysis.strengths.slice(0, 8).map((b: unknown) => String(b).slice(0, 200));
+    if (typeof analysis.summary === "string") analysis.summary = analysis.summary.slice(0, 1500);
+
     if (!analysis.hiddenAngle) analysis.hiddenAngle = analysis.summary?.slice(0, 220) ?? "";
     if (!analysis.proDeepDive || typeof analysis.proDeepDive !== "object") {
       analysis.proDeepDive = {
@@ -964,11 +1006,6 @@ ${crossSourceBlock}`,
         .upsert({ cache_key: cacheKey, url, language: langCode || "en", analysis }, { onConflict: "cache_key" });
     } catch (e) {
       console.error("Failed to cache analysis:", e);
-    }
-
-    // Record usage server-side AFTER successful analysis
-    if (userId && !isPro) {
-      await supabaseAdmin.from("analysis_usage").insert({ user_id: userId });
     }
 
     // Persist to the public Media Bias Pulse feed
