@@ -33,7 +33,6 @@ export const NEWS_FEEDS: NewsFeed[] = [
   { key: "euronews-business", publisher: "Euronews", url: "https://www.euronews.com/rss?level=vertical&name=business", regions: ["europe"], categories: [] },
   { key: "expansion-mercados", publisher: "Expansión", url: "https://e00-expansion.uecdn.es/rss/mercados.xml", regions: ["europe"], categories: ["finance"] },
   { key: "elpais-economia", publisher: "El País", url: "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/economia/portada", regions: ["europe"], categories: [] },
-  { key: "nikkei-asia", publisher: "Nikkei Asia", url: "https://asia.nikkei.com/rss/feed/nar", regions: ["asia"], categories: [] },
   { key: "scmp-business", publisher: "South China Morning Post", url: "https://www.scmp.com/rss/92/feed", regions: ["asia"], categories: [] },
   { key: "abc-au-business", publisher: "ABC News (Australia)", url: "https://www.abc.net.au/news/feed/51892/rss.xml", regions: ["oceania"], categories: [] },
   { key: "coindesk", publisher: "CoinDesk", url: "https://www.coindesk.com/arc/outboundfeeds/rss/", regions: [], categories: ["crypto"] },
