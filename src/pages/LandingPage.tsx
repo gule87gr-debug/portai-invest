@@ -391,7 +391,7 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
                 was: null as string | null,
                 badge: null as string | null,
                 highlight: false,
-                features: [lt("free1"), lt("free2"), lt("free3"), lt("free4"), lt("free5"), t("featFreeAlerts")],
+                features: [lt("free1"), lt("free2"), lt("free3"), lt("free4"), lt("free5")],
                 cta: lt("startFree"),
               },
               {
@@ -402,7 +402,7 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
                 was: null,
                 badge: null,
                 highlight: true,
-                features: [t("proBiasUnlimited"), t("proDivesUnlimited"), t("proChatUnlimited"), t("proAlertsUnlimited"), t("proQuizFull"), `€89${t("perYear")} · ${t("save26")}`],
+                features: [t("proBiasUnlimited"), t("proDivesUnlimited"), t("proChatUnlimited"), t("proQuizFull"), `€89${t("perYear")} · ${t("save26")}`],
                 cta: lt("goPro"),
               },
             ].map((tier) => (
@@ -655,9 +655,8 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
                 <span className="flex items-center gap-2"><HelpCircle className="h-4 w-4 text-primary shrink-0" aria-hidden="true" /> How does portfolio and watchlist tracking work?</span>
               </AccordionTrigger>
               <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
-                Build unlimited multi-asset watchlists across stocks, ETFs and crypto. PortAI streams live
-                quotes, interactive candlestick charts with volume, timeframe performance and price alerts,
-                and links every position to the latest news scored for bias and trust.
+                Build multi-asset watchlists across stocks, ETFs and crypto. Charts and market data come from
+                official TradingView widgets, and every position links to the latest publisher headlines.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="q6" className="border-border">
@@ -758,7 +757,7 @@ const LandingPage = ({ onGetStarted, onLogIn }: { onGetStarted: () => void; onLo
                         "name": "How does portfolio and watchlist tracking work?",
                         "acceptedAnswer": {
                           "@type": "Answer",
-                          "text": "Build unlimited multi-asset watchlists across stocks, ETFs and crypto. PortAI streams live quotes, interactive candlestick charts with volume, timeframe performance and price alerts, and links every position to the latest news scored for bias and trust."
+                          "text": "Build multi-asset watchlists across stocks, ETFs and crypto. Charts and market data come from official TradingView widgets, and every position links to the latest publisher headlines."
                         }
                       },
                       {
