@@ -221,9 +221,9 @@ const en: LegalCopy = {
     sectionTitle: "9. Subscription, Payments and Right of Withdrawal",
     subscriptionStrong: "Subscription terms.",
     subscriptionIntro:
-      " Certain premium features (Plus and Pro plans) require a paid monthly subscription processed by Stripe Payments Europe, Ltd. By subscribing, you agree to:",
+      " Certain premium features (the Pro plan, billed monthly or yearly) require a paid subscription processed by Stripe Payments Europe, Ltd. By subscribing, you agree to:",
     subscriptionBullets: [
-      "Pay all fees associated with your chosen plan in advance, in EUR, on a recurring monthly basis",
+      "Pay all fees associated with your chosen plan in advance, in EUR, on a recurring monthly or yearly basis depending on the billing interval you choose",
       "Automatic renewal at the end of each billing period until you cancel",
       "Provide accurate, complete and up-to-date billing information",
       "Authorize PortAI (via Stripe) to charge your selected payment method on each renewal",
@@ -233,7 +233,7 @@ const en: LegalCopy = {
       " You may cancel at any time from Settings → Subscription. After you cancel, you retain full access to your paid plan until the end of the current billing period; no further charges are made and you are not refunded for the remainder of the period (unless required by mandatory law — see the right of withdrawal below).",
     planChangesStrong: "Plan changes.",
     planChangesBody:
-      " Upgrading from Plus to Pro charges only the prorated price difference for the remaining days of the current period. Downgrading from Pro to Plus is scheduled to take effect at the end of the current billing period — you are not charged again until the new plan begins.",
+      " Switching from Pro to the Free plan (by cancelling) takes effect at the end of the current billing period — you keep Pro until then and are not charged again. Subscribers who joined an earlier paid plan keep Pro at the price they already pay.",
     withdrawalStrong: "Right of withdrawal (EU consumers).",
     withdrawalBodyBefore:
       " If you are a consumer resident in the European Union, you have the right to withdraw from a subscription contract within 14 calendar days of the initial purchase, without giving any reason, in accordance with Directive 2011/83/EU and the Spanish General Law for the Defence of Consumers and Users (Real Decreto Legislativo 1/2007). To exercise this right, you may either: (a) submit the in-app model withdrawal form available in Settings → My Billing Consents (preferred — your statement is timestamped and acknowledged automatically), or (b) send an email to ",
@@ -383,9 +383,9 @@ const es: LegalCopy = {
     sectionTitle: "9. Suscripción, pagos y derecho de desistimiento",
     subscriptionStrong: "Condiciones de la suscripción.",
     subscriptionIntro:
-      " Determinadas funciones premium (planes Plus y Pro) requieren una suscripción mensual de pago procesada por Stripe Payments Europe, Ltd. Al suscribirte, aceptas:",
+      " Determinadas funciones premium (el plan Pro, con facturación mensual o anual) requieren una suscripción de pago procesada por Stripe Payments Europe, Ltd. Al suscribirte, aceptas:",
     subscriptionBullets: [
-      "Pagar todas las tarifas asociadas a tu plan elegido por adelantado, en EUR, de forma mensual recurrente",
+      "Pagar todas las tarifas asociadas a tu plan elegido por adelantado, en EUR, de forma recurrente mensual o anual según el periodo de facturación que elijas",
       "La renovación automática al final de cada período de facturación hasta que canceles",
       "Proporcionar información de facturación exacta, completa y actualizada",
       "Autorizar a PortAI (a través de Stripe) a cargar el método de pago seleccionado en cada renovación",
@@ -395,7 +395,7 @@ const es: LegalCopy = {
       " Puedes cancelar en cualquier momento desde Ajustes → Suscripción. Tras cancelar, conservas el acceso íntegro a tu plan de pago hasta el final del período de facturación en curso; no se realizarán cargos adicionales y no se reembolsa el resto del período (salvo que lo exija una norma imperativa — véase el derecho de desistimiento más abajo).",
     planChangesStrong: "Cambios de plan.",
     planChangesBody:
-      " Mejorar de Plus a Pro solo cobra la diferencia de precio prorrateada por los días restantes del período en curso. Bajar de Pro a Plus se programa para entrar en vigor al final del período de facturación en curso — no se vuelve a cobrar hasta que comience el nuevo plan.",
+      " Pasar de Pro al plan Free (cancelando) entra en vigor al final del período de facturación en curso: conservas Pro hasta entonces y no se te vuelve a cobrar. Quienes se suscribieron a un plan de pago anterior conservan Pro al precio que ya pagan.",
     withdrawalStrong: "Derecho de desistimiento (consumidores de la UE).",
     withdrawalBodyBefore:
       " Si eres un consumidor residente en la Unión Europea, tienes derecho a desistir del contrato de suscripción en un plazo de 14 días naturales desde la compra inicial, sin necesidad de justificar tu decisión, conforme a la Directiva 2011/83/UE y al Texto Refundido de la Ley General para la Defensa de los Consumidores y Usuarios (Real Decreto Legislativo 1/2007). Para ejercer este derecho puedes: (a) enviar el modelo de formulario de desistimiento integrado en la app, disponible en Ajustes → Mis Consentimientos de Facturación (preferido — tu declaración queda fechada y reconocida automáticamente), o (b) enviar un correo electrónico a ",

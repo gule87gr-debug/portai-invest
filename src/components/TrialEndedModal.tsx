@@ -64,7 +64,6 @@ export const TrialEndedModal = () => {
             "Unlimited article analyses",
             "Pro-only fact-check & deep dives",
             "Unlimited AI chat on all models",
-            "Real-time price alerts",
           ].map((f) => (
             <li key={f} className="flex items-center gap-2">
               <Check className="h-4 w-4 text-primary shrink-0" />

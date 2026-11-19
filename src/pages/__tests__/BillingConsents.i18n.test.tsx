@@ -121,6 +121,6 @@ describe("BillingConsents — localized legal copy", () => {
     expect(
       await screen.findByRole("heading", { name: en.page.title })
     ).toBeInTheDocument();
-    expect(screen.getByText(en.explainer.title)).toBeInTheDocument();
+    expect(await screen.findByText(en.explainer.title)).toBeInTheDocument();
   });
 });

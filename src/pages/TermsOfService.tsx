@@ -5,6 +5,7 @@ import { LegalContent } from "@/components/LegalContent";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLegalCopy } from "@/lib/legalI18n";
 import { getLegalPagesCopy } from "@/lib/legalPagesI18n";
+import { getDataSourcesNodes } from "@/lib/dataSourcesI18n";
 
 const TermsOfService = () => {
   const { language } = useLanguage();
@@ -65,6 +66,7 @@ const TermsOfService = () => {
 
       {/* Sections 10–15 (localized shell) */}
       <LegalContent nodes={pages.tosTail} />
+      <LegalContent nodes={getDataSourcesNodes(language, "terms")} />
     </LegalPageLayout>
     </>
   );

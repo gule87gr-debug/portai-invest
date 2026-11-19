@@ -34,6 +34,7 @@ export const CookieConsent = () => {
     cookieTitle: "We use cookies",
     cookieBody:
       "We use essential cookies to keep the platform running and optional cookies to improve your experience. You can customize your preferences below. Read our",
+    cookieTradingView: "Charts are TradingView widgets that load from TradingView's servers; TradingView may receive your IP address and set its own cookies.",
     privacyPolicyLink: "Privacy Policy",
     forDetails: "for details.",
     managePrefs: "Manage preferences",
@@ -92,6 +93,7 @@ export const CookieConsent = () => {
                 </Link>{" "}
                 {t("forDetails")}
               </p>
+              <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{t("cookieTradingView")}</p>
 
               {/* Expandable preferences */}
               <button

@@ -23,10 +23,6 @@ const PRO_TOUR_FEATURES = [
     title: "Pro Deep Dive",
     body: "Stakeholder motives, omitted data points and sentiment divergence on every analysis.",
   },
-  {
-    title: "Real-time sentiment alerts",
-    body: "Get notified when sentiment shifts on the tickers in your watchlists.",
-  },
 ];
 
 export const TrialActivation = ({ variant = "card", className }: Props) => {
@@ -146,7 +142,7 @@ export const TrialActivation = ({ variant = "card", className }: Props) => {
                 Try Pro free for 14 days
               </p>
               <p className="mt-0.5 text-xs sm:text-sm leading-relaxed text-muted-foreground">
-                Unlimited bias analysis, Pro deep dives & sentiment alerts. No card required.
+                Unlimited bias analysis and Pro deep dives. No card required.
               </p>
             </div>
           </div>
@@ -171,8 +167,7 @@ export const TrialActivation = ({ variant = "card", className }: Props) => {
               Unlock Pro Institutional Features
             </DialogTitle>
             <DialogDescription>
-              Get 14 days of unlimited analysis, real-time sentiment alerts, and
-              deep-dive bias reporting. No payment required until the trial ends.
+              Get 14 days of unlimited analysis and deep-dive bias reporting. No payment required until the trial ends.
             </DialogDescription>
           </DialogHeader>
           <ul className="space-y-2 py-2 text-sm">

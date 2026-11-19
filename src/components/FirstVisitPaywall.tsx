@@ -73,9 +73,8 @@ export const FirstVisitPaywall = () => {
   const freeLimits = [
     tr("welcomeFreeLimit1", "No Pro Deep Dive on articles"),
     t("featFreeQuiz"),
-    tr("welcomeFreeLimit3", "No price alerts"),
   ];
-  const proPerks = [t("proBiasUnlimited"), t("proDivesUnlimited"), t("proChatUnlimited"), t("proAlertsUnlimited"), t("proQuizFull")];
+  const proPerks = [t("proBiasUnlimited"), t("proDivesUnlimited"), t("proChatUnlimited"), t("proQuizFull")];
 
   return (
     <div

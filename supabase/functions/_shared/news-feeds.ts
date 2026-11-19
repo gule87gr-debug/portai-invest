@@ -1,7 +1,6 @@
 /**
  * The ONLY news sources PortAI reads: publishers' own official public RSS
- * feeds (business / markets sections). No aggregators (no Google News,
- * Yahoo, etc.). We keep headline, source, date, link and a ≤150-char
+ * feeds (business / markets sections). No aggregators or portals. We keep headline, source, date, link and a ≤150-char
  * snippet from the feed's own description — never article bodies or images.
  */
 export type NewsCategory = "technology" | "finance" | "healthcare" | "energy" | "consumer" | "crypto" | "etfs";

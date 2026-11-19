@@ -4,6 +4,7 @@ import { LegalPageLayout } from "@/components/LegalPageLayout";
 import { LegalContent } from "@/components/LegalContent";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLegalPagesCopy } from "@/lib/legalPagesI18n";
+import { getDataSourcesNodes } from "@/lib/dataSourcesI18n";
 
 const DataCompliance = () => {
   const { language } = useLanguage();
@@ -18,6 +19,7 @@ const DataCompliance = () => {
       />
       <LegalPageLayout title={copy.title} lastUpdated={copy.lastUpdated}>
         <LegalContent nodes={copy.nodes} />
+        <LegalContent nodes={getDataSourcesNodes(language, "dataCompliance")} />
       </LegalPageLayout>
     </>
   );

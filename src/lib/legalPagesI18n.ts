@@ -7,6 +7,7 @@
 // unreviewed translation. Drop in fr/pt/de/it when reviewed.
 
 import type { Language } from "@/contexts/LanguageContext";
+import { ACCESSIBILITY_COPY } from "./accessibilityI18n";
 
 // ── Node types used by <LegalContent /> renderer ─────────────────────────
 // `**text**` inside a string renders as <strong>text</strong>.
@@ -376,7 +377,7 @@ const en: LegalPagesCopy = {
     lastUpdated: "August 22, 2026",
     nodes: [
       { type: "h2", text: "1. Our Commitment" },
-      { type: "p", text: "PortAI is committed to making our AI-powered investment platform accessible and usable for everyone, including people with disabilities. We aim to meet or exceed the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA standards and continue improving the accessibility of our product, content, and services." },
+      { type: "p", text: "PortAI is committed to making our AI-powered investment platform accessible and usable for everyone, including people with disabilities. We are working towards the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA. PortAI has not yet been independently audited against WCAG, and we keep improving the accessibility of our product, content, and services." },
 
       { type: "h2", text: "2. Accessibility Measures" },
       { type: "p", text: "To support an inclusive experience, we have implemented the following measures:" },
@@ -384,7 +385,7 @@ const en: LegalPagesCopy = {
         "Semantic HTML and ARIA landmarks to help screen-reader users navigate pages",
         "Keyboard-accessible navigation and interactive controls throughout the platform",
         "Descriptive labels on buttons, links, and form inputs, including icon-only controls",
-        "Color contrast that meets WCAG AA thresholds for text and interactive elements",
+        "Color contrast designed to reach WCAG AA thresholds for text and interactive elements",
         "Responsive layouts that adapt to zoom, magnification, and mobile screen readers",
         "Focus indicators that make the current interactive element visible",
         "A 'Skip to content' link for fast keyboard navigation past repeated menus",
@@ -398,7 +399,7 @@ const en: LegalPagesCopy = {
         "Article analysis results are structured with headings and lists for easy screen-reader scanning",
         "The navigation menu, search dialog, and settings are operable with keyboard and assistive technology",
         "Form validation errors are associated with their inputs and announced clearly",
-        "Authentication, subscription, and billing flows are keyboard and screen-reader friendly",
+        "Authentication, subscription, and billing flows are designed to work with keyboards and screen readers",
       ]},
 
       { type: "h2", text: "4. Known Limitations" },
@@ -870,7 +871,7 @@ const es: LegalPagesCopy = {
     lastUpdated: "22 de agosto de 2026",
     nodes: [
       { type: "h2", text: "1. Nuestro Compromiso" },
-      { type: "p", text: "PortAI está comprometido con hacer que su plataforma de inversión impulsada por IA sea accesible y utilizable para todos, incluidas las personas con discapacidad. Nuestro objetivo es cumplir o superar las Directrices de Accesibilidad para el Contenido Web (WCAG) 2.1 Nivel AA y seguir mejorando la accesibilidad de nuestro producto, contenido y servicios." },
+      { type: "p", text: "PortAI está comprometido con hacer que su plataforma de inversión impulsada por IA sea accesible y utilizable para todos, incluidas las personas con discapacidad. Estamos trabajando para alcanzar las Directrices de Accesibilidad para el Contenido Web (WCAG) 2.1 Nivel AA. PortAI aún no ha sido auditado de forma independiente frente a las WCAG, y seguimos mejorando la accesibilidad de nuestro producto, contenido y servicios." },
 
       { type: "h2", text: "2. Medidas de Accesibilidad" },
       { type: "p", text: "Para garantizar una experiencia inclusiva, hemos implementado las siguientes medidas:" },
@@ -878,7 +879,7 @@ const es: LegalPagesCopy = {
         "HTML semántico y puntos de referencia ARIA para ayudar a los usuarios de lectores de pantalla a navegar por las páginas",
         "Navegación y controles interactivos accesibles por teclado en toda la plataforma",
         "Etiquetas descriptivas en botones, enlaces y campos de formulario, incluidos los controles que solo muestran un icono",
-        "Contraste de color que cumple los umbrales WCAG AA para texto y elementos interactivos",
+        "Contraste de color diseñado para alcanzar los umbrales WCAG AA en texto y elementos interactivos",
         "Diseños responsivos que se adaptan al zoom, a la magnificación y a lectores de pantalla móviles",
         "Indicadores de foco que hacen visible el elemento interactivo actual",
         "Un enlace 'Saltar al contenido' para una navegación rápida por teclado más allá de los menús repetidos",
@@ -892,7 +893,7 @@ const es: LegalPagesCopy = {
         "Los resultados del análisis de artículos están estructurados con encabezados y listas para facilitar el escaneado con lectores de pantalla",
         "El menú de navegación, el diálogo de búsqueda y los ajustes son operables con teclado y tecnología de asistencia",
         "Los errores de validación de formularios están asociados a sus campos y se anuncian claramente",
-        "Los flujos de autenticación, suscripción y facturación son compatibles con teclado y lectores de pantalla",
+        "Los flujos de autenticación, suscripción y facturación están diseñados para funcionar con teclado y lectores de pantalla",
       ]},
 
       { type: "h2", text: "4. Limitaciones Conocidas" },
@@ -1052,5 +1053,10 @@ const es: LegalPagesCopy = {
 
 const TABLE: Partial<Record<Language, LegalPagesCopy>> = { en, es };
 
-export const getLegalPagesCopy = (lang: Language): LegalPagesCopy =>
-  TABLE[lang] ?? en;
+// Other legal documents fall back to English; the accessibility statement is
+// fully localized for every supported language.
+export const getLegalPagesCopy = (lang: Language): LegalPagesCopy => {
+  const base = TABLE[lang] ?? en;
+  const accessibility = ACCESSIBILITY_COPY[lang];
+  return accessibility ? { ...base, accessibility } : base;
+};

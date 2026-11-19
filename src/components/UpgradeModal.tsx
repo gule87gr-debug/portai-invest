@@ -24,7 +24,7 @@ export const UpgradeModal = ({
 
   if (!open) return null;
 
-  const proFeatures = [t("proBiasUnlimited"), t("proDivesUnlimited"), t("proChatUnlimited"), t("proAlertsUnlimited"), t("proQuizFull")];
+  const proFeatures = [t("proBiasUnlimited"), t("proDivesUnlimited"), t("proChatUnlimited"), t("proQuizFull")];
 
   const goToPricing = () => {
     onClose();

@@ -15,11 +15,11 @@ export const DEMO_LOOPS: { label: string; src: string; alt: string }[] = [
   {
     label: "AI trust scores on live news",
     src: demoNews,
-    alt: "PortAI news feed showing financial headlines with colour-coded AI trust scores from CNBC, AP News and Yahoo Finance",
+    alt: "PortAI news feed showing financial headlines with colour-coded AI trust scores from CNBC, AP News and The Guardian",
   },
   {
-    label: "Live charts & timeframe performance",
+    label: "Charts & timeframe performance",
     src: demoChart,
-    alt: "PortAI stock detail page for Apple with a one-month price chart, timeframe selector and live performance badge",
+    alt: "PortAI stock detail page for Apple with a one-month chart and timeframe selector",
   },
 ];

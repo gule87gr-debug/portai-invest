@@ -1,7 +1,7 @@
 import { ChevronDown, Chrome, FileWarning, Gauge, Puzzle, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 
-const SITES = ["CNBC", "Yahoo Finance", "Seeking Alpha", "MarketWatch"];
+const SITES = ["CNBC", "Financial Times", "Seeking Alpha", "MarketWatch"];
 
 const MISSING_CONTEXT = [
   "Insider selling — 2 Form 4 filings in the last 30 days",

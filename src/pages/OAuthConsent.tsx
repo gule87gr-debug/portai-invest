@@ -198,7 +198,7 @@ export default function OAuthConsent() {
                   {details.client?.name ?? "An external app"}
                 </span>{" "}
                 will be able to call PortAI's tools while you're signed in — read your
-                watchlists and price alerts, create new ones, and act as you inside PortAI.
+                watchlists, create new ones, and act as you inside PortAI.
               </p>
               {details.client?.redirect_uris?.[0] && (
                 <p className="mt-2 break-all text-xs text-muted-foreground">
